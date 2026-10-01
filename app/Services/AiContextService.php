@@ -106,89 +106,110 @@ class AiContextService
     }
 
     /**
-     * TOOL: Search company in MariaDB
+     * TOOL: ficha de una empresa por CIF o por nombre.
+     *
+     * Reescrito el 01-10-2026 para que el asistente diga lo mismo que la API:
+     *  - Por nombre usa CompanyModel::getBestByName (prefiere sociedades del Registro a
+     *    UTE y fichas vacías). Antes cogía la primera fila con LIKE 'nombre%', al azar.
+     *  - El estado es el normalizado de la API (status_code: concurso, hoja cerrada...),
+     *    no el campo bruto con "Activa" por defecto si estaba vacío.
+     *  - Administradores: solo los VIGENTES y del órgano de administración (sin
+     *    apoderados), como datos_pro de la API. Antes listaba todos los nombramientos
+     *    de la historia (Telefónica: más de cien, la mayoría apoderados).
+     *  - El patrón de CIF admite letra final (A1234567J); antes solo 8 dígitos.
      */
     protected function handleGetCompanyInfo(string $query): string
     {
-        if (empty($query)) return "No se proporcionó un criterio de búsqueda.";
+        $query = trim($query);
+        if ($query === '') return "No se proporcionó un criterio de búsqueda.";
 
-        // Detectamos si es un CIF (Patrón: 1 letra + 8 dígitos)
-        $isCif = preg_match('/^[A-Z][0-9]{8}$/i', $query);
+        $cifQuery = strtoupper(preg_replace('/[\s\.\-]/', '', $query));
+        $isCif = (bool) preg_match('/^[A-Z][0-9]{7}[0-9A-Z]$/', $cifQuery);
 
-        $db = \Config\Database::connect();
-        $builder = $db->table('companies');
-        
-        // Seleccionamos campos enriquecidos de companies
-        $builder->select('id, company_name, cif, estado as status, capital_social_raw, objeto_social, address, municipality, registro_mercantil, cnae_label, phone, phone_mobile, fecha_constitucion');
-
-        if ($isCif) {
-            $builder->where('cif', $query);
-        } else {
-            $builder->like('company_name', $query, 'after');
-        }
-
-        $company = $builder->limit(1)->get()->getRowArray();
-
-        if (!$company) return "No se encontró ninguna empresa con el nombre o CIF: " . $query;
-
-        // 1. Obtener Administradores desde la tabla específica
-        $adminBuilder = $db->table('company_administrators');
-        $admins = $adminBuilder->where('company_id', $company['id'])
-                             ->get()
-                             ->getResultArray();
-
-        // Filtrar registros que no son personas (metadatos de Sociedades Civiles, etc) - Heurística de Radar.php
-        $excludeKeywords = ['CAPITAL', 'DOMICILIO', 'OBJETO SOCIAL', 'OTROS CONCEPTOS', 'COMIENZO DE OPERACIONES', 'INSCRIPCION', 'RESULTANTE', 'SUSCRITO', 'EURO'];
-        $filteredAdmins = [];
-        $seenAdmins = [];
-
-        foreach ($admins as $admin) {
-            $nameStr = strtoupper($admin['name'] ?? '');
-            $posStr = strtoupper($admin['position'] ?? '');
-            $combinedText = $nameStr . ' ' . $posStr;
-
-            $exclude = false;
-            foreach ($excludeKeywords as $kw) {
-                if (strpos($combinedText, $kw) !== false) {
-                    $exclude = true;
-                    break;
-                }
+        try {
+            if ($isCif) {
+                $company = $this->companyModel->getByCif($cifQuery);
+            } else {
+                $best = $this->companyModel->getBestByName($query);
+                $company = $best['data'] ?? null;
             }
-            if ($exclude || preg_match('/[0-9]+/', $nameStr)) continue;
-
-            $uniqueKey = md5($nameStr . '|' . $posStr);
-            if (isset($seenAdmins[$uniqueKey])) continue;
-
-            $seenAdmins[$uniqueKey] = true;
-            $filteredAdmins[] = $this->sanitizeUtf8($admin['name']) . " (" . $this->sanitizeUtf8($admin['position']) . ")";
+        } catch (\Throwable $e) {
+            log_message('error', '[AiContextService::getCompanyInfo] ' . $e->getMessage());
+            $company = null;
         }
 
-        // 2. Formatear datos de la empresa
-        $cName = $this->sanitizeUtf8($company['company_name']);
-        $cAddress = $this->sanitizeUtf8($company['address'] ?? 'No disponible');
-        $cMuni = $this->sanitizeUtf8($company['municipality'] ?? 'No disponible');
-        $cProv = $this->sanitizeUtf8($company['registro_mercantil'] ?? 'No disponible');
-        $cObj = $this->sanitizeUtf8($company['objeto_social'] ?? 'No disponible');
-        $cCapital = $this->sanitizeUtf8($company['capital_social_raw'] ?? 'No disponible');
-        $cPhone = $this->sanitizeUtf8($company['phone'] ?: ($company['phone_mobile'] ?: 'No disponible'));
+        if (!$company) {
+            return "No se encontró ninguna empresa con el nombre o CIF: " . $query
+                . ". Si es un nombre, pide al usuario el CIF para afinar la búsqueda.";
+        }
 
-        $info = "Empresa: " . $cName . "\n";
-        $info .= "CIF: " . $company['cif'] . "\n";
-        $info .= "Estado: " . ($company['status'] ?? 'Activa') . "\n";
-        $info .= "Fecha Constitución: " . ($company['fecha_constitucion'] ?? 'No disponible') . "\n";
-        $info .= "Capital Social: " . $cCapital . "\n";
-        $info .= "Sector (CNAE): " . $this->sanitizeUtf8($company['cnae_label'] ?? 'No disponible') . "\n";
-        $info .= "Dirección: " . $cAddress . ", " . $cMuni . " (" . $cProv . ")\n";
-        $info .= "Teléfono: " . $cPhone . "\n";
-        $info .= "Objeto Social: " . (strlen($cObj) > 300 ? substr($cObj, 0, 300) . "..." : $cObj) . "\n";
-        
-        if (!empty($filteredAdmins)) {
-            $info .= "Administradores:\n- " . implode("\n- ", $filteredAdmins);
+        // Estado normalizado (el mismo status_code que devuelve la API)
+        $estado = (string) ($company['status'] ?? '');
+        try {
+            $enr = \App\Services\ApiCompanyEnricher::enrich([$company], true)[0];
+            $mapa = [
+                'ACTIVE'          => 'Activa',
+                'PRESUMED_ACTIVE' => 'Sin estado en el Registro; el BORME no publica nada que la cierre',
+                'INSOLVENCY'      => 'En concurso de acreedores',
+                'IN_LIQUIDATION'  => 'En liquidación',
+                'DISSOLVED'       => 'Disuelta',
+                'REGISTRY_CLOSED' => 'Hoja registral cerrada',
+                'MERGED'          => 'Absorbida en una fusión',
+                'INACTIVE'        => 'Inactiva',
+                'EXTINCT'         => 'Extinguida',
+                'UNKNOWN'         => 'Sin datos suficientes para saberlo',
+            ];
+            $estado = $mapa[$enr['status_code'] ?? ''] ?? ($estado ?: 'Sin datos suficientes para saberlo');
+            if (!empty($enr['status_date'])) {
+                $estado .= ' (desde ' . $enr['status_date'] . ')';
+            }
+        } catch (\Throwable $e) {
+            $estado = $estado ?: 'Sin datos suficientes para saberlo';
+        }
+
+        // Administradores vigentes del órgano de administración
+        $admins = [];
+        try {
+            $vigentes = \App\Services\ApiCompanyEnricher::currentAdministrators([(int) $company['id']]);
+            foreach (($vigentes[(int) $company['id']] ?? []) as $p) {
+                $cargos = array_values(array_filter(
+                    array_map('trim', explode(',', (string) ($p['position'] ?? ''))),
+                    [\App\Services\ApiCompanyEnricher::class, 'isAdminPosition']
+                ));
+                if (!$cargos) {
+                    continue;
+                }
+                $admins[] = $this->sanitizeUtf8($p['name']) . ' (' . $this->sanitizeUtf8(implode(', ', $cargos)) . ')'
+                    . (!empty($p['since']) ? ' desde ' . $p['since'] : '');
+            }
+        } catch (\Throwable $e) {
+            log_message('error', '[AiContextService::admins] ' . $e->getMessage());
+        }
+
+        $v = fn ($k) => $this->sanitizeUtf8((string) ($company[$k] ?? '')) ?: 'No disponible';
+        $obj = $v('corporate_purpose');
+        $tel = $this->sanitizeUtf8((string) (($company['phone'] ?? '') ?: ($company['phone_mobile'] ?? ''))) ?: 'No disponible';
+
+        $info  = "Empresa: " . $v('name') . "\n";
+        $info .= "CIF: " . $v('cif') . "\n";
+        $info .= "Estado: " . $estado . "\n";
+        $info .= "Fecha de constitución: " . $v('founded') . "\n";
+        $info .= "Capital social: " . $v('capital_social_raw') . "\n";
+        $info .= "Sector (CNAE): " . $v('cnae_label') . "\n";
+        $info .= "Dirección: " . $v('address') . ", " . $v('municipality') . " (Registro Mercantil de " . $v('province') . ")\n";
+        $info .= "Teléfono: " . $tel . "\n";
+        $info .= "Objeto social: " . (mb_strlen($obj) > 300 ? mb_substr($obj, 0, 300) . "..." : $obj) . "\n";
+        if ($admins) {
+            $total = count($admins);
+            $info .= "Administradores vigentes ({$total}):\n- " . implode("\n- ", array_slice($admins, 0, 15));
+            if ($total > 15) {
+                $info .= "\n- ... y " . ($total - 15) . " más";
+            }
         } else {
-            $info .= "Administradores: No se han identificado administradores actuales en el registro.";
+            $info .= "Administradores vigentes: no constan en nuestro histórico del BORME.";
         }
 
-        return "Datos encontrados en la base de datos oficial:\n" . $info;
+        return "Datos encontrados en la base de datos de APIEmpresas (Registro Mercantil y BORME):\n" . $info;
     }
 
     /**
@@ -242,8 +263,14 @@ class AiContextService
         $db = \Config\Database::connect();
         $builder = $db->table('borme_posts b');
         
-        // Detectamos si es un CIF (Patrón: 1 letra + 8 dígitos)
-        $isCif = preg_match('/^[A-Z][0-9]{8}$/i', $query);
+        // CIF: letra + 7 dígitos + dígito o letra de control (antes exigía 8 dígitos y
+        // un CIF como Q2826000H no se reconocía)
+        $query = trim($query);
+        $cifQuery = strtoupper(preg_replace('/[\s\.\-]/', '', $query));
+        $isCif = (bool) preg_match('/^[A-Z][0-9]{7}[0-9A-Z]$/', $cifQuery);
+        if ($isCif) {
+            $query = $cifQuery;
+        }
 
         $builder->select('b.borme_date, b.company_name, b.act_types, b.description, b.url_pdf')
             ->join('companies c', 'b.company_id = c.id', 'left');
@@ -251,7 +278,20 @@ class AiContextService
         if ($isCif) {
             $builder->where('c.cif', $query);
         } else {
-            $builder->like('b.company_name', $query, 'after');
+            // Por nombre: primero la empresa (misma búsqueda que la API) y luego sus
+            // actos. Antes buscaba el texto en borme_posts.company_name con LIKE, sin
+            // índice y mezclando empresas de nombre parecido.
+            $best = null;
+            try {
+                $best = $this->companyModel->getBestByName($query);
+            } catch (\Throwable $e) {
+                log_message('error', '[AiContextService::getBorme] ' . $e->getMessage());
+            }
+            if (empty($best['data']['id'])) {
+                return "No he encontrado ninguna empresa llamada '{$query}'. Pide al usuario el CIF para buscar sus actos en el BORME.";
+            }
+            $builder->where('b.company_id', (int) $best['data']['id']);
+            $query = (string) ($best['data']['name'] ?? $query) . ' (' . ($best['data']['cif'] ?? '') . ')';
         }
 
         $builder->orderBy('b.borme_date', 'DESC')
@@ -278,21 +318,63 @@ class AiContextService
     }
 
     /**
-     * Generate the base system prompt
+     * Precios y cupos de los planes, leídos de api_plans (los mismos que /billing y
+     * /planes). Antes estaban escritos a mano en el prompt y se quedaban viejos.
+     */
+    protected function preciosPlanes(): array
+    {
+        $p = [
+            'pro'      => ['mes' => 19.0, 'anual' => 182.0, 'cupo' => 3000],
+            'business' => ['mes' => 49.0, 'anual' => 470.0, 'cupo' => 10000],
+            'radar'    => ['mes' => 79.0, 'anual' => 470.0],
+            'solv'     => ['mes' => 29.0, 'anual' => 290.0],
+        ];
+        try {
+            $filas = \Config\Database::connect()->table('api_plans')
+                ->select('slug, price_monthly, price_annual, monthly_quota')
+                ->whereIn('slug', ['pro', 'business', 'radar', 'risk_pro'])
+                ->get()->getResultArray();
+            foreach ($filas as $f) {
+                $k = $f['slug'] === 'risk_pro' ? 'solv' : $f['slug'];
+                $p[$k]['mes'] = (float) $f['price_monthly'];
+                if ($f['price_annual'] !== null) {
+                    $p[$k]['anual'] = (float) $f['price_annual'];
+                }
+                if (in_array($k, ['pro', 'business'], true)) {
+                    $p[$k]['cupo'] = (int) $f['monthly_quota'];
+                }
+            }
+        } catch (\Throwable $e) {
+            log_message('error', '[AiContextService::preciosPlanes] ' . $e->getMessage());
+        }
+        return $p;
+    }
+
+    /**
+     * Prompt del asistente. Actualizado el 01-10-2026 con lo que la API hace hoy
+     * (planes, endpoints, sandbox, bono, errores). Si cambia algo de la API, cambiarlo
+     * también aquí y en Views/documentation.php.
      */
     public function getSystemPrompt(): string
     {
         helper('api');
         $freeLimit = get_free_plan_limit();
+        $p = $this->preciosPlanes();
+        $e = static fn (float $x) => number_format($x, $x == floor($x) ? 0 : 2, ',', '.') . ' €';
+        $n = static fn (int $x) => number_format($x, 0, ',', '.');
+        $proMesAnual = $e(round($p['pro']['anual'] / 12, 2));
+        $bizMesAnual = $e(round($p['business']['anual'] / 12, 2));
+        $proAhorro   = $e(round($p['pro']['mes'] * 12 - $p['pro']['anual']));
+        $bizAhorro   = $e(round($p['business']['mes'] * 12 - $p['business']['anual']));
 
-        return "Eres el Asistente Inteligente de APIEmpresas.es, experto en datos mercantiles, tecnología API y prospección B2B.
+        return "Eres el asistente de APIEmpresas.es, experto en datos mercantiles de empresas españolas, en nuestra API y en prospección B2B.
 
 ════════════════════════════════════════
 FUENTES DE DATOS DISPONIBLES
 ════════════════════════════════════════
-1. Directorio de Empresas (Datos básicos, administradores, capital social).
-2. BORME (Publicaciones oficiales: cambios de administrador, depósitos de cuentas, ampliaciones de capital).
-3. Blog de APIEmpresas (Guías, noticias, ayuda técnica).
+1. Ficha de empresas (Registro Mercantil y BORME): estado, capital, administradores vigentes, objeto social, dirección. Usa la herramienta get_company_info.
+2. Actos publicados en el BORME (nombramientos, ceses, ampliaciones de capital, cambios de domicilio, disoluciones, concursos...). Usa get_borme_publications.
+3. Blog de APIEmpresas (guías y ayuda). Usa search_blog_posts.
 
 ════════════════════════════════════════
 PÁGINAS PRINCIPALES DE LA PLATAFORMA
@@ -300,138 +382,94 @@ PÁGINAS PRINCIPALES DE LA PLATAFORMA
 
 ## /directorio (Directorio de Empresas Españolas)
 URL: https://apiempresas.es/directorio
-Descripción: Directorio histórico navegable de todas las empresas españolas registradas en el Registro Mercantil. Organizado por provincias y sectores CNAE. Permite validar información mercantil en tiempo real.
-Funcionalidades:
-- Búsqueda por nombre, CIF, actividad o provincia.
-- Navegación por TODAS las provincias españolas con su volumen de empresas y barra de densidad relativa.
-- Navegación por sectores de actividad (CNAE) con volumen y barra de densidad.
-- Tabla de 'Últimas Empresas Registradas' (las 10 más recientes).
-- Filtrado instantáneo por provincia o sector dentro de la página.
-- Botón 'Ver más' para expandir más de 12 provincias/sectores.
-Ideal para: Consultas de validación mercantil, investigar el tejido empresarial por zona o sector.
-URL formato provincia: https://apiempresas.es/listado-de-empresas/[nombre-provincia]
-URL formato sector: https://apiempresas.es/listado-de-empresas/sector-[codigo]/[slug-nombre]
+Directorio navegable de las empresas del Registro Mercantil por provincia y sector CNAE, con búsqueda por nombre, CIF, actividad o provincia y las últimas empresas registradas.
+URL por provincia: https://apiempresas.es/listado-de-empresas/[nombre-provincia]
+URL por sector: https://apiempresas.es/listado-de-empresas/sector-[codigo]/[slug-nombre]
 
-## /base-de-datos-de-empresas (Base de Datos de Empresas - Herramienta de Descarga)
+## /base-de-datos-de-empresas (Descarga de listados, sin programar)
 URL: https://apiempresas.es/base-de-datos-de-empresas
-Descripción: Herramienta interactiva B2B para filtrar, visualizar en mapa y descargar bases de datos de empresas en formato CSV. Listados B2B oficiales extraídos del BORME listos para campañas de telemarketing o cold mailing.
-Funcionalidades:
-- Filtros: Provincia (obligatorio), Municipio, Sector CNAE, Estado (activa/inactiva), Solo con Teléfono, Rango de fechas de constitución.
-- Mapa interactivo Leaflet que muestra los resultados geolocalizados.
-- Asistente IA de chat integrado: el usuario puede describir en lenguaje natural el tipo de empresa que busca (ej: 'Constructoras en Valencia') y el asistente configura los filtros automáticamente.
-- Paginación de resultados con hasta 100 resultados por página.
-- Botón de descarga CSV (se genera un checkout con precio dinámico según el volumen de resultados).
-- Precio de descarga dinámico según número de empresas (tramos de precio por volumen).
-Ideal para: Equipos de ventas y marketing que necesitan listas de prospectos B2B segmentadas.
-Garantías mostradas: Datos Oficiales BORME, Actualización Diaria, Descarga Segura (CSV).
+Filtra empresas (provincia obligatoria, municipio, sector CNAE, estado, solo con teléfono, fechas de constitución), las ve en un mapa y descarga el listado en CSV. Precio según el número de empresas. Incluye un asistente que configura los filtros a partir de una frase (\"constructoras en Valencia\").
 
 ════════════════════════════════════════
-TARIFAS Y PRECIOS (Información oficial)
+PLANES DE LA API (precios sin IVA)
 ════════════════════════════════════════
+Todos los planes usan la misma API Key: al cambiar de plan no hay que tocar el código.
 
-## PLANES API (Acceso programático vía REST):
-Los precios varían según ciclo de facturación:
+PLAN FREE
+- 0 €, sin tarjeta.
+- {$freeLimit} consultas EN TOTAL (no se renuevan cada mes).
+- Datos recortados: sin dirección completa ni administradores; el objeto social sale cortado. Sí incluye razón social, CIF, estado, provincia, CNAE, fecha de constitución y capital.
+- Para probar la integración sin gastar consultas: el Sandbox (ver más abajo).
 
-PLAN FREE:
-- Precio: 0€ (único, sin tarjeta de crédito)
-- Consultas: {$freeLimit} consultas garantizadas
-- Incluye: Acceso a endpoint /companies, datos básicos oficiales (CIF, Razón Social, CNAE)
-- Ideal para: Pruebas, Sandbox, validación inicial
+PLAN PRO (el más elegido)
+- {$e($p['pro']['mes'])}/mes, o {$e($p['pro']['anual'])}/año pagando anual (equivale a {$proMesAnual}/mes; ahorra {$proAhorro} al año).
+- {$n($p['pro']['cupo'])} consultas al mes.
+- Datos completos: dirección completa, administradores vigentes con fecha de nombramiento (parámetro admin=true), tramo de facturación y último año de cuentas.
+- Verificación KYB en una llamada (/companies/verify), nombre a CIF en lote (/companies/reconcile), consultas por lotes de hasta 100 CIF (/companies/batch), historial de actos del BORME, vigilancia de hasta 100 empresas (/watchlist) y Radar con 100 resultados.
+- Soporte prioritario por email: respuesta en menos de 2 horas.
 
-PLAN PRO (El más elegido):
-- Precio mensual: 19€/mes
-- Precio anual: 15€/mes (se paga de golpe, AHORRA 20%)
-- Consultas: 3.000 consultas al mes
-- Incluye: Datos completos BORME y Actividad, Scoring Comercial IA (0-100), Acceso a Radar API (Prospección), Grafos de Poder Societario
-- Ideal para: SaaS, ERPs, automatizar validaciones en producción
+PLAN BUSINESS
+- {$e($p['business']['mes'])}/mes, o {$e($p['business']['anual'])}/año pagando anual (equivale a {$bizMesAnual}/mes; ahorra {$bizAhorro} al año).
+- {$n($p['business']['cupo'])} consultas al mes.
+- Todo lo de Pro, más: perfil de riesgo corporativo (/companies/risk-profile), contratos públicos adjudicados (/companies/contracts), segmentos para descargar empresas por sector, zona y tamaño (/companies/filter), vigilancia de hasta 1.000 empresas con webhooks (avisos en tu servidor), IA de insights completa y contact-prep.
+- Soporte prioritario por email: respuesta en menos de 2 horas.
 
-PLAN BUSINESS:
-- Precio mensual: 49€/mes
-- Precio anual: 39€/mes (se paga de golpe, AHORRA 20%)
-- Consultas: 10.000 consultas al mes
-- Incluye: Webhooks Push (Notificaciones BORME), IA Predictiva de Oportunidades, Calculadora de Match B2B, Soporte Prioritario Slack/Email, IA Contact Prep
-- Ideal para: Plataformas con alta carga, procesos críticos, equipos grandes
+BONO DE CRÉDITOS (sin suscripción)
+- Pago único, los créditos no caducan. Precio según volumen (descuento automático), en https://apiempresas.es/crear-bono-api
+- Da datos completos con la misma API Key. La mayoría de endpoints cuestan 1 crédito y los complejos 3. Solo se descuentan las respuestas correctas (200): los errores y el Sandbox no gastan.
+- Útil para proyectos puntuales o migraciones, o para no quedarse sin servicio al agotar el cupo de un plan (las consultas de más se cobran del bono).
 
-IMPORTANTE: La tabla de precios tiene un switch Mensual/Anual. Al activar 'Anual', los precios cambian (Pro: 19€→15€/mes, Business: 49€→39€/mes). El usuario paga el año completo por adelantado y ahorra un 20%.
+Al agotar el cupo: en Free la API responde 429 (code QUOTA_EXCEEDED) hasta pasar a un plan o comprar un bono; en Pro y Business igual hasta el día de renovación, salvo que haya saldo de bono.
 
-## RADAR B2B (Herramienta comercial, suscripción independiente):
-- Suscripción: 79€/mes (también disponible en ciclo anual con descuento del 20%)
-- Diseñado para equipos comerciales que necesitan detectar nuevas empresas recién creadas diariamente.
-- Acceso al mapa interactivo, filtros avanzados, exportación CSV.
-- NO es lo mismo que la API: la API es para desarrolladores que integran datos en sus sistemas; el Radar es una interfaz web lista para usar sin programación.
+Contratar o cambiar de plan: https://apiempresas.es/billing (desde ahí también se ve el precio anual). Para cancelar, cambiar de Pro a Business o pasar de mensual a anual a mitad de periodo, recomienda escribir a soporte@apiempresas.es: lo ajustamos sin cortar la integración. No inventes condiciones de reembolso ni prorrateos.
 
 ════════════════════════════════════════
-DOCUMENTACIÓN API (Endpoints disponibles)
+OTROS PRODUCTOS (no son la API)
 ════════════════════════════════════════
-URL documentación: https://apiempresas.es/documentation (Swagger interactivo)
-
-ENDPOINTS PRINCIPALES:
-
-GET /api/v1/companies
-- Descripción: Valida la existencia de una sociedad y obtén sus datos oficiales.
-- Parámetros: cif (CIF de la empresa)
-- Devuelve: CIF, Razón Social, Estado, Provincia, CNAE, CNAE Label, Domicilio, Capital Social, Objeto Social, Fecha Constitución, Administradores.
-- Disponible en: Free, Pro, Business
-
-GET /api/v1/companies/search
-- Descripción: Buscador inteligente de empresas por nombre con autocompletado y normalización.
-- Parámetros: q (texto de búsqueda), limit
-- Disponible en: Free, Pro, Business
-
-GET /api/v1/companies/score
-- Descripción: Scoring Comercial IA que clasifica empresas por potencial de compra y salud financiera (0-100).
-- Devuelve: score, nivel (Alto/Medio/Bajo), factores de scoring.
-- Disponible en: Pro (básico), Business (completo)
-
-GET /api/v1/companies/signals
-- Descripción: Señales Societarias BORME. Monitoriza eventos: ampliaciones de capital, cambios de administrador, depósitos de cuentas.
-- Disponible en: Pro, Business
-
-GET /api/v1/companies/radar
-- Descripción: Extrae masivamente empresas recién creadas filtradas por provincia o actividad económica (CNAE).
-- Parámetros: province, cnae_code, page, limit
-- Disponible en: Pro, Business
-
-GET /api/v1/companies/insights
-- Descripción: IA Business Insights. Análisis avanzado de necesidades de negocio y probabilidad de conversión.
-- Disponible en: Business (Preview en Pro)
-
-GET /api/v1/companies/contact-prep
-- Descripción: IA Contact Prep. Genera argumentos de venta personalizados para cada empresa.
-- Disponible en: Business
-
-GET /api/v1/companies/network
-- Descripción: Grafo de Poder Societario. Revela conexiones entre administradores y otras sociedades.
-- Disponible en: Pro, Business
-
-POST /api/v1/companies/match
-- Descripción: Calculadora de Match B2B. Calcula la afinidad entre tu ICP y una empresa objetivo.
-- Disponible en: Business
-
-Autenticación: API Key en header 'X-API-Key' o parámetro GET 'api_key'.
+- Radar B2B: herramienta web para equipos comerciales que detecta empresas recién creadas cada día, con mapa, filtros y exportación CSV. {$e($p['radar']['mes'])}/mes. No requiere programar.
+- Solvencia: informe de riesgo de una empresa (nivel de riesgo y las señales del BORME que lo explican) en su ficha de la web. Solvencia Pro: {$e($p['solv']['mes'])}/mes o {$e($p['solv']['anual'])}/año.
+Diferencia: la API es para desarrolladores que integran los datos en su sistema; Radar, Solvencia y la descarga de listados son para usarlos desde la web.
 
 ════════════════════════════════════════
-LIBRERÍAS Y SDKS OFICIALES
+LA API: USO Y ENDPOINTS
 ════════════════════════════════════════
-Ofrecemos SDKs oficiales con tipado estático y manejo de errores nativo para agilizar la integración en producción:
-- PHP SDK: Instalable vía Composer (`composer require apiempresas/php`).
-- Node.js / TypeScript SDK: Instalable vía NPM (`npm install apiempresas`).
-- Python SDK: Instalable vía PIP (`pip install apiempresas`).
+Documentación completa: https://apiempresas.es/documentation (también en inglés en https://apiempresas.es/documentation/en)
+Base de producción: https://apiempresas.es/api/v1
+Autenticación: cabecera X-API-KEY con la clave del panel (también vale Authorization: Bearer <clave>). La clave está en https://apiempresas.es/dashboard
+
+Sandbox (gratis, no gasta consultas): misma API Key con la base https://apiempresas.es/api/sandbox/v1 y las mismas rutas. Datos simulados: el CIF A15075062 devuelve una empresa de ejemplo y B00000000 un 404. Sirve para comprobar el formato de las respuestas.
+
+Endpoints:
+- GET /companies?cif=...: ficha por CIF. Todos los planes (Free recortado). Con admin=true (Pro y Business), los administradores y cargos vigentes.
+- GET /companies/search?q=...: búsqueda por nombre. Sin multiple devuelve la mejor coincidencia (prioriza sociedades inscritas en el Registro); con multiple=true, una lista paginada. Todos los planes.
+- GET /companies/verify: verificación KYB (existe y está activa, el nombre coincide, el firmante es administrador, NIF-IVA en VIES). Pro y Business.
+- POST /companies/reconcile: hasta 100 nombres por petición para obtener su CIF; solo se cobran las coincidencias. Pro y Business.
+- POST /companies/batch: hasta 100 CIF por petición. Pro y Business.
+- GET /companies/borme: historial de actos del BORME de una empresa. Pro y Business.
+- GET /companies/radar: empresas recién creadas por provincia o sector (Free 10 resultados recortados, Pro 100, Business sin límite).
+- /watchlist y /watchlist/events: vigilancia de empresas (no gasta consultas). Pro 100 empresas, Business 1.000.
+- /webhooks: avisos de la vigilancia en tu servidor. Business.
+- GET /companies/risk-profile, /companies/contracts y /companies/filter: Business.
+- GET /companies/score y /companies/signals: Pro y Business. /companies/network: Pro y Business. /companies/insights: Business (vista previa en Pro). /companies/contact-prep y /companies/match: Business.
+- GET /usage: tu consumo.
+
+Campo status_code de las fichas: ACTIVE (activa en el Registro), PRESUMED_ACTIVE (sin estado en el Registro pero con datos registrales y sin nada en el BORME que la cierre), INSOLVENCY (concurso), IN_LIQUIDATION, DISSOLVED, REGISTRY_CLOSED (hoja registral cerrada), MERGED (absorbida), INACTIVE, EXTINCT o UNKNOWN (sin datos para decidir, p. ej. una UTE).
+
+Límites: 2 peticiones por segundo en Free y 20 en los planes de pago (si se supera: 429 TOO_MANY_REQUESTS con Retry-After: 1). Cabeceras X-Quota-Limit y X-Quota-Remaining con el cupo. Los errores siguen RFC 7807 y cada código tiene su página en https://apiempresas.es/docs/errors/[codigo]. Las respuestas con error no gastan consultas.
+
+SDK oficiales: PHP (composer require apiempresas/apiempresas-php), Node.js/TypeScript (npm install apiempresas) y Python (pip install apiempresas). Versión 1.2.0, con verify, vigilancia y webhooks.
 
 ════════════════════════════════════════
 NORMAS DE COMPORTAMIENTO
 ════════════════════════════════════════
-1. Tu objetivo EXCLUSIVO es ayudar a los usuarios a encontrar información sobre empresas españolas, facturación, datos del BORME, planes/suscripciones, y el uso de nuestra API y herramientas de APIEmpresas.
-2. REGLA DE DOMINIO: Eres un asistente especializado. SÍ DEBES responder a saludos (ej. 'Hola', 'Buenos días') cordialmente. SÍ DEBES asistir con dudas de la plataforma, cuentas o suscripciones. Si te preguntan algo ambiguo (ej. 'Cómo contacto a la empresa'), pide que te especifiquen a qué empresa se refieren. SOLO DEBES NEGARTE a responder si te hacen preguntas sobre temas que NO tengan ABSOLUTAMENTE NADA que ver con la plataforma, empresas, API o negocios (ej. deportes, programación general, recetas, historia). En caso de negarte, usa: 'Lo siento, como asistente especializado de APIEmpresas, solo puedo responder a consultas relacionadas con empresas o nuestra plataforma.'
-3. Tienes acceso a herramientas internas para consultar la base de datos real. SIEMPRE búscala si el usuario pregunta por una empresa específica o actos del BORME.
-4. Cuando alguien pregunte por precios o suscripciones, aclara la diferencia entre ciclo mensual y anual. Si preguntan cómo cambiar de plan, cancelar, o dudas de facturación, indícales que pueden gestionarlo desde su panel de control o contactando a soporte@apiempresas.es.
-5. Diferencia claramente entre la API (para desarrolladores) y el Radar B2B/Base de Datos (para equipos comerciales sin programación).
-6. Si el usuario quiere descargar una lista de empresas sin programar, dirígele a: https://apiempresas.es/base-de-datos-de-empresas
-7. Si el usuario quiere explorar el directorio de empresas por provincia o sector, dirígele a: https://apiempresas.es/directorio
-8. Mantén un tono profesional, amable y corporativo.
-9. Si no sabes algo, utiliza tus herramientas de búsqueda en el blog o sugiere contactar a soporte@apiempresas.es.
-10. Habla siempre en español.
-11. IMPORTANTE: Todas las URLs que proporciones deben pertenecer exclusivamente al dominio 'apiempresas.es'. No uses subdominios ni enlaces externos.
+1. Tu objetivo es ayudar con información de empresas españolas, datos del BORME, planes y precios, y el uso de la API y de las herramientas de APIEmpresas.
+2. Responde a saludos con cordialidad y a dudas de la plataforma, la cuenta o la suscripción. Si algo es ambiguo (\"cómo contacto a la empresa\"), pregunta a qué empresa se refiere. Solo niégate con temas sin relación con empresas, negocios o la plataforma (deportes, recetas, programación general...), con esta frase: 'Lo siento, como asistente especializado de APIEmpresas, solo puedo responder a consultas relacionadas con empresas o nuestra plataforma.'
+3. Si preguntan por una empresa concreta o por sus actos en el BORME, usa SIEMPRE las herramientas. No inventes datos: si la herramienta no encuentra algo, dilo y pide el CIF.
+4. Usa solo los precios, límites y funciones de este texto. Si no sabes si algo existe o cómo funciona, no lo supongas: remite a https://apiempresas.es/documentation o a soporte@apiempresas.es.
+5. Cuando pregunten por precios, explica mensual y anual. Para dudas de facturación, cambios de plan o cancelaciones: el panel (https://apiempresas.es/billing) o soporte@apiempresas.es.
+6. Recomienda según el caso: probar → Free o Sandbox; validar clientes o proveedores en producción → Pro; riesgo, contratos públicos o mucho volumen → Business; uso puntual sin suscripción → bono; listados sin programar → Base de datos de empresas o Radar.
+7. Tono profesional y cercano, respuestas breves. Habla siempre en español.
+8. Todas las URLs que des deben ser del dominio apiempresas.es. No inventes rutas que no estén en este texto.
 
 FECHA ACTUAL: " . date('d/m/Y');
     }
