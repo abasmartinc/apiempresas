@@ -212,20 +212,39 @@
 <script>
 (function () {
     if (!window.fetch) return;
+    // jQuery se carga con defer: el token puede llegar antes que jQuery, así que el
+    // filtro se engancha cuando jQuery existe y lee el token en el momento de cada envío.
+    function enganchar() {
+        if (!window.jQuery || !jQuery.ajaxPrefilter || window.AE_CSRF_HOOK) return !!window.AE_CSRF_HOOK;
+        window.AE_CSRF_HOOK = true;
+        jQuery.ajaxPrefilter(function (o) {
+            var t = window.AE_CSRF;
+            if (!t || typeof o.data !== 'string') return;
+            var re = new RegExp('(^|&)' + t.name + '=[^&]*');
+            if (re.test(o.data)) {
+                o.data = o.data.replace(re, '$1' + t.name + '=' + encodeURIComponent(t.hash));
+            }
+        });
+        return true;
+    }
+    // Formularios que se crean después (p. ej. el registro rápido dentro de un SweetAlert):
+    // al enviarlos se pone el token bueno. Fase de captura: antes que el manejador propio.
+    document.addEventListener('submit', function (e) {
+        var t = window.AE_CSRF, f = e.target;
+        if (!t || !f || !f.querySelectorAll) return;
+        f.querySelectorAll('input[name="' + t.name + '"]').forEach(function (i) { i.value = t.hash; });
+    }, true);
+    if (!enganchar()) {
+        document.addEventListener('DOMContentLoaded', enganchar);
+        window.addEventListener('load', enganchar);
+    }
     fetch('<?= site_url('csrf-token') ?>', { credentials: 'same-origin', cache: 'no-store', headers: { 'Accept': 'application/json' } })
         .then(function (r) { return r.ok ? r.json() : null; })
         .then(function (t) {
             if (!t || !t.name || !t.hash) return;
             window.AE_CSRF = t;
             document.querySelectorAll('input[name="' + t.name + '"]').forEach(function (i) { i.value = t.hash; });
-            if (window.jQuery && jQuery.ajaxPrefilter) {
-                var re = new RegExp('(^|&)' + t.name + '=[^&]*');
-                jQuery.ajaxPrefilter(function (o) {
-                    if (typeof o.data === 'string' && re.test(o.data)) {
-                        o.data = o.data.replace(re, '$1' + t.name + '=' + encodeURIComponent(t.hash));
-                    }
-                });
-            }
+            enganchar();
         })
         .catch(function () {});
 })();
