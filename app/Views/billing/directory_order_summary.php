@@ -239,23 +239,19 @@
                     <div style="display: flex; justify-content: space-between; margin-bottom: 4px; color: #64748b; font-size: 0.88rem; gap: 12px;">
                         <span>BBDD <?= esc($display_name ?? $province) ?> (<?= number_format($total_count, 0, ',', '.') ?> empresas)</span>
                         <span style="font-weight: 700; color: #0f172a; white-space: nowrap;">
-                            <?php if(isset($pricing) && $pricing['is_discounted']): ?>
-                            <s style="opacity:0.55; font-size:0.85em; font-weight:500; margin-right:4px;"><?= number_format($pricing['original_price'], 2, ',', '.') ?> €</s>
-                            <?php endif; ?>
                             <?= number_format($price, 2, ',', '.') ?> €
                         </span>
                     </div>
 
+                    <?php /* Sin "precio original" ni "con descuento": era un precio que nunca se cobró (ver pricing_helper). */ ?>
                     <?php if ($total_count > 0 && $price > 0): ?>
-                    <div style="text-align: right; font-size: 0.72rem; font-weight: 800; margin-bottom: 12px; display:flex; justify-content:flex-end; gap:8px;">
-                        <?php if(isset($pricing) && $pricing['is_discounted']): ?>
-                        <span style="background:#fef2f2; color:#dc2626; padding:2px 8px; border-radius:4px;">Precio original: <?= number_format($pricing['original_price'], 2, ',', '.') ?>€</span>
-                        <span style="background:#ecfdf5; color:#10b981; padding:2px 8px; border-radius:4px;">✓ Con descuento</span>
-                        <?php else: ?>
+                    <div style="text-align: right; font-size: 0.72rem; font-weight: 800; margin-bottom: 12px; display:flex; justify-content:flex-end; gap:8px; flex-wrap:wrap;">
+                        <?php if (!empty($pricing['precio_maximo'])): ?>
+                        <span style="background:#ecfdf5; color:#047857; padding:2px 8px; border-radius:4px;">✓ Precio máximo: nunca pagas más de <?= number_format($pricing['tope'] ?? 149, 0, ',', '.') ?> €</span>
+                        <?php endif; ?>
                         <span style="background: #ecfdf5; padding: 2px 6px; border-radius: 4px; color:#10b981;">
                             Apenas <?= number_format($price / $total_count, 4, ',', '.') ?>€ por empresa
                         </span>
-                        <?php endif; ?>
                     </div>
                     <?php endif; ?>
 

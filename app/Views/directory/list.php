@@ -553,6 +553,11 @@
                         Descargar CSV (<?= esc($province_name ?? 'España') ?>) — <?php if(isset($pricing) && $pricing['is_discounted']): ?><s style="opacity:0.7; font-size:0.9em; margin-right:6px;"><?= number_format($pricing['original_price'], 2, ',', '') ?>€</s><?php endif; ?><?= esc($dynamic_price ?? '9') ?>€ <span style="font-size:0.85em; opacity:0.85; font-weight:600;">+ IVA</span>
                     <?php endif; ?>
                 </a>
+                <?php if (!empty($pricing['precio_maximo'])): ?>
+                <div style="font-size: 0.78rem; color: #047857; font-weight: 700; max-width: 280px; margin: 0 0 6px auto;">
+                    ✓ Precio máximo: por muchas empresas que tenga el listado, nunca pagas más de <?= number_format($pricing['tope'] ?? 149, 0, ',', '.') ?> € + IVA.
+                </div>
+                <?php endif; ?>
                 <div style="font-size: 0.75rem; color: #94a3b8; max-width: 280px; margin-left: auto;">
                     Incluye: CIF, Razón social, Dirección, CNAE, Provincia, Fecha constitución, Capital Social, Socio Único y Cargos. <strong style="color: #64748b; font-weight: 600;">(Puede haber empresas sin teléfono)</strong>.
                 </div>

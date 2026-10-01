@@ -255,6 +255,8 @@ class CompanyMapV2Controller extends Controller
                 'dynamic_price'  => $priceData['base_price'] ?? 9,
                 'original_price' => $priceData['original_price'] ?? 9,
                 'is_discounted'  => $priceData['is_discounted'] ?? false,
+                'precio_maximo'  => $priceData['precio_maximo'] ?? false,
+                'tope'           => $priceData['tope'] ?? 149,
                 'limit'          => $limit,
                 'with_phone'    => 0,
                 'top_cnae'      => [],

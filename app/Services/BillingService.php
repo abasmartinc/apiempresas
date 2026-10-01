@@ -374,10 +374,6 @@ class BillingService
         if (!function_exists('calculate_directory_price')) {
             require_once APPPATH . 'Helpers/pricing_helper.php';
         }
-        // Usamos el helper para obtener el "precio matemático" para mostrar como tachado
-        $linearPricing = calculate_directory_price($totalCount, false);
-        $originalPrice = $linearPricing['original_price'];
-
         $basePrice = 9.90;
         if ($totalCount <= 999) {
             $basePrice = 9.90;
@@ -391,26 +387,15 @@ class BillingService
             $basePrice = 149.0;
         }
 
-        $maxDisplayOriginalPrice = [
-            9   => 19.0,
-            19  => 29.0,
-            49  => 79.0,
-            99  => 129.0,
-            149 => 259.0,
-        ];
-        $originalPrice = min($originalPrice, $maxDisplayOriginalPrice[(int) $basePrice] ?? 259.0);
-
-        $isDiscounted = false;
-        if ($originalPrice > $basePrice) {
-            $isDiscounted = true;
-        } else {
-            $originalPrice = $basePrice;
-        }
-
+        // Sin precio tachado: antes se tachaba el precio de la fórmula de los listados
+        // de empresas (p. ej. 29 € junto a 19 €), que en subvenciones y licitaciones
+        // no se ha cobrado nunca. Ver la nota en pricing_helper (calculate_core_price).
         return [
             'base_price'     => $basePrice,
-            'original_price' => $originalPrice,
-            'is_discounted'  => $isDiscounted,
+            'original_price' => $basePrice,
+            'is_discounted'  => false,
+            'precio_maximo'  => $basePrice >= 149.0,
+            'tope'           => 149.0,
             'tax'            => round($basePrice * 0.21, 2),
             'total'          => $basePrice + round($basePrice * 0.21, 2)
         ];

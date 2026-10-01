@@ -33,23 +33,34 @@ if (!function_exists('calculate_core_price')) {
             $basePrice = round($basePrice * 1.5, 2);
         }
 
-        $originalPrice = $basePrice;
-        $isDiscounted = false;
-        
+        /*
+         * TOPE DE PRECIO, SIN "REBAJA".
+         *
+         * Antes, al llegar al tope se enseñaba tachado el precio sin tope (hasta 259 €)
+         * con "Precio original" y "Con descuento". Ese precio no se había cobrado
+         * nunca, y anunciar una rebaja exige que el precio tachado sea el más bajo
+         * aplicado en los 30 días anteriores (art. 20 LOCM, directiva Ómnibus) y no
+         * engañar sobre el precio (Ley de Competencia Desleal, también entre empresas).
+         *
+         * Ahora no hay descuento: `is_discounted` es siempre false y `original_price`
+         * es el precio real, así que ninguna vista tacha nada. Lo que se comunica es
+         * un hecho cierto: a partir del tope, el precio no sube (`precio_maximo`).
+         */
         $maxCap = 149.00;
-        $maxDisplayOriginalPrice = 259.00;
-        if ($basePrice > $maxCap) {
-            $originalPrice = min($originalPrice, $maxDisplayOriginalPrice);
+        $precioMaximo = false;
+        if ($basePrice >= $maxCap) {
             $basePrice = $maxCap;
-            $isDiscounted = true;
+            $precioMaximo = true;
         }
 
         $tax = round($basePrice * 0.21, 2);
 
         return [
             'base_price'     => $basePrice,
-            'original_price' => $originalPrice,
-            'is_discounted'  => $isDiscounted,
+            'original_price' => $basePrice,
+            'is_discounted'  => false,
+            'precio_maximo'  => $precioMaximo,
+            'tope'           => $maxCap,
             'tax'            => $tax,
             'total'          => $basePrice + $tax
         ];
