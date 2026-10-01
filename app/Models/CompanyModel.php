@@ -221,15 +221,16 @@ class CompanyModel extends Model
             WHERE companies.company_name IS NOT NULL
               AND MATCH(companies.company_name) AGAINST (? IN BOOLEAN MODE)
             ORDER BY score DESC
-            LIMIT 1
+            LIMIT 25
         ";
 
         try {
-            $row = $this->db->query($sql, [$booleanQuery, $booleanQuery])->getRowArray();
-            if (!$row) {
+            $rows = $this->db->query($sql, [$booleanQuery, $booleanQuery])->getResultArray();
+            if (!$rows) {
                 return null;
             }
 
+            $row = $this->pickBestCandidate($rows, $qClean);
             $rawScore = (float) ($row['score'] ?? 0.0);
 
             // Normalización simple del score para exponer 0..100
@@ -254,6 +255,57 @@ class CompanyModel extends Model
             log_message('debug', '[CompanyModel::tryFulltextBest] ' . $e->getMessage());
             return null;
         }
+    }
+
+    /**
+     * Elige el mejor candidato del FULLTEXT sin fiarse solo de la puntuación.
+     *
+     * Con "Telefónica" la puntuación más alta era una UTE vacía (U75760280): el
+     * nombre repite la palabra y MATCH la premia. Se ordena primero por lo fiable
+     * que es la ficha y después por puntuación y por nombre más corto (el nombre
+     * más corto suele ser la sociedad y no sus filiales o UTE):
+     *   0  CIF de sociedad válido con datos del Registro
+     *   1  CIF de sociedad válido sin datos del Registro
+     *   2  UTE (U...), CIF enmascarado o que no es un CIF, salvo que se busque "UTE"
+     * El umbral de 35 se aplica después sobre la fila elegida.
+     */
+    private function pickBestCandidate(array $rows, string $qClean): array
+    {
+        $buscaUte = (bool) preg_match('/\\bute\\b/i', $qClean);
+        $nivel = static function (array $r) use ($buscaUte): int {
+            $cif = strtoupper(trim((string) ($r['cif'] ?? '')));
+            $cifValido = (bool) preg_match('/^[ABCDEFGHJNPQRSUVW][0-9]{7}[0-9A-J]$/', $cif);
+            if (!$cifValido) {
+                return 2;
+            }
+            if ($cif[0] === 'U') {
+                return $buscaUte ? 0 : 2; // las UTE no están en el Registro
+            }
+            $hayRegistro = trim((string) ($r['province'] ?? '')) !== ''
+                || !empty($r['founded'])
+                || trim((string) ($r['status'] ?? '')) !== '';
+            return $hayRegistro ? 0 : 1;
+        };
+
+        $maxScore = (float) ($rows[0]['score'] ?? 0.0);
+        usort($rows, static function (array $a, array $b) use ($nivel): int {
+            return [$nivel($a), -(float) ($a['score'] ?? 0), mb_strlen((string) ($a['name'] ?? ''), 'UTF-8')]
+                <=> [$nivel($b), -(float) ($b['score'] ?? 0), mb_strlen((string) ($b['name'] ?? ''), 'UTF-8')];
+        });
+        $best = $rows[0];
+
+        // Si la elegida puntúa menos de la mitad que la mejor, la búsqueda iba por
+        // otra ficha: gana la de más puntuación, pero nunca una UTE ni un CIF roto
+        // (nivel 2) si hay alternativa.
+        if ($maxScore > 0 && (float) ($best['score'] ?? 0) < $maxScore * 0.5) {
+            foreach ($rows as $r) {
+                if ($nivel($r) < 2 && (float) ($r['score'] ?? 0) > (float) ($best['score'] ?? 0)) {
+                    $best = $r;
+                }
+            }
+        }
+
+        return $best;
     }
 
     private function fallbackBestByLike(string $qClean): ?array

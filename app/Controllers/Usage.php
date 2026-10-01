@@ -317,8 +317,11 @@ class Usage extends BaseController
                 $r['plan_name'] = 'Bono Prepago';
             }
             $r['short_endpoint'] = str_replace('/apiempresas/api/v1', '', $r['endpoint']);
-            $r['date_display'] = date('d/m/Y H:i', strtotime($r['created_at']));
-            $r['date_iso'] = date('c', strtotime($r['created_at']));
+            // En BD, UTC (appTimezone); al cliente, hora de Madrid. Antes salía en UTC:
+            // dos horas menos en verano y el cliente no encontraba sus llamadas.
+            $utc = new \DateTime((string) $r['created_at'], new \DateTimeZone('UTC'));
+            $r['date_iso'] = $utc->format('c');
+            $r['date_display'] = $utc->setTimezone(new \DateTimeZone('Europe/Madrid'))->format('d/m/Y H:i');
         }
 
         return $this->response->setJSON([

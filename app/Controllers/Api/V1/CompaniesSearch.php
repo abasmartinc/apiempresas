@@ -119,7 +119,7 @@ class CompaniesSearch extends BaseApiController
         if ($multiple) {
             $cacheKey = 'company_search_mult_v4_' . $limit . '_p' . $page . '_' . md5(mb_strtolower($name, 'UTF-8'));
         } else {
-            $cacheKey = 'company_search_best_' . md5(mb_strtolower($name, 'UTF-8'));
+            $cacheKey = 'company_search_best_v2_' . md5(mb_strtolower($name, 'UTF-8'));
         }
         $cachedData = cache($cacheKey);
 

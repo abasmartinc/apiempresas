@@ -351,23 +351,41 @@ class EmailAutomationCommand extends BaseCommand
     }
 
     /**
-     * ¿Ha recibido ya en las últimas 20 h algún correo automático de la API Free?
-     * (los de servicio de clientes de pago, como paid_quota_*, no cuentan)
+     * Correos que salen siempre, aunque ese día ya haya recibido otro: avisan de que su
+     * integración se va a parar.
+     */
+    protected const CORREOS_DE_SERVICIO = ['paid_quota_80', 'paid_quota_100'];
+
+    /**
+     * ¿Ha recibido ya en las últimas 20 h algún correo automático (de la API Free, de
+     * pago, de recuperación o de Solvencia)? Los de servicio (CORREOS_DE_SERVICIO) no
+     * cuentan.
+     *
+     * Antes solo miraba los de la API Free y solo en el bloque 1: el mismo día podían
+     * llegar la ayuda por errores (3), el resumen o el aviso de mitad de mes (4b), el
+     * win-back (5) y el pago sin terminar (6). Ahora lo miran los bloques 1, 3, 4b, 5 y 6,
+     * y como los bloques van en orden, el primero que envía gana; el resto sale en otra
+     * pasada.
      */
     protected function recibioHoyApi(int $userId): bool
     {
         return \Config\Database::connect()->table('user_email_automation')
             ->where('user_id', $userId)
-            ->whereIn('email_type', [
-                'first_request', 'no_requests_15min', 'no_requests_day1', 'no_requests_day3',
-                'no_requests_day14', 'no_requests_day30',
-                'one_request_inactive_1h', 'reached_5_requests', 'reached_80_requests',
-                'reached_100_percent_quota', 'monthly_report', 'bad_request_help',
-                'api_stalled_7d', 'api_stalled_30d', 'api_checkout_abandoned',
-                'api_exhausted_3d', 'api_exhausted_10d',
-            ])
+            ->whereNotIn('email_type', self::CORREOS_DE_SERVICIO)
             ->where('sent_at >=', date('Y-m-d H:i:s', strtotime('-20 hours')))
             ->countAllResults() > 0;
+    }
+
+    /**
+     * Periodo de la suscripción ('monthly' o 'annual'), por la duración del ciclo como
+     * en Billing::success. Sirve para que el enlace a Business respete lo que ya paga:
+     * un Pro anual no debe acabar en Business mensual.
+     */
+    protected function periodoDe(array $sub): string
+    {
+        $ini = strtotime((string) ($sub['current_period_start'] ?? ''));
+        $fin = strtotime((string) ($sub['current_period_end'] ?? ''));
+        return ($ini && $fin && ($fin - $ini) > 40 * 86400) ? 'annual' : 'monthly';
     }
 
     /** ¿Se envió ese correo después de una fecha? (p. ej. después de la última llamada) */
@@ -1453,7 +1471,7 @@ class EmailAutomationCommand extends BaseCommand
         // Misma suscripción que elige ApiKeyFilter: la activa más reciente de la API
         $filas = $db->query("
             SELECT u.id, u.email, u.name,
-                   us.id AS sub_id, us.plan_id,
+                   us.id AS sub_id, us.plan_id, us.current_period_start, us.current_period_end,
                    ap.name AS plan_name, ap.monthly_quota, ap.product_type,
                    COALESCE(uw.balance, 0) AS wallet
             FROM user_subscriptions us
@@ -1536,7 +1554,7 @@ class EmailAutomationCommand extends BaseCommand
             CLI::write("  -> Enviando '{$tipo}' a {$c['email']} ({$usadas}/{$cupo})...");
             $res = $this->emailService->sendPaidQuotaWarning(
                 ['id' => $uid, 'email' => $c['email'], 'name' => $c['name']],
-                ['name' => $c['plan_name'], 'monthly_quota' => $cupo],
+                ['name' => $c['plan_name'], 'monthly_quota' => $cupo, 'period' => $this->periodoDe($c)],
                 $usadas,
                 $umbral,
                 (int) $c['wallet'],
@@ -1606,6 +1624,9 @@ class EmailAutomationCommand extends BaseCommand
 
         foreach ($clientes as $uid => $c) {
             $usuario = ['id' => $uid, 'user_id' => $uid, 'email' => $c['email'], 'name' => $c['name']];
+            if ($this->recibioHoyApi($uid)) {
+                continue; // ya le ha llegado otro correo hoy
+            }
 
             // 1. Resumen del mes anterior
             if ($esPrincipio
@@ -1621,7 +1642,7 @@ class EmailAutomationCommand extends BaseCommand
                     CLI::write("  -> Enviando 'paid_monthly_summary' a {$c['email']} ({$usadas} consultas)...");
                     $res = $this->emailService->sendPaidMonthlySummary(
                         $usuario,
-                        ['name' => $c['plan_name'], 'monthly_quota' => (int) $c['monthly_quota'], 'id' => (int) $c['plan_id']],
+                        ['name' => $c['plan_name'], 'monthly_quota' => (int) $c['monthly_quota'], 'id' => (int) $c['plan_id'], 'period' => $this->periodoDe($c)],
                         $mesPasado,
                         $usadas,
                         $stats
@@ -1826,7 +1847,7 @@ class EmailAutomationCommand extends BaseCommand
             }
             $vistos[$uid] = true;
 
-            if ($this->automationModel->wasSentRecently($uid, 'api_winback', 365)) {
+            if ($this->automationModel->wasSentRecently($uid, 'api_winback', 365) || $this->recibioHoyApi($uid)) {
                 continue;
             }
 
@@ -1903,7 +1924,8 @@ class EmailAutomationCommand extends BaseCommand
                 ->where('user_id', $uid)
                 ->where('created_at >', date('Y-m-d H:i:s', strtotime('-1 hour')))
                 ->countAllResults() > 0;
-            if ($completado || $reciente || $this->automationModel->wasSentRecently($uid, 'api_checkout_abandoned', 30)) {
+            if ($completado || $reciente || $this->automationModel->wasSentRecently($uid, 'api_checkout_abandoned', 30)
+                || $this->recibioHoyApi($uid)) {
                 continue;
             }
 
@@ -1982,6 +2004,9 @@ class EmailAutomationCommand extends BaseCommand
         foreach ($results as $user) {
             $userId   = (int)$user['id'];
             $badCount = (int)$user['bad_count'];
+            if ($this->recibioHoyApi($userId)) {
+                continue; // ya le ha llegado otro correo hoy; si sigue fallando, mañana
+            }
 
             // Las peticiones con error no se cobran (ApiKeyFilter solo factura las 200).
             // Antes aquí se restaban hasta 50 del uso de hoy "para devolverlas", y lo que

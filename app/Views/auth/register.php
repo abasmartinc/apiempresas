@@ -3,7 +3,15 @@
 <head>
     <?=view('partials/head') ?>
     <link rel="stylesheet" href="<?= base_url('public/css/login.css?v=' . time()) ?>" />
+    <?php
+    // Captcha de Cloudflare: solo si está activado (TURNSTILE_ENABLED=true en .env). La
+    // comprobación en el servidor lleva tiempo desactivada; mientras tanto el recuadro
+    // solo cargaba un script de fuera y podía enseñar "Error 600010" sin motivo.
+    $turnstileOn = filter_var(env('TURNSTILE_ENABLED', false), FILTER_VALIDATE_BOOLEAN);
+    ?>
+    <?php if ($turnstileOn): ?>
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <?php endif; ?>
 </head>
 
 <body>
@@ -176,7 +184,7 @@
                 </div>
 
                 <div style="margin-top: 10px; margin-bottom: 16px; display: flex; justify-content: center;">
-                    <div class="cf-turnstile" data-sitekey="<?= env('TURNSTILE_SITE_KEY') ?>" data-theme="light"></div>
+                    <?php if ($turnstileOn): ?><div class="cf-turnstile" data-sitekey="<?= env('TURNSTILE_SITE_KEY') ?>" data-theme="light"></div><?php endif; ?>
                 </div>
 
                 <button id="registerSubmit" type="submit" class="auth-btn-primary" style="padding: 10px; font-size: 0.95rem;">

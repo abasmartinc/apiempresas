@@ -11,7 +11,7 @@
         </div>
         
         <div style="display: flex; align-items: center; gap: 16px;">
-            <a id="usage-trigger-cta" href="<?= site_url('billing?plan=pro&source=usage_banner') ?>" class="btn" style="white-space: nowrap; font-weight: 800; padding: 10px 24px; border-radius: 12px; font-size: 0.9rem; transition: all 0.2s ease; border: none;">
+            <a id="usage-trigger-cta" href="<?= site_url('billing?plan=pro&period=monthly&source=usage_banner') ?>" class="btn" style="white-space: nowrap; font-weight: 800; padding: 10px 24px; border-radius: 12px; font-size: 0.9rem; transition: all 0.2s ease; border: none;">
                 <?= lang('UsageTrigger.activate_radar') ?>
             </a>
             <button id="usage-trigger-close" style="background: transparent; border: none; cursor: pointer; padding: 4px; opacity: 0.6; transition: opacity 0.2s ease;" title="Cerrar">
@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', function() {
             ctaBg: '#dc2626',
             ctaText: '#ffffff',
             ctaLabel: '<?= lang('UsageTrigger.100_percent_cta') ?>',
-            href: '<?= site_url('billing?plan=pro&source=usage_banner_100') ?>',
+            href: '<?= site_url('billing?plan=pro&period=monthly&source=usage_banner_100') ?>',
             // Estado, no aviso de una vez: no se marca como visto en user_trigger_events
             persistente: true
         },
@@ -119,7 +119,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 cta.style.backgroundColor = config.ctaBg;
                 cta.style.color = config.ctaText;
                 cta.textContent = config.ctaLabel || '<?= lang('UsageTrigger.default_cta') ?>';
-                if (config.href) cta.href = config.href;
+                // Cada aviso con su origen, para saber cuál vende
+                cta.href = config.href || '<?= site_url('billing?plan=pro&period=monthly&source=usage_banner_') ?>' + data.trigger;
                 
                 // Mostrar banner
                 container.style.display = 'block';

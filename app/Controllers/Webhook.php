@@ -104,8 +104,12 @@ class Webhook extends Controller
     /**
      * Reparte el evento de Stripe a su manejador.
      */
+    /** Id del evento de Stripe que se está procesando (para no registrar dos veces). */
+    private string $eventoId = '';
+
     private function procesarEvento($event): void
     {
+        $this->eventoId = (string) ($event->id ?? '');
         switch ($event->type) {
             case 'checkout.session.completed':
                 $session = $event->data->object;
@@ -220,6 +224,62 @@ class Webhook extends Controller
      * webhook o la página de éxito (las dos miran stripe_id). Nunca interrumpe el
      * webhook.
      */
+    /**
+     * Hitos de la suscripción después del pago, en tracking_events (page 'billing'),
+     * para seguir el embudo más allá de checkout_completed:
+     *   subscription_renewed          renovación cobrada (invoice.paid de ciclo)
+     *   subscription_payment_failed   cobro rechazado (cada intento)
+     *   subscription_cancel_scheduled baja programada al final del periodo (web o portal)
+     *   subscription_reactivated      deshace una baja programada
+     *   subscription_ended            fin real; element = motivo de Stripe
+     *                                 (cancellation_requested, payment_failed...)
+     * Una fila por evento de Stripe: si Stripe lo reenvía, no se repite.
+     */
+    private function registrarCiclo(string $evento, string $stripeSubscriptionId, array $meta = [], string $element = ''): void
+    {
+        try {
+            if ($stripeSubscriptionId === '') {
+                return;
+            }
+            $db = \Config\Database::connect();
+            if ($this->eventoId !== '' && $db->table('tracking_events')
+                    ->where('event_name', $evento)
+                    ->like('metadata', '"stripe_event":"' . $this->eventoId . '"')
+                    ->countAllResults() > 0) {
+                return;
+            }
+            $sub = $db->table('user_subscriptions us')
+                ->select('us.user_id, us.plan_id, us.created_at, ap.slug, ap.product_type')
+                ->join('api_plans ap', 'ap.id = us.plan_id', 'left')
+                ->where('us.stripe_subscription_id', $stripeSubscriptionId)
+                ->orderBy('us.id', 'DESC')
+                ->get()->getRowArray();
+            if (!$sub) {
+                return;
+            }
+            $db->table('tracking_events')->insert([
+                'event_name'   => $evento,
+                'page'         => 'billing',
+                'user_id'      => (int) $sub['user_id'],
+                'session_id'   => '',
+                'anonymous_id' => '',
+                'element'      => substr($element, 0, 255),
+                'metadata'     => json_encode($meta + [
+                    'plan'         => (string) ($sub['slug'] ?? ''),
+                    'plan_id'      => (int) $sub['plan_id'],
+                    'product_type' => (string) ($sub['product_type'] ?? ''),
+                    'dias_cliente' => (int) floor((time() - strtotime((string) $sub['created_at'])) / 86400),
+                    'stripe_id'    => $stripeSubscriptionId,
+                    'stripe_event' => $this->eventoId,
+                    'via'          => 'webhook',
+                ]),
+                'created_at'   => date('Y-m-d H:i:s'),
+            ]);
+        } catch (\Throwable $e) {
+            log_message('error', '[Webhook::registrarCiclo] ' . $e->getMessage());
+        }
+    }
+
     private function registrarVenta($session): void
     {
         try {
@@ -567,6 +627,8 @@ class Webhook extends Controller
 
     private function handleInvoicePaid($invoice)
     {
+        // $invoice se reutiliza más abajo para la factura local: guardamos la de Stripe
+        $stripeInvoiceRaw = $invoice;
         $stripeSubscriptionId = $invoice->subscription ?? null;
 
         if (!$stripeSubscriptionId) {
@@ -730,6 +792,15 @@ class Webhook extends Controller
                     'currency'       => $invoice->currency,
                     'invoice_number' => $invoice->invoice_number,
                     'pdf_path'       => $invoice->pdf_path
+                ]);
+            }
+
+            // La primera factura (subscription_create) ya cuenta como checkout_completed
+            if ((string) ($stripeInvoiceRaw->billing_reason ?? '') === 'subscription_cycle') {
+                $this->registrarCiclo('subscription_renewed', (string) $stripeSubscriptionId, [
+                    'amount'  => ((int) ($stripeInvoiceRaw->amount_paid ?? 0)) / 100,
+                    'invoice' => (string) ($stripeInvoiceRaw->id ?? ''),
+                    'period'  => (strtotime($end) - strtotime($start)) > 40 * 86400 ? 'annual' : 'monthly',
                 ]);
             }
 
@@ -938,6 +1009,13 @@ class Webhook extends Controller
                 return;
             }
 
+            $this->registrarCiclo('subscription_payment_failed', (string) $stripeSubscriptionId, [
+                'amount'  => ((int) ($invoice->amount_due ?? 0)) / 100,
+                'attempt' => (int) ($invoice->attempt_count ?? 1),
+                'invoice' => (string) ($invoice->id ?? ''),
+                'final'   => empty($invoice->next_payment_attempt),
+            ]);
+
             // Stripe puede reenviar el mismo evento: como mucho un correo cada 2 días
             $automation = new \App\Models\EmailAutomationModel();
             if ($automation->wasSentRecently($userId, 'payment_failed', 2)) {
@@ -1035,6 +1113,21 @@ class Webhook extends Controller
                 $db->table('user_subscriptions')->where('id', (int) $sub['id'])->update($cambios);
             }
 
+            // Embudo: baja programada o deshecha, venga de nuestra web o del portal. Se
+            // mira lo que cambió en Stripe y no el estado local, porque la baja hecha en
+            // la web ya está marcada en BD antes de que llegue este evento.
+            $clavesPrevias = is_object($previo) && method_exists($previo, 'keys') ? $previo->keys() : array_keys((array) $previo);
+            if (array_intersect(['cancel_at_period_end', 'cancel_at'], $clavesPrevias)) {
+                $antes = !empty($previo->cancel_at_period_end) || !empty($previo->cancel_at);
+                if (!$antes && $cancelaAlFin) {
+                    $this->registrarCiclo('subscription_cancel_scheduled', $stripeSubscriptionId, [
+                        'ends_at' => $cambios['current_period_end'] ?? ($sub['current_period_end'] ?? null),
+                    ], (string) ($subscription->cancellation_details->feedback ?? ''));
+                } elseif ($antes && !$cancelaAlFin && $viva) {
+                    $this->registrarCiclo('subscription_reactivated', $stripeSubscriptionId);
+                }
+            }
+
             // Cambio de precio hecho en Stripe: no sabemos a qué plan corresponde
             $precioNuevo = $subscription->items->data[0]->price->id ?? null;
             $precioViejo = $previo->items->data[0]->price->id ?? null;
@@ -1094,6 +1187,10 @@ class Webhook extends Controller
             ->groupEnd()
             ->update(['current_period_end' => $ahora]);
                          
+        // Motivo: cancellation_requested (baja normal), payment_failed (tarjeta), payment_disputed...
+        $this->registrarCiclo('subscription_ended', (string) $stripeSubscriptionId, [],
+            (string) ($subscription->cancellation_details->reason ?? ''));
+
         log_message('info', "[Webhook::stripe] Subscription canceled: {$stripeSubscriptionId}");
     }
 }

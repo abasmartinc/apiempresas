@@ -194,7 +194,12 @@ class Dashboard extends BaseController
         $data['walletSpent'] = $walletSpent;
         $data['walletTotal'] = $walletTotal;
         $data['walletLowBalance'] = $walletLowBalance;
-        $data['isBonusUser'] = ($walletTotal > 0);
+        // "Usuario de bono" = sin plan de pago y con saldo en el monedero: sus consultas
+        // salen del bono, no de un cupo. Antes bastaba con haber comprado un bono alguna
+        // vez (walletTotal > 0): un Pro que compró uno veía el panel como si fuera de
+        // prepago (sin barra de cupo, "consultas de bono", "pago por uso"), y quien había
+        // gastado todo el bono seguía viéndolo así con saldo 0.
+        $data['isBonusUser'] = (!$isPaid && $walletBalance > 0);
 
         // --- Mostrar aviso de migración a Free (solo una vez) ---
         $data['showMigrationNotice'] = false;

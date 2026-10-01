@@ -143,7 +143,12 @@ class ApiCompanyEnricher
             }
             $id  = (int) ($c['id'] ?? 0);
 
-            $st = self::statusFor((string) ($c['status'] ?? ''), $ex['estado_fecha'] ?? null, $profiles[$cif] ?? null);
+            // Sin la fila en BD no se puede saber: se mantiene el comportamiento de antes.
+            $hayRegistro = empty($ex)
+                || trim((string) ($ex['registro_mercantil'] ?? '')) !== ''
+                || !empty($ex['fecha_constitucion'])
+                || !empty($profiles[$cif]['events']);
+            $st = self::statusFor((string) ($c['status'] ?? ''), $ex['estado_fecha'] ?? null, $profiles[$cif] ?? null, $hayRegistro);
             $c['status_code']   = $st['status_code'];
             $c['status_source'] = $st['status_source'];
             $c['status_date']   = $st['status_date'];
@@ -181,7 +186,7 @@ class ApiCompanyEnricher
         try {
             $db = \Config\Database::connect();
             $rows = $db->table('companies')
-                ->select('id, cif, ventas_raw, ult_cuentas_anio, estado_fecha')
+                ->select('id, cif, ventas_raw, ult_cuentas_anio, estado_fecha, registro_mercantil, fecha_constitucion')
                 ->whereIn('cif', $cifs)
                 ->get()->getResultArray();
         } catch (\Throwable $e) {
@@ -253,22 +258,17 @@ class ApiCompanyEnricher
     }
 
     /** Número de personas distintas con algún nombramiento (para el gancho del Free). */
+    /**
+     * Cuántos administradores VIGENTES tiene cada empresa (los mismos que devuelve
+     * admin=true en Pro). Antes contaba todos los nombres que habían pasado por la
+     * empresa, con ceses y dimisiones incluidos (Inditex: 72), y el Free veía un número
+     * que luego no coincidía con lo que recibía al pagar.
+     */
     private static function countAdministrators(array $ids): array
     {
-        try {
-            $db = \Config\Database::connect();
-            $rows = $db->table('company_administrators')
-                ->select('company_id, COUNT(DISTINCT name) AS n', false)
-                ->whereIn('company_id', array_unique($ids))
-                ->groupBy('company_id')
-                ->get()->getResultArray();
-        } catch (\Throwable $e) {
-            log_message('error', '[ApiCompanyEnricher::countAdministrators] ' . $e->getMessage());
-            return [];
-        }
         $out = [];
-        foreach ($rows as $r) {
-            $out[(int) $r['company_id']] = (int) $r['n'];
+        foreach (self::currentAdministrators($ids) as $id => $vigentes) {
+            $out[(int) $id] = is_array($vigentes) ? count($vigentes) : 0;
         }
         return $out;
     }
@@ -281,7 +281,9 @@ class ApiCompanyEnricher
      * Valores de status_code:
      *   ACTIVE           el Registro la da como activa y el BORME no dice lo contrario
      *   PRESUMED_ACTIVE  sin estado en el Registro, pero el BORME no tiene ningún hecho
-     *                    que la cierre (el motor la ve normal)
+     *                    que la cierre (el motor la ve normal). Solo si la ficha tiene
+     *                    algún dato del Registro ($hayRegistro): una UTE o una ficha
+     *                    vacía no tiene hechos en el BORME porque no está, y sale UNKNOWN.
      *   INSOLVENCY       concurso de acreedores en curso
      *   IN_LIQUIDATION   en liquidación
      *   DISSOLVED        disuelta
@@ -291,7 +293,7 @@ class ApiCompanyEnricher
      *   EXTINCT          extinguida
      *   UNKNOWN          sin datos para decidir
      */
-    public static function statusFor(string $statusRaw, ?string $estadoFecha, ?array $legal): array
+    public static function statusFor(string $statusRaw, ?string $estadoFecha, ?array $legal, bool $hayRegistro = true): array
     {
         helper('company');
 
@@ -351,7 +353,7 @@ class ApiCompanyEnricher
                 $code = 'INACTIVE';
                 $source = 'registry';
                 $date = $estadoFecha ?: null;
-            } elseif (is_array($legal) && in_array(self::bareLegal((string) ($legal['legal_state'] ?? '')), ['NORMAL', 'RECOVERED_RESOLVED'], true)) {
+            } elseif ($hayRegistro && is_array($legal) && in_array(self::bareLegal((string) ($legal['legal_state'] ?? '')), ['NORMAL', 'RECOVERED_RESOLVED'], true)) {
                 $code = 'PRESUMED_ACTIVE';
                 $source = 'borme_analysis';
             } else {

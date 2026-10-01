@@ -1498,7 +1498,7 @@ class EmailService
                 . '</ul>';
             if ($esPro) {
                 $boton = 'Pasar a Business';
-                $url   = site_url('billing?plan=business');
+                $url   = site_url('billing?plan=business&period=' . (($plan['period'] ?? 'monthly') === 'annual' ? 'annual' : 'monthly') . '&source=email_paid_monthly_summary');
             }
         } elseif ($pct >= 80) {
             $contenido .= $this->p('Estás cerca del límite de tu plan. Si este mes esperas más volumen, te avisaremos al 80 % y al 100 %, y un bono de créditos evita que la API se pare al llegar al tope.');
@@ -1625,8 +1625,10 @@ class EmailService
         $meses    = [1 => 'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio',
                      'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
         $renueva  = '1 de ' . $meses[(int) date('n', strtotime('first day of next month'))];
-        // Directo al plan siguiente (Business), no a /billing a secas
-        $urlPlan  = site_url('billing?plan=business');
+        // Directo al plan siguiente (Business), en el mismo periodo que paga ahora y con
+        // el origen (paid_quota_80 o paid_quota_100) para saber cuál vende.
+        $periodo  = ($plan['period'] ?? 'monthly') === 'annual' ? 'annual' : 'monthly';
+        $urlPlan  = site_url('billing?plan=business&period=' . $periodo . '&source=email_paid_quota_' . ($umbral >= 100 ? 100 : 80));
         $urlBono  = site_url('crear-bono-api');
 
         // Qué pasa al llegar al 100 %, según tenga o no saldo en el monedero
@@ -1682,6 +1684,9 @@ class EmailService
         }
 
         return $this->sendTemplateEmail('quota_warning', [
+            // Antes los dos avisos se registraban como 'quota_warning' y no se podía
+            // saber cuál abre y cuál vende.
+            '_log_slug'   => 'paid_quota_' . ($umbral >= 100 ? 100 : 80),
             'subject'     => $asunto,
             'preheader'   => $preheader,
             // Sin nombre, la parte local del correo: "Hola Hola," queda descuidado.

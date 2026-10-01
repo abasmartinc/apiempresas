@@ -10,10 +10,13 @@ if (!function_exists('verify_turnstile')) {
      */
     function verify_turnstile(string $token, string $ip = null): bool
     {
-        // === TEMPORAL BYPASS ===
-        // Desactivado temporalmente a petición para evitar el bloqueo masivo
-        return true;
-        // =======================
+        // Desactivado salvo TURNSTILE_ENABLED=true en .env (antes, un "return true" fijo
+        // "para evitar el bloqueo masivo"). Con el interruptor apagado, login y registro
+        // tampoco pintan el recuadro: así el cliente no ve errores de un captcha que no
+        // se comprueba.
+        if (!filter_var(env('TURNSTILE_ENABLED', false), FILTER_VALIDATE_BOOLEAN)) {
+            return true;
+        }
 
         if (empty($token)) {
             @file_put_contents(WRITEPATH . 'debug_turnstile.txt', date('Y-m-d H:i:s') . " | Token is EMPTY\n", FILE_APPEND);

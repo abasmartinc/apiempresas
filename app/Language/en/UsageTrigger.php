@@ -1,7 +1,7 @@
 <?php
 return [
     'first_use_title' => 'Your first API call was a success!',
-    'first_use_desc'  => 'Upgrade to Pro to unlock unmasked data and higher speeds.',
+    'first_use_desc'  => 'With Pro you get unmasked data (directors, full address and revenue band) and 3,000 queries a month.',
     'first_use_cta'   => 'View Pro Plan',
     
     '20_percent_title' => 'You are making the most of the API',
@@ -21,5 +21,5 @@ return [
     '100_percent_cta'   => 'Activate Pro',
 
     'default_cta'      => 'Activate Pro Plan',
-    'activate_radar'   => '🔥 Activate Radar + API',
+    'activate_radar'   => 'View Pro plan',
 ];

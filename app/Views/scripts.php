@@ -263,7 +263,7 @@ $isEn = (service('request')->getLocale() === 'en');
                         </div>
 
                         <h2 style="font-size: 2rem; font-weight: 900; color: #0f172a; margin-bottom: 12px; letter-spacing: -0.03em;">Tu API Key está lista</h2>
-                        <p style="font-size: 1.1rem; color: #64748b; margin-bottom: 32px; line-height: 1.6;">Introduce tu email para activar tu acceso gratuito y ver todos los datos sin límites.</p>
+                        <p style="font-size: 1.1rem; color: #64748b; margin-bottom: 32px; line-height: 1.6;">Introduce tu email para activar tu acceso gratuito: 100 consultas de prueba, sin tarjeta.</p>
 
                         <form action="<?= site_url('register/quick_store') ?>" method="POST" id="quick-reg-form" style="display: grid; gap: 16px; text-align: left;">
                             <?= csrf_field() ?>

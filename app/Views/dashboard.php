@@ -1,11 +1,8 @@
 <?php
-$isBonusUser = (($walletBalance ?? 0) > 0);
-if ($isBonusUser && !($isPaid ?? false)) {
-    $isPaid = true; // Tratar como usuario de pago para quitar bloqueos
-    $planNameRaw = 'Bono API Prepago';
-    $currentPlanSlug = 'custom_bonus';
-    $requestsUsed = 0; // Quitar limitación del buscador
-}
+// $isBonusUser llega del controlador (sin plan de pago y con saldo). Aquí había un bloque
+// que lo recalculaba y "convertía" al usuario de bono en uno de pago, pero más abajo se
+// volvían a calcular $isPaid y $planNameRaw a partir del plan y no tenía ningún efecto;
+// los componentes ya miran $walletBalance / $isBonusUser por su cuenta.
 ?>
 <?= $this->extend( ($isHtmx ?? false) ? 'layouts/htmx' : 'layouts/app' ) ?>
 <?= $this->section('styles') ?>

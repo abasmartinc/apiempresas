@@ -11,6 +11,15 @@ $planName = 'Free';
 if (strcasecmp($planNameRaw, 'pro') === 0) $planName = 'Pro';
 if (strcasecmp($planNameRaw, 'business') === 0) $planName = 'Business';
 if (strcasecmp($planNameRaw, 'radar b2b') === 0) $planName = 'Radar B2B';
+// Plan de la API a medida (p. ej. 7 "Professional", 13 "Copiloto de Ventas"): antes
+// caía en 'Free' y veía "Plan actual: Free" y el pago de Pro, como si no tuviera nada.
+$planSlug    = strtolower(trim((string) $get($plan, 'plan_slug', '')));
+$planAMedida = $plan
+    && strtolower((string) $get($plan, 'product_type', '')) === 'api'
+    && !in_array($planSlug, ['', 'free', 'pro', 'business'], true);
+if ($planAMedida) {
+    $planName = (string) $planNameRaw;
+}
 $periodEnd = $get($plan, 'current_period_end', null);
 
 $fmt = function ($n) {
@@ -19,7 +28,8 @@ $fmt = function ($n) {
 ?>
 <?= $this->extend( ($isHtmx ?? false) ? 'layouts/htmx' : 'layouts/app' ) ?>
 <?= $this->section('styles') ?>
-<link rel="stylesheet" href="<?= base_url('public/css/billing.css') ?>?v=<?= time() ?>" />
+<?php $cssBilling = ROOTPATH . 'public/css/billing.css'; ?>
+<link rel="stylesheet" href="<?= base_url('public/css/billing.css') ?>?v=<?= is_file($cssBilling) ? filemtime($cssBilling) : '1' ?>" />
 <style>
     /* Aislamiento del checkout */
     header .nav nav.desktop-only,
@@ -60,6 +70,19 @@ $fmt = function ($n) {
                 <!-- COLUMNA IZQUIERDA: TARJETAS Y FORMULARIO -->
                 <div class="billing-left">
                     
+                    <?php if (session('info')): ?>
+                        <div role="status" style="margin: 0 0 24px; padding: 14px 18px; border-radius: 14px; background: #f0f9ff; border: 1px solid #bae6fd; color: #075985; font-weight: 600; line-height: 1.5; display: flex; gap: 12px; align-items: flex-start;">
+                            <span aria-hidden="true" style="font-size: 1.1rem;">ℹ️</span>
+                            <span><?= esc(session('info')) ?> <a href="<?= site_url('contact') ?>" style="color: #0369a1; font-weight: 800;">Contactar</a></span>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($planAMedida): ?>
+                        <div style="margin: 0 0 24px; padding: 18px 22px; border-radius: 16px; background: #eff6ff; border: 1px solid #bfdbfe; color: #1e3a8a; font-weight: 600; line-height: 1.55;">
+                            Tu plan actual es <strong><?= esc($planNameRaw) ?></strong>, un plan a medida
+                            (<?= $fmt($get($plan, 'monthly_quota', 0)) ?> consultas al mes)<?= $periodEnd ? ', vigente hasta el ' . esc(date('d/m/Y', strtotime((string) $periodEnd))) : '' ?>.
+                            Para cambiarlo o ampliarlo, <a href="<?= site_url('contact') ?>" style="color: #1d4ed8; font-weight: 800;">escríbenos</a> y te lo ajustamos sin cortar tu integración.
+                        </div>
+                    <?php endif; ?>
                     <div class="plan-grid" role="radiogroup" aria-label="Planes">
                         <!-- TARJETA FREE -->
                         <label class="plan-card <?= ($planName === 'Free') ? 'is-current' : '' ?>" for="plan_free" data-plan="free" style="opacity: 0.95; cursor: default; border: 1px solid #e2e8f0; background: #ffffff;">
@@ -452,6 +475,7 @@ $fmt = function ($n) {
         const checkoutTitle = document.getElementById('checkout-title');
         const checkoutSub = document.getElementById('checkout-sub');
         const currentPlan = '<?= esc($planName) ?>'.toLowerCase();
+        const planAMedida = <?= json_encode((bool) $planAMedida) ?>;
 
         function getPeriod() {
             return document.querySelector('.period-btn.active')?.dataset.period || 'monthly';
@@ -588,6 +612,11 @@ $fmt = function ($n) {
         }
         // Si viene a por un plan concreto (botones de precios, correos, registro), se le
         // lleva directo al botón de pago en vez de dejarle debajo de las tres tarjetas.
+        // Plan a medida: no se le ofrece pagar Pro o Business encima (lo ajustamos a mano)
+        if (planAMedida && checkoutSection) {
+            checkoutSection.remove();
+            return;
+        }
         if ((planUrl === 'pro' || planUrl === 'business') && planUrl !== currentPlan && checkoutSection) {
             setTimeout(function () { checkoutSection.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 300);
         }

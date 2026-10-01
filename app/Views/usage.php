@@ -22,10 +22,13 @@
     $formatDateTime = function ($dt) {
         if (!$dt)
             return null;
-        $ts = strtotime((string) $dt);
-        if (!$ts)
+        // En BD las fechas están en UTC (appTimezone); al cliente, en hora de Madrid
+        try {
+            $d = new \DateTime((string) $dt, new \DateTimeZone('UTC'));
+        } catch (\Throwable $e) {
             return null;
-        return date('d/m/Y H:i', $ts);
+        }
+        return $d->setTimezone(new \DateTimeZone('Europe/Madrid'))->format('d/m/Y H:i');
     };
 
     $userName = esc($get($user, 'name', ''));
@@ -758,8 +761,12 @@
                     document.getElementById('logModalEndpoint').innerText = data.endpoint;
                     document.getElementById('logModalLatency').innerText = data.duration_ms + ' ms';
                     
-                    const dt = new Date(data.created_at);
-                    document.getElementById('logModalDate').innerText = dt.toLocaleString('es-ES');
+                    // created_at viene en UTC sin zona ("2026-10-01 07:02:00"): se marca
+                    // como UTC y se enseña en hora de Madrid, como la tabla.
+                    const dt = new Date(String(data.created_at).replace(' ', 'T') + 'Z');
+                    document.getElementById('logModalDate').innerText = isNaN(dt)
+                        ? (data.created_at || '--')
+                        : dt.toLocaleString('es-ES', { timeZone: 'Europe/Madrid' });
                     
                     if (searchEl) searchEl.innerText = data.search_term || '--';
 

@@ -1538,8 +1538,9 @@ class Billing extends BaseController
         if (!session('logged_in')) {
             return redirect()->to(site_url('enter') . '?redirect=' . urlencode($destino));
         }
-        // puedes crear una vista billing_cancel si quieres
-        return redirect()->to(site_url($destino))->with('info', lang('Messages.flash_14'));
+        // La vista lo enseña como aviso suave encima de los planes (antes /billing no
+        // pintaba los mensajes 'info' y el aviso se perdía).
+        return redirect()->to(site_url($destino))->with('info', 'No se ha hecho ningún cargo. Hemos guardado el plan que elegiste: puedes terminar el pago cuando quieras. Si algo ha fallado en el pago, escríbenos y lo vemos.');
     }
 
     /**
@@ -1563,12 +1564,13 @@ class Billing extends BaseController
         return $this->renderView('purchase_success');
     }
 
+    /**
+     * Era una maqueta de pruebas (botones que no hacían nada) accesible en producción.
+     * Se redirige a la página de pago real; la vista billing_manage.php ya no se usa.
+     */
     public function billing_manage()
     {
-        if (!session('logged_in')) {
-            return redirect()->to(site_url('dashboard'));
-        }
-        return $this->renderView('billing_manage');
+        return redirect()->to(site_url('billing'), 301);
     }
 
     /**

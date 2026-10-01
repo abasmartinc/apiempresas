@@ -1,7 +1,7 @@
 <?php
 return [
     'first_use_title' => '¡Tu primera llamada a la API ha sido un éxito!',
-    'first_use_desc'  => 'Pásate a Pro para desbloquear datos sin enmascarar y mayor velocidad.',
+    'first_use_desc'  => 'Con Pro ves los datos sin enmascarar (administradores, domicilio completo y tramo de facturación) y tienes 3.000 consultas al mes.',
     'first_use_cta'   => 'Ver Plan Pro',
     
     '20_percent_title' => 'Le estás sacando partido a la API',
@@ -21,5 +21,5 @@ return [
     '100_percent_cta'   => 'Activar Pro',
 
     'default_cta'      => 'Activar Plan Pro',
-    'activate_radar'   => '🔥 Activar Radar + API',
+    'activate_radar'   => 'Ver plan Pro',
 ];
