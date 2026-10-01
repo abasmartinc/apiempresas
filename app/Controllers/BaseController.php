@@ -64,6 +64,24 @@ abstract class BaseController extends Controller
         $request->setLocale($locale);
         \Config\Services::language()->setLocale($locale);
 
+        // Marca "sesión iniciada" para Cloudflare (01-10-2026). La Page Rule
+        // *apiempresas.es/*-* guarda un mes el HTML de todas las URL con guion (fichas,
+        // listados) y la cabecera lleva nombre, email y avatar de quien tiene sesión: si
+        // un usuario con sesión era el primero en pedir una página, Cloudflare podía
+        // servir su cabecera a todos. La Cache Rule "Protección Privacidad" salta la caché
+        // cuando la petición trae la cookie ae_auth=1. No lleva datos: solo dice "hay sesión".
+        $conSesion = (bool) session('logged_in');
+        $marca     = ($_COOKIE['ae_auth'] ?? '') === '1';
+        if (!is_cli() && $conSesion !== $marca && !headers_sent()) {
+            setcookie('ae_auth', $conSesion ? '1' : '', [
+                'expires'  => $conSesion ? time() + 30 * 86400 : time() - 3600,
+                'path'     => '/',
+                'secure'   => $request->isSecure(),
+                'httponly' => true,
+                'samesite' => 'Lax',
+            ]);
+        }
+
         // Preload any models, libraries, etc, here.
         // E.g.: $this->session = \Config\Services::session();
     }
