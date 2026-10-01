@@ -412,6 +412,16 @@ class CompanyModel extends Model
 
     private function fallbackBestByLike(string $qClean): ?array
     {
+        // Desactivado (01-10-2026). Era un LIKE '%palabra%' sin índice sobre 8,5 M de
+        // filas: cuando no encontraba nada recorría la tabla entera (13 s con "BAUMER
+        // AUTOMACION IBERICA S.L.U."). El prefijo y el FULLTEXT ya cubren lo que encuentra
+        // por palabras enteras o por el principio; lo que solo hallaba esto (trozos del
+        // medio de una palabra) no compensa ese coste. Se deja el código por si se quiere
+        // recuperar con un límite de tiempo.
+        if (true) {
+            return null;
+        }
+
         $tokens = array_values(array_filter(explode(' ', $qClean)));
 
         // Filtrar primero por longitud mínima (3 caracteres) para evitar grupos vacíos ()
@@ -690,8 +700,38 @@ class CompanyModel extends Model
             $seenCifs[$row['cif']] = true;
         }
 
-        if (!$hasLimit || count($results) < $targetFetch) {
-            // 2. Priority 2: FULLTEXT por nombre y etiquetas (Muy rápida)
+        // 2. Nombres que EMPIEZAN por el término (índice company_name, sin ordenar: es una
+        //    lectura de rango y vuelve en milisegundos). Es lo que espera quien escribe
+        //    "Telef" o "Mari" en un buscador, y evita el FULLTEXT con comodín, que tiene que
+        //    puntuar todas las coincidencias ("Can": 24 s, "Mari": 20 s en septiembre).
+        if (mb_strlen($term, 'UTF-8') >= 2 && (!$hasLimit || count($results) < $targetFetch)) {
+            try {
+                $builderPrefijo = $this->builder();
+                $builderPrefijo->select('companies.id, companies.cif');
+                $builderPrefijo->like('companies.company_name', $term, 'after');
+                if ($hasLimit) {
+                    $builderPrefijo->limit($targetFetch);
+                }
+                foreach ($builderPrefijo->get()->getResultArray() as $row) {
+                    if ($hasLimit && count($results) >= $targetFetch) {
+                        break;
+                    }
+                    $clave = $row['cif'] ?: ('id:' . $row['id']);
+                    if (!isset($seenCifs[$clave])) {
+                        $results[] = $row;
+                        $seenCifs[$clave] = true;
+                    }
+                }
+            } catch (\Throwable $e) {
+                log_message('error', '[CompanyModel::searchMany] Prefijo falló: ' . $e->getMessage());
+            }
+        }
+
+        // 3. FULLTEXT (palabras sueltas en cualquier posición del nombre, CNAE o
+        //    provincia). Solo si faltan resultados y el término tiene alguna palabra de 4
+        //    letras o más: con palabras cortas el índice devuelve demasiado y tarda.
+        $tienePalabraLarga = (bool) preg_match('/[\p{L}\p{N}]{4,}/u', $term);
+        if ($tienePalabraLarga && (!$hasLimit || count($results) < $targetFetch)) {
             try {
                 $cleanTerm = preg_replace('/[+\-><()~*\"@]+/', ' ', $term);
                 $parts = array_filter(explode(' ', $cleanTerm));
@@ -713,29 +753,35 @@ class CompanyModel extends Model
                             WHERE MATCH(companies.company_name, companies.cnae_label, companies.registro_mercantil) AGAINST (? IN BOOLEAN MODE)
                             ORDER BY score DESC";
 
-                    if ($hasLimit) {
-                        $sql .= " LIMIT ?";
-                        $query = $this->db->query($sql, [$booleanTerm, $booleanTerm, $targetFetch]);
-                    } else {
-                        $query = $this->db->query($sql, [$booleanTerm, $booleanTerm]);
+                    // Primero las palabras exactas (búsqueda directa en el índice) y solo si
+                    // no llega, con comodín (recorre todas las palabras que empiezan así)
+                    $exacto = trim(str_replace('* ', ' ', $booleanTerm . ' '));
+                    $filasFt = [];
+                    foreach (array_unique([$exacto, $booleanTerm]) as $intento) {
+                        $q = $sql . ($hasLimit ? ' LIMIT ' . (int) $targetFetch : '');
+                        $filasFt = $this->db->query($q, [$intento, $intento])->getResultArray();
+                        if (!$hasLimit || count($results) + count($filasFt) >= $targetFetch) {
+                            break;
+                        }
                     }
 
-                    foreach ($query->getResultArray() as $row) {
+                    foreach ($filasFt as $row) {
                         if ($hasLimit && count($results) >= $targetFetch)
                             break;
-                        if (!isset($seenCifs[$row['cif']])) {
+                        $clave = $row['cif'] ?: ('id:' . $row['id']);
+                        if (!isset($seenCifs[$clave])) {
                             $results[] = $row;
-                            $seenCifs[$row['cif']] = true;
+                            $seenCifs[$clave] = true;
                         }
                     }
                 }
             } catch (\Throwable $e) {
-                log_message('debug', '[CompanyModel::searchMany] Fulltext falló: ' . $e->getMessage());
+                log_message('error', '[CompanyModel::searchMany] Fulltext falló: ' . $e->getMessage());
             }
         }
 
-        if (!$hasLimit || count($results) < $targetFetch) {
-            // 3. Fallback: B-Tree Index friendly LIKE (Evitando comodín inicial)
+        // (El antiguo paso 3, LIKE 'término%', es ahora el paso 2.)
+        if (false) {
             if (mb_strlen($term) >= 3) {
                 $builderFallback = $this->builder();
                 $builderFallback->select('companies.id, companies.cif');
