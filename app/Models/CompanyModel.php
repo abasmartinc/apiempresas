@@ -189,7 +189,16 @@ class CompanyModel extends Model
             return null;
         }
 
-        // 1) Intento FULLTEXT (rápido)
+        // 0) Nombre que EMPIEZA por lo buscado: usa el índice normal de company_name y
+        //    es casi instantáneo. El FULLTEXT tiene que puntuar todas las coincidencias
+        //    (miles con "Telefónica": ~2-3 s), así que solo se usa si esto no da una
+        //    sociedad con datos del Registro.
+        $prefijo = $this->tryPrefixBest($qClean);
+        if ($prefijo !== null) {
+            return $prefijo;
+        }
+
+        // 1) Intento FULLTEXT
         $fulltext = $this->tryFulltextBest($qClean);
         if ($fulltext !== null) {
             return $fulltext;
@@ -204,45 +213,132 @@ class CompanyModel extends Model
         return null;
     }
 
+    /**
+     * Sociedades cuyo nombre empieza por la búsqueda (LIKE 'texto%' sobre el índice
+     * company_name; la colación es _unicode_ci, así que "telefonica" encuentra
+     * "TELEFÓNICA"). De las más cortas a las más largas, y se elige con las mismas reglas
+     * que el FULLTEXT. Solo devuelve algo si la elegida es una sociedad con datos del
+     * Registro (nivel 0); si no, que decida el FULLTEXT.
+     */
+    private function tryPrefixBest(string $qClean): ?array
+    {
+        if (mb_strlen($qClean, 'UTF-8') < 4 || !preg_match('/^[a-z0-9 ]+$/', $qClean)) {
+            return null;
+        }
+
+        try {
+            $rows = $this->db->query("
+                SELECT id, company_name AS name, cif, registro_mercantil AS province,
+                       fecha_constitucion AS founded, estado AS status
+                FROM {$this->table}
+                WHERE company_name LIKE ?
+                LIMIT 300
+            ", [$qClean . '%'])->getResultArray();
+            if (!$rows) {
+                return null;
+            }
+            // Sin ORDER BY en SQL: con un prefijo muy común ("construcciones") ordenar
+            // por longitud obligaría a leer decenas de miles de filas. Se toman 300 en el
+            // orden del índice y se ordenan aquí.
+            usort($rows, static fn ($a, $b) => mb_strlen((string) $a['name'], 'UTF-8') <=> mb_strlen((string) $b['name'], 'UTF-8'));
+            $rows = array_slice($rows, 0, 25);
+            foreach ($rows as &$r) {
+                $r['score'] = 1.0; // todas empatan: deciden el nivel y el nombre más corto
+            }
+            unset($r);
+
+            $elegida = $this->pickBestCandidate($rows, $qClean);
+            if ($this->nivelCandidato($elegida, $qClean) !== 0) {
+                return null;
+            }
+
+            $row = $this->db->table($this->table)
+                ->select(implode(', ', $this->selectFields))
+                ->join('cnae_2009_2025', 'cnae_2009_2025.cnae_2009 = companies.cnae_code', 'left')
+                ->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'left')
+                ->where('companies.id', (int) $elegida['id'])
+                ->limit(1)
+                ->get()->getRowArray();
+            if (!$row) {
+                return null;
+            }
+
+            return ['data' => $row, 'meta' => ['method' => 'prefix', 'score' => 100]];
+        } catch (\Throwable $e) {
+            log_message('error', '[CompanyModel::tryPrefixBest] ' . $e->getMessage());
+            return null;
+        }
+    }
+
     private function tryFulltextBest(string $qClean): ?array
     {
         $booleanQuery = $this->toBooleanPrefixQuery($qClean);
 
-        // OJO: selectFields ya tiene aliases, lo podemos usar directamente en SQL
-        $fields = implode(', ', $this->selectFields);
-
+        // Dos pasos. 1) Candidatos solo con lo necesario para elegir (sin JOIN ni
+        // columnas de texto largo): antes se ordenaban TODAS las coincidencias con la
+        // ficha completa (objeto social, texto SEO, FAQ...) y con "Telefónica" (miles de
+        // filas) la consulta pasaba de 6 s. 2) La ficha completa solo de la elegida.
         $sql = "
             SELECT
-                {$fields},
+                companies.id                 AS id,
+                companies.company_name       AS name,
+                companies.cif                AS cif,
+                companies.registro_mercantil AS province,
+                companies.fecha_constitucion AS founded,
+                companies.estado             AS status,
                 MATCH(companies.company_name) AGAINST (? IN BOOLEAN MODE) AS score
             FROM {$this->table}
-            LEFT JOIN cnae_2009_2025 ON cnae_2009_2025.cnae_2009 = companies.cnae_code
-            LEFT JOIN company_enrichment ON company_enrichment.company_id = companies.id
-            WHERE companies.company_name IS NOT NULL
-              AND MATCH(companies.company_name) AGAINST (? IN BOOLEAN MODE)
+            WHERE MATCH(companies.company_name) AGAINST (? IN BOOLEAN MODE)
+              AND companies.company_name IS NOT NULL
             ORDER BY score DESC
             LIMIT 25
         ";
 
         try {
-            $rows = $this->db->query($sql, [$booleanQuery, $booleanQuery])->getResultArray();
+            // Primero las palabras exactas, que es una búsqueda directa en el índice;
+            // el comodín (telefonica*) obliga a recorrer todas las palabras que empiezan
+            // así y es lo lento (unos 2 s con "Telefónica"). Solo si con las exactas no
+            // sale nada se prueba con comodín (nombres a medio escribir, plurales).
+            $exacta = $this->toBooleanPrefixQuery($qClean, false);
+            $rows = $this->db->query($sql, [$exacta, $exacta])->getResultArray();
+            if (!$rows && $exacta !== $booleanQuery) {
+                $rows = $this->db->query($sql, [$booleanQuery, $booleanQuery])->getResultArray();
+            }
             if (!$rows) {
                 return null;
             }
 
-            $row = $this->pickBestCandidate($rows, $qClean);
-            $rawScore = (float) ($row['score'] ?? 0.0);
+            // El umbral se mira sobre la MEJOR puntuación (como antes, cuando solo se
+            // pedía una fila): decide si la búsqueda ha encontrado algo. La fila elegida
+            // puede puntuar algo menos (p. ej. la sociedad frente a su UTE) y no por eso
+            // la búsqueda es basura.
+            $maxRaw = 0.0;
+            foreach ($rows as $r) {
+                $maxRaw = max($maxRaw, (float) ($r['score'] ?? 0.0));
+            }
+            if ((int) round(min(1.0, $maxRaw / 5.0) * 100) < 35) {
+                return null;
+            }
+
+            $elegida  = $this->pickBestCandidate($rows, $qClean);
+            $rawScore = (float) ($elegida['score'] ?? 0.0);
+
+            $row = $this->db->table($this->table)
+                ->select(implode(', ', $this->selectFields))
+                ->join('cnae_2009_2025', 'cnae_2009_2025.cnae_2009 = companies.cnae_code', 'left')
+                ->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'left')
+                ->where('companies.id', (int) $elegida['id'])
+                ->limit(1)
+                ->get()->getRowArray();
+            if (!$row) {
+                return null;
+            }
 
             // Normalización simple del score para exponer 0..100
             $score01 = min(1.0, $rawScore / 5.0);
             $score100 = (int) round($score01 * 100);
 
             unset($row['score']);
-
-            // Umbral mínimo para evitar devolver basura
-            if ($score100 < 35) {
-                return null;
-            }
 
             return [
                 'data' => $row,
@@ -252,7 +348,8 @@ class CompanyModel extends Model
                 ],
             ];
         } catch (\Throwable $e) {
-            log_message('debug', '[CompanyModel::tryFulltextBest] ' . $e->getMessage());
+            // 'error' y no 'debug': si esto falla, la búsqueda cae al LIKE, que es lento
+            log_message('error', '[CompanyModel::tryFulltextBest] ' . $e->getMessage());
             return null;
         }
     }
@@ -271,21 +368,7 @@ class CompanyModel extends Model
      */
     private function pickBestCandidate(array $rows, string $qClean): array
     {
-        $buscaUte = (bool) preg_match('/\\bute\\b/i', $qClean);
-        $nivel = static function (array $r) use ($buscaUte): int {
-            $cif = strtoupper(trim((string) ($r['cif'] ?? '')));
-            $cifValido = (bool) preg_match('/^[ABCDEFGHJNPQRSUVW][0-9]{7}[0-9A-J]$/', $cif);
-            if (!$cifValido) {
-                return 2;
-            }
-            if ($cif[0] === 'U') {
-                return $buscaUte ? 0 : 2; // las UTE no están en el Registro
-            }
-            $hayRegistro = trim((string) ($r['province'] ?? '')) !== ''
-                || !empty($r['founded'])
-                || trim((string) ($r['status'] ?? '')) !== '';
-            return $hayRegistro ? 0 : 1;
-        };
+        $nivel = fn (array $r): int => $this->nivelCandidato($r, $qClean);
 
         $maxScore = (float) ($rows[0]['score'] ?? 0.0);
         usort($rows, static function (array $a, array $b) use ($nivel): int {
@@ -297,7 +380,9 @@ class CompanyModel extends Model
         // Si la elegida puntúa menos de la mitad que la mejor, la búsqueda iba por
         // otra ficha: gana la de más puntuación, pero nunca una UTE ni un CIF roto
         // (nivel 2) si hay alternativa.
-        if ($maxScore > 0 && (float) ($best['score'] ?? 0) < $maxScore * 0.5) {
+        // (0.45 y no 0.5: una palabra repetida en el nombre duplica justo la puntuación,
+        // que es el caso de las UTE, y no debe colarse por un redondeo)
+        if ($maxScore > 0 && (float) ($best['score'] ?? 0) < $maxScore * 0.45) {
             foreach ($rows as $r) {
                 if ($nivel($r) < 2 && (float) ($r['score'] ?? 0) > (float) ($best['score'] ?? 0)) {
                     $best = $r;
@@ -306,6 +391,23 @@ class CompanyModel extends Model
         }
 
         return $best;
+    }
+
+    /** Nivel de fiabilidad de una ficha candidata (ver pickBestCandidate). */
+    private function nivelCandidato(array $r, string $qClean): int
+    {
+        $cif = strtoupper(trim((string) ($r['cif'] ?? '')));
+        if (!preg_match('/^[ABCDEFGHJNPQRSUVW][0-9]{7}[0-9A-J]$/', $cif)) {
+            return 2;
+        }
+        if ($cif[0] === 'U') {
+            // Las UTE no están en el Registro: solo cuentan si se busca "UTE"
+            return preg_match('/\\bute\\b/i', $qClean) ? 0 : 2;
+        }
+        $hayRegistro = trim((string) ($r['province'] ?? '')) !== ''
+            || !empty($r['founded'])
+            || trim((string) ($r['status'] ?? '')) !== '';
+        return $hayRegistro ? 0 : 1;
     }
 
     private function fallbackBestByLike(string $qClean): ?array
@@ -412,8 +514,18 @@ class CompanyModel extends Model
     {
         $s = mb_strtolower(trim($s), 'UTF-8');
 
-        // Quitar acentos
-        $s = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $s) ?: $s;
+        // Quitar acentos con una tabla fija. Antes iconv(ASCII//TRANSLIT), que depende
+        // del sistema: en Windows (Laragon) "ó" sale como "'o" y "Telefónica" acababa en
+        // "telef onica", que no encuentra nada, cae al LIKE (lento) y da 404.
+        $s = strtr($s, [
+            'á' => 'a', 'à' => 'a', 'ä' => 'a', 'â' => 'a', 'ã' => 'a',
+            'é' => 'e', 'è' => 'e', 'ë' => 'e', 'ê' => 'e',
+            'í' => 'i', 'ì' => 'i', 'ï' => 'i', 'î' => 'i',
+            'ó' => 'o', 'ò' => 'o', 'ö' => 'o', 'ô' => 'o', 'õ' => 'o',
+            'ú' => 'u', 'ù' => 'u', 'ü' => 'u', 'û' => 'u',
+            'ñ' => 'n', 'ç' => 'c', 'ª' => 'a', 'º' => 'o', 'l·l' => 'll',
+        ]);
+        $s = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $s) ?: $s; // por si queda algo raro
         $s = mb_strtolower($s, 'UTF-8');
 
         // Quitar signos
@@ -431,7 +543,7 @@ class CompanyModel extends Model
         return trim($padded);
     }
 
-    private function toBooleanPrefixQuery(string $qClean): string
+    private function toBooleanPrefixQuery(string $qClean, bool $comodin = true): string
     {
         $parts = array_values(array_filter(explode(' ', $qClean)));
 
@@ -448,10 +560,11 @@ class CompanyModel extends Model
         $out = [];
         foreach (array_slice($tokens, 0, 6) as $t) {
             $len = mb_strlen($t, 'UTF-8');
+            $fin = $comodin ? '*' : '';
             if ($len >= 4) {
-                $out[] = '+' . $t . '*';
+                $out[] = '+' . $t . $fin;
             } else {
-                $out[] = $t . '*'; // Not required if short/stopword
+                $out[] = $t . $fin; // Not required if short/stopword
             }
         }
         return implode(' ', $out);
