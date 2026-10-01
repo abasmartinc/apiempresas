@@ -440,8 +440,14 @@ class RadarController extends BaseController
         $filename = $this->getExportFilename($params);
         $params['dl_token'] = (string) ($this->request->getGet('dl_token') ?? '');
 
-        if (ob_get_length())
-            ob_clean();
+        // Listados grandes: se escriben por lotes y pueden tardar minutos. Sin límite
+        // de tiempo, sin búferes (cada lote sale al navegador según se escribe) y
+        // soltando la sesión para no bloquear al usuario en otras pestañas.
+        @set_time_limit(0);
+        session_write_close();
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
 
         header('Content-Type: text/csv; charset=utf-8');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
@@ -508,7 +514,12 @@ class RadarController extends BaseController
             ->setBody(view('billing/download_denied'));
     }
 
-    private function getExportData($params): array
+    /**
+     * Consulta de la exportación con los filtros de la compra (sin orden ni límite).
+     *
+     * @return array{0: \CodeIgniter\Database\BaseBuilder, 1: bool} [builder, ¿histórico?]
+     */
+    private function buildExportQuery($db, array $params): array
     {
         $sector = $params['sector'] ?? '';
         $province = $params['provincia'] ?? 'España';
@@ -526,7 +537,6 @@ class RadarController extends BaseController
             $period = $cnae !== '' ? 'general' : '30days';
         }
 
-        $db = \Config\Database::connect();
         $builder = $db->table('companies');
         $builder->select('id, company_name as name, cif, fecha_constitucion, cnae_label, registro_mercantil, municipality, address, objeto_social, phone');
 
@@ -598,68 +608,46 @@ class RadarController extends BaseController
             $builder->where('fecha_constitucion <=', date('Y-m-d'));
         }
 
-        $builder->orderBy('fecha_constitucion', 'DESC');
-
         $isHistorical = ($params['is_historical'] ?? '0') === '1' || $period === 'general';
 
-        if (!$isHistorical) {
-            $builder->limit($cnae !== '' ? 2000 : 5000);
-        } else {
-            // For historical province downloads, limit must be much higher or removed.
-            // We set it to 500k to prevent OOM but allow full provinces.
-            $builder->limit(500000);
-        }
+        return [$builder, $isHistorical];
+    }
 
-        $companies = $builder->get()->getResultArray();
-
+    /**
+     * Añade administradores, capital y socio único a un lote de empresas.
+     * Solo carga los del lote: la memoria no crece con el tamaño del listado.
+     */
+    private function enrichExportBatch($db, array $companies): array
+    {
         if (empty($companies)) {
             return [];
         }
-
-        $companyIds = array_column($companies, 'id');
-
-        $adminRows = [];
-        $bormeRows = [];
-        $chunks = array_chunk($companyIds, 5000);
-
-        foreach ($chunks as $chunk) {
-            $chunkAdmin = $db->table('company_administrators')
-                ->select('company_id, position, name')
-                ->whereIn('company_id', $chunk)
-                ->get()->getResultArray();
-            $adminRows = array_merge($adminRows, $chunkAdmin);
-
-            $chunkBorme = $db->table('borme_posts')
-                ->select('company_id, description')
-                ->whereIn('company_id', $chunk)
-                ->get()->getResultArray();
-            $bormeRows = array_merge($bormeRows, $chunkBorme);
-        }
+        $ids = array_column($companies, 'id');
 
         $adminsByCompany = [];
-        foreach ($adminRows as $row) {
-            $cid = $row['company_id'];
+        foreach ($db->table('company_administrators')
+                    ->select('company_id, position, name')
+                    ->whereIn('company_id', $ids)
+                    ->get()->getResultArray() as $row) {
             $position = $row['position'] ?: 'Administrador';
-            $adminsByCompany[$cid][] = $position . ': ' . $row['name'];
+            $adminsByCompany[$row['company_id']][] = $position . ': ' . $row['name'];
         }
 
         $bormeExtracted = [];
-        foreach ($bormeRows as $row) {
+        foreach ($db->table('borme_posts')
+                    ->select('company_id, description')
+                    ->whereIn('company_id', $ids)
+                    ->get()->getResultArray() as $row) {
             $cid = $row['company_id'];
             $desc = $row['description'] ?? '';
-
             if (!isset($bormeExtracted[$cid])) {
                 $bormeExtracted[$cid] = ['capital' => '', 'socio_unico' => ''];
             }
-
-            // Extract Capital
-            if (empty($bormeExtracted[$cid]['capital']) && preg_match('/Capital:\s*([\d\.,]+\s*Euros?)/iu', $desc, $matches)) {
-                $bormeExtracted[$cid]['capital'] = trim($matches[1]);
+            if ($bormeExtracted[$cid]['capital'] === '' && preg_match('/Capital:\s*([\d\.,]+\s*Euros?)/iu', $desc, $m)) {
+                $bormeExtracted[$cid]['capital'] = trim($m[1]);
             }
-
-            // Extract Socio unico
-            if (empty($bormeExtracted[$cid]['socio_unico']) && preg_match('/Socio único:\s*([^.]+)\./iu', $desc, $matches)) {
-                $bormeExtracted[$cid]['socio_unico'] = trim($matches[1]);
+            if ($bormeExtracted[$cid]['socio_unico'] === '' && preg_match('/Socio único:\s*([^.]+)\./iu', $desc, $m)) {
+                $bormeExtracted[$cid]['socio_unico'] = trim($m[1]);
             }
         }
 
@@ -669,6 +657,7 @@ class RadarController extends BaseController
             $c['capital_social'] = $bormeExtracted[$cid]['capital'] ?? '';
             $c['socio_unico'] = $bormeExtracted[$cid]['socio_unico'] ?? '';
         }
+        unset($c);
 
         return $companies;
     }
@@ -691,14 +680,27 @@ class RadarController extends BaseController
         return "Listado_Nuevas_Empresas_" . str_replace(' ', '_', $sector) . "_" . str_replace(' ', '_', $province) . ".csv";
     }
 
+    /**
+     * Escribe el CSV por lotes.
+     *
+     * Antes se cargaba todo el listado (hasta 500.000 empresas, más sus
+     * administradores y anuncios del BORME) en memoria antes de escribir la primera
+     * línea: con Madrid, Barcelona o España se agotaba la memoria o el tiempo y el
+     * cliente pagaba y recibía un error. Y el tope de 500.000 cortaba en silencio
+     * listados que se cobraban enteros.
+     *
+     * Ahora, en los históricos, se leen lotes de EXPORT_BATCH empresas por id
+     * (de más reciente a más antigua), se enriquecen solo esas y se escriben y
+     * envían al momento. La memoria es la de un lote y no hay tope de filas.
+     * Los listados del Radar (últimos días, máx. 5.000) siguen en una consulta.
+     */
+    private const EXPORT_BATCH = 2000;
+
     private function streamExportData($params, $fp)
     {
         // BOM for Excel compatibility with UTF-8
         fprintf($fp, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
-        $companies = $this->getExportData($params);
-
-        // Headers
         fputcsv($fp, [
             'Empresa',
             'CIF',
@@ -714,6 +716,44 @@ class RadarController extends BaseController
             'Administradores'
         ]);
 
+        $db = \Config\Database::connect();
+        [$builder, $isHistorical] = $this->buildExportQuery($db, $params);
+
+        if (!$isHistorical) {
+            $cnae = $params['cnae'] ?? '';
+            $rows = $builder->orderBy('fecha_constitucion', 'DESC')
+                ->limit($cnae !== '' ? 2000 : 5000)
+                ->get()->getResultArray();
+            $this->writeExportRows($fp, $this->enrichExportBatch($db, $rows));
+            return;
+        }
+
+        $lastId = null;
+        do {
+            [$builder] = $this->buildExportQuery($db, $params);
+            if ($lastId !== null) {
+                $builder->where('id <', $lastId);
+            }
+            $rows = $builder->orderBy('id', 'DESC')
+                ->limit(self::EXPORT_BATCH)
+                ->get()->getResultArray();
+
+            if (empty($rows)) {
+                break;
+            }
+            $lastId = (int) end($rows)['id'];
+
+            $this->writeExportRows($fp, $this->enrichExportBatch($db, $rows));
+            fflush($fp);
+            if (function_exists('flush')) {
+                flush();
+            }
+            unset($rows);
+        } while (true);
+    }
+
+    private function writeExportRows($fp, array $companies): void
+    {
         foreach ($companies as $c) {
             fputcsv($fp, [
                 $c['name'] ?? '',

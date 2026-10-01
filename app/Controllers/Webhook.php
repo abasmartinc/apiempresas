@@ -480,28 +480,17 @@ class Webhook extends Controller
                 }
             }
 
-            // EXPORT JOBS
-            if (in_array($planSlug, ['directory_single', 'subsidies_single', 'contracts_single', 'radar'])) {
-                $exportContext = json_decode($session->metadata->export_context ?? '{}', true);
+            // LISTADOS: la descarga es en directo (por lotes, sin tope de filas) desde
+            // la página de éxito o el enlace del correo (ListadoPagadoService).
+            //
+            // Aquí se insertaba un trabajo en export_jobs con columnas (type, context,
+            // user_id) que no son las que lee `process:exports` (export_type, filters,
+            // user_email): o fallaba el insert —y con él el registro de la venta, que
+            // va después— o el trabajo no servía. Las subvenciones y licitaciones de
+            // más de 100k siguen encolándose bien desde invoice.paid.
+            if (in_array($planSlug, \App\Libraries\PaidExports::PLANES, true)) {
                 $totalCount = (int) ($session->metadata->total_count ?? 0);
-                
-                if ($totalCount >= 100000) {
-                    $jobModel = new \App\Models\ExportJobModel();
-                    $type = 'directory';
-                    if ($planSlug === 'subsidies_single') $type = 'subsidies';
-                    if ($planSlug === 'contracts_single') $type = 'contracts';
-                    if ($planSlug === 'radar') $type = 'radar';
-                    
-                    $jobModel->insert([
-                        'user_id' => $userId,
-                        'type' => $type,
-                        'context' => json_encode($exportContext),
-                        'status' => 'pending'
-                    ]);
-                    log_message('info', "[Webhook::stripe] Created export_job for user {$userId}, type {$type}, count {$totalCount}");
-                } else {
-                    log_message('info', "[Webhook::stripe] Payment for {$planSlug} user {$userId}, count {$totalCount} < 100k, handled live on frontend.");
-                }
+                log_message('info', "[Webhook::stripe] Listado {$planSlug} pagado por user {$userId} ({$totalCount} registros); descarga en directo y por correo.");
             }
 
             return;
