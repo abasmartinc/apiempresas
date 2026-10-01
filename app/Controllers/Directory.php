@@ -119,6 +119,64 @@ class Directory extends BaseController
         ]);
     }
 
+    /**
+     * Nombre real de provincia (registro_mercantil) a partir de un slug o una
+     * grafía distinta, o null. Compara sin tildes, sin signos y sin importar el
+     * orden de las palabras: "a-coruña" = "A Coruña" = "Coruña (A)",
+     * "arabaálava" = "Araba/Álava".
+     */
+    private function provinciaDesdeSlug(string $texto): ?string
+    {
+        $buscado = self::claveProvincia($texto);
+        if ($buscado === '') {
+            return null;
+        }
+
+        $cache = \Config\Services::cache();
+        $nombres = $cache->get('dir_provincias_nombres_v1');
+        if (!is_array($nombres)) {
+            $indice = $cache->get('directory_index_data_v5');
+            if (is_array($indice) && !empty($indice['provinces'])) {
+                $nombres = array_column($indice['provinces'], 'name');
+            } else {
+                $nombres = array_column($this->companyModel->builder()
+                    ->select('registro_mercantil as name')
+                    ->where('registro_mercantil >=', 'A')
+                    ->groupBy('registro_mercantil')
+                    ->get()->getResultArray(), 'name');
+            }
+            $cache->save('dir_provincias_nombres_v1', $nombres, 1296000); // 15 días
+        }
+
+        $sinOrden = self::claveProvincia($texto, true);
+        foreach ($nombres as $nombre) {
+            $nombre = (string) $nombre;
+            if (self::claveProvincia($nombre) === $buscado || self::claveProvincia($nombre, true) === $sinOrden) {
+                return $nombre;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * "A Coruña" → "acoruna"; con $palabras, ordena las palabras: "Coruña (A)" → "a coruna".
+     */
+    private static function claveProvincia(string $s, bool $palabras = false): string
+    {
+        $s = mb_strtolower(trim(urldecode($s)), 'UTF-8');
+        $s = strtr($s, ['á' => 'a', 'à' => 'a', 'ä' => 'a', 'â' => 'a', 'é' => 'e', 'è' => 'e', 'ë' => 'e', 'ê' => 'e',
+            'í' => 'i', 'ì' => 'i', 'ï' => 'i', 'î' => 'i', 'ó' => 'o', 'ò' => 'o', 'ö' => 'o', 'ô' => 'o',
+            'ú' => 'u', 'ù' => 'u', 'ü' => 'u', 'û' => 'u', 'ñ' => 'n', 'ç' => 'c', 'l·l' => 'll']);
+        if (!$palabras) {
+            return preg_replace('/[^a-z0-9]/', '', $s) ?? '';
+        }
+        $w = preg_split('/[^a-z0-9]+/', $s, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        sort($w);
+
+        return implode(' ', $w);
+    }
+
     public function province(...$args)
     {
         // Reconstruct province name if it was split by a slash in the URL (e.g., Araba/Álava)
@@ -152,9 +210,17 @@ class Directory extends BaseController
             ->get()
             ->getResultArray();
 
-        log_message('error', 'PROVINCE_DEBUG - provinceName: ' . var_export($provinceName, true) . ' - count: ' . count($companies));
+        // (Aquí había un log_message('error', 'PROVINCE_DEBUG …') en cada visita.)
 
         if (empty($companies)) {
+             // Enlaces en formato URL (las páginas del Radar enlazan a
+             // /listado-de-empresas/a-coruña, arabaálava…): si equivale a una
+             // provincia real, 301 a su URL buena en vez de mandar al índice.
+             $real = $this->provinciaDesdeSlug($provinceName);
+             if ($real !== null && $real !== $provinceName) {
+                 $destino = 'listado-de-empresas/' . urlencode($real) . ($page > 1 ? '/' . $page : '');
+                 return redirect()->to(site_url($destino), 301);
+             }
              if ($page > 1) {
                  return redirect()->to(site_url("listado-de-empresas/{$provinceName}"));
              }

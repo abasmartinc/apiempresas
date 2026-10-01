@@ -133,6 +133,13 @@ class Billing extends BaseController
     public function checkout()
     {
         // Enforce preview step / registration if accessed via GET (direct link)
+        //
+        // OJO (01-10-2026): en CodeIgniter 4.5 getMethod() devuelve 'GET' en
+        // mayúsculas, así que esta rama NO se ejecuta nunca. Se deja así a propósito:
+        // activarla cambiaría a dónde llevan los enlaces GET a billing/checkout que
+        // hoy van directos a Stripe (p. ej. new_companies.php, o plantillas de correo
+        // en BD). El precio ya se calcula siempre en el servidor, así que no es un
+        // agujero. Revisar esos enlaces antes de cambiarla a strtoupper().
         if ($this->request->getMethod() === 'get') {
             $params = $this->request->getGet();
 
@@ -175,7 +182,12 @@ class Billing extends BaseController
         $currentTime = time();
         // Reanudar tras el registro no es un doble clic: con Google el alta dura
         // menos de 10 s y el antirrebote de abajo devolvía un error al volver.
-        $reanudando = $this->request->getMethod() === 'get';
+        // strtoupper: con `=== 'get'` nunca era cierto (CI 4.5 da 'GET') y quien volvía
+        // del registro en menos de 10 s se encontraba el error de doble clic.
+        // Solo es "reanudar" si no trae plan en la URL (la compra sale de la sesión):
+        // un enlace GET con plan sigue pasando por el antirrebote.
+        $reanudando = strtoupper($this->request->getMethod()) === 'GET'
+            && empty($this->request->getGet('plan'));
 
         if (!$reanudando && $lastCheckout && ($currentTime - $lastCheckout) < 10) { // 10 seconds limit
             return redirect()->back()->with('error', lang('Messages.flash_4'));
