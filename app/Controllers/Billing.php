@@ -939,6 +939,11 @@ class Billing extends BaseController
         if ($has_phone !== '') {
             $params['has_phone'] = $has_phone;
         }
+        // Municipio del mapa: antes se descartaba aquí y se cobraba la provincia entera
+        $municipio = trim((string) ($this->request->getGet('municipio') ?? ''));
+        if ($municipio !== '') {
+            $params['municipio'] = $municipio;
+        }
         $date_min = $this->request->getGet('date_min') ?? '';
         $date_max = $this->request->getGet('date_max') ?? '';
         if ($date_min !== '')
@@ -979,6 +984,13 @@ class Billing extends BaseController
             $displayName = $sector ?: "CNAE {$cnae}";
         }
 
+        $municipio = trim((string) ($this->request->getGet('municipio') ?? ''));
+        if ($municipio !== '') {
+            $displayName = ($cnae !== '' || $cnae_text !== '')
+                ? str_replace(' en ' . $province, ' en ' . $municipio . ' (' . $province . ')', $displayName)
+                : $municipio . ' (' . $province . ')';
+        }
+
         // Dynamic pricing calculada via BillingService
         $pricing = $this->billingService->getDirectoryPricingDetails($totalCount);
         $price = $pricing['base_price'];
@@ -999,6 +1011,7 @@ class Billing extends BaseController
             // sea lo que se exporta. Antes se perdían y el CSV salía sin estos filtros.
             'date_min'  => (string) ($this->request->getGet('date_min') ?? ''),
             'date_max'  => (string) ($this->request->getGet('date_max') ?? ''),
+            'municipio' => $municipio,
             'pricing'   => $pricing
         ]);
     }

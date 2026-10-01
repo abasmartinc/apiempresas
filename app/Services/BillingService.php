@@ -117,9 +117,14 @@ class BillingService
         $date_max = $filters['date_max'] ?? '';
         $cnae = $filters['cnae'] ?? '';
         $cnae_text = $filters['cnae_text'] ?? '';
+        $municipio = trim((string) ($filters['municipio'] ?? ''));
 
         if ($estado !== '') {
             $builder->where('estado', $estado);
+        }
+        // Mismo filtro de municipio que el mapa (CompanyMapV2Controller::search)
+        if ($municipio !== '') {
+            $builder->like('address', $municipio, 'both');
         }
         if ($has_phone == '1') {
             $builder->groupStart()
@@ -136,14 +141,27 @@ class BillingService
             $builder->like('cnae_label', $cnae_text, 'both');
         }
         
-        if (strtolower($prov) !== 'españa') {
-            if (in_array(strtolower($prov), ['alicante', 'alacant', 'alicante/alacant'])) {
-                $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant', 'ALACANT']);
-            } else {
-                $builder->where('registro_mercantil', $prov);
-            }
-        }
+        self::filtrarProvincia($builder, (string) $prov);
         return $builder->countAllResults();
+    }
+
+    /**
+     * Filtro de provincia común al recuento (lo que se cobra) y a la exportación
+     * (lo que se entrega). Antes cada uno trataba Álava y Alicante a su manera.
+     */
+    public static function filtrarProvincia($builder, string $prov): void
+    {
+        $p = mb_strtolower(trim($prov), 'UTF-8');
+        if ($p === '' || $p === 'españa') {
+            return;
+        }
+        if (in_array($p, ['alicante', 'alacant', 'alicante/alacant'], true)) {
+            $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant', 'ALACANT']);
+        } elseif (in_array($p, ['araba/álava', 'álava', 'álava-araba', 'araba', 'alava'], true)) {
+            $builder->whereIn('registro_mercantil', ['Álava', 'ÁLAVA', 'Álava-Araba', 'Araba/Álava', 'ALAVA']);
+        } else {
+            $builder->where('registro_mercantil', $prov);
+        }
     }
 
     /**
@@ -196,9 +214,11 @@ class BillingService
             $has_phone = ((string) ($postData['has_phone'] ?? $getParams['has_phone'] ?? '')) === '1' ? '1' : '';
             $date_min = $this->fechaValida($postData['date_min'] ?? $getParams['date_min'] ?? '');
             $date_max = $this->fechaValida($postData['date_max'] ?? $getParams['date_max'] ?? '');
+            $municipio = trim((string) ($postData['municipio'] ?? ''));
 
             $count = $this->countDirectoryCompanies([
                 'provincia' => $prov,
+                'municipio' => $municipio,
                 'estado'    => $estado,
                 'has_phone' => $has_phone,
                 'date_min'  => $date_min,
@@ -212,6 +232,7 @@ class BillingService
             $context = [
                 'type'        => 'directory_excel',
                 'provincia'   => $prov,
+                'municipio'   => $municipio,
                 'cnae'        => $cnae,
                 'cnae_text'   => $cnae_text,
                 'sector'      => $sect,
@@ -221,7 +242,8 @@ class BillingService
                 'date_max'    => $date_max,
                 'total_count' => $count
             ];
-            $productName = 'BBDD Histórica ' . $prov . ' (' . number_format($count, 0, ',', '.') . ' empresas)';
+            $zona = $municipio !== '' ? $municipio . ' (' . $prov . ')' : $prov;
+            $productName = 'BBDD Histórica ' . $zona . ' (' . number_format($count, 0, ',', '.') . ' empresas)';
             $productDesc = 'Descarga en Excel del listado histórico completo.';
             $metadataPlan = 'directory_single';
 

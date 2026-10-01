@@ -174,7 +174,8 @@ class CompanyMapV2Controller extends Controller
         try {
             $db = Database::connect();
             $applyFilters = function($b) use ($provinceName, $municipalityName, $estado, $cnaePrefix, $cnaeText, $hasPhone, $dateMin, $dateMax) {
-                if ($provinceName !== '') $b->where('registro_mercantil', $provinceName);
+                // Mismo filtro de provincia que el recuento del pago (Álava, Alicante…)
+                if ($provinceName !== '') \App\Services\BillingService::filtrarProvincia($b, $provinceName);
                 if ($municipalityName !== '') $b->like('address', $municipalityName, 'both');
                 if ($estado !== '') $b->where('estado', $estado);
                 
@@ -244,11 +245,10 @@ class CompanyMapV2Controller extends Controller
             }
         }
             
-            $isPremium = false;
-            if (!empty($dateMin) && strtotime($dateMin) >= strtotime('-90 days')) {
-                $isPremium = true;
-            }
-            $priceData = calculate_directory_price($totalCount, $isPremium);
+            // Mismo precio que se cobra (BillingService::getDirectoryPricingDetails).
+            // Antes, con fechas de los últimos 90 días, aquí se enseñaba ×1,5 y en el
+            // pago se cobraba el normal: dos precios para la misma descarga.
+            $priceData = calculate_directory_price($totalCount, false);
 
             $meta = [
                 'total_count'    => $totalCount,

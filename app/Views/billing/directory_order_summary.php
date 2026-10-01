@@ -298,6 +298,9 @@
                         <?php if(!empty($estado)): ?>
                         <input type="hidden" name="estado"       value="<?= esc($estado) ?>">
                         <?php endif; ?>
+                        <?php if(!empty($municipio)): ?>
+                        <input type="hidden" name="municipio"    value="<?= esc($municipio) ?>">
+                        <?php endif; ?>
                         <?php if(!empty($has_phone)): ?>
                         <input type="hidden" name="has_phone"    value="<?= esc($has_phone) ?>">
                         <?php endif; ?>

@@ -814,11 +814,16 @@
                 const checkoutBtnContainer = document.getElementById('checkoutBtnContainer');
                 if (meta.total_count > 0 && provinceText && provinceText !== '— Selecciona —' && provinceText !== '— Todos —') {
                     let checkoutUrl = `<?= site_url('billing/directory_checkout') ?>?provincia=${encodeURIComponent(provinceText)}`;
+                    // `sector` es solo el nombre que se enseña: ya no se rellena con la
+                    // provincia (hacía que la exportación se saltara el filtro de provincia).
                     if (cnaePrefix) {
-                        checkoutUrl += `&cnae=${encodeURIComponent(cnaePrefix)}&sector=${encodeURIComponent(cnaeTextValue || provinceText)}`;
+                        checkoutUrl += `&cnae=${encodeURIComponent(cnaePrefix)}&sector=${encodeURIComponent(cnaeTextValue)}`;
                     } else if (cnaeTextValue) {
                         checkoutUrl += `&cnae_text=${encodeURIComponent(cnaeTextValue)}&sector=${encodeURIComponent(cnaeTextValue)}`;
-                    } else if (municipalityText && municipalityText !== '— Todos —') {
+                    }
+                    // El municipio va siempre, también con sector: es parte del recuento
+                    // que se enseña y de lo que se cobra.
+                    if (municipalityText && municipalityText !== '— Todos —') {
                         checkoutUrl += `&municipio=${encodeURIComponent(municipalityText)}`;
                     }
                     const fEstado = document.getElementById('f_estado');

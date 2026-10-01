@@ -105,6 +105,9 @@ class ListadoPagadoService
         }
 
         $provincia = trim((string) ($ctx['provincia'] ?? '')) ?: 'España';
+        if (!empty($ctx['municipio'])) {
+            $provincia = trim((string) $ctx['municipio']) . " ({$provincia})";
+        }
         $sector    = trim((string) ($ctx['sector'] ?? ''));
         $que       = ($sector !== '' && mb_strtolower($sector) !== 'general' && $sector !== $provincia)
             ? "{$sector} en {$provincia}"

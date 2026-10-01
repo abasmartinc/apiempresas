@@ -580,14 +580,21 @@ class RadarController extends BaseController
             $builder->where('estado_fecha <=', $params['date_max']);
         }
 
-        if ($province && mb_strtolower($province, 'UTF-8') !== 'españa' && mb_strtolower($province, 'UTF-8') !== mb_strtolower($sector, 'UTF-8') && $province !== $cnae_text) {
-            if (in_array(mb_strtolower($province, 'UTF-8'), ['alicante', 'alacant', 'alicante/alacant'])) {
-                $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant', 'ALACANT']);
-            } elseif (in_array(mb_strtolower($province, 'UTF-8'), ['araba/álava', 'álava', 'álava-araba', 'araba', 'alava'])) {
-                $builder->whereIn('registro_mercantil', ['ÁLAVA', 'Álava-Araba', 'Araba/Álava', 'ALAVA']);
-            } else {
-                $builder->where('registro_mercantil', $province);
-            }
+        // Municipio del mapa: mismo filtro que el recuento que se cobró
+        if (!empty($params['municipio'])) {
+            $builder->like('address', (string) $params['municipio'], 'both');
+        }
+
+        // Provincia. En los listados del directorio (históricos) se aplica SIEMPRE,
+        // igual que en el recuento que se cobra (BillingService::filtrarProvincia).
+        // Antes se saltaba si la provincia coincidía con el sector: el mapa manda
+        // `sector=<provincia>` cuando no hay texto de CNAE, y se entregaba ese CNAE
+        // de toda España habiendo cobrado solo la provincia. La excepción se queda
+        // solo para el Radar, que es de donde venía.
+        $esDirectorio = ($params['is_historical'] ?? '0') === '1';
+        if ($esDirectorio
+            || ($province && mb_strtolower($province, 'UTF-8') !== mb_strtolower($sector, 'UTF-8') && $province !== $cnae_text)) {
+            \App\Services\BillingService::filtrarProvincia($builder, (string) $province);
         }
 
         // Filtro de fecha: 'general' o CNAE histórico sin period = sin límite de fecha

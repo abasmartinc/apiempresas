@@ -72,7 +72,7 @@ class PaidExports
             ];
         }
         // Filtros que entraron en el precio
-        foreach (['cnae_text', 'estado', 'has_phone', 'date_min', 'date_max'] as $filtro) {
+        foreach (['cnae_text', 'estado', 'has_phone', 'date_min', 'date_max', 'municipio'] as $filtro) {
             if (!empty($ctx[$filtro])) {
                 $params[$filtro] = $ctx[$filtro];
             }

@@ -213,7 +213,14 @@ class Directory extends BaseController
 
         $totalFormatted = number_format($totalCompanies, 0, ',', '.');
         helper('pricing');
-        $priceData = calculate_directory_price($totalCompanies);
+        // Precio con el mismo recuento que el pago (provincia con sus alias)
+        $buyKey = 'prov_compra_v1_' . md5($provinceName);
+        $totalCompra = $cache->get($buyKey);
+        if ($totalCompra === null) {
+            $totalCompra = (new \App\Services\BillingService())->countDirectoryCompanies(['provincia' => $provinceName]);
+            $cache->save($buyKey, $totalCompra, 1296000); // 15 días
+        }
+        $priceData = calculate_directory_price((int) $totalCompra);
         $dynamicPrice = $priceData['base_price'];
 
         return view('directory/list', [
@@ -316,6 +323,17 @@ class Directory extends BaseController
             $cache->save($countKey, $totalCompanies, 1296000); // 15 días
         }
 
+        // Recuento de lo que se COMPRA desde esta página: el pago cuenta y exporta
+        // `cnae_code LIKE 'X%'` (BillingService::countDirectoryCompanies), y aquí el
+        // precio salía del recuento exacto: el botón enseñaba un precio y se cobraba
+        // otro. La paginación sigue con el recuento exacto, que es lo que se lista.
+        $buyKey = 'cnae_compra_v1_' . $cnaeCode;
+        $totalCompra = $cache->get($buyKey);
+        if ($totalCompra === null) {
+            $totalCompra = (new \App\Services\BillingService())->countDirectoryCompanies(['cnae' => $cnaeCode]);
+            $cache->save($buyKey, $totalCompra, 1296000); // 15 días
+        }
+
         $totalPages = max(1, (int) ceil($totalCompanies / $perPage));
 
         $companies = $this->companyModel->builder()
@@ -363,7 +381,7 @@ class Directory extends BaseController
 
         $totalFormatted = number_format($totalCompanies, 0, ',', '.');
         helper('pricing');
-        $priceData = calculate_directory_price($totalCompanies);
+        $priceData = calculate_directory_price((int) $totalCompra); // mismo recuento que el pago
         $dynamicPrice = $priceData['base_price'];
 
         return view('directory/list', [
