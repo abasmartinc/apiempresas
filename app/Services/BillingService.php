@@ -185,27 +185,29 @@ class BillingService
         $metadataPlan = '';
 
         if ($plan === 'directory_single') {
-            $count = (int) ($postData['total_count'] ?? 0);
-            $amount = (float) ($postData['price'] ?? 0);
-            $cnae = $postData['cnae'] ?? '';
-            $cnae_text = $postData['cnae_text'] ?? '';
-            $sect = $postData['sector'] ?? '';
-            $estado = $postData['estado'] ?? '';
-            $has_phone = $postData['has_phone'] ?? '';
-            
-            if ($count <= 0 || $amount <= 0) {
-                $filters = [
-                    'provincia' => $prov,
-                    'estado'    => $estado,
-                    'has_phone' => $has_phone,
-                    'date_min'  => $getParams['date_min'] ?? '',
-                    'date_max'  => $getParams['date_max'] ?? '',
-                    'cnae'      => $cnae,
-                    'cnae_text' => $cnae_text
-                ];
-                $count = $this->countDirectoryCompanies($filters);
-                $amount = $this->calculateDirectoryPrice($count);
-            }
+            // Recuento y precio SIEMPRE en el servidor. Antes se aceptaban `price` y
+            // `total_count` del formulario (campos ocultos) y se podía pagar 0,50 €
+            // por toda España. Los filtros son los mismos que se guardan en el
+            // contexto y que usa la exportación: se cobra exactamente lo que se entrega.
+            $cnae = (string) ($postData['cnae'] ?? '');
+            $cnae_text = (string) ($postData['cnae_text'] ?? '');
+            $sect = (string) ($postData['sector'] ?? '');
+            $estado = (string) ($postData['estado'] ?? '');
+            $has_phone = ((string) ($postData['has_phone'] ?? $getParams['has_phone'] ?? '')) === '1' ? '1' : '';
+            $date_min = $this->fechaValida($postData['date_min'] ?? $getParams['date_min'] ?? '');
+            $date_max = $this->fechaValida($postData['date_max'] ?? $getParams['date_max'] ?? '');
+
+            $count = $this->countDirectoryCompanies([
+                'provincia' => $prov,
+                'estado'    => $estado,
+                'has_phone' => $has_phone,
+                'date_min'  => $date_min,
+                'date_max'  => $date_max,
+                'cnae'      => $cnae,
+                'cnae_text' => $cnae_text,
+            ]);
+            // Un listado vacío no se vende (antes costaba 9 €)
+            $amount = $count > 0 ? $this->calculateDirectoryPrice($count) : 0.0;
 
             $context = [
                 'type'        => 'directory_excel',
@@ -215,6 +217,8 @@ class BillingService
                 'sector'      => $sect,
                 'estado'      => $estado,
                 'has_phone'   => $has_phone,
+                'date_min'    => $date_min,
+                'date_max'    => $date_max,
                 'total_count' => $count
             ];
             $productName = 'BBDD Histórica ' . $prov . ' (' . number_format($count, 0, ',', '.') . ' empresas)';
@@ -266,9 +270,15 @@ class BillingService
             $metadataPlan = 'contracts_single';
 
         } elseif ($plan === 'lookalike_single') {
-            $count = (int) ($postData['total_count'] ?? 0);
-            $amount = (float) ($postData['price'] ?? 0);
-            
+            // El recuento sale de la búsqueda guardada en sesión por LookalikeController,
+            // no del formulario; el precio se recalcula con la misma fórmula.
+            $lookalike = (array) (session('lookalike_params') ?? []);
+            $count = (int) ($lookalike['total_found'] ?? 0);
+            if (!function_exists('calculate_directory_price')) {
+                require_once APPPATH . 'Helpers/pricing_helper.php';
+            }
+            $amount = $count > 0 ? (float) calculate_directory_price($count, false)['base_price'] : 0.0;
+
             $context = [
                 'type'        => 'lookalike_excel',
                 'total_count' => $count
@@ -321,6 +331,20 @@ class BillingService
             'product_desc' => $productDesc,
             'metadata_plan' => $metadataPlan
         ];
+    }
+
+    /**
+     * Fecha Y-m-d válida o cadena vacía (los filtros de fecha llegan del navegador).
+     */
+    private function fechaValida($valor): string
+    {
+        $valor = trim((string) $valor);
+        if ($valor === '') {
+            return '';
+        }
+        $d = \DateTime::createFromFormat('Y-m-d', $valor);
+
+        return ($d && $d->format('Y-m-d') === $valor) ? $valor : '';
     }
 
     public function getPublicFundsPricingDetails(int $totalCount): array

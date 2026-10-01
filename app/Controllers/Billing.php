@@ -588,6 +588,13 @@ class Billing extends BaseController
                 $amount = $downloadData['amount'];
                 $metadataPlan = $downloadData['metadata_plan'];
 
+                // El importe lo calcula el servidor; si no hay empresas (o ha expirado
+                // la búsqueda de lookalike), no se abre el pago.
+                if ($amount <= 0 || (int) ($downloadData['count'] ?? 0) <= 0) {
+                    session()->remove('checkout_context');
+                    return redirect()->back()->with('error', 'No hay empresas que cumplan esos filtros, así que no hay nada que cobrar. Prueba con otra búsqueda.');
+                }
+
                 $lineItem = $this->billingService->buildSinglePaymentLineItem(
                     $productName,
                     $productDesc,
@@ -987,7 +994,11 @@ class Billing extends BaseController
             'cnae_text' => $cnae_text,
             'sector' => $sector,
             'estado' => $estado,
-            'has_phone' => $has_phone,
+            'has_phone' => $has_phone === '1' ? '1' : '',
+            // Viajan en el formulario de pago para que lo que se cobra (este recuento)
+            // sea lo que se exporta. Antes se perdían y el CSV salía sin estos filtros.
+            'date_min'  => (string) ($this->request->getGet('date_min') ?? ''),
+            'date_max'  => (string) ($this->request->getGet('date_max') ?? ''),
             'pricing'   => $pricing
         ]);
     }
@@ -1352,6 +1363,48 @@ class Billing extends BaseController
             }
 
             if (in_array($checkoutData['type'] ?? '', $validExcelTypes)) {
+                /*
+                 * ESTA PÁGINA NO DA ACCESO A NINGÚN LISTADO SIN PAGO COBRADO.
+                 *
+                 * `checkout_context` se guarda ANTES de ir a Stripe: ir al pago,
+                 * cancelar y abrir /billing/success daba la descarga gratis (el mismo
+                 * fallo que tuvo el pack de Solvencia). Y el respaldo por session_id
+                 * aceptaba cualquier sesión `cs_…`, también una abandonada.
+                 *
+                 * Ahora se exige que Stripe diga que ESTA sesión de pago es de un
+                 * listado y está cobrada; los filtros que se conceden son los de su
+                 * metadata (lo que se pagó), no los de la sesión PHP.
+                 */
+                $excelPlanes   = ['directory_single', 'subsidies_single', 'contracts_single', 'lookalike_single', 'radar_single'];
+                $excelPagado   = false;
+                $excelStripeId = '';
+
+                if (env('BILLING_MODE') === 'simulator' && session('simulator_excel_token')) {
+                    $excelPagado = true;
+                } elseif ($packStripe
+                    && in_array((string) ($packStripe->metadata->plan ?? ''), $excelPlanes, true)
+                    && in_array((string) ($packStripe->payment_status ?? ''), ['paid', 'no_payment_required'], true)) {
+                    $excelPagado   = true;
+                    $excelStripeId = (string) $packStripe->id;
+                    $ctxStripe = json_decode((string) ($packStripe->metadata->export_context ?? ''), true);
+                    if (is_array($ctxStripe) && in_array($ctxStripe['type'] ?? '', $validExcelTypes, true)) {
+                        $checkoutData = $ctxStripe;
+                    }
+                }
+
+                if (!$excelPagado) {
+                    session()->remove('checkout_context');
+                    $pendiente = $packStripe && ($packStripe->status ?? '') === 'complete';
+                    return redirect()->to(site_url(session('logged_in') ? 'dashboard' : 'listado-de-empresas'))->with(
+                        'error',
+                        $pendiente
+                            ? 'Tu pago aún se está confirmando. En cuanto se cobre te enviaremos el listado; si tienes dudas, escríbenos a soporte@apiempresas.es.'
+                            : 'No nos consta el pago de este listado. Si lo cancelaste, no se te ha cobrado nada.'
+                    );
+                }
+
+                $isDir = ($checkoutData['type'] ?? '') === 'directory_excel';
+
                 $exportParams = [];
                 if (($checkoutData['type'] ?? '') === 'subsidies_excel') {
                     $exportParams = ['convocatoria' => $checkoutData['convocatoria'] ?? '', 'year' => $checkoutData['year'] ?? ''];
@@ -1371,16 +1424,40 @@ class Billing extends BaseController
                 if (!empty($checkoutData['estado'])) {
                     $exportParams['estado'] = $checkoutData['estado'];
                 }
+                // Filtros que entraron en el precio y antes se perdían en la descarga
+                foreach (['has_phone', 'date_min', 'date_max'] as $filtro) {
+                    if (!empty($checkoutData[$filtro])) {
+                        $exportParams[$filtro] = $checkoutData[$filtro];
+                    }
+                }
+                if (!empty($checkoutData['cnae'])) {
+                    $exportParams['cnae'] = $checkoutData['cnae'];
+                    $exportParams['is_historical'] = '1';
+                    $exportParams['period'] = 'general';
+                }
                 $totalCount = $checkoutData['total_count'] ?? 0;
+
+                // Permiso de descarga ligado a este pago, con los filtros congelados
+                $kind = match ($checkoutData['type'] ?? '') {
+                    'subsidies_excel' => 'subsidies',
+                    'contracts_excel' => 'contracts',
+                    default           => 'excel',
+                };
+                $downloadToken = ($checkoutData['type'] ?? '') === 'lookalike_excel'
+                    ? ''
+                    : \App\Libraries\PaidExports::grant($kind, $exportParams, $excelStripeId);
 
                 // Guardamos info de la última compra para persistencia en refresh
                 $lastInfo = [
                     'total_count' => $totalCount,
                     'export_params' => $exportParams,
                     'cnae' => $checkoutData['cnae'] ?? '',
-                    'type' => $checkoutData['type'] ?? ''
+                    'type' => $checkoutData['type'] ?? '',
+                    'download_token' => $downloadToken,
                 ];
                 session()->set('last_purchase_info', $lastInfo);
+                // Solo la usan la descarga de lookalike y el aviso del panel del Radar;
+                // las demás descargas ya no se abren con ella.
                 session()->set('just_bought_excel', true);
 
                 // Limpiamos el contexto tras la compra (pero mantenemos last_purchase_info para refresh)
@@ -1400,11 +1477,15 @@ class Billing extends BaseController
                 session()->set('last_purchase_info', $lastInfo);
             }
 
-            $downloadUrl = site_url('billing/export-excel?' . http_build_query($exportParams));
+            // La descarga va por token: el exportador toma los filtros del permiso
+            // concedido arriba, no de la URL. Sin token (compra anterior a este
+            // cambio o sesión caducada) el enlace lleva a soporte.
+            $tokenQuery = http_build_query(['t' => (string) ($lastInfo['download_token'] ?? '')]);
+            $downloadUrl = site_url('billing/export-excel?' . $tokenQuery);
             if (($lastInfo['type'] ?? '') === 'subsidies_excel') {
-                $downloadUrl = site_url('billing/export-subsidies?' . http_build_query($exportParams));
+                $downloadUrl = site_url('billing/export-subsidies?' . $tokenQuery);
             } elseif (($lastInfo['type'] ?? '') === 'contracts_excel') {
-                $downloadUrl = site_url('billing/export-contracts?' . http_build_query($exportParams));
+                $downloadUrl = site_url('billing/export-contracts?' . $tokenQuery);
             } elseif (($lastInfo['type'] ?? '') === 'lookalike_excel') {
                 // Pre-generar el archivo ahora para que la descarga sea instantánea
                 $lookalike = new \App\Controllers\LookalikeController();

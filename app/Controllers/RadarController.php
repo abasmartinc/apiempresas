@@ -431,13 +431,14 @@ class RadarController extends BaseController
      */
     public function exportExcel()
     {
-        $hasSimulatorToken = session('simulator_excel_token') !== null || session('just_bought_excel') !== null;
-        if (!session('logged_in') && !$hasSimulatorToken) {
-            return redirect()->to(site_url('enter'))->with('error', lang('Messages.flash_52'));
+        // Solo con una compra verificada: los filtros salen del permiso que concede
+        // Billing::success tras cobrar, nunca de la URL (ver App\Libraries\PaidExports).
+        $params = \App\Libraries\PaidExports::get($this->request->getGet('t'), 'excel');
+        if ($params === null) {
+            return $this->descargaNoAutorizada();
         }
-
-        $params = $this->request->getGet();
         $filename = $this->getExportFilename($params);
+        $params['dl_token'] = (string) ($this->request->getGet('dl_token') ?? '');
 
         if (ob_get_length())
             ob_clean();
@@ -460,9 +461,12 @@ class RadarController extends BaseController
 
     public function sendExportEmail()
     {
-        $hasExcelToken = session('simulator_excel_token') !== null || session('just_bought_excel') !== null;
-        if (!session('logged_in') && !$hasExcelToken) {
-            return $this->response->setJSON(['status' => 'error', 'message' => 'Debes iniciar sesión.']);
+        $params = \App\Libraries\PaidExports::get(
+            $this->request->getPost('t') ?? $this->request->getGet('t'),
+            'excel'
+        );
+        if ($params === null) {
+            return $this->response->setStatusCode(403)->setJSON(['status' => 'error', 'message' => 'No hay ninguna compra asociada a esta descarga.']);
         }
 
         $email = $this->request->getPost('email');
@@ -472,7 +476,6 @@ class RadarController extends BaseController
 
         session()->set('last_export_email', $email);
 
-        $params = $this->request->getGet();
         $filename = $this->getExportFilename($params);
 
         $tempFile = tempnam(sys_get_temp_dir(), 'export');
@@ -493,6 +496,19 @@ class RadarController extends BaseController
             unlink($tempFile);
             return $this->response->setJSON(['status' => 'error', 'message' => 'No se pudo enviar el email.']);
         }
+    }
+
+    /**
+     * Respuesta común cuando se pide una descarga sin compra verificada.
+     */
+    private function descargaNoAutorizada()
+    {
+        // Página propia y directa: redirigir a /listado-de-empresas era lento (su
+        // índice agrupa toda la tabla de empresas si la caché está fría) y esa
+        // página no muestra mensajes flash, así que el aviso no se veía.
+        return $this->response
+            ->setStatusCode(403)
+            ->setBody(view('billing/download_denied'));
     }
 
     private function getExportData($params): array
@@ -547,6 +563,14 @@ class RadarController extends BaseController
                     ->groupStart()->where('phone IS NOT NULL', null, false)->where('phone !=', '')->groupEnd()
                     ->orGroupStart()->where('phone_mobile IS NOT NULL', null, false)->where('phone_mobile !=', '')->groupEnd()
                     ->groupEnd();
+        }
+
+        // Mismo filtro de fechas que BillingService::countDirectoryCompanies (lo que se cobró)
+        if (!empty($params['date_min'])) {
+            $builder->where('estado_fecha >=', $params['date_min']);
+        }
+        if (!empty($params['date_max'])) {
+            $builder->where('estado_fecha <=', $params['date_max']);
         }
 
         if ($province && mb_strtolower($province, 'UTF-8') !== 'españa' && mb_strtolower($province, 'UTF-8') !== mb_strtolower($sector, 'UTF-8') && $province !== $cnae_text) {
@@ -763,12 +787,10 @@ class RadarController extends BaseController
 
     public function exportSubsidiesExcel()
     {
-        $hasExcelToken = session('simulator_excel_token') !== null || session('just_bought_excel') !== null;
-        if (!session('logged_in') && !$hasExcelToken) {
-            return redirect()->to(site_url('enter'))->with('error', lang('Messages.flash_53'));
+        $params = \App\Libraries\PaidExports::get($this->request->getGet('t'), 'subsidies');
+        if ($params === null) {
+            return $this->descargaNoAutorizada();
         }
-
-        $params = $this->request->getGet();
         $convocatoria = $params['convocatoria'] ?? '';
         $year = $params['year'] ?? '';
 
@@ -849,12 +871,10 @@ class RadarController extends BaseController
 
     public function exportContractsExcel()
     {
-        $hasExcelToken = session('simulator_excel_token') !== null || session('just_bought_excel') !== null;
-        if (!session('logged_in') && !$hasExcelToken) {
-            return redirect()->to(site_url('enter'))->with('error', lang('Messages.flash_54'));
+        $params = \App\Libraries\PaidExports::get($this->request->getGet('t'), 'contracts');
+        if ($params === null) {
+            return $this->descargaNoAutorizada();
         }
-
-        $params = $this->request->getGet();
         $year = $params['year'] ?? '';
         $organo = $params['organo'] ?? '';
 

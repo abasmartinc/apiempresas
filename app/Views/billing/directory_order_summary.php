@@ -276,6 +276,11 @@
                         </p>
                     </div>
 
+                    <?php if ((int) $total_count <= 0): ?>
+                    <div style="margin-top: 24px; background:#fef2f2; border:1px solid #fecaca; border-radius:12px; padding:14px; color:#991b1b; font-size:0.9rem; font-weight:600; line-height:1.5;">
+                        No hay empresas que cumplan estos filtros, así que no hay nada que comprar. Prueba con otra provincia o sector.
+                    </div>
+                    <?php else: ?>
                     <form action="<?= site_url('billing/checkout') ?>" method="POST" style="margin-top: 24px;">
                         <?= csrf_field() ?>
                         <input type="hidden" name="plan"         value="directory_single">
@@ -293,8 +298,16 @@
                         <?php if(!empty($estado)): ?>
                         <input type="hidden" name="estado"       value="<?= esc($estado) ?>">
                         <?php endif; ?>
-                        <input type="hidden" name="total_count"  value="<?= (int) $total_count ?>">
-                        <input type="hidden" name="price"        value="<?= $price ?>">
+                        <?php if(!empty($has_phone)): ?>
+                        <input type="hidden" name="has_phone"    value="<?= esc($has_phone) ?>">
+                        <?php endif; ?>
+                        <?php if(!empty($date_min)): ?>
+                        <input type="hidden" name="date_min"     value="<?= esc($date_min) ?>">
+                        <?php endif; ?>
+                        <?php if(!empty($date_max)): ?>
+                        <input type="hidden" name="date_max"     value="<?= esc($date_max) ?>">
+                        <?php endif; ?>
+                        <?php /* El precio y el recuento NO viajan en el formulario: los calcula el servidor al pagar. */ ?>
 
                         <button type="submit" class="btn js-loading-btn"
                             style="width: 100%; padding: 18px; font-size: 1rem; font-weight: 900; background: #10b981; color: white; border-radius: 16px; border: none; cursor: pointer; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.35); text-transform: uppercase; letter-spacing: 0.01em; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.2;"
@@ -305,6 +318,7 @@
                             </span>
                         </button>
                     </form>
+                    <?php endif; ?>
 
                     <p style="font-size: 0.72rem; color: #94a3b8; text-align: center; margin-top: 16px; line-height: 1.5; font-weight: 500;">
                         Al confirmar serás redirigido a la pasarela segura de Stripe.<br>Pago único, sin suscripción.
@@ -336,7 +350,7 @@
             </div>
             <button type="button" class="btn"
                 style="background: #10b981; color: white; border-radius: 12px; font-weight: 800; padding: 14px 24px; border: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); cursor: pointer;"
-                onclick="document.querySelector('.order-card form').submit();">
+                onclick="var f = document.querySelector('.order-card form'); if (f) f.submit();">
                 Pagar y Descargar
             </button>
         </div>
