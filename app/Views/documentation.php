@@ -414,7 +414,7 @@
                         <strong>Cambios en los datos (1 de octubre de 2026).</strong> No cambia ningún campo, solo el valor que llevan en estos casos:
                         <ul style="margin: 8px 0 0; padding-left: 20px;">
                             <li><code>status_code</code>: una ficha sin ningún dato del Registro (por ejemplo, una UTE) devuelve <code>UNKNOWN</code> en lugar de <code>PRESUMED_ACTIVE</code>. Que el BORME no tenga hechos de una entidad que no está inscrita no dice nada de su estado.</li>
-                            <li><code>upsell_opportunities.datos_pro.administradores</code> (plan Free) cuenta los administradores vigentes, los mismos que devuelve <code>admin=true</code> en Pro. Antes contaba a todos los que habían pasado por la empresa, aunque hubieran cesado.</li>
+                            <li><code>upsell_opportunities.datos_pro.administradores</code> (plan Free) cuenta las personas con un cargo de administración vigente: administradores, consejeros, presidente y vicepresidente (no apoderados, auditores ni secretarios no consejeros). Antes contaba a todos los que habían pasado por la empresa, aunque hubieran cesado.</li>
                             <li><code>/companies/search</code> (sin <code>multiple</code>): la mejor coincidencia da prioridad a las sociedades inscritas en el Registro frente a UTE y fichas sin datos.</li>
                         </ul>
                     </div>
@@ -578,7 +578,7 @@ Accept: application/json</code></pre>
                         <li><code>corporate_purpose</code> se corta a 100 caracteres cuando es más largo.</li>
                         <li><code>lat</code> y <code>lng</code> no se incluyen.</li>
                         <li>Se añade el objeto <code>upsell_opportunities</code>. Si tu código necesita saber si la respuesta está recortada, comprueba si existe ese campo.</li>
-                        <li><code>financials</code> no se incluye. Dentro de <code>upsell_opportunities</code>, <code>datos_pro</code> indica si hay tramo de facturación y año de cuentas, y cuántos administradores vigentes constan (los mismos que devuelve <code>admin=true</code> en Pro).</li>
+                        <li><code>financials</code> no se incluye. Dentro de <code>upsell_opportunities</code>, <code>datos_pro</code> indica si hay tramo de facturación y año de cuentas, y cuántas personas tienen un cargo de administración vigente (sin apoderados; <code>admin=true</code> en Pro devuelve además los demás cargos).</li>
                         <li>También dentro de <code>upsell_opportunities</code>: <code>consultas_restantes</code> (ya descontada esta petición), <code>consultas_totales</code> y <code>se_renuevan</code> (<code>false</code>: las del Free no se renuevan).</li>
                         <li><code>status_code</code>, <code>status_source</code> y <code>status_date</code> llegan igual que en los planes de pago.</li>
                     </ul>

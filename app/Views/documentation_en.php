@@ -410,7 +410,7 @@
                         <strong>Data changes (1 October 2026).</strong> No field changes, only the value they carry in these cases:
                         <ul style="margin: 8px 0 0; padding-left: 20px;">
                             <li><code>status_code</code>: a record with no Registry data at all (for example, a UTE joint venture) returns <code>UNKNOWN</code> instead of <code>PRESUMED_ACTIVE</code>. The BORME having no events for an entity that is not registered says nothing about its status.</li>
-                            <li><code>upsell_opportunities.datos_pro.administradores</code> (Free plan) counts current directors, the same ones <code>admin=true</code> returns on Pro. It used to count everyone who had held a post, even after they left.</li>
+                            <li><code>upsell_opportunities.datos_pro.administradores</code> (Free plan) counts people currently holding a board position: directors, board members, chair and vice-chair (not attorneys-in-fact, auditors or non-director secretaries). It used to count everyone who had held a post, even after they left.</li>
                             <li><code>/companies/search</code> (without <code>multiple</code>): the best match now favours companies registered in the Registry over UTE joint ventures and records without data.</li>
                         </ul>
                     </div>
@@ -563,7 +563,7 @@ Accept: application/json</code></pre>
                         <li><code>corporate_purpose</code> is cut to 100 characters when longer.</li>
                         <li><code>lat</code> and <code>lng</code> are not included.</li>
                         <li>An <code>upsell_opportunities</code> object is added. If your code needs to know whether the response is trimmed, check for that field.</li>
-                        <li><code>financials</code> is not included. Inside <code>upsell_opportunities</code>, <code>datos_pro</code> says whether a revenue band and accounts year exist, and how many current directors are on record (the same ones <code>admin=true</code> returns on Pro).</li>
+                        <li><code>financials</code> is not included. Inside <code>upsell_opportunities</code>, <code>datos_pro</code> says whether a revenue band and accounts year exist, and how many people currently hold a board position (excluding attorneys-in-fact; <code>admin=true</code> on Pro also returns the other posts).</li>
                         <li><code>status_code</code>, <code>status_source</code> and <code>status_date</code> are returned as on paid plans.</li>
                     </ul>
                     <p>With a Pro or Business plan, or with prepaid credit, you get the full data without changing your code.</p>

@@ -257,20 +257,54 @@ class ApiCompanyEnricher
         return $out;
     }
 
-    /** Número de personas distintas con algún nombramiento (para el gancho del Free). */
     /**
-     * Cuántos administradores VIGENTES tiene cada empresa (los mismos que devuelve
-     * admin=true en Pro). Antes contaba todos los nombres que habían pasado por la
-     * empresa, con ceses y dimisiones incluidos (Inditex: 72), y el Free veía un número
-     * que luego no coincidía con lo que recibía al pagar.
+     * Cuántos administradores VIGENTES tiene cada empresa, para el gancho del Free
+     * (datos_pro.administradores). Antes contaba todos los nombres que habían pasado
+     * por la empresa (Inditex: 72); después, todos los cargos vigentes, apoderados
+     * incluidos (Telefónica: 70, de ellos ~97 nombramientos de apoderado). Ahora solo
+     * las personas con algún cargo de administración (isAdminPosition).
      */
     private static function countAdministrators(array $ids): array
     {
         $out = [];
         foreach (self::currentAdministrators($ids) as $id => $vigentes) {
-            $out[(int) $id] = is_array($vigentes) ? count($vigentes) : 0;
+            $n = 0;
+            foreach ((array) $vigentes as $p) {
+                foreach (explode(',', (string) ($p['position'] ?? '')) as $cargo) {
+                    if (self::isAdminPosition($cargo)) {
+                        $n++;
+                        break;
+                    }
+                }
+            }
+            $out[(int) $id] = $n;
         }
         return $out;
+    }
+
+    /**
+     * ¿Es un cargo del órgano de administración? Sí: administrador (único, solidario,
+     * mancomunado), consejero (y sus variantes: independiente, dominical, delegado,
+     * ejecutivo...), presidente y vicepresidente, miembro de comisión y liquidador. No:
+     * apoderados, auditores, secretarios y vicesecretarios no consejeros, y lo que no se
+     * reconozca. Las abreviaturas son las del BORME ("Apo.Man.Soli", "Consj.Domini",
+     * "Vpre.Pres.Co", "Mmbr.Com.Del", "PresEjecutiv"...).
+     */
+    public static function isAdminPosition(string $cargo): bool
+    {
+        $s = mb_strtolower(trim($cargo), 'UTF-8');
+        $s = strtr($s, ['á' => 'a', 'é' => 'e', 'í' => 'i', 'ó' => 'o', 'ú' => 'u', 'ü' => 'u', 'ñ' => 'n']);
+        $s = preg_replace('/[^a-z]+/', '.', $s);
+        $s = trim((string) $s, '.');
+        if ($s === '') {
+            return false;
+        }
+        if (preg_match('/^(apo|aud|sec|vsec|vicesec|v\.sec|letr|ent|rep|soc)/', $s) && !preg_match('/cons/', $s)) {
+            return false;
+        }
+        // "Secr.Consejero": secretario que además es consejero
+        return (bool) preg_match('/^(adm|con|cons|consj|pres|vpre|vpte|vicep|liq|mmbr|miem|mbro)/', $s)
+            || (bool) preg_match('/(^|\.)cons/', $s);
     }
 
     // ------------------------------------------------------------------
