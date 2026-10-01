@@ -1390,6 +1390,13 @@ class Billing extends BaseController
                     if (is_array($ctxStripe) && in_array($ctxStripe['type'] ?? '', $validExcelTypes, true)) {
                         $checkoutData = $ctxStripe;
                     }
+                    // Correo con el enlace de descarga (30 días, sin sesión). Si ya lo
+                    // mandó el webhook, no se repite.
+                    try {
+                        (new \App\Services\ListadoPagadoService())->enviarCorreoDescarga($packStripe);
+                    } catch (\Throwable $e) {
+                        log_message('error', '[Billing::success] correo de descarga: ' . $e->getMessage());
+                    }
                 }
 
                 if (!$excelPagado) {
@@ -1405,44 +1412,11 @@ class Billing extends BaseController
 
                 $isDir = ($checkoutData['type'] ?? '') === 'directory_excel';
 
-                $exportParams = [];
-                if (($checkoutData['type'] ?? '') === 'subsidies_excel') {
-                    $exportParams = ['convocatoria' => $checkoutData['convocatoria'] ?? '', 'year' => $checkoutData['year'] ?? ''];
-                } elseif (($checkoutData['type'] ?? '') === 'contracts_excel') {
-                    $exportParams = ['year' => $checkoutData['year'] ?? '', 'organo' => $checkoutData['organo'] ?? ''];
-                } else {
-                    $exportParams = [
-                        'sector' => $checkoutData['sector'] ?? 'General',
-                        'provincia' => $checkoutData['provincia'] ?? 'España',
-                        'period' => $isDir ? 'general' : ($checkoutData['period'] ?? '30days'),
-                        'is_historical' => $isDir ? '1' : '0'
-                    ];
-                }
-                if (!empty($checkoutData['cnae_text'])) {
-                    $exportParams['cnae_text'] = $checkoutData['cnae_text'];
-                }
-                if (!empty($checkoutData['estado'])) {
-                    $exportParams['estado'] = $checkoutData['estado'];
-                }
-                // Filtros que entraron en el precio y antes se perdían en la descarga
-                foreach (['has_phone', 'date_min', 'date_max'] as $filtro) {
-                    if (!empty($checkoutData[$filtro])) {
-                        $exportParams[$filtro] = $checkoutData[$filtro];
-                    }
-                }
-                if (!empty($checkoutData['cnae'])) {
-                    $exportParams['cnae'] = $checkoutData['cnae'];
-                    $exportParams['is_historical'] = '1';
-                    $exportParams['period'] = 'general';
-                }
+                // Misma traducción contexto → filtros que el enlace del correo
+                [$kind, $exportParams] = \App\Libraries\PaidExports::fromContext($checkoutData);
                 $totalCount = $checkoutData['total_count'] ?? 0;
 
                 // Permiso de descarga ligado a este pago, con los filtros congelados
-                $kind = match ($checkoutData['type'] ?? '') {
-                    'subsidies_excel' => 'subsidies',
-                    'contracts_excel' => 'contracts',
-                    default           => 'excel',
-                };
                 $downloadToken = ($checkoutData['type'] ?? '') === 'lookalike_excel'
                     ? ''
                     : \App\Libraries\PaidExports::grant($kind, $exportParams, $excelStripeId);

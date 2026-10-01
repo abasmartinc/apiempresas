@@ -107,12 +107,30 @@ class Webhook extends Controller
     /** Id del evento de Stripe que se está procesando (para no registrar dos veces). */
     private string $eventoId = '';
 
+    /**
+     * Listado pagado (también como invitado): correo con el enlace de descarga.
+     * Solo si está cobrado; no repite si ya lo mandó la página de éxito.
+     */
+    private function correoListadoPagado($session): void
+    {
+        if (($session->mode ?? '') !== 'payment'
+            || !in_array((string) ($session->metadata->plan ?? ''), \App\Libraries\PaidExports::PLANES, true)) {
+            return;
+        }
+        try {
+            (new \App\Services\ListadoPagadoService())->enviarCorreoDescarga($session);
+        } catch (\Throwable $e) {
+            log_message('error', '[Webhook::listado] ' . $e->getMessage());
+        }
+    }
+
     private function procesarEvento($event): void
     {
         $this->eventoId = (string) ($event->id ?? '');
         switch ($event->type) {
             case 'checkout.session.completed':
                 $session = $event->data->object;
+                $this->correoListadoPagado($session);
                 $this->handleCheckoutSessionCompleted($session);
                 $this->registrarVenta($session);
                 break;
@@ -125,6 +143,7 @@ class Webhook extends Controller
                 if ((($session->metadata->plan ?? '') === 'risk_pack_5') && ($session->mode ?? '') === 'payment') {
                     $this->abonarPackRiesgo($session);
                 }
+                $this->correoListadoPagado($session);
                 $this->registrarVenta($session);
                 break;
             case 'invoice.paid':
@@ -357,6 +376,16 @@ class Webhook extends Controller
         $stripeSubscriptionId = $session->subscription ?? null;
         $stripeCustomerId = $session->customer ?? null;
         
+        // Compra de listado como invitado (user_id "0"): no es un error. El correo con
+        // el enlace de descarga ya ha salido en procesarEvento(); aquí no se crea
+        // cuenta a propósito (nadie la ha pedido). Antes se registraba como
+        // "Missing userId" y el comprador se quedaba sin nada.
+        if ($planSlug && (!$userId || $userId === '0') && ($session->mode ?? '') === 'payment'
+            && in_array((string) $planSlug, \App\Libraries\PaidExports::PLANES, true)) {
+            log_message('info', "[Webhook::stripe] Listado {$planSlug} pagado como invitado ({$session->id}); descarga enviada por correo.");
+            return;
+        }
+
         if (!$userId || !$planSlug) {
             log_message('error', '[Webhook::stripe] Missing userId or planSlug in session metadata.');
             return;

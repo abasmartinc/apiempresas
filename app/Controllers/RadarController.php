@@ -433,7 +433,7 @@ class RadarController extends BaseController
     {
         // Solo con una compra verificada: los filtros salen del permiso que concede
         // Billing::success tras cobrar, nunca de la URL (ver App\Libraries\PaidExports).
-        $params = \App\Libraries\PaidExports::get($this->request->getGet('t'), 'excel');
+        $params = \App\Libraries\PaidExports::autorizar($this->request, 'excel');
         if ($params === null) {
             return $this->descargaNoAutorizada();
         }
@@ -461,10 +461,7 @@ class RadarController extends BaseController
 
     public function sendExportEmail()
     {
-        $params = \App\Libraries\PaidExports::get(
-            $this->request->getPost('t') ?? $this->request->getGet('t'),
-            'excel'
-        );
+        $params = \App\Libraries\PaidExports::autorizar($this->request, 'excel');
         if ($params === null) {
             return $this->response->setStatusCode(403)->setJSON(['status' => 'error', 'message' => 'No hay ninguna compra asociada a esta descarga.']);
         }
@@ -787,7 +784,7 @@ class RadarController extends BaseController
 
     public function exportSubsidiesExcel()
     {
-        $params = \App\Libraries\PaidExports::get($this->request->getGet('t'), 'subsidies');
+        $params = \App\Libraries\PaidExports::autorizar($this->request, 'subsidies');
         if ($params === null) {
             return $this->descargaNoAutorizada();
         }
@@ -871,7 +868,7 @@ class RadarController extends BaseController
 
     public function exportContractsExcel()
     {
-        $params = \App\Libraries\PaidExports::get($this->request->getGet('t'), 'contracts');
+        $params = \App\Libraries\PaidExports::autorizar($this->request, 'contracts');
         if ($params === null) {
             return $this->descargaNoAutorizada();
         }
