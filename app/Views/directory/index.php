@@ -441,7 +441,38 @@
         .co-chip--new   { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; }
 
         /* province-row / cnae-row collapsed */
-        .province-row--collapsed, .cnae-row--collapsed { display: none !important; }
+        .province-row--collapsed, .cnae-row--collapsed, .ix-oculta { display: none !important; }
+
+        /* Filas del índice (01-10-2026): antes cada fila llevaba ~2,7 KB de estilos en
+           línea, onmouseover y tres SVG; con 917 filas el HTML pesaba 3,4 MB. */
+        .ix-rank { text-align: center; padding-left: 16px; }
+        .ix-name { font-weight: 700; color: #0f172a; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: color 0.2s; }
+        .ix-name--blue:hover { color: #2152FF; }
+        .ix-name--green:hover { color: #10b981; }
+        .ix-name span { max-width: 440px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; }
+        .ix-ico { flex-shrink: 0; color: #2152FF; }
+        .ix-ico--green { color: #10b981; }
+        .ix-vol { display: flex; align-items: center; gap: 14px; }
+        .ix-num { font-weight: 800; color: #0f172a; min-width: 85px; font-size: 0.9rem; letter-spacing: -0.01em; }
+        .ix-pct { font-size: 0.78rem; color: #94a3b8; font-weight: 600; min-width: 36px; }
+        .ix-act { text-align: right; }
+        .row-actions .action-link::after { content: "→"; font-weight: 800; }
+
+        /* Móvil: cada fila es una tarjeta (nombre y número arriba, botones debajo).
+           Antes la tabla medía 630 px dentro de una caja de 249 px. */
+        @media (max-width: 640px) {
+            .prem-table-wrap { overflow-x: visible !important; }
+            .prem-table, .prem-table tbody { display: block; width: 100%; min-width: 0; }
+            .prem-table thead { display: none; }
+            .prem-table tbody tr { display: grid; grid-template-columns: 1fr auto; gap: 8px 12px; padding: 14px 16px; align-items: center; }
+            .prem-table td { padding: 0 !important; }
+            .prem-table td.ix-rank, .ix-pct, .prem-table .pbar-track { display: none; }
+            .ix-name span { max-width: none; white-space: normal; }
+            .prem-table td.ix-act { grid-column: 1 / -1; text-align: left; }
+            .row-actions { justify-content: flex-start; }
+            .ix-num { min-width: 0; text-align: right; }
+            .ix-num::after { content: " empresas"; display: block; font-size: 0.7rem; font-weight: 600; color: #94a3b8; }
+        }
 
         /* ── RESPONSIVE ── */
         @media (max-width: 768px) {
@@ -459,6 +490,10 @@
     </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="ix-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></symbol>
+    <symbol id="ix-tag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></symbol>
+</svg>
 <div class="bg-halo" aria-hidden="true"></div>
 <?= view('partials/header') ?>
 
@@ -571,38 +606,12 @@
                             $delay = ($count - 1) * 0.04;
                             $rankClass = $count === 1 ? 'rank-1' : ($count === 2 ? 'rank-2' : ($count === 3 ? 'rank-3' : 'rank-n'));
                         ?>
-                        <tr class="province-row <?= $collapsedClass ?>" data-name="<?= esc($prov['name']) ?>">
-                            <td style="text-align:center; padding-left:16px;">
-                                <span class="rank-badge <?= $rankClass ?>">
-                                    <?= $count <= 3 ? ['🥇','🥈','🥉'][$count-1] : $count ?>
-                                </span>
-                            </td>
-                            <td>
-                                <a href="<?= site_url('listado-de-empresas/' . urlencode($prov['name'])) ?>" style="font-weight:700; color:#0f172a; text-decoration:none; display:inline-flex; align-items:center; gap:8px; transition:color 0.2s;" onmouseover="this.style.color='#2152FF'" onmouseout="this.style.color='#0f172a'">
-                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2152FF" stroke-width="2.5" style="flex-shrink:0;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                                    <?= esc($prov['name']) ?>
-                                </a>
-                            </td>
-                            <td>
-                                <div style="display:flex; align-items:center; gap:14px;">
-                                    <span style="font-weight:800; color:#0f172a; min-width:85px; font-size:0.9rem; letter-spacing:-0.01em;"><?= number_format($prov['total'], 0, ',', '.') ?></span>
-                                    <div class="pbar-track">
-                                        <div class="pbar-fill pbar-fill--blue" style="width:<?= $pct ?>%; animation-delay:<?= $delay ?>s;"></div>
-                                    </div>
-                                    <span style="font-size:0.78rem; color:#94a3b8; font-weight:600; min-width:36px;"><?= round($pct) ?>%</span>
-                                </div>
-                            </td>
-                            <td style="text-align:right;">
-                                <div class="row-actions">
-                                    <a href="<?= site_url('listado-de-empresas/' . urlencode($prov['name'])) ?>" class="action-link action-link--blue">
-                                        Ver provincia
-                                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                                    </a>
-                                    <a href="<?= site_url('billing/directory_checkout?provincia=' . urlencode($prov['name'])) ?>" class="action-buy" rel="nofollow" title="Descargar en CSV las <?= number_format($prov['total'], 0, ',', '.') ?> empresas de <?= esc($prov['name']) ?>">
-                                        CSV · <?= calculate_directory_price((int) $prov['total'])['base_price'] ?> € <small>+ IVA</small>
-                                    </a>
-                                </div>
-                            </td>
+                        <?php $provUrl = site_url('listado-de-empresas/' . urlencode($prov['name'])); ?>
+                        <tr class="province-row <?= $collapsedClass ?>">
+                            <td class="ix-rank"><span class="rank-badge <?= $rankClass ?>"><?= $count <= 3 ? ['🥇','🥈','🥉'][$count-1] : $count ?></span></td>
+                            <td><a href="<?= $provUrl ?>" class="ix-name ix-name--blue"><svg class="ix-ico" width="13" height="13"><use href="#ix-pin"/></svg><span><?= esc($prov['name']) ?></span></a></td>
+                            <td><div class="ix-vol"><span class="ix-num"><?= number_format($prov['total'], 0, ',', '.') ?></span><div class="pbar-track"><div class="pbar-fill pbar-fill--blue" style="width:<?= round($pct, 1) ?>%<?= $count <= 12 ? ';animation-delay:' . $delay . 's' : '' ?>"></div></div><span class="ix-pct"><?= round($pct) ?>%</span></div></td>
+                            <td class="ix-act"><div class="row-actions"><a href="<?= $provUrl ?>" class="action-link action-link--blue">Ver provincia</a><a href="<?= site_url('billing/directory_checkout?provincia=' . urlencode($prov['name'])) ?>" class="action-buy" rel="nofollow">CSV · <?= calculate_directory_price((int) $prov['total'])['base_price'] ?> € <small>+ IVA</small></a></div></td>
                         </tr>
                         <?php endforeach; ?>
                     </tbody>
@@ -659,6 +668,7 @@
                     </thead>
                     <tbody>
                         <?php
+                        helper('text');
                         $count = 0;
                         foreach($cnaes as $cnae):
                             $count++;
@@ -667,41 +677,14 @@
                             $pct = min(100, max(2, ($cnae['total'] / $max_cnae) * 100));
                             $delay = ($count - 1) * 0.04;
                             $rankClass = $count === 1 ? 'rank-1' : ($count === 2 ? 'rank-2' : ($count === 3 ? 'rank-3' : 'rank-n'));
-                            helper('text');
                             $cnaeSlug = url_title($cnae['name'], '-', true);
                         ?>
-                        <tr class="cnae-row <?= $collapsedClass ?>" data-name="<?= esc($label) ?>">
-                            <td style="text-align:center; padding-left:16px;">
-                                <span class="rank-badge <?= $rankClass ?>">
-                                    <?= $count <= 3 ? ['🥇','🥈','🥉'][$count-1] : $count ?>
-                                </span>
-                            </td>
-                            <td>
-                                <a href="<?= site_url('listado-de-empresas/sector-' . $cnae['cnae'] . '/' . $cnaeSlug) ?>" style="font-weight:700; color:#0f172a; text-decoration:none; display:inline-flex; align-items:center; gap:8px; transition:color 0.2s;" title="<?= esc($cnae['name']) ?>" onmouseover="this.style.color='#10b981'" onmouseout="this.style.color='#0f172a'">
-                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" style="flex-shrink:0;"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-                                    <span style="max-width:440px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:inline-block;"><?= esc($label) ?></span>
-                                </a>
-                            </td>
-                            <td>
-                                <div style="display:flex; align-items:center; gap:14px;">
-                                    <span style="font-weight:800; color:#0f172a; min-width:85px; font-size:0.9rem; letter-spacing:-0.01em;"><?= number_format($cnae['total'], 0, ',', '.') ?></span>
-                                    <div class="pbar-track">
-                                        <div class="pbar-fill pbar-fill--green" style="width:<?= $pct ?>%; animation-delay:<?= $delay ?>s;"></div>
-                                    </div>
-                                    <span style="font-size:0.78rem; color:#94a3b8; font-weight:600; min-width:36px;"><?= round($pct) ?>%</span>
-                                </div>
-                            </td>
-                            <td style="text-align:right;">
-                                <div class="row-actions">
-                                    <a href="<?= site_url('listado-de-empresas/sector-' . $cnae['cnae'] . '/' . $cnaeSlug) ?>" class="action-link action-link--green">
-                                        Ver sector
-                                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                                    </a>
-                                    <a href="<?= site_url('billing/directory_checkout?cnae=' . urlencode((string) $cnae['cnae']) . '&sector=' . urlencode($cnae['name'])) ?>" class="action-buy" rel="nofollow" title="Descargar en CSV las <?= number_format($cnae['total'], 0, ',', '.') ?> empresas del sector">
-                                        CSV · <?= calculate_directory_price((int) $cnae['total'])['base_price'] ?> € <small>+ IVA</small>
-                                    </a>
-                                </div>
-                            </td>
+                        <?php $secUrl = site_url('listado-de-empresas/sector-' . $cnae['cnae'] . '/' . $cnaeSlug); ?>
+                        <tr class="cnae-row <?= $collapsedClass ?>">
+                            <td class="ix-rank"><span class="rank-badge <?= $rankClass ?>"><?= $count <= 3 ? ['🥇','🥈','🥉'][$count-1] : $count ?></span></td>
+                            <td><a href="<?= $secUrl ?>" class="ix-name ix-name--green"><svg class="ix-ico ix-ico--green" width="13" height="13"><use href="#ix-tag"/></svg><span><?= esc($label) ?></span></a></td>
+                            <td><div class="ix-vol"><span class="ix-num"><?= number_format($cnae['total'], 0, ',', '.') ?></span><div class="pbar-track"><div class="pbar-fill pbar-fill--green" style="width:<?= round($pct, 1) ?>%<?= $count <= 12 ? ';animation-delay:' . $delay . 's' : '' ?>"></div></div><span class="ix-pct"><?= round($pct) ?>%</span></div></td>
+                            <td class="ix-act"><div class="row-actions"><a href="<?= $secUrl ?>" class="action-link action-link--green">Ver sector</a><a href="<?= site_url('billing/directory_checkout?cnae=' . urlencode((string) $cnae['cnae']) . '&sector=' . urlencode($label)) ?>" class="action-buy" rel="nofollow">CSV · <?= calculate_directory_price((int) $cnae['total'])['base_price'] ?> € <small>+ IVA</small></a></div></td>
                         </tr>
                         <?php endforeach; ?>
                     </tbody>
@@ -827,6 +810,12 @@
 
         <script>
             document.addEventListener('DOMContentLoaded', function() {
+                // Mostrar u ocultar con una clase: el display lo pone el CSS (tabla o tarjeta en móvil)
+                function mostrarFila(row, visible) {
+                    row.classList.remove('province-row--collapsed', 'cnae-row--collapsed');
+                    row.classList.toggle('ix-oculta', !visible);
+                }
+
                 // 1. Provinces Accordion & Filter
                 const provSearch = document.getElementById('provinceSearch');
                 const provRows = document.querySelectorAll('.province-row');
@@ -838,13 +827,13 @@
                     if (query.length > 0) {
                         if (provBtn) provBtn.style.display = 'none';
                         provRows.forEach(row => {
-                            const name = row.dataset.name.toLowerCase();
-                            row.style.setProperty('display', name.includes(query) ? 'table-row' : 'none', 'important');
+                            const name = (row.querySelector('.ix-name span')?.textContent || '').toLowerCase();
+                            mostrarFila(row, name.includes(query));
                         });
                     } else {
                         if (provBtn) provBtn.style.display = 'inline-flex';
                         provRows.forEach((row, index) => {
-                            row.style.setProperty('display', (index < 12 || provExpanded) ? 'table-row' : 'none', 'important');
+                            mostrarFila(row, index < 12 || provExpanded);
                         });
                     }
                 }
@@ -871,13 +860,13 @@
                     if (query.length > 0) {
                         if (cnaeBtn) cnaeBtn.style.display = 'none';
                         cnaeRows.forEach(row => {
-                            const name = row.dataset.name.toLowerCase();
-                            row.style.setProperty('display', name.includes(query) ? 'table-row' : 'none', 'important');
+                            const name = (row.querySelector('.ix-name span')?.textContent || '').toLowerCase();
+                            mostrarFila(row, name.includes(query));
                         });
                     } else {
                         if (cnaeBtn) cnaeBtn.style.display = 'inline-flex';
                         cnaeRows.forEach((row, index) => {
-                            row.style.setProperty('display', (index < 12 || cnaeExpanded) ? 'table-row' : 'none', 'important');
+                            mostrarFila(row, index < 12 || cnaeExpanded);
                         });
                     }
                 }

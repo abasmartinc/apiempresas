@@ -14,11 +14,49 @@ class CompanyMapV2Controller extends BaseController
 {
     public function index()
     {
-        helper('radar');
+        helper(['radar', 'pricing']);
+
         return view('map/companies_map', [
             'title' => 'Base de datos de empresas | Compra listados B2B',
             'excerptText' => 'Descarga al instante tu base de datos de empresas españolas. Filtra por provincia y sector. Listados B2B extraídos del BORME listos para tu CRM o telemarketing.',
+            'provinciasInicio' => $this->provinciasInicio(),
         ]);
+    }
+
+    /**
+     * Estado inicial del mapa (01-10-2026): antes arrancaba vacío ("Pulsa el botón…").
+     * Ahora enseña las provincias con su número de empresas y el precio del listado;
+     * al pinchar se busca esa provincia. Sale de la caché del índice (no calcula nada:
+     * si está vacía, no se enseña) y solo provincias que existen en el desplegable.
+     */
+    private function provinciasInicio(): array
+    {
+        try {
+            $indice = \App\Libraries\IndiceDirectorio::enCache();
+            if ($indice === null) {
+                return [];
+            }
+            $delDesplegable = [];
+            foreach (Database::connect()->table('provinces')->select('pro_name')->get()->getResultArray() as $r) {
+                $delDesplegable[mb_strtolower((string) $r['pro_name'], 'UTF-8')] = (string) $r['pro_name'];
+            }
+            $out = [];
+            foreach ($indice['provinces'] as $p) {
+                $clave = mb_strtolower((string) $p['name'], 'UTF-8');
+                if (!isset($delDesplegable[$clave]) || isset($out[$clave])) {
+                    continue;
+                }
+                $out[$clave] = [
+                    'name'   => $delDesplegable[$clave],
+                    'total'  => (int) $p['total'],
+                    'precio' => calculate_directory_price((int) $p['total'])['base_price'],
+                ];
+            }
+
+            return array_values($out);
+        } catch (\Throwable $e) {
+            return [];
+        }
     }
 
     // ---------- GEO (Provinces / Municipalities) ----------

@@ -206,6 +206,31 @@
 
 <?=view('scripts') ?>
 
+<!-- Token CSRF del visitante. Cloudflare sirve algunas páginas desde su caché con el token
+     de otro visitante y los envíos daban 403 (buscador, registro rápido). Se pide el bueno
+     a /csrf-token y se cambia en los formularios y en las peticiones jQuery. -->
+<script>
+(function () {
+    if (!window.fetch) return;
+    fetch('<?= site_url('csrf-token') ?>', { credentials: 'same-origin', cache: 'no-store', headers: { 'Accept': 'application/json' } })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (t) {
+            if (!t || !t.name || !t.hash) return;
+            window.AE_CSRF = t;
+            document.querySelectorAll('input[name="' + t.name + '"]').forEach(function (i) { i.value = t.hash; });
+            if (window.jQuery && jQuery.ajaxPrefilter) {
+                var re = new RegExp('(^|&)' + t.name + '=[^&]*');
+                jQuery.ajaxPrefilter(function (o) {
+                    if (typeof o.data === 'string' && re.test(o.data)) {
+                        o.data = o.data.replace(re, '$1' + t.name + '=' + encodeURIComponent(t.hash));
+                    }
+                });
+            }
+        })
+        .catch(function () {});
+})();
+</script>
+
 <!-- Global Tracking System -->
 <script>
     window.ae_base_url = '<?= site_url() ?>';

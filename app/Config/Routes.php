@@ -505,6 +505,8 @@ $routes->get('empresas-(:any)-en-(:any)', 'RadarController::sectorProvince/$1/$2
 // --- Programmatic SEO Routes ---
 
 // Directorios SEO (Listado de empresas)
+// Token CSRF del visitante para páginas que Cloudflare sirve desde su caché (ver CsrfToken)
+$routes->get('csrf-token', 'CsrfToken::index');
 $routes->get('listado-de-empresas', 'Directory::index');
 $routes->get('listado-de-grupos-empresariales', 'HoldingDirectory::index');
 

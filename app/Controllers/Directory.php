@@ -15,84 +15,10 @@ class Directory extends BaseController
 
     public function index()
     {
-        $cache = \Config\Services::cache();
-        // v6 (01-10-2026): nombres de la CNAE-2025 y sin códigos que no existen. Tras pasar
-        // calidad_datos/normalizar_datos.py, las provincias ya son las 52 canónicas.
-        $cacheKey = 'directory_index_data_v6';
-        
-        $data = $cache->get($cacheKey);
-        
-        if (!$data) {
-            // Exclusiones de provincias y CNAEs no válidos
-            $invalidNames = [
-                '', ' ', '  ', '-', '.', '..', '...', '8', 'N/A', 'NULL', 'UNDEFINED', 
-                '00 DESCONOCIDA', 'desconocido', 'desconocida', 'no disponible', 'n/a', 'unknown', 'sin especificar',
-                'ÍNDICE ALFABÉTICO DE SOCIEDADES', 'No Detectado'
-            ];
-
-            // Obtener lista de provincias únicas con conteo simple
-            $provincesData = $this->companyModel->builder()
-                ->select('registro_mercantil as name, COUNT(id) as total')
-                ->where('registro_mercantil IS NOT NULL')
-                ->where('registro_mercantil >=', 'A')
-                ->whereNotIn('registro_mercantil', $invalidNames)
-                ->groupBy('registro_mercantil')
-                ->orderBy('registro_mercantil', 'ASC')
-                ->get()
-                ->getResultArray();
-
-            $provinces = $provincesData;
-            usort($provinces, function($a, $b) {
-                return $b['total'] <=> $a['total'];
-            });
-
-            $cnaes = $this->companyModel->builder()
-                ->select('cnae_code as cnae, COUNT(id) as total')
-                ->where('cnae_code IS NOT NULL')
-                ->where('cnae_code >=', '0100')
-                ->groupBy('cnae_code')
-                ->orderBy('total', 'DESC')
-                ->get()
-                ->getResultArray();
-
-            // Nombres de sector: CNAE-2009 y, si el código es de la CNAE-2025 (las altas
-            // nuevas), su nombre de 2025. Antes solo se miraba 2009 y salían "CNAE 6812"
-            // (164.219 empresas, el tercer sector) y otros 2025 sin nombre. La misma regla
-            // la usan la página de sector, sus enlaces y el sitemap (App\Libraries\Sectores).
-            $cnaeMap = \App\Libraries\Sectores::nombres();
-
-            // Solo se listan (y se cuentan en "Sectores CNAE") los códigos que existen en
-            // alguna de las dos clasificaciones. Los demás eran códigos sueltos y erróneos
-            // (6046, 9848…, casi todos con 1 empresa) que inflaban el KPI hasta 1.222.
-            $cnaes = array_values(array_filter($cnaes, static fn ($c) => isset($cnaeMap[(string) $c['cnae']])));
-            foreach ($cnaes as &$cnae) {
-                $cnae['name'] = $cnaeMap[(string) $cnae['cnae']];
-            }
-            unset($cnae);
-
-            $data = [
-                'provinces' => $provinces,
-                'cnaes'     => $cnaes,
-            ];
-
-            $cache->save($cacheKey, $data, 1296000); // 15 días (recuentos pesados, cambian poco)
-        }
-
-        // "Últimas empresas registradas" va aparte con caché de 1 hora. Antes iba en la de
-        // 15 días de arriba (el comentario decía 24 h) y la lista se quedaba congelada.
-        $latest = $cache->get('directory_latest_v1');
-        if (!is_array($latest)) {
-            $latest = $this->companyModel->builder()
-                ->select('id, cif, company_name as name, fecha_constitucion as founded, cnae_label, registro_mercantil as province')
-                ->where('fecha_constitucion IS NOT NULL')
-                ->where('fecha_constitucion <=', date('Y-m-d'))
-                ->orderBy('fecha_constitucion', 'DESC')
-                ->limit(10)
-                ->get()
-                ->getResultArray();
-            $cache->save('directory_latest_v1', $latest, 3600);
-        }
-        $data['latest'] = $latest;
+        // Recuentos en App\Libraries\IndiceDirectorio (los recalcula cada noche
+        // `php spark directorio:calentar`; si no corre, se calculan aquí como antes).
+        $data = \App\Libraries\IndiceDirectorio::datos();
+        $data['latest'] = \App\Libraries\IndiceDirectorio::ultimas();
 
         // Calcular máximos dinámicos para barras de densidad
         $maxProvince = !empty($data['provinces']) ? max(array_column($data['provinces'], 'total')) : 1;

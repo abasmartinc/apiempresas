@@ -271,9 +271,35 @@
                             </button>
                         </div>
                         
-                        <div id="initialPlaceholder" style="padding: 60px 20px; text-align: center; color: #64748b; font-size: 1.1rem;">
-                            <span style="font-size: 2rem; margin-bottom: 12px; display: block;">✨</span>
-                            Pulsa el botón <strong>✨ Inteligencia Artificial</strong> de arriba o usa los filtros manuales<br>para empezar a extraer empresas aquí.
+                        <div id="initialPlaceholder" style="padding: 28px 20px; color: #64748b;">
+                            <?php if (!empty($provinciasInicio)): ?>
+                            <!-- Estado inicial: provincias con número de empresas y precio (antes, mapa vacío) -->
+                            <div style="text-align: center; margin-bottom: 18px;">
+                                <div style="font-size: 1.15rem; font-weight: 800; color: #0f172a;">Elige una provincia para empezar</div>
+                                <div style="font-size: 0.92rem; margin-top: 6px;">Después puedes afinar por municipio, sector, estado o teléfono. Listado en CSV desde 9 € · máximo 149 € + IVA.</div>
+                            </div>
+                            <div class="prov-inicio">
+                                <?php foreach ($provinciasInicio as $p): ?>
+                                <button type="button" class="prov-inicio__btn" data-provincia="<?= esc($p['name']) ?>">
+                                    <span class="prov-inicio__nombre"><?= esc($p['name']) ?></span>
+                                    <span class="prov-inicio__dato"><?= number_format($p['total'], 0, ',', '.') ?> empresas · <?= $p['precio'] ?> €</span>
+                                </button>
+                                <?php endforeach; ?>
+                            </div>
+                            <div style="text-align: center; font-size: 0.85rem; margin-top: 16px;">O describe lo que buscas con <strong>✨ Inteligencia Artificial</strong>.</div>
+                            <style>
+                                .prov-inicio { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; }
+                                .prov-inicio__btn { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 12px; cursor: pointer; transition: border-color 0.15s, background 0.15s; font: inherit; }
+                                .prov-inicio__btn:hover, .prov-inicio__btn:focus-visible { border-color: #2563eb; background: #eff6ff; outline: none; }
+                                .prov-inicio__nombre { font-weight: 800; color: #0f172a; font-size: 0.95rem; }
+                                .prov-inicio__dato { font-size: 0.78rem; color: #64748b; font-weight: 600; }
+                            </style>
+                            <?php else: ?>
+                            <div style="padding: 32px 0; text-align: center; font-size: 1.1rem;">
+                                <span style="font-size: 2rem; margin-bottom: 12px; display: block;">✨</span>
+                                Elige una provincia en los filtros o pulsa <strong>✨ Inteligencia Artificial</strong><br>para empezar a extraer empresas aquí.
+                            </div>
+                            <?php endif; ?>
                         </div>
 
                         <div id="results" class="b2b-data-list results" style="display: none; flex-direction: column; padding: 16px; gap: 4px; background: white;"></div>
@@ -866,6 +892,23 @@
                 btnSearch.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg> <span>Buscar</span>`;
             }
         }
+
+        // Estado inicial: pinchar una provincia la selecciona en el filtro y busca
+        document.querySelectorAll('.prov-inicio__btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const nombre = btn.dataset.provincia || '';
+                if (!fProvince.querySelector('option[data-name]')) {
+                    try { await loadProvinces(); } catch (e) { return; }
+                }
+                const opt = Array.from(fProvince.options).find(o => (o.dataset.name || '').toLowerCase() === nombre.toLowerCase());
+                if (!opt) return;
+                fProvince.value = opt.value;
+                if (window.$ && $('#f_province').data('select2')) $('#f_province').trigger('change.select2');
+                try { await loadMunicipalities(opt.value); } catch (e) {}
+                if (window.trackEvent) trackEvent('map_province_chip');
+                search(1);
+            });
+        });
 
         btnSearch.addEventListener('click', () => {
             const f_province = document.getElementById('f_province').value;
