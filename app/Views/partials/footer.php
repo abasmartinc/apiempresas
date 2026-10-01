@@ -208,7 +208,7 @@
 
 <!-- Token CSRF del visitante. Cloudflare sirve algunas páginas desde su caché con el token
      de otro visitante y los envíos daban 403 (buscador, registro rápido). Se pide el bueno
-     a /csrf-token y se cambia en los formularios y en las peticiones jQuery. -->
+     a /csrftoken (sin guion: ver Routes.php) y se cambia en los formularios y en las peticiones jQuery. -->
 <script>
 (function () {
     if (!window.fetch) return;
@@ -238,7 +238,7 @@
         document.addEventListener('DOMContentLoaded', enganchar);
         window.addEventListener('load', enganchar);
     }
-    fetch('<?= site_url('csrf-token') ?>', { credentials: 'same-origin', cache: 'no-store', headers: { 'Accept': 'application/json' } })
+    fetch('<?= site_url('csrftoken') ?>', { credentials: 'same-origin', cache: 'no-store', headers: { 'Accept': 'application/json' } })
         .then(function (r) { return r.ok ? r.json() : null; })
         .then(function (t) {
             if (!t || !t.name || !t.hash) return;

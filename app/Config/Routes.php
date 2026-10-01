@@ -505,8 +505,10 @@ $routes->get('empresas-(:any)-en-(:any)', 'RadarController::sectorProvince/$1/$2
 // --- Programmatic SEO Routes ---
 
 // Directorios SEO (Listado de empresas)
-// Token CSRF del visitante para páginas que Cloudflare sirve desde su caché (ver CsrfToken)
-$routes->get('csrf-token', 'CsrfToken::index');
+// Token CSRF del visitante para páginas que Cloudflare sirve desde su caché (ver CsrfToken).
+// SIN guion: la Page Rule de Cloudflare *apiempresas.es/*-* guarda un mes todo lo que lleva
+// guion, y con 'csrf-token' servía el mismo token a todos los visitantes.
+$routes->get('csrftoken', 'CsrfToken::index');
 $routes->get('listado-de-empresas', 'Directory::index');
 $routes->get('listado-de-grupos-empresariales', 'HoldingDirectory::index');
 

@@ -5,7 +5,7 @@ namespace App\Controllers;
 use CodeIgniter\Controller;
 
 /**
- * GET /csrf-token → {"name": "...", "hash": "..."} y la cookie CSRF del visitante.
+ * GET /csrftoken (sin guion, ver Routes.php) → {"name": "...", "hash": "..."} y la cookie CSRF del visitante.
  *
  * Por qué (01-10-2026): Cloudflare guarda el HTML de /listado-de-empresas* y
  * /base-de-datos-de-empresas con el token CSRF del primer visitante. CSRF va por cookie
