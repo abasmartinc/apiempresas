@@ -477,44 +477,97 @@ class Directory extends BaseController
         ]);
     }
 
-    public function provinceCnae($provinceName, $cnaeCode, $page = 1)
+    /**
+     * /listado-de-empresas/{provincia}/sector-{cnae}[/{página}]
+     *
+     * Variádico porque la provincia puede llevar barra (Araba/Álava) y CodeIgniter
+     * parte los parámetros por '/': llegan [...provincia, cnae] o
+     * [...provincia, cnae, página]. Antes esta ruta no se alcanzaba nunca (la de
+     * provincia iba delante y se la tragaba).
+     */
+    public function provinceCnae(...$args)
     {
-        $provinceName = urldecode($provinceName);
-        $page = (int)$page;
+        $page = 1;
+        $n = count($args);
+        if ($n >= 3 && ctype_digit((string) $args[$n - 1]) && ctype_digit((string) $args[$n - 2])) {
+            $page = (int) array_pop($args);
+        }
+        $cnaeCode = (string) array_pop($args);
+        $provinceName = urldecode(implode('/', $args));
+
+        if ($provinceName === '' || !ctype_digit($cnaeCode)) {
+            return redirect()->to(site_url('listado-de-empresas'));
+        }
+
         if ($page < 1) $page = 1;
         $perPage = 100;
         $offset = ($page - 1) * $perPage;
+        $baseUrl = site_url("listado-de-empresas/" . urlencode($provinceName) . "/sector-{$cnaeCode}");
 
-        $companies = $this->companyModel->builder()
+        $builder = $this->companyModel->builder()
             ->select('id, cif, company_name as name, cnae_label, fecha_constitucion as founded, registro_mercantil as province')
-            ->where('registro_mercantil', $provinceName)
-            ->where('cnae_code', $cnaeCode)
-            ->orderBy('company_name', 'ASC')
+            ->where('cnae_code', $cnaeCode);
+        \App\Services\BillingService::filtrarProvincia($builder, $provinceName);
+        $companies = $builder->orderBy('company_name', 'ASC')
             ->limit($perPage, $offset)
             ->get()
             ->getResultArray();
 
         if (empty($companies)) {
              if ($page > 1) {
-                 return redirect()->to(site_url("listado-de-empresas/" . urlencode($provinceName) . "/sector-{$cnaeCode}"));
+                 return redirect()->to($baseUrl);
              }
              return redirect()->to(site_url("listado-de-empresas/" . urlencode($provinceName)));
         }
 
         $cnaeLabel = $companies[0]['cnae_label'] ?? "CNAE {$cnaeCode}";
 
+        // Recuento para la paginación (antes "siguiente" no acababa nunca) y el de
+        // lo que se compra desde aquí: ese CNAE en esa provincia, igual que el pago.
+        $cache = \Config\Services::cache();
+        $countKey = 'prov_cnae_total_v1_' . md5($provinceName . '|' . $cnaeCode);
+        $totalCompanies = $cache->get($countKey);
+        if ($totalCompanies === null) {
+            $countBuilder = $this->companyModel->builder()->where('cnae_code', $cnaeCode);
+            \App\Services\BillingService::filtrarProvincia($countBuilder, $provinceName);
+            $totalCompanies = (int) $countBuilder->countAllResults();
+            $cache->save($countKey, $totalCompanies, 1296000); // 15 días
+        }
+        $buyKey = 'prov_cnae_compra_v1_' . md5($provinceName . '|' . $cnaeCode);
+        $totalCompra = $cache->get($buyKey);
+        if ($totalCompra === null) {
+            $totalCompra = (new \App\Services\BillingService())->countDirectoryCompanies(['provincia' => $provinceName, 'cnae' => $cnaeCode]);
+            $cache->save($buyKey, $totalCompra, 1296000);
+        }
+        $totalPages = max(1, (int) ceil($totalCompanies / $perPage));
+
+        helper('pricing');
+        $priceData = calculate_directory_price((int) $totalCompra);
+        $totalFormatted = number_format($totalCompanies, 0, ',', '.');
+
         return view('directory/list', [
             'items'     => $companies,
+            'total_companies' => $totalCompanies,
+            'total_formatted' => $totalFormatted,
+            'dynamic_price'   => $priceData['base_price'],
+            'pricing'         => $priceData,
+            // Botón de compra: ese CNAE en esa provincia
+            'province_name'    => "{$cnaeLabel} en {$provinceName}",
+            'cnae_code'        => $cnaeCode,
+            'provincia_compra' => $provinceName,
+            'sector_compra'    => $cnaeLabel,
             'robots'    => ($page > 1) ? 'noindex, follow' : 'index, follow',
-            'title'     => "Empresas de {$cnaeLabel} en {$provinceName} hoy | +50 oportunidades",
-            'excerptText' => "Descubre empresas de {$cnaeLabel} en {$provinceName} detectadas hoy. Oportunidades reales listas para contactar antes que tu competencia.",
+            'canonical' => $baseUrl,
+            'title'     => "{$totalFormatted} empresas de {$cnaeLabel} en {$provinceName} | Listado",
+            'excerptText' => "Listado de {$totalFormatted} empresas de {$cnaeLabel} en {$provinceName}, con datos oficiales del Registro Mercantil.",
             'header'    => "{$cnaeLabel} en {$provinceName}",
-            'meta_description' => "Descubre empresas de {$cnaeLabel} en {$provinceName} detectadas hoy. Oportunidades reales listas para contactar antes que tu competencia.",
+            'meta_description' => "Listado de {$totalFormatted} empresas de {$cnaeLabel} en {$provinceName}. Consulta CIF, fecha de constitución y ficha de cada sociedad.",
             'pagination' => [
                 'current' => $page,
-                'next'    => site_url("listado-de-empresas/" . urlencode($provinceName) . "/sector-{$cnaeCode}/" . ($page + 1)),
-                'prev'    => ($page > 1) ? site_url("listado-de-empresas/" . urlencode($provinceName) . "/sector-{$cnaeCode}/" . ($page - 1)) : null,
-                'base'    => site_url("listado-de-empresas/" . urlencode($provinceName) . "/sector-{$cnaeCode}")
+                'total'   => $totalPages,
+                'next'    => ($page < $totalPages) ? $baseUrl . '/' . ($page + 1) : null,
+                'prev'    => ($page > 1) ? $baseUrl . '/' . ($page - 1) : null,
+                'base'    => $baseUrl
             ]
         ]);
     }
@@ -535,8 +588,17 @@ class Directory extends BaseController
             ->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'inner')
             ->like('company_enrichment.ai_tags', $tagName, 'both');
 
-        $totalCompanies = clone $builder;
-        $totalCompanies = $totalCompanies->countAllResults(false);
+        // Recuento en caché: es un LIKE sobre company_enrichment y la página la
+        // enlazan todas las fichas de empresa (ahora que la ruta funciona, la
+        // visitarán los rastreadores).
+        $cache = \Config\Services::cache();
+        $countKey = 'tag_total_v1_' . md5($tagName);
+        $totalCompanies = $cache->get($countKey);
+        if ($totalCompanies === null) {
+            $countBuilder = clone $builder;
+            $totalCompanies = (int) $countBuilder->countAllResults(false);
+            $cache->save($countKey, $totalCompanies, 1296000); // 15 días
+        }
         $totalPages = max(1, (int) ceil($totalCompanies / $perPage));
 
         $companies = $builder->orderBy('companies.company_name', 'ASC')
@@ -565,6 +627,9 @@ class Directory extends BaseController
             'dynamic_price'   => $dynamicPrice,
             'pricing'         => $priceData,
             'province_name'   => $titleTag,
+            // Sin botón de compra: no hay descarga por etiqueta. Antes el botón
+            // mandaba la etiqueta como provincia (0 empresas).
+            'sin_compra'      => true,
             'robots'    => ($page > 1) ? 'noindex, follow' : 'index, follow',
             'title'     => "{$totalFormatted} Empresas etiquetadas como {$titleTag} | Listado",
             'excerptText' => "Descubre nuestro listado de {$totalFormatted} empresas relacionadas con {$titleTag}.",

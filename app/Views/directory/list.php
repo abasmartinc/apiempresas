@@ -530,7 +530,11 @@
             <?php 
                 if (!empty($province_name)) {
                     if (isset($cnae_code)) {
-                        $checkoutUrl = site_url('billing/directory_checkout?cnae=' . esc($cnae_code) . '&sector=' . urlencode($province_name ?? ''));
+                        // Provincia + sector: el pago es ese CNAE en esa provincia (antes
+                        // no se pasaba la provincia y se habría vendido toda España)
+                        $checkoutUrl = site_url('billing/directory_checkout?cnae=' . esc($cnae_code)
+                            . '&sector=' . urlencode($sector_compra ?? $province_name ?? '')
+                            . (!empty($provincia_compra) ? '&provincia=' . urlencode($provincia_compra) : ''));
                     } else {
                         $checkoutUrl = site_url('billing/directory_checkout?provincia=' . urlencode($province_name ?? 'España'));
                     }
@@ -539,7 +543,7 @@
                 }
             ?>
 
-            <?php if (!empty($province_name)): ?>
+            <?php if (!empty($province_name) && empty($sin_compra)): ?>
             <div style="margin-left: auto; text-align: right;">
                 <a href="<?= $checkoutUrl ?>" style="display: inline-flex; align-items: center; gap: 8px; background: #10b981; color: #fff; padding: 12px 24px; border-radius: 12px; font-weight: 800; font-size: 0.95rem; text-decoration: none; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.25); transition: all 0.2s; margin-bottom: 8px;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 25px rgba(16, 185, 129, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 20px rgba(16, 185, 129, 0.25)';">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>

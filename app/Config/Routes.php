@@ -519,17 +519,22 @@ $routes->get('listado-de-empresas/sector-(:segment)', 'Directory::cnae/$1');
 $routes->get('listado-de-empresas/sector-(:segment)/(:segment)', 'Directory::cnae/$1/$2');
 $routes->get('listado-de-empresas/sector-(:segment)/(:segment)/(:num)', 'Directory::cnae/$1/$2/$3');
 
-// Provincias
-$routes->get('listado-de-empresas/(:any)', 'Directory::province/$1');
-$routes->get('listado-de-empresas/(:any)/(:num)', 'Directory::province/$1/$2');
-
-// Provincia + Sector
-$routes->get('listado-de-empresas/(:any)/sector-(:segment)', 'Directory::provinceCnae/$1/$2');
-$routes->get('listado-de-empresas/(:any)/sector-(:segment)/(:num)', 'Directory::provinceCnae/$1/$2/$3');
+// ORDEN: las rutas se comprueban de arriba abajo y (:any) es `.*`, así que la
+// de provincia tiene que ir la ÚLTIMA. Antes iba antes que etiquetas y que
+// provincia + sector y se las tragaba: /listado-de-empresas/etiqueta/x (enlazada
+// desde cada ficha de empresa) acababa redirigida al índice.
 
 // Etiquetas
-$routes->get('listado-de-empresas/etiqueta/(:any)', 'Directory::tag/$1');
-$routes->get('listado-de-empresas/etiqueta/(:any)/(:num)', 'Directory::tag/$1/$2');
+$routes->get('listado-de-empresas/etiqueta/(:segment)/(:num)', 'Directory::tag/$1/$2');
+$routes->get('listado-de-empresas/etiqueta/(:segment)', 'Directory::tag/$1');
+
+// Provincia + Sector (la provincia puede llevar barra: Araba/Álava)
+$routes->get('listado-de-empresas/(:any)/sector-(:segment)/(:num)', 'Directory::provinceCnae/$1/$2/$3');
+$routes->get('listado-de-empresas/(:any)/sector-(:segment)', 'Directory::provinceCnae/$1/$2');
+
+// Provincias (siempre al final)
+$routes->get('listado-de-empresas/(:any)/(:num)', 'Directory::province/$1/$2');
+$routes->get('listado-de-empresas/(:any)', 'Directory::province/$1');
 
 // --- 301 Redirects desde el antiguo /directorio/ ---
 $routes->addRedirect('directorio', 'listado-de-empresas', 301);
