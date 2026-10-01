@@ -5,6 +5,7 @@
         'title'       => $title, 
         'excerptText' => $meta_description,
         'robots'      => $robots ?? 'index,follow',
+        'schemaApp'   => false, // sin SoftwareApplication/Service de la API (no es el contenido de la página)
         'prevUrl'     => $pagination['prev'] ?? null,
         'nextUrl'     => $pagination['next'] ?? null
     ]) ?>

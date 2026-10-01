@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="es">
 <head>
-    <?=view('partials/head') ?>
+    <?=view('partials/head', ['schemaApp' => false]) ?>
 
     <link rel="stylesheet" href="<?= base_url('public/css/styles.css') ?>?v=<?= time() ?>" />
     <link rel="stylesheet" href="<?= base_url('public/css/companies_map.css') ?>?v=<?= time() ?>" />

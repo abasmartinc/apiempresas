@@ -179,7 +179,11 @@ $enUrl = str_replace(['apiempresas.es', 'apiempresas.local'], ['spaincompanyapi.
         "width": 1200,
         "height": 630
       }
-    },
+    }<?php
+    /* SoftwareApplication (planes de la API) y Service ("API de verificación") describen
+       el producto API. En páginas que son otra cosa —listados, mapa— no corresponden al
+       contenido visible; esas vistas pasan 'schemaApp' => false (01-10-2026). */
+    if ($schemaApp ?? true): ?>,
     {
       "@type": ["SoftwareApplication", "WebApplication"],
       "@id": "<?= esc($homeUrl) ?>#app",
@@ -211,7 +215,7 @@ $enUrl = str_replace(['apiempresas.es', 'apiempresas.local'], ['spaincompanyapi.
         "name": "España"
       },
       "description": "<?= esc($defaultDesc) ?>"
-    }
+    }<?php endif; ?>
   ]
 }
 </script>

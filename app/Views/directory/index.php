@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="es">
 <head>
-    <?= view('partials/head', ['title' => $title, 'excerptText' => $meta_description]) ?>
+    <?= view('partials/head', ['title' => $title, 'excerptText' => $meta_description, 'schemaApp' => false]) ?>
     <style>
         :root {
             --dir-primary: #2152FF;
