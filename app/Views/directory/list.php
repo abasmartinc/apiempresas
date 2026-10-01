@@ -496,10 +496,10 @@
         </nav>
 
         <?php if (!empty($province_name)): ?>
-            <h1><span><?= esc($total_formatted ?? count($items)) ?> empresas</span> registradas en <?= esc($province_name) ?></h1>
+            <h1><span><?= esc($total_formatted ?? count($items)) ?> empresas</span> registradas <?= esc($h1_sufijo ?? ('en ' . $province_name)) ?></h1>
             <p class="hero-sub" style="margin-bottom: 0.5rem;"><?= esc($excerptText) ?></p>
             <p style="color: #94a3b8; max-width: 700px; font-size: 0.95rem; line-height: 1.5; margin-bottom: 2.5rem;">
-                Consulta el listado completo de sociedades y empresas en <?= esc($province_name) ?>. 
+                Consulta el listado de sociedades y empresas <?= esc($h1_sufijo ?? ('en ' . $province_name)) ?>. 
                 Consulta la ficha de cada sociedad con CIF, razón social, cargos publicados en el BORME, sector CNAE y vinculaciones.
                 Con las nuevas sociedades y los actos que se publican cada día en el BORME.
             </p>
@@ -519,7 +519,7 @@
             <div class="hero-stat__divider"></div>
             <div class="hero-stat">
                 <span class="hero-stat__value"><?= esc($pagination['total'] ?? '—') ?></span>
-                <span class="hero-stat__label">Páginas disponibles</span>
+                <span class="hero-stat__label">Páginas para consultar</span>
             </div>
             <div class="hero-stat__divider"></div>
             <div class="hero-stat">
@@ -718,6 +718,14 @@
         </div>
         <?php endif; ?>
 
+        <?php if (!empty($pagination['truncada']) && empty($sin_compra) && !empty($province_name)): ?>
+        <!-- La web enseña las primeras páginas; el listado completo es la descarga -->
+        <p style="margin: 1rem 0 0; font-size: 0.9rem; color: #475569; text-align: center;">
+            En la web se pueden consultar las primeras <?= number_format($pagination['visibles'] ?? 2000, 0, ',', '.') ?> empresas.
+            Las <?= esc($total_formatted ?? '') ?> están en el <a href="<?= $checkoutUrl ?>" style="color: #047857; font-weight: 700;">listado completo en CSV (<?= esc($dynamic_price ?? '9') ?> € + IVA)</a>.
+        </p>
+        <?php endif; ?>
+
         <!-- Sectors cross-links -->
         <?php if (!empty($cross_links) && !empty($cross_links['items'])): ?>
         <div class="sectors-section">
@@ -726,9 +734,8 @@
                 <?php foreach($cross_links['items'] as $cl): ?>
                     <?php 
                         if($cross_links['type'] === 'cnae') {
-                            helper('text');
-                            $cnaeSlug = url_title($cl['label'] ?: "CNAE {$cl['code']}", '-', true);
-                            $clUrl  = site_url('listado-de-empresas/sector-' . $cl['code'] . '/' . $cnaeSlug);
+                            // Misma URL que el índice y el sitemap (sin 301)
+                            $clUrl  = \App\Libraries\Sectores::url((string) $cl['code'], $cl['label'] ?? null);
                             $clName = $cl['label'] ?: "CNAE {$cl['code']}";
                         } else {
                             $clUrl  = site_url('listado-de-empresas/' . urlencode($cl['name']));

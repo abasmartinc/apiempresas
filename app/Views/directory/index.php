@@ -314,6 +314,16 @@
             color: #fff;
             border-color: #10b981;
         }
+        /* Compra directa desde la fila: precio de la descarga y al resumen de compra */
+        .row-actions { display: inline-flex; gap: 8px; align-items: center; justify-content: flex-end; flex-wrap: wrap; }
+        .action-buy {
+            display: inline-flex; align-items: center; gap: 5px;
+            font-size: 0.82rem; font-weight: 800; padding: 6px 14px; border-radius: 99px;
+            background: #10b981; color: #fff; border: 1.5px solid #10b981;
+            text-decoration: none; white-space: nowrap; transition: background 0.2s;
+        }
+        .action-buy:hover { background: #059669; border-color: #059669; color: #fff; }
+        .action-buy small { font-weight: 600; opacity: 0.85; font-size: 0.72rem; }
 
         /* show more button */
         .show-more-btn {
@@ -583,10 +593,15 @@
                                 </div>
                             </td>
                             <td style="text-align:right;">
-                                <a href="<?= site_url('listado-de-empresas/' . urlencode($prov['name'])) ?>" class="action-link action-link--blue">
-                                    Ver provincia
-                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                                </a>
+                                <div class="row-actions">
+                                    <a href="<?= site_url('listado-de-empresas/' . urlencode($prov['name'])) ?>" class="action-link action-link--blue">
+                                        Ver provincia
+                                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                                    </a>
+                                    <a href="<?= site_url('billing/directory_checkout?provincia=' . urlencode($prov['name'])) ?>" class="action-buy" rel="nofollow" title="Descargar en CSV las <?= number_format($prov['total'], 0, ',', '.') ?> empresas de <?= esc($prov['name']) ?>">
+                                        CSV · <?= calculate_directory_price((int) $prov['total'])['base_price'] ?> € <small>+ IVA</small>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                         <?php endforeach; ?>
@@ -677,10 +692,15 @@
                                 </div>
                             </td>
                             <td style="text-align:right;">
-                                <a href="<?= site_url('listado-de-empresas/sector-' . $cnae['cnae'] . '/' . $cnaeSlug) ?>" class="action-link action-link--green">
-                                    Ver sector
-                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                                </a>
+                                <div class="row-actions">
+                                    <a href="<?= site_url('listado-de-empresas/sector-' . $cnae['cnae'] . '/' . $cnaeSlug) ?>" class="action-link action-link--green">
+                                        Ver sector
+                                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                                    </a>
+                                    <a href="<?= site_url('billing/directory_checkout?cnae=' . urlencode((string) $cnae['cnae']) . '&sector=' . urlencode($cnae['name'])) ?>" class="action-buy" rel="nofollow" title="Descargar en CSV las <?= number_format($cnae['total'], 0, ',', '.') ?> empresas del sector">
+                                        CSV · <?= calculate_directory_price((int) $cnae['total'])['base_price'] ?> € <small>+ IVA</small>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                         <?php endforeach; ?>

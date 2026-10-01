@@ -2,11 +2,15 @@
 
 namespace App\Controllers;
 
-use CodeIgniter\Controller;
 use Config\Database;
 use CodeIgniter\HTTP\ResponseInterface;
 
-class CompanyMapV2Controller extends Controller
+/**
+ * Extiende BaseController (antes Controller) para que fije el idioma como el resto de la
+ * web: con Controller se quedaba el defaultLocale 'en' de Config\App y los textos legales
+ * del pie salían en inglés en /base-de-datos-de-empresas.
+ */
+class CompanyMapV2Controller extends BaseController
 {
     public function index()
     {
@@ -197,45 +201,76 @@ class CompanyMapV2Controller extends Controller
                 }
             };
 
-            $fields = [
-                'id', 'company_name', 'address', 'cif', 'cnae_code', 'cnae_label', 
-                'registro_mercantil', 'estado', 'estado_fecha', 'phone', 'phone_mobile', 
-                'lat_num AS lat', 'lng_num AS lng'
-            ];
+            // Rendimiento (01-10-2026): Madrid tardaba 14,8 s y España 10,1 s. Cada búsqueda
+            // ordenaba por estado_fecha todas las empresas del filtro (850.000 en Madrid) dos
+            // veces —puntos y lista— y contaba de nuevo, sin caché.
+            //  - Orden por id DESC (las últimas dadas de alta primero): con el filtro de
+            //    provincia, MySQL lee el índice en orden y para al llegar al LIMIT.
+            //  - Caché por combinación de filtros: recuento, puntos y cada página.
+            //  - Puntos ligeros: 7 columnas en vez de 13 (sin dirección ni teléfonos; la ficha va en la lista).
+            $cache = \Config\Services::cache();
+            $filtros = [$provinceName, $municipalityName, $estado, $cnaePrefix, $cnaePrefix === '' ? $cnaeText : '', $hasPhone, (string) $dateMin, (string) $dateMax];
+            $ignoreBbox = ($provinceName !== '' || $municipalityName !== '');
+            $bboxLista = (!$ignoreBbox && $useBbox === 1) ? $this->bboxRedondeado($north, $south, $east, $west) : null;
+            $claveLista = 'mapa_lista_' . md5(json_encode([$filtros, $bboxLista]));
 
-            // 1. Datos del Mapa (Solo página 1, limit 5000, respetando siempre geocoding y bbox)
+            // 1. Puntos del mapa (solo página 1; siempre geocodificados y dentro del área visible)
             $mapData = [];
             if ($page === 1) {
-                $bMap = $db->table('companies');
-                $bMap->select($fields);
-                $applyFilters($bMap);
+                $bboxMapa = $useBbox === 1 ? $this->bboxRedondeado($north, $south, $east, $west) : null;
+                $clavePuntos = 'mapa_puntos_' . md5(json_encode([$filtros, $bboxMapa, $onlyGeocoded, $limit]));
+                $mapData = $cache->get($clavePuntos);
+                if (!is_array($mapData)) {
+                    $bMap = $db->table('companies');
+                    $bMap->select(['id', 'company_name', 'cif', 'cnae_code', 'estado', 'lat_num AS lat', 'lng_num AS lng']);
+                    $applyFilters($bMap);
 
-                if ($onlyGeocoded === 1) {
-                    $bMap->where('lat_num IS NOT NULL', null, false)
-                         ->where('lng_num IS NOT NULL', null, false);
+                    if ($onlyGeocoded === 1) {
+                        $bMap->where('lat_num IS NOT NULL', null, false)
+                             ->where('lng_num IS NOT NULL', null, false);
+                    }
+                    if ($useBbox === 1) {
+                        $bMap->where('lat_num >=', $south)->where('lat_num <=', $north)
+                             ->where('lng_num >=', $west)->where('lng_num <=', $east);
+                    }
+                    $bMap->orderBy('id', 'DESC')->limit($limit);
+                    $mapData = $bMap->get()->getResultArray();
+                    $cache->save($clavePuntos, $mapData, self::CACHE_PUNTOS);
                 }
-                if ($useBbox === 1) {
-                    $bMap->where('lat_num >=', $south)->where('lat_num <=', $north)
-                         ->where('lng_num >=', $west)->where('lng_num <=', $east);
-                }
-                $bMap->orderBy('estado_fecha', 'DESC')->limit($limit);
-                $mapData = $bMap->get()->getResultArray();
             }
 
-            // 2. Datos de la Lista (Paginada, ignora bbox y geocoding si hay provincia/municipio)
-            $bList = $db->table('companies');
-            $bList->select($fields);
-            $applyFilters($bList);
-
-            $ignoreBbox = ($provinceName !== '' || $municipalityName !== '');
-            if (!$ignoreBbox && $useBbox === 1) {
-                $bList->where('lat_num >=', $south)->where('lat_num <=', $north)
+            // 2. Lista paginada (ignora el área del mapa si hay provincia o municipio)
+            $fields = [
+                'id', 'company_name', 'address', 'cif', 'cnae_code', 'cnae_label',
+                'registro_mercantil', 'estado', 'estado_fecha', 'phone', 'phone_mobile',
+                'lat_num AS lat', 'lng_num AS lng'
+            ];
+            $listar = function () use ($db, $fields, $applyFilters, $bboxLista, $south, $north, $west, $east) {
+                $b = $db->table('companies');
+                $applyFilters($b);
+                if ($bboxLista !== null) {
+                    $b->where('lat_num >=', $south)->where('lat_num <=', $north)
                       ->where('lng_num >=', $west)->where('lng_num <=', $east);
+                }
+                return $b;
+            };
+
+            $totalCount = $cache->get($claveLista . '_total');
+            if (!is_int($totalCount)) {
+                $totalCount = (int) $listar()->countAllResults();
+                $cache->save($claveLista . '_total', $totalCount, self::CACHE_LISTA);
             }
 
-            $totalCount = $bList->countAllResults(false);
-            $bList->orderBy('estado_fecha', 'DESC')->limit($perPage, $offset);
-            $listData = $bList->get()->getResultArray();
+            $clavePagina = $claveLista . '_p' . $page;
+            $listData = $cache->get($clavePagina);
+            if (!is_array($listData)) {
+                $listData = $offset >= $totalCount ? [] : $listar()
+                    ->select($fields)
+                    ->orderBy('id', 'DESC')
+                    ->limit($perPage, $offset)
+                    ->get()->getResultArray();
+                $cache->save($clavePagina, $listData, self::CACHE_LISTA);
+            }
 
             helper('pricing');
             if (!function_exists('calculate_directory_price')) {
@@ -306,6 +341,21 @@ class CompanyMapV2Controller extends Controller
 
     /** Muestras gratuitas por IP y día (y una por email y día) */
     private const MUESTRAS_POR_IP_DIA = 3;
+
+    /** Caché del recuento y de las páginas de la lista (no dependen del área visible con provincia) */
+    private const CACHE_LISTA = 21600; // 6 h
+
+    /** Caché de los puntos del mapa (cambian con el área visible: más claves, menos tiempo) */
+    private const CACHE_PUNTOS = 3600; // 1 h
+
+    /**
+     * Área visible redondeada a 2 decimales (~1 km) para la clave de caché: dos personas
+     * mirando "casi" lo mismo comparten resultado. La consulta usa los valores exactos.
+     */
+    private function bboxRedondeado(float $n, float $s, float $e, float $w): array
+    {
+        return [round($n, 2), round($s, 2), round($e, 2), round($w, 2)];
+    }
 
     private function enmascararFila(array $r): array
     {
@@ -389,7 +439,8 @@ class CompanyMapV2Controller extends Controller
             // 2. Fetch 20 companies
             $b = $db->table('companies');
             $b->select('id, company_name as name, cif, cnae_label, registro_mercantil, municipality, address, phone, phone_mobile, objeto_social, fecha_constitucion');
-            if ($province !== '') $b->where('registro_mercantil', $province);
+            // Mismo filtro de provincia que la búsqueda y el pago (Álava, Alicante…)
+            if ($province !== '') \App\Services\BillingService::filtrarProvincia($b, $province);
             if ($municipality !== '') $b->like('address', $municipality, 'both');
             if ($estado !== '') $b->where('estado', $estado);
             

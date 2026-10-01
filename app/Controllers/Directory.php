@@ -57,20 +57,9 @@ class Directory extends BaseController
 
             // Nombres de sector: CNAE-2009 y, si el código es de la CNAE-2025 (las altas
             // nuevas), su nombre de 2025. Antes solo se miraba 2009 y salían "CNAE 6812"
-            // (164.219 empresas, el tercer sector) y otros 2025 sin nombre.
-            $db = \Config\Database::connect();
-            $cnaeMap = [];
-            foreach ($db->table('cnae_2009_2025')->select('cnae_2009 as cnae, label_2009 as label')->get()->getResultArray() as $row) {
-                if ($row['cnae'] !== null && $row['cnae'] !== '' && !empty($row['label'])) {
-                    $cnaeMap[(string) $row['cnae']] = $row['label'];
-                }
-            }
-            foreach ($db->table('cnae_2009_2025')->select('cnae_2025 as cnae, label_2025 as label')->get()->getResultArray() as $row) {
-                $code = (string) ($row['cnae'] ?? '');
-                if ($code !== '' && !empty($row['label']) && !isset($cnaeMap[$code])) {
-                    $cnaeMap[$code] = $row['label'];
-                }
-            }
+            // (164.219 empresas, el tercer sector) y otros 2025 sin nombre. La misma regla
+            // la usan la página de sector, sus enlaces y el sitemap (App\Libraries\Sectores).
+            $cnaeMap = \App\Libraries\Sectores::nombres();
 
             // Solo se listan (y se cuentan en "Sectores CNAE") los códigos que existen en
             // alguna de las dos clasificaciones. Los demás eran códigos sueltos y erróneos
@@ -210,17 +199,16 @@ class Directory extends BaseController
         $perPage = 100;
         $offset = ($page - 1) * $perPage;
 
+        $baseUrl = site_url("listado-de-empresas/" . urlencode($provinceName));
+        if ($page > self::MAX_PAGINAS) {
+            return redirect()->to($baseUrl, 301);
+        }
+
+        // Mismo filtro de provincia que el recuento, el precio y la descarga
         $builder = $this->companyModel->builder()
             ->select('id, cif, company_name as name, registro_mercantil as province, cnae_label, fecha_constitucion as founded');
-            
-        if (in_array(strtolower($provinceName), ['alicante', 'alacant', 'alicante/alacant'])) {
-            $builder->where('registro_mercantil', 'Alicante');
-        } elseif (in_array(mb_strtolower($provinceName, 'UTF-8'), ['araba/álava', 'álava', 'álava-araba', 'araba', 'alava'])) {
-            $builder->where('registro_mercantil', 'Álava');
-        } else {
-            $builder->where('registro_mercantil', $provinceName);
-        }
-        
+        \App\Services\BillingService::filtrarProvincia($builder, $provinceName);
+
         $companies = $builder->orderBy('company_name', 'ASC')
             ->limit($perPage, $offset)
             ->get()
@@ -245,24 +233,17 @@ class Directory extends BaseController
 
         // Total count (cached per province)
         $cache = \Config\Services::cache();
-        $countKey = 'prov_total_v5_' . urlencode($provinceName);
+        $countKey = 'prov_total_v6_' . md5($provinceName);
         $totalCompanies = $cache->get($countKey);
         if ($totalCompanies === null) {
-            $countBuilder = $this->companyModel->builder()->selectCount('id', 'total');
-            if (in_array(strtolower($provinceName), ['alicante', 'alacant', 'alicante/alacant'])) {
-                $countBuilder->where('registro_mercantil', 'Alicante');
-            } elseif (in_array(mb_strtolower($provinceName, 'UTF-8'), ['araba/álava', 'álava', 'álava-araba', 'araba', 'alava'])) {
-                $countBuilder->where('registro_mercantil', 'Álava');
-            } else {
-                $countBuilder->where('registro_mercantil', $provinceName);
-            }
-            $totalCompanies = (int) $countBuilder->get()->getRowArray()['total'];
+            $countBuilder = $this->companyModel->builder();
+            \App\Services\BillingService::filtrarProvincia($countBuilder, $provinceName);
+            $totalCompanies = (int) $countBuilder->countAllResults();
             $cache->save($countKey, $totalCompanies, 1296000); // 15 días
         }
-        $totalPages = max(1, (int) ceil($totalCompanies / $perPage));
 
         // Cross-pollination: Top CNAEs in this province
-        $crossKey = 'cross_cnae_v5_' . urlencode($provinceName);
+        $crossKey = 'cross_cnae_v6_' . md5($provinceName);
         $topCnaes = $cache->get($crossKey);
         
         if (!$topCnaes) {
@@ -273,15 +254,8 @@ class Directory extends BaseController
             ];
             $cnaeBuilder = $this->companyModel->builder()
                 ->select('cnae_code as code, cnae_label as label, COUNT(id) as total');
-                
-            if (in_array(strtolower($provinceName), ['alicante', 'alacant', 'alicante/alacant'])) {
-                $cnaeBuilder->where('registro_mercantil', 'Alicante');
-            } elseif (in_array(mb_strtolower($provinceName, 'UTF-8'), ['araba/álava', 'álava', 'álava-araba', 'araba', 'alava'])) {
-                $cnaeBuilder->where('registro_mercantil', 'Álava');
-            } else {
-                $cnaeBuilder->where('registro_mercantil', $provinceName);
-            }
-            
+            \App\Services\BillingService::filtrarProvincia($cnaeBuilder, $provinceName);
+
             $topCnaes = $cnaeBuilder->where('cnae_code IS NOT NULL')
                 ->where('cnae_label >=', 'A')
                 ->whereNotIn('cnae_label', $invalidNames)
@@ -292,6 +266,7 @@ class Directory extends BaseController
                 ->getResultArray();
             $cache->save($crossKey, $topCnaes, 1296000); // 15 días
         }
+        $topCnaes = $this->sectoresCanonicos($topCnaes);
 
         $totalFormatted = number_format($totalCompanies, 0, ',', '.');
         helper('pricing');
@@ -312,9 +287,12 @@ class Directory extends BaseController
             'dynamic_price'   => $dynamicPrice,
             'pricing'         => $priceData,
             'province_name'   => $provinceName,
+            'h1_sufijo'       => "en {$provinceName}",
             'robots'          => ($page > 1) ? 'noindex, follow' : 'index, follow',
-            'canonical'       => site_url("listado-de-empresas/" . urlencode($provinceName)), // siempre pág 1
-            'title'           => "{$totalFormatted} Empresas en {$provinceName} | Listado",
+            // Cada página es su propia canónica: con noindex y canónica a la 1 a la vez
+            // Google recibía dos señales que se contradicen.
+            'canonical'       => $page > 1 ? "{$baseUrl}/{$page}" : $baseUrl,
+            'title'           => "{$totalFormatted} Empresas en {$provinceName} | Listado" . ($page > 1 ? " · Página {$page}" : ''),
             'excerptText'     => "Consulta el listado de {$totalFormatted} empresas registradas en {$provinceName}, con los datos publicados en el BORME.",
             'header'          => "Listado de empresas en {$provinceName}",
             'meta_description'=> "Listado de {$totalFormatted} empresas en {$provinceName}. Busca por nombre, consulta CIF y accede a la ficha de cada sociedad.",
@@ -324,13 +302,7 @@ class Directory extends BaseController
                 'items'    => $topCnaes,
                 'province' => $provinceName
             ],
-            'pagination' => [
-                'current' => $page,
-                'total'   => $totalPages,
-                'next'    => ($page < $totalPages) ? site_url("listado-de-empresas/" . urlencode($provinceName) . "/" . ($page + 1)) : null,
-                'prev'    => ($page > 1) ? site_url("listado-de-empresas/" . urlencode($provinceName) . "/" . ($page - 1)) : null,
-                'base'    => site_url("listado-de-empresas/" . urlencode($provinceName))
-            ]
+            'pagination' => $this->paginacion($baseUrl, $page, $totalCompanies, $perPage),
         ]);
     }
 
@@ -340,7 +312,10 @@ class Directory extends BaseController
             return redirect()->to(site_url('listado-de-empresas'));
         }
 
-        $cnaeCode = $args[0];
+        $cnaeCode = (string) $args[0];
+        if (!preg_match('/^[0-9][0-9.]*$/', $cnaeCode)) { // "6201" (o "41.20" hasta normalizar)
+            return redirect()->to(site_url('listado-de-empresas'));
+        }
         $slug = null;
         $page = 1;
 
@@ -361,10 +336,16 @@ class Directory extends BaseController
         $perPage = 100;
         $offset = ($page - 1) * $perPage;
 
-        // Get the most frequent CNAE label early to validate the slug
+        // Nombre del sector: el mismo que el índice y sus enlaces (App\Libraries\Sectores).
+        // Antes era el nombre más repetido entre las empresas, el slug no coincidía y
+        // 7 de cada 40 enlaces del índice pasaban por un 301. Las empresas solo deciden
+        // el nombre si el código no está en ninguna de las dos CNAE.
         $cache = \Config\Services::cache();
+        $cnaeLabel = \App\Libraries\Sectores::nombre($cnaeCode);
         $labelKey = 'cnae_label_v5_' . $cnaeCode;
-        $cnaeLabel = $cache->get($labelKey);
+        if ($cnaeLabel === null) {
+            $cnaeLabel = $cache->get($labelKey);
+        }
         if (!$cnaeLabel) {
             $labelRow = $this->companyModel->builder()
                 ->select('cnae_label, COUNT(*) as count')
@@ -383,10 +364,13 @@ class Directory extends BaseController
             $cache->save($labelKey, $cnaeLabel, 1296000); // 15 days
         }
 
-        helper('text');
-        $correctSlug = url_title($cnaeLabel, '-', true);
+        $correctSlug = \App\Libraries\Sectores::slug($cnaeCode, $cnaeLabel);
+        $baseUrl = site_url("listado-de-empresas/sector-{$cnaeCode}/{$correctSlug}");
 
         // Redirect if slug is missing or incorrect
+        if ($page > self::MAX_PAGINAS) {
+            return redirect()->to($baseUrl, 301);
+        }
         if ($slug !== $correctSlug) {
             $redirectUrl = "listado-de-empresas/sector-{$cnaeCode}/{$correctSlug}";
             if ($page > 1) {
@@ -416,8 +400,6 @@ class Directory extends BaseController
             $cache->save($buyKey, $totalCompra, 1296000); // 15 días
         }
 
-        $totalPages = max(1, (int) ceil($totalCompanies / $perPage));
-
         $companies = $this->companyModel->builder()
             ->select('id, cif, company_name as name, cnae_label, fecha_constitucion as founded, registro_mercantil as province')
             ->where('cnae_code', $cnaeCode)
@@ -428,7 +410,7 @@ class Directory extends BaseController
 
         if (empty($companies)) {
              if ($page > 1) {
-                 return redirect()->to(site_url("listado-de-empresas/sector-{$cnaeCode}/{$correctSlug}"));
+                 return redirect()->to($baseUrl);
              }
              return redirect()->to(site_url('listado-de-empresas'));
         }
@@ -473,9 +455,11 @@ class Directory extends BaseController
             'dynamic_price'   => $dynamicPrice,
             'pricing'         => $priceData,
             'province_name'   => $cnaeLabel, // reusing this variable for the excel download label
+            'h1_sufijo'       => "del sector {$cnaeLabel}",
             'cnae_code'       => $cnaeCode,
             'robots'    => ($page > 1) ? 'noindex, follow' : 'index, follow',
-            'title'     => "{$totalFormatted} Empresas de {$cnaeLabel} | Listado por sector",
+            'canonical' => $page > 1 ? "{$baseUrl}/{$page}" : $baseUrl,
+            'title'     => "{$totalFormatted} Empresas de {$cnaeLabel} | Listado por sector" . ($page > 1 ? " · Página {$page}" : ''),
             'excerptText' => "Listado de {$totalFormatted} empresas del sector {$cnaeLabel} en España, con CIF, provincia y fecha de constitución.",
             'header'    => "Empresas en el sector: {$cnaeLabel}",
             'meta_description' => "Listado de {$totalFormatted} empresas del sector {$cnaeLabel} en España. Consulta el CIF, la provincia y la ficha de cada sociedad.",
@@ -485,13 +469,7 @@ class Directory extends BaseController
                 'items' => $topProvinces,
                 'cnae' => $cnaeCode
             ],
-            'pagination' => [
-                'current' => $page,
-                'total'   => $totalPages,
-                'next'    => ($page < $totalPages) ? site_url("listado-de-empresas/sector-{$cnaeCode}/{$correctSlug}/" . ($page + 1)) : null,
-                'prev'    => ($page > 1) ? site_url("listado-de-empresas/sector-{$cnaeCode}/{$correctSlug}/" . ($page - 1)) : null,
-                'base'    => site_url("listado-de-empresas/sector-{$cnaeCode}/{$correctSlug}")
-            ]
+            'pagination' => $this->paginacion($baseUrl, $page, $totalCompanies, $perPage),
         ]);
     }
 
@@ -585,6 +563,9 @@ class Directory extends BaseController
         $perPage = 100;
         $offset = ($page - 1) * $perPage;
         $baseUrl = site_url("listado-de-empresas/" . urlencode($provinceName) . "/sector-{$cnaeCode}");
+        if ($page > self::MAX_PAGINAS) {
+            return redirect()->to($baseUrl, 301);
+        }
 
         $builder = $this->companyModel->builder()
             ->select('id, cif, company_name as name, cnae_label, fecha_constitucion as founded, registro_mercantil as province')
@@ -602,7 +583,7 @@ class Directory extends BaseController
              return redirect()->to(site_url("listado-de-empresas/" . urlencode($provinceName)));
         }
 
-        $cnaeLabel = $companies[0]['cnae_label'] ?? "CNAE {$cnaeCode}";
+        $cnaeLabel = \App\Libraries\Sectores::nombre($cnaeCode) ?? ($companies[0]['cnae_label'] ?: "CNAE {$cnaeCode}");
 
         // Recuento para la paginación (antes "siguiente" no acababa nunca) y el de
         // lo que se compra desde aquí: ese CNAE en esa provincia, igual que el pago.
@@ -621,8 +602,6 @@ class Directory extends BaseController
             $totalCompra = (new \App\Services\BillingService())->countDirectoryCompanies(['provincia' => $provinceName, 'cnae' => $cnaeCode]);
             $cache->save($buyKey, $totalCompra, 1296000);
         }
-        $totalPages = max(1, (int) ceil($totalCompanies / $perPage));
-
         helper('pricing');
         $priceData = calculate_directory_price((int) $totalCompra);
         $totalFormatted = number_format($totalCompanies, 0, ',', '.');
@@ -635,22 +614,17 @@ class Directory extends BaseController
             'pricing'         => $priceData,
             // Botón de compra: ese CNAE en esa provincia
             'province_name'    => "{$cnaeLabel} en {$provinceName}",
+            'h1_sufijo'        => "del sector {$cnaeLabel} en {$provinceName}",
             'cnae_code'        => $cnaeCode,
             'provincia_compra' => $provinceName,
             'sector_compra'    => $cnaeLabel,
             'robots'    => ($page > 1) ? 'noindex, follow' : 'index, follow',
-            'canonical' => $baseUrl,
-            'title'     => "{$totalFormatted} empresas de {$cnaeLabel} en {$provinceName} | Listado",
+            'canonical' => $page > 1 ? "{$baseUrl}/{$page}" : $baseUrl,
+            'title'     => "{$totalFormatted} empresas de {$cnaeLabel} en {$provinceName} | Listado" . ($page > 1 ? " · Página {$page}" : ''),
             'excerptText' => "Listado de {$totalFormatted} empresas de {$cnaeLabel} en {$provinceName}, con los datos publicados en el BORME.",
             'header'    => "{$cnaeLabel} en {$provinceName}",
             'meta_description' => "Listado de {$totalFormatted} empresas de {$cnaeLabel} en {$provinceName}. Consulta CIF, fecha de constitución y ficha de cada sociedad.",
-            'pagination' => [
-                'current' => $page,
-                'total'   => $totalPages,
-                'next'    => ($page < $totalPages) ? $baseUrl . '/' . ($page + 1) : null,
-                'prev'    => ($page > 1) ? $baseUrl . '/' . ($page - 1) : null,
-                'base'    => $baseUrl
-            ]
+            'pagination' => $this->paginacion($baseUrl, $page, $totalCompanies, $perPage),
         ]);
     }
 
@@ -663,6 +637,10 @@ class Directory extends BaseController
 
         // Limpiar el slug para la búsqueda y mostrarlo
         $tagName = str_replace('-', ' ', $tagSlug);
+        $baseUrl = site_url("listado-de-empresas/etiqueta/{$tagSlug}");
+        if ($page > self::MAX_PAGINAS) {
+            return redirect()->to($baseUrl, 301);
+        }
 
         // Usamos un builder nativo conectando el modelo base a la tabla de enrichment
         $builder = $this->companyModel->builder('companies')
@@ -681,8 +659,6 @@ class Directory extends BaseController
             $totalCompanies = (int) $countBuilder->countAllResults(false);
             $cache->save($countKey, $totalCompanies, 1296000); // 15 días
         }
-        $totalPages = max(1, (int) ceil($totalCompanies / $perPage));
-
         $companies = $builder->orderBy('companies.company_name', 'ASC')
             ->limit($perPage, $offset)
             ->get()
@@ -690,7 +666,7 @@ class Directory extends BaseController
 
         if (empty($companies)) {
              if ($page > 1) {
-                 return redirect()->to(site_url("listado-de-empresas/etiqueta/{$tagSlug}"));
+                 return redirect()->to($baseUrl);
              }
              return redirect()->to(site_url('listado-de-empresas'));
         }
@@ -712,19 +688,71 @@ class Directory extends BaseController
             // Sin botón de compra: no hay descarga por etiqueta. Antes el botón
             // mandaba la etiqueta como provincia (0 empresas).
             'sin_compra'      => true,
+            'h1_sufijo'       => "con la etiqueta {$titleTag}",
             'robots'    => ($page > 1) ? 'noindex, follow' : 'index, follow',
-            'title'     => "{$totalFormatted} Empresas etiquetadas como {$titleTag} | Listado",
+            'canonical' => $page > 1 ? "{$baseUrl}/{$page}" : $baseUrl,
+            'title'     => "{$totalFormatted} Empresas etiquetadas como {$titleTag} | Listado" . ($page > 1 ? " · Página {$page}" : ''),
             'excerptText' => "Descubre nuestro listado de {$totalFormatted} empresas relacionadas con {$titleTag}.",
             'header'    => "Empresas de " . $titleTag,
             'meta_description' => "Accede al listado de {$totalFormatted} empresas con la etiqueta {$titleTag}. Consulta la ficha de cada sociedad.",
-            'pagination' => [
-                'current' => $page,
-                'total'   => $totalPages,
-                'next'    => ($page < $totalPages) ? site_url("listado-de-empresas/etiqueta/{$tagSlug}/" . ($page + 1)) : null,
-                'prev'    => ($page > 1) ? site_url("listado-de-empresas/etiqueta/{$tagSlug}/" . ($page - 1)) : null,
-                'base'    => site_url("listado-de-empresas/etiqueta/{$tagSlug}")
-            ]
+            'pagination' => $this->paginacion($baseUrl, $page, $totalCompanies, $perPage),
         ]);
+    }
+
+    /**
+     * Páginas públicas por listado. Madrid tenía ~8.500 páginas de 100: OFFSET profundo
+     * (cada página más lenta que la anterior) y rastreo de páginas que nadie visita.
+     * El listado completo es la descarga.
+     */
+    private const MAX_PAGINAS = 20;
+
+    /**
+     * Enlaces de paginación. La página 1 es la URL base, sin "/1" (antes la página 2
+     * enlazaba a /Madrid/1, un duplicado de /Madrid).
+     */
+    private function paginacion(string $base, int $page, int $total, int $perPage): array
+    {
+        $paginasReales = max(1, (int) ceil($total / $perPage));
+        $paginas = min(self::MAX_PAGINAS, $paginasReales);
+        $url = static fn (int $p): string => $p <= 1 ? $base : "{$base}/{$p}";
+
+        return [
+            'current'  => $page,
+            'total'    => $paginas,
+            'next'     => $page < $paginas ? $url($page + 1) : null,
+            'prev'     => $page > 1 ? $url($page - 1) : null,
+            'base'     => $base,
+            // Hay más empresas de las que se pueden ver: la última página lo dice
+            'truncada' => $paginasReales > $paginas,
+            'visibles' => $paginas * $perPage,
+        ];
+    }
+
+    /**
+     * "Principales sectores": nombre canónico (Sectores) y una sola píldora por código.
+     * La consulta agrupa por código y nombre de empresa, y un mismo código salía repetido.
+     */
+    private function sectoresCanonicos(array $filas): array
+    {
+        $porCodigo = [];
+        foreach ($filas as $f) {
+            $code = (string) ($f['code'] ?? '');
+            if ($code === '') {
+                continue;
+            }
+            if (!isset($porCodigo[$code])) {
+                $porCodigo[$code] = [
+                    'code'  => $code,
+                    'label' => \App\Libraries\Sectores::nombre($code) ?? ($f['label'] ?? ''),
+                    'total' => 0,
+                ];
+            }
+            $porCodigo[$code]['total'] += (int) ($f['total'] ?? 0);
+        }
+        $out = array_values($porCodigo);
+        usort($out, static fn ($a, $b) => $b['total'] <=> $a['total']);
+
+        return $out;
     }
 }
 

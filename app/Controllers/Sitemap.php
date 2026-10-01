@@ -342,15 +342,6 @@ class Sitemap extends Controller
             ->get()
             ->getResultArray();
 
-        $db = \Config\Database::connect();
-        $cnaeLabels = $db->table('cnae_2009_2025')
-            ->select('cnae_2009 as cnae, label_2009 as label')
-            ->get()
-            ->getResultArray();
-        $cnaeMap = [];
-        foreach ($cnaeLabels as $row) {
-            $cnaeMap[$row['cnae']] = $row['label'];
-        }
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>';
         $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
@@ -365,12 +356,16 @@ class Sitemap extends Controller
             $xml .= '</url>';
         }
 
-        helper('text');
+        // Mismas URL que el índice (App\Libraries\Sectores): antes el nombre salía solo de
+        // la CNAE-2009 y muchas URL del sitemap respondían con un 301. Los códigos que no
+        // existen en ninguna CNAE no se listan, como en el índice.
         foreach ($cnaes as $c) {
-            $label = $cnaeMap[$c['code']] ?? "CNAE {$c['code']}";
-            $slug = url_title($label, '-', true);
+            $code = (string) $c['code'];
+            if (\App\Libraries\Sectores::nombre($code) === null) {
+                continue;
+            }
             $xml .= '<url>';
-            $xml .= '<loc>' . site_url('listado-de-empresas/sector-' . $c['code'] . '/' . $slug) . '</loc>';
+            $xml .= '<loc>' . \App\Libraries\Sectores::url($code) . '</loc>';
             $xml .= '<changefreq>weekly</changefreq><priority>0.8</priority>';
             $xml .= '</url>';
         }

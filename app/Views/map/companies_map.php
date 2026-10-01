@@ -894,6 +894,7 @@
         ${r.estado ? `<div class="p-row"><strong>Estado:</strong> ${safe(r.estado)}</div>` : ''}
         ${r.address ? `<div class="p-row"><strong>Dirección:</strong> ${safe(r.address)}</div>` : ''}
         ${phone ? `<div class="p-row"><strong>Tel:</strong> ${safe(phone)}</div>` : ''}
+        ${r.id ? `<div class="p-row"><a href="<?= site_url('empresa') ?>/${encodeURIComponent(r.id)}" target="_blank" rel="noopener">Ver ficha →</a></div>` : ''}
       </div>
     `;
         }
