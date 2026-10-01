@@ -155,8 +155,10 @@ class CompanyMapV2Controller extends Controller
         $provinceName = trim((string)($req->getGet('province') ?? ''));
         $municipalityName = trim((string)($req->getGet('municipality') ?? ''));
         $estado = trim((string)($req->getGet('estado') ?? ''));
-        $limit      = (int)($req->getGet('limit') ?? 5000);
-        $page       = (int)($req->getGet('page') ?? 1);
+        // Topes: antes `limit` no tenía máximo (?limit=1000000 devolvía la base de
+        // datos entera en JSON, con teléfonos) y la lista se podía paginar sin fin.
+        $limit      = max(1, min(self::MAX_PUNTOS_MAPA, (int)($req->getGet('limit') ?? self::MAX_PUNTOS_MAPA)));
+        $page       = max(1, min(self::MAX_PAGINAS_LISTA, (int)($req->getGet('page') ?? 1)));
         $perPage    = 50;
         $offset     = ($page - 1) * $perPage;
 
@@ -258,7 +260,9 @@ class CompanyMapV2Controller extends Controller
                 'top_cnae'      => [],
                 'page'          => $page,
                 'per_page'      => $perPage,
-                'total_pages'   => ceil($totalCount / $perPage),
+                // La lista pública se queda en las primeras páginas; el listado
+                // completo es el CSV de pago.
+                'total_pages'   => (int) min(self::MAX_PAGINAS_LISTA, ceil($totalCount / $perPage)),
             ];
 
             $cnaeAgg = [];
@@ -273,6 +277,12 @@ class CompanyMapV2Controller extends Controller
             arsort($cnaeAgg);
             $meta['top_cnae'] = array_slice($cnaeAgg, 0, 5, true);
 
+            // Teléfonos enmascarados en la parte pública: se ve que la empresa tiene
+            // teléfono ("912 34• •••"), el número completo va en el CSV de pago.
+            // Antes salían enteros en el JSON, miles por petición.
+            $mapData  = array_map([$this, 'enmascararFila'], $mapData);
+            $listData = array_map([$this, 'enmascararFila'], $listData);
+
             return $this->response->setJSON([
                 'success' => true,
                 'meta'    => $meta,
@@ -285,6 +295,44 @@ class CompanyMapV2Controller extends Controller
     }
 
     // ---------- HELPERS ----------
+
+    /** Máximo de puntos que devuelve una búsqueda del mapa */
+    private const MAX_PUNTOS_MAPA = 5000;
+
+    /** Páginas de 50 empresas visibles en la lista pública (1.000 empresas) */
+    private const MAX_PAGINAS_LISTA = 20;
+
+    /** Muestras gratuitas por IP y día (y una por email y día) */
+    private const MUESTRAS_POR_IP_DIA = 3;
+
+    private function enmascararFila(array $r): array
+    {
+        foreach (['phone', 'phone_mobile'] as $campo) {
+            if (isset($r[$campo]) && $r[$campo] !== '') {
+                $r[$campo] = $this->enmascararTelefono((string) $r[$campo]);
+            }
+        }
+
+        return $r;
+    }
+
+    /**
+     * "912345678" → "912 34• •••". Se ve que hay teléfono y de qué zona, no el número.
+     */
+    private function enmascararTelefono(string $tel): string
+    {
+        $d = preg_replace('/\D/', '', $tel) ?? '';
+        if (str_starts_with($d, '0034') && strlen($d) === 13) {
+            $d = substr($d, 4);
+        } elseif (str_starts_with($d, '34') && strlen($d) === 11) {
+            $d = substr($d, 2);
+        }
+        if (strlen($d) < 6) {
+            return '••• ••• •••';
+        }
+
+        return substr($d, 0, 3) . ' ' . substr($d, 3, 2) . '• •••';
+    }
 
     private function jsonError(int $status, string $code, string $message): ResponseInterface
     {
@@ -308,6 +356,22 @@ class CompanyMapV2Controller extends Controller
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return $this->jsonError(400, 'INVALID_EMAIL', 'Email inválido');
         }
+
+        // Límites: sin ellos (ruta fuera de CSRF y sin captcha) se podían pedir
+        // muestras sin fin —20 empresas con teléfono completo cada una— y mandar
+        // correos con adjunto a direcciones ajenas, quemando la reputación del dominio.
+        $cache    = \Config\Services::cache();
+        $claveIp  = 'muestra_ip_' . md5((string) $req->getIPAddress());
+        $claveMail = 'muestra_mail_' . md5(mb_strtolower($email));
+        $usosIp   = (int) ($cache->get($claveIp) ?? 0);
+        if ($cache->get($claveMail)) {
+            return $this->jsonError(429, 'SAMPLE_LIMIT', 'Ya te enviamos una muestra gratuita a este email hoy. Revisa tu bandeja de entrada (y la de spam).');
+        }
+        if ($usosIp >= self::MUESTRAS_POR_IP_DIA) {
+            return $this->jsonError(429, 'SAMPLE_LIMIT', 'Has alcanzado el máximo de muestras gratuitas por hoy. Si necesitas más datos, puedes descargar el listado completo.');
+        }
+        $cache->save($claveMail, 1, 86400);
+        $cache->save($claveIp, $usosIp + 1, 86400);
 
         try {
             $db = Database::connect();

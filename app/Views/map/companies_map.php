@@ -1059,10 +1059,12 @@
                     document.getElementById('leadForm').style.display = 'none';
                     document.getElementById('leadSuccess').style.display = 'block';
                 } else {
+                    // Límite de muestras (429): aviso, no "error del servidor"
+                    const esLimite = data.code === 'SAMPLE_LIMIT';
                     Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: 'Error del servidor: ' + (data.message || 'No se pudo enviar la muestra.'),
+                        icon: esLimite ? 'info' : 'error',
+                        title: esLimite ? 'Muestra ya enviada' : 'Oops...',
+                        text: esLimite ? data.message : 'Error del servidor: ' + (data.message || 'No se pudo enviar la muestra.'),
                         confirmButtonColor: '#2152ff'
                     });
                 }
