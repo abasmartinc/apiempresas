@@ -371,6 +371,12 @@ class Directory extends BaseController
         if ($page > self::MAX_PAGINAS) {
             return redirect()->to($baseUrl, 301);
         }
+        // Comparación tolerante (codificación y forma Unicode de las tildes) y nunca un 301
+        // a la misma URL: en producción había sectores en bucle de redirecciones
+        // (ERR_TOO_MANY_REDIRECTS), p. ej. sector-4322 con el slug del nombre de empresa.
+        if ($slug !== $correctSlug && self::slugIgual($slug, $correctSlug)) {
+            $slug = $correctSlug;
+        }
         if ($slug !== $correctSlug) {
             $redirectUrl = "listado-de-empresas/sector-{$cnaeCode}/{$correctSlug}";
             if ($page > 1) {
@@ -697,6 +703,24 @@ class Directory extends BaseController
             'meta_description' => "Accede al listado de {$totalFormatted} empresas con la etiqueta {$titleTag}. Consulta la ficha de cada sociedad.",
             'pagination' => $this->paginacion($baseUrl, $page, $totalCompanies, $perPage),
         ]);
+    }
+
+    /** Mismo slug aunque llegue codificado o con las tildes en otra forma Unicode (NFC/NFD) */
+    private static function slugIgual(?string $a, string $b): bool
+    {
+        if ($a === null) {
+            return false;
+        }
+        $norm = static function (string $s): string {
+            $s = rawurldecode($s);
+            if (class_exists(\Normalizer::class)) {
+                $s = \Normalizer::normalize($s, \Normalizer::FORM_C) ?: $s;
+            }
+
+            return mb_strtolower($s, 'UTF-8');
+        };
+
+        return $norm($a) === $norm($b);
     }
 
     /**
