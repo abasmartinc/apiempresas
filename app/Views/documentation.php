@@ -409,6 +409,15 @@
                             </ul>
                         </div>
                     </div>
+
+                    <div id="cambios-datos" style="margin: 24px 0 0; padding: 16px 20px; border-radius: 12px; background: #fffbeb; border: 1px solid #fde68a; color: #78350f; line-height: 1.6;">
+                        <strong>Cambios en los datos (1 de octubre de 2026).</strong> No cambia ningún campo, solo el valor que llevan en estos casos:
+                        <ul style="margin: 8px 0 0; padding-left: 20px;">
+                            <li><code>status_code</code>: una ficha sin ningún dato del Registro (por ejemplo, una UTE) devuelve <code>UNKNOWN</code> en lugar de <code>PRESUMED_ACTIVE</code>. Que el BORME no tenga hechos de una entidad que no está inscrita no dice nada de su estado.</li>
+                            <li><code>upsell_opportunities.datos_pro.administradores</code> (plan Free) cuenta los administradores vigentes, los mismos que devuelve <code>admin=true</code> en Pro. Antes contaba a todos los que habían pasado por la empresa, aunque hubieran cesado.</li>
+                            <li><code>/companies/search</code> (sin <code>multiple</code>): la mejor coincidencia da prioridad a las sociedades inscritas en el Registro frente a UTE y fichas sin datos.</li>
+                        </ul>
+                    </div>
                 </section>
 
                 <!-- AUTH -->
@@ -527,7 +536,7 @@ Accept: application/json</code></pre>
                             <tr>
                                 <td><code style="background: transparent; color: #2563eb; font-weight: 600;">status_code</code></td>
                                 <td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">enum</span></td>
-                                <td style="color: #475569;">Estado normalizado. <code style="font-size: 0.8rem;">ACTIVE</code> (activa en el Registro), <code style="font-size: 0.8rem;">PRESUMED_ACTIVE</code> (sin estado en el Registro y sin ningún hecho en el BORME que la cierre), <code style="font-size: 0.8rem;">INSOLVENCY</code> (concurso en curso), <code style="font-size: 0.8rem;">IN_LIQUIDATION</code>, <code style="font-size: 0.8rem;">DISSOLVED</code>, <code style="font-size: 0.8rem;">REGISTRY_CLOSED</code> (hoja registral cerrada), <code style="font-size: 0.8rem;">MERGED</code> (absorbida), <code style="font-size: 0.8rem;">INACTIVE</code>, <code style="font-size: 0.8rem;">EXTINCT</code> o <code style="font-size: 0.8rem;">UNKNOWN</code>. Todos los planes.</td>
+                                <td style="color: #475569;">Estado normalizado. <code style="font-size: 0.8rem;">ACTIVE</code> (activa en el Registro), <code style="font-size: 0.8rem;">PRESUMED_ACTIVE</code> (sin estado en el Registro, con otros datos registrales y sin ningún hecho en el BORME que la cierre), <code style="font-size: 0.8rem;">INSOLVENCY</code> (concurso en curso), <code style="font-size: 0.8rem;">IN_LIQUIDATION</code>, <code style="font-size: 0.8rem;">DISSOLVED</code>, <code style="font-size: 0.8rem;">REGISTRY_CLOSED</code> (hoja registral cerrada), <code style="font-size: 0.8rem;">MERGED</code> (absorbida), <code style="font-size: 0.8rem;">INACTIVE</code>, <code style="font-size: 0.8rem;">EXTINCT</code> o <code style="font-size: 0.8rem;">UNKNOWN</code> (sin datos para decidir; p. ej. UTE o fichas sin datos del Registro). Todos los planes.</td>
                             </tr>
                             <tr>
                                 <td><code style="background: transparent; color: #2563eb; font-weight: 600;">status_source</code></td>
@@ -569,7 +578,7 @@ Accept: application/json</code></pre>
                         <li><code>corporate_purpose</code> se corta a 100 caracteres cuando es más largo.</li>
                         <li><code>lat</code> y <code>lng</code> no se incluyen.</li>
                         <li>Se añade el objeto <code>upsell_opportunities</code>. Si tu código necesita saber si la respuesta está recortada, comprueba si existe ese campo.</li>
-                        <li><code>financials</code> no se incluye. Dentro de <code>upsell_opportunities</code>, <code>datos_pro</code> indica si hay tramo de facturación y año de cuentas, y cuántos administradores constan.</li>
+                        <li><code>financials</code> no se incluye. Dentro de <code>upsell_opportunities</code>, <code>datos_pro</code> indica si hay tramo de facturación y año de cuentas, y cuántos administradores vigentes constan (los mismos que devuelve <code>admin=true</code> en Pro).</li>
                         <li>También dentro de <code>upsell_opportunities</code>: <code>consultas_restantes</code> (ya descontada esta petición), <code>consultas_totales</code> y <code>se_renuevan</code> (<code>false</code>: las del Free no se renuevan).</li>
                         <li><code>status_code</code>, <code>status_source</code> y <code>status_date</code> llegan igual que en los planes de pago.</li>
                     </ul>
@@ -685,7 +694,7 @@ Accept: application/json</code></pre>
                 <!-- SEARCH -->
                 <section class="docs-section" id="endpoint-search">
                     <h2>4. Búsqueda por Nombre</h2>
-                    <p>Busca empresas similares a un nombre o razón social.</p>
+                    <p>Busca empresas similares a un nombre o razón social. Sin <code>multiple</code> devuelve la mejor coincidencia, con prioridad para las sociedades inscritas en el Registro frente a UTE y fichas sin datos.</p>
                     
                     <div class="endpoint-header">
                         <span class="http-badge get">GET</span>

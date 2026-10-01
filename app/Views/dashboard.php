@@ -111,6 +111,42 @@
 </div>
 
 <script>
+    // Actualiza el contador del panel tras una consulta, con X-Quota-Limit y
+    // X-Quota-Remaining de la respuesta (ya descuentan la consulta recién cobrada).
+    function actualizarContadorPanel(res) {
+        try {
+            const limite = parseInt(res.headers.get('X-Quota-Limit') || '', 10);
+            const quedan = parseInt(res.headers.get('X-Quota-Remaining') || '', 10);
+            if (!(limite > 0) || isNaN(quedan)) return;
+            const usadas = Math.max(0, limite - quedan);
+            const fmt = new Intl.NumberFormat('es-ES');
+
+            const texto = document.querySelector('.activation-main-card .progress-text');
+            if (texto) {
+                const plantilla = <?= json_encode(lang($isPaid ? 'Dashboard.queries_used' : 'Dashboard.companies_tested', ['__USADAS__', '__LIMITE__'])) ?>;
+                texto.textContent = plantilla.replace('__USADAS__', fmt.format(usadas)).replace('__LIMITE__', fmt.format(limite));
+            }
+            const barra = document.querySelector('.activation-main-card .progress-bar-fill');
+            if (barra) {
+                const pct = Math.min(100, Math.max(usadas > 0 ? 5 : 0, Math.ceil(usadas / limite * 100)));
+                barra.style.setProperty('--target-width', pct + '%');
+                barra.style.animation = 'none'; // si la barra entra animada, que no tape el valor nuevo
+                barra.style.width = pct + '%';
+                if (usadas >= limite) barra.style.background = '#e11d48';
+                else if (usadas >= limite * <?= $isPaid ? '0.8' : '0.7' ?>) barra.style.background = '#f59e0b';
+            }
+            const kpi = document.getElementById('kpi-requests');
+            if (kpi) {
+                kpi.textContent = fmt.format(usadas);
+                kpi.style.display = 'inline';
+                const espera = document.getElementById('kpi-waiting-msg');
+                if (espera) espera.style.display = 'none';
+                const seccion = document.getElementById('kpi-section');
+                if (seccion) seccion.style.display = '';
+            }
+        } catch (e) {}
+    }
+
     (function(){
         const box = document.getElementById('apiKeyBox');
         if(!box) return;
@@ -220,6 +256,11 @@
                     
                     // Store for JSON view
                     window.lastAhaResult = data;
+
+                    // El contador del panel ("3 de 100 empresas probadas", la barra y la
+                    // tarjeta de consultas) se quedaba como al cargar la página hasta recargar.
+                    // Se actualiza con las cabeceras de cupo de la propia respuesta.
+                    actualizarContadorPanel(res);
 
                     // If it was the first request, visually activate the API Key section instead of reloading
                     <?php if ($requestsUsedThisMonth == 0): ?>

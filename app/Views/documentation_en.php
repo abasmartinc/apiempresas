@@ -405,6 +405,15 @@
                             </ul>
                         </div>
                     </div>
+
+                    <div id="data-changes" style="margin: 24px 0 0; padding: 16px 20px; border-radius: 12px; background: #fffbeb; border: 1px solid #fde68a; color: #78350f; line-height: 1.6;">
+                        <strong>Data changes (1 October 2026).</strong> No field changes, only the value they carry in these cases:
+                        <ul style="margin: 8px 0 0; padding-left: 20px;">
+                            <li><code>status_code</code>: a record with no Registry data at all (for example, a UTE joint venture) returns <code>UNKNOWN</code> instead of <code>PRESUMED_ACTIVE</code>. The BORME having no events for an entity that is not registered says nothing about its status.</li>
+                            <li><code>upsell_opportunities.datos_pro.administradores</code> (Free plan) counts current directors, the same ones <code>admin=true</code> returns on Pro. It used to count everyone who had held a post, even after they left.</li>
+                            <li><code>/companies/search</code> (without <code>multiple</code>): the best match now favours companies registered in the Registry over UTE joint ventures and records without data.</li>
+                        </ul>
+                    </div>
                 </section>
 
                 <!-- AUTHENTICATION -->
@@ -512,7 +521,7 @@ Accept: application/json</code></pre>
                             <tr>
                                 <td><code style="background: transparent; color: #2563eb; font-weight: 600;">status_code</code></td>
                                 <td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">enum</span></td>
-                                <td style="color: #475569;">Normalised status: <code style="font-size: 0.8rem;">ACTIVE</code> (active in the Registry), <code style="font-size: 0.8rem;">PRESUMED_ACTIVE</code> (no status in the Registry and no BORME event that closes it), <code style="font-size: 0.8rem;">INSOLVENCY</code> (insolvency proceedings in progress), <code style="font-size: 0.8rem;">IN_LIQUIDATION</code>, <code style="font-size: 0.8rem;">DISSOLVED</code>, <code style="font-size: 0.8rem;">REGISTRY_CLOSED</code> (registry sheet closed), <code style="font-size: 0.8rem;">MERGED</code> (absorbed), <code style="font-size: 0.8rem;">INACTIVE</code>, <code style="font-size: 0.8rem;">EXTINCT</code> or <code style="font-size: 0.8rem;">UNKNOWN</code>. All plans.</td>
+                                <td style="color: #475569;">Normalised status: <code style="font-size: 0.8rem;">ACTIVE</code> (active in the Registry), <code style="font-size: 0.8rem;">PRESUMED_ACTIVE</code> (no status in the Registry, other Registry data present and no BORME event that closes it), <code style="font-size: 0.8rem;">INSOLVENCY</code> (insolvency proceedings in progress), <code style="font-size: 0.8rem;">IN_LIQUIDATION</code>, <code style="font-size: 0.8rem;">DISSOLVED</code>, <code style="font-size: 0.8rem;">REGISTRY_CLOSED</code> (registry sheet closed), <code style="font-size: 0.8rem;">MERGED</code> (absorbed), <code style="font-size: 0.8rem;">INACTIVE</code>, <code style="font-size: 0.8rem;">EXTINCT</code> or <code style="font-size: 0.8rem;">UNKNOWN</code> (not enough data to decide, e.g. UTE joint ventures or records with no Registry data). All plans.</td>
                             </tr>
                             <tr>
                                 <td><code style="background: transparent; color: #2563eb; font-weight: 600;">status_source</code></td>
@@ -554,7 +563,7 @@ Accept: application/json</code></pre>
                         <li><code>corporate_purpose</code> is cut to 100 characters when longer.</li>
                         <li><code>lat</code> and <code>lng</code> are not included.</li>
                         <li>An <code>upsell_opportunities</code> object is added. If your code needs to know whether the response is trimmed, check for that field.</li>
-                        <li><code>financials</code> is not included. Inside <code>upsell_opportunities</code>, <code>datos_pro</code> says whether a revenue band and accounts year exist, and how many directors are on record.</li>
+                        <li><code>financials</code> is not included. Inside <code>upsell_opportunities</code>, <code>datos_pro</code> says whether a revenue band and accounts year exist, and how many current directors are on record (the same ones <code>admin=true</code> returns on Pro).</li>
                         <li><code>status_code</code>, <code>status_source</code> and <code>status_date</code> are returned as on paid plans.</li>
                     </ul>
                     <p>With a Pro or Business plan, or with prepaid credit, you get the full data without changing your code.</p>
@@ -668,7 +677,7 @@ Accept: application/json</code></pre>
                 <!-- SEARCH -->
                 <section class="docs-section" id="endpoint-search">
                     <h2>4. Search by Name</h2>
-                    <p>Search for companies matching a name or business name.</p>
+                    <p>Search for companies matching a name or business name. Without <code>multiple</code> it returns the best match, favouring companies registered in the Registry over UTE joint ventures and records without data.</p>
                     
                     <div class="endpoint-header">
                         <span class="http-badge get">GET</span>

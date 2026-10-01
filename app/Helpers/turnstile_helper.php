@@ -8,7 +8,8 @@ if (!function_exists('verify_turnstile')) {
      * @param string $ip The user's IP address (optional but recommended)
      * @return bool True if verification is successful, False otherwise
      */
-    function verify_turnstile(string $token, string $ip = null): bool
+    // ?string: con el recuadro apagado el formulario no manda cf-turnstile-response (null)
+    function verify_turnstile(?string $token, ?string $ip = null): bool
     {
         // Desactivado salvo TURNSTILE_ENABLED=true en .env (antes, un "return true" fijo
         // "para evitar el bloqueo masivo"). Con el interruptor apagado, login y registro
