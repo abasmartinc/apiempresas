@@ -245,6 +245,30 @@ $pagination = [
             50% { transform: scale(1.5); opacity: 0.5; }
             100% { transform: scale(1); opacity: 1; }
         }
+
+        /* Móvil (02-10-2026): radar.css oculta la barra lateral por debajo de 980px pero
+           dejaba el margen de 292px, y el contenido quedaba fuera de la pantalla. La tabla
+           pasa a tarjetas apiladas. */
+        @media (max-width: 980px) {
+            .ae-radar-page__main { margin-left: 0 !important; width: 100%; }
+            .ae-radar-page__topbar { height: auto !important; padding: 12px 16px !important; flex-wrap: wrap; gap: 6px; }
+            .ae-radar-page__content { margin: 12px !important; padding: 20px 12px !important; border-radius: 16px !important; overflow: visible !important; }
+            .preview-header-banner { padding: 0 0 16px !important; }
+            .preview-header-banner__title { font-size: 1.6rem !important; }
+            .preview-header-banner__subtitle { font-size: 1rem !important; margin-bottom: 20px !important; }
+            .ae-radar-page__table-scroll { overflow-x: hidden !important; position: relative; }
+            .ae-radar-page__table { display: block !important; min-width: 0 !important; width: 100% !important; }
+            .ae-radar-page__table thead { display: none !important; }
+            .ae-radar-page__table tbody,
+            .ae-radar-page__table tr,
+            .ae-radar-page__table td { display: block !important; width: 100% !important; box-sizing: border-box; }
+            .ae-radar-page__table td { padding: 10px 12px !important; text-align: left !important; }
+            .ae-radar-page__table tr { border-bottom: 1px solid #e2e8f0; padding: 8px 0; }
+            .ae-radar-page__td-actions > div { max-width: none !important; margin-left: 0 !important; }
+            /* Aviso de "empresas ocultas": sobre las dos filas bloqueadas, sin flotar */
+            .ae-radar-page__table-scroll > div[style*="position: absolute"] { position: relative !important; height: auto !important; margin-top: -362px; padding: 12px 4px; box-sizing: border-box; }
+            .ae-radar-page__table-scroll > div[style*="position: absolute"] > div { padding: 20px 16px !important; }
+        }
     </style>
 </head>
 <body>
