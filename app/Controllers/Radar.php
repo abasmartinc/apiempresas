@@ -127,9 +127,11 @@ class Radar extends BaseController
             companies.registro_mercantil, 
             companies.municipality, 
             companies.objeto_social, 
+            companies.capital_social_raw,
             crs.score_total,
             crs.priority_level,
-            crs.score_reasons
+            crs.score_reasons,
+            crs.main_act_type
         ');
         // Las 5 constituciones más recientes, con puntuación si la tienen. Antes se exigía
         // puntuación de 80 o más y ciertos sectores: la escala actual no pasa de ~76, así
@@ -153,8 +155,11 @@ class Radar extends BaseController
         // o de ayer "para demostrar frescura": era un dato falso sobre empresas con nombre.
         foreach ($companies as $index => &$co) {
             $co['strategy'] = $this->generateDemoStrategy($co);
-            $co['lead_score_data'] = ['numeric' => $co['score_total'], 'base' => $co['score_total']];
+            // Misma puntuación que en el panel: si el cálculo nocturno aún no la ha puntuado,
+            // se calcula la provisional (antes el preview mostraba 0/100).
+            $co['trigger_type'] = 'nueva_empresa';
             $co['last_borme_date'] = $co['fecha_constitucion'];
+            $co['lead_score_data'] = $this->getLeadScore($co, 0, 0, 0);
         }
         unset($co);
 

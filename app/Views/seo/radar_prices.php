@@ -104,7 +104,7 @@
                                 <td>Barcelona</td>
                                 <td style="color: #059669; font-weight: 800; font-size: 0.9rem;">Puntuación alta</td>
                                 <td>
-                                    <button disabled style="background: #e2e8f0; color: #94a3b8; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 800; font-size: 0.8rem; cursor: not-allowed;">Contactar ahora</button>
+                                    <button disabled style="background: #e2e8f0; color: #94a3b8; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 800; font-size: 0.8rem; cursor: not-allowed;">Ver empresa</button>
                                 </td>
                             </tr>
                             <tr>
@@ -118,7 +118,7 @@
                                 <td>Madrid</td>
                                 <td style="color: #059669; font-weight: 800; font-size: 0.9rem;">Puntuación alta</td>
                                 <td>
-                                    <button disabled style="background: #e2e8f0; color: #94a3b8; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 800; font-size: 0.8rem; cursor: not-allowed;">Contactar ahora</button>
+                                    <button disabled style="background: #e2e8f0; color: #94a3b8; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 800; font-size: 0.8rem; cursor: not-allowed;">Ver empresa</button>
                                 </td>
                             </tr>
                             <tr style="background: #f8fafc;">
@@ -132,7 +132,7 @@
                                 <td>Valencia</td>
                                 <td style="color: #059669; font-weight: 800; font-size: 0.9rem;">Puntuación alta</td>
                                 <td>
-                                    <button disabled style="background: #e2e8f0; color: #94a3b8; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 800; font-size: 0.8rem; cursor: not-allowed;">Contactar ahora</button>
+                                    <button disabled style="background: #e2e8f0; color: #94a3b8; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 800; font-size: 0.8rem; cursor: not-allowed;">Ver empresa</button>
                                 </td>
                             </tr>
                         </tbody>
@@ -688,7 +688,7 @@
                     </div>
                     <div>
                         <div style="font-weight: 800; color: #0f172a; font-size: 1rem; margin-bottom: 6px;">Licitaciones del Estado</div>
-                        <div style="font-size: 0.83rem; color: #64748b; line-height: 1.5; margin-bottom: 12px;">Empresas adjudicatarias de contratos públicos por Ministerio, Ayuntamiento o Consejería. CSV con datos de contacto del Registro Mercantil.</div>
+                        <div style="font-size: 0.83rem; color: #64748b; line-height: 1.5; margin-bottom: 12px;">Empresas adjudicatarias de contratos públicos por Ministerio, Ayuntamiento o Consejería. CSV con los datos públicos de cada adjudicación.</div>
                         <span style="font-size: 0.8rem; font-weight: 800; color: #2152FF; display: flex; align-items: center; gap: 5px;">
                             Explorar directorio
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2152FF" stroke-width="2.5"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>

@@ -215,7 +215,7 @@ $premiumLeads = array_slice($companies, $freeCount);
                             <div class="ae-radar-page__empty-state-kicker">Análisis Sectorial B2B</div>
                             <h3 class="ae-radar-page__empty-state-title-main">Sin resultados recientes</h3>
                             <p class="ae-radar-page__empty-state-subtitle">
-                                No hemos detectado nuevas constituciones en <?= esc($sectorLabel) ?> en las últimas horas, pero puedes contactar el histórico nacional o activar alertas.
+                                No hemos detectado nuevas constituciones en <?= esc($sectorLabel) ?> en las últimas horas, pero puedes consultar el histórico nacional.
                             </p>
                         </div>
 

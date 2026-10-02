@@ -227,7 +227,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                                 <div class="ae-radar-page__empty-state-kicker">Búsqueda de mercado local</div>
                                 <h3 class="ae-radar-page__empty-state-title-main">Sin resultados recientes</h3>
                                 <p class="ae-radar-page__empty-state-subtitle">
-                                    No hemos detectado nuevas constituciones en <?= esc($province) ?> en las últimas horas, pero puedes contactar el histórico provincial o alertas nacionales.
+                                    No hemos detectado nuevas constituciones en <?= esc($province) ?> en las últimas horas, pero puedes consultar el histórico provincial o el listado nacional.
                                 </p>
                             </div>
 
