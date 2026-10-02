@@ -483,69 +483,58 @@ class Sitemap extends Controller
     }
     public function subvenciones()
     {
-        $isEn = (strpos((string)$this->request->getServer('HTTP_HOST'), 'spaincompanyapi') !== false);
-        if ($isEn) return $this->response->setStatusCode(404);
-
-        $db = \Config\Database::connect();
-        
-        $xml = '<?xml version="1.0" encoding="UTF-8"?>';
-        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
-
-        $urls = [
-            site_url('subvenciones-empresas'),
-            site_url('empresas-mas-subvencionadas-espana'),
-        ];
-        foreach ([2020, 2021, 2022, 2023, 2024, 2025, 2026] as $year) {
-            $urls[] = site_url('subvenciones-empresas/ano-' . $year);
-        }
-
-        foreach ($urls as $u) {
-            $xml .= '<url><loc>' . $u . '</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>';
-        }
-
-        helper('text');
-        $convocatorias = $db->query("SELECT DISTINCT convocatoria FROM company_subsidies WHERE convocatoria IS NOT NULL AND convocatoria != ''")->getResultArray();
-        
-        foreach ($convocatorias as $c) {
-            $slug = url_title($c['convocatoria'], '-', true);
-            $xml .= '<url><loc>' . site_url('subvenciones-empresas/convocatoria-' . $slug) . '</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>';
-        }
-
-        $xml .= '</urlset>';
-        return $this->response->setContentType('application/xml')->setBody($xml);
+        return $this->sitemapFondos(
+            'sitemap_subvenciones_v2',
+            ['subvenciones-empresas', 'empresas-mas-subvencionadas-espana'],
+            'subvenciones-empresas/ano-',
+            array_keys(\App\Libraries\FondosPublicos::anosSubvenciones()),
+            'subvenciones-empresas/convocatoria-',
+            array_keys(\App\Libraries\FondosPublicos::slugsConvocatorias())
+        );
     }
 
     public function contratos()
     {
+        return $this->sitemapFondos(
+            'sitemap_contratos_v2',
+            ['licitaciones-del-estado', 'mayores-empresas-contratistas-del-estado'],
+            'licitaciones-del-estado/ano-',
+            array_keys(\App\Libraries\FondosPublicos::anosContratos()),
+            'licitaciones-del-estado/organo-',
+            array_keys(\App\Libraries\FondosPublicos::slugsOrganos())
+        );
+    }
+
+    /**
+     * Sitemap de subvenciones o licitaciones. Solo años con datos y solo convocatorias
+     * u órganos con alguna entidad (sin personas físicas). Se guarda un día: antes
+     * recorría la tabla entera en cada petición.
+     */
+    private function sitemapFondos(string $clave, array $fijas, string $baseAno, array $anos, string $baseSlug, array $slugs)
+    {
         $isEn = (strpos((string)$this->request->getServer('HTTP_HOST'), 'spaincompanyapi') !== false);
         if ($isEn) return $this->response->setStatusCode(404);
 
-        $db = \Config\Database::connect();
-        
-        $xml = '<?xml version="1.0" encoding="UTF-8"?>';
-        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
-
-        $urls = [
-            site_url('licitaciones-del-estado'),
-            site_url('mayores-empresas-contratistas-del-estado'),
-        ];
-        foreach ([2020, 2021, 2022, 2023, 2024, 2025, 2026] as $year) {
-            $urls[] = site_url('licitaciones-del-estado/ano-' . $year);
+        $cache = \Config\Services::cache();
+        $xml   = $cache->get($clave);
+        if (!is_string($xml) || $xml === '') {
+            $xml  = '<?xml version="1.0" encoding="UTF-8"?>';
+            $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+            foreach ($fijas as $u) {
+                $xml .= '<url><loc>' . esc(site_url($u), 'html') . '</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>';
+            }
+            foreach ($anos as $ano) {
+                $xml .= '<url><loc>' . esc(site_url($baseAno . $ano), 'html') . '</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>';
+            }
+            foreach ($slugs as $slug) {
+                $xml .= '<url><loc>' . esc(site_url($baseSlug . $slug), 'html') . '</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>';
+            }
+            $xml .= '</urlset>';
+            if ($slugs) {
+                $cache->save($clave, $xml, 86400);
+            }
         }
 
-        foreach ($urls as $u) {
-            $xml .= '<url><loc>' . $u . '</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>';
-        }
-
-        helper('text');
-        $organos = $db->query("SELECT DISTINCT organo_contratacion FROM company_contracts WHERE organo_contratacion IS NOT NULL AND organo_contratacion != ''")->getResultArray();
-        
-        foreach ($organos as $o) {
-            $slug = url_title($o['organo_contratacion'], '-', true);
-            $xml .= '<url><loc>' . site_url('licitaciones-del-estado/organo-' . $slug) . '</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>';
-        }
-
-        $xml .= '</urlset>';
         return $this->response->setContentType('application/xml')->setBody($xml);
     }
     

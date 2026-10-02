@@ -2,58 +2,107 @@
 
 namespace App\Controllers;
 
-use CodeIgniter\Controller;
+use App\Libraries\FondosPublicos;
 
 class PublicFinancesSEO extends BaseController
 {
-    private function getContractsSlugMap()
+    private const POR_PAGINA = 50;
+
+    /** Página pedida (?page=N), mínimo 1 */
+    private function pagina(): int
     {
-        $cache = \Config\Services::cache();
-        $cacheKey = 'seo_contracts_slugmap_v2';
-        $map = $cache->get($cacheKey);
-        
-        if (!$map) {
-            $db = \Config\Database::connect();
-            $organsData = $db->query("SELECT DISTINCT organo_contratacion as name FROM company_contracts WHERE organo_contratacion IS NOT NULL AND organo_contratacion != ''")->getResultArray();
-            helper('text');
-            $map = [];
-            foreach ($organsData as $org) {
-                $slug = url_title($org['name'], '-', true);
-                if (!empty($slug)) {
-                    $map[$slug] = $org['name'];
-                }
-            }
-            $cache->save($cacheKey, $map, 86400 * 7);
-        }
-        return $map;
+        return max(1, (int) ($this->request->getGet('page') ?? 1));
     }
 
-    public function contractsHub()
+    private function noEncontrada(string $msg = 'Página no encontrada.')
     {
-        $page = (int) ($this->request->getVar('page') ?? 1);
-        $q = trim($this->request->getVar('q') ?? '');
-        
-        $db = \Config\Database::connect();
-        
-        $perPage = 50;
-        $offset = ($page - 1) * $perPage;
+        throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound($msg);
+    }
 
-        $whereClause = "organo_contratacion IS NOT NULL AND organo_contratacion != ''";
-        $params = [];
+    /** 404 si la página pedida no existe (antes respondía 200 con la tabla vacía) */
+    private function validarPagina(int $page, int $total, string $q): void
+    {
         if ($q !== '') {
-            $whereClause .= " AND organo_contratacion LIKE ?";
+            return;
+        }
+        if ($total === 0 || $page > (int) ceil($total / self::POR_PAGINA)) {
+            $this->noEncontrada();
+        }
+    }
+
+    /** Las URL antiguas /slug/2 mostraban la página 1: se redirigen a ?page=2 */
+    private function redirigirSegmento(string $base, $segmento)
+    {
+        $n = (int) $segmento;
+        return redirect()->to($base . ($n > 1 ? '?page=' . $n : ''), 301);
+    }
+
+    /**
+     * Filas y totales de un listado de subvenciones o contratos.
+     * Solo personas jurídicas (ver Libraries/FondosPublicos). El nombre de la empresa
+     * se saca con subconsulta: con LEFT JOIN, un CIF repetido en companies duplicaba
+     * filas e inflaba el total.
+     */
+    private function listado(string $tabla, string $cond, array $params, string $orden, string $colImporte, string $nombreOrigen, string $q, int $page, string $claveTotal): array
+    {
+        $db    = \Config\Database::connect();
+        $where = $cond . ' AND ' . FondosPublicos::soloJuridicas('t.company_cif');
+        if ($q !== '') {
+            $where   .= ' AND (t.company_cif LIKE ? OR EXISTS (SELECT 1 FROM companies comp WHERE comp.cif = t.company_cif AND comp.company_name LIKE ?))';
+            $params[] = '%' . $q . '%';
             $params[] = '%' . $q . '%';
         }
 
-        // Cache the first page (no search)
-        $cache = \Config\Services::cache();
-        $cacheKey = 'seo_contracts_hub_page1_v2';
-        $data = null;
-        
-        if ($page === 1 && $q === '') {
-            $data = $cache->get($cacheKey);
+        $cache  = \Config\Services::cache();
+        $totales = $q === '' ? $cache->get($claveTotal) : null;
+        if (!is_array($totales)) {
+            $r = $db->query("SELECT COUNT(*) AS total, SUM(t.{$colImporte}) AS importe FROM {$tabla} t WHERE {$where}", $params)->getRow();
+            $totales = ['total' => (int) ($r->total ?? 0), 'importe' => (float) ($r->importe ?? 0)];
+            if ($q === '' && $totales['total'] > 0) {
+                $cache->save($claveTotal, $totales, 21600);
+            }
         }
-        
+
+        $this->validarPagina($page, $totales['total'], $q);
+
+        $filas = $db->query("
+            SELECT t.*, {$nombreOrigen} AS nombre_origen,
+                   (SELECT comp.company_name FROM companies comp WHERE comp.cif = t.company_cif LIMIT 1) AS company_name
+            FROM {$tabla} t
+            WHERE {$where}
+            ORDER BY {$orden}
+            LIMIT ? OFFSET ?
+        ", array_merge($params, [self::POR_PAGINA, ($page - 1) * self::POR_PAGINA]))->getResultArray();
+
+        return [$filas, $totales['total'], $totales['importe']];
+    }
+
+    private function enlaces(int $page, int $total): string
+    {
+        return \Config\Services::pager()->makeLinks($page, self::POR_PAGINA, $total, 'seo_es');
+    }
+
+    private const NOMBRE_CONTRATO   = "COALESCE(NULLIF(t.company_name, ''), t.raw_adjudicatario)";
+    private const NOMBRE_SUBVENCION = 't.raw_beneficiario';
+
+    // ── LICITACIONES ─────────────────────────────────────────────────────────
+    public function contractsHub()
+    {
+        $page = $this->pagina();
+        $q    = trim((string) ($this->request->getGet('q') ?? ''));
+        $db   = \Config\Database::connect();
+
+        $whereClause = "organo_contratacion IS NOT NULL AND organo_contratacion != '' AND " . FondosPublicos::soloJuridicas('company_cif');
+        $params = [];
+        if ($q !== '') {
+            $whereClause .= ' AND organo_contratacion LIKE ?';
+            $params[] = '%' . $q . '%';
+        }
+
+        $cache    = \Config\Services::cache();
+        $cacheKey = 'seo_contracts_hub_page1_v3';
+        $data     = ($page === 1 && $q === '') ? $cache->get($cacheKey) : null;
+
         if (!$data) {
             $organsData = $db->query("
                 SELECT organo_contratacion as name, COUNT(id) as total_contracts, SUM(importe_adjudicacion) as total_amount, COUNT(DISTINCT company_cif) as total_companies
@@ -62,44 +111,33 @@ class PublicFinancesSEO extends BaseController
                 GROUP BY organo_contratacion
                 ORDER BY total_contracts DESC
                 LIMIT ? OFFSET ?
-            ", array_merge($params, [$perPage, $offset]))->getResultArray();
+            ", array_merge($params, [self::POR_PAGINA, ($page - 1) * self::POR_PAGINA]))->getResultArray();
 
-            helper('text');
             $organs = [];
             foreach ($organsData as $org) {
-                $org['slug'] = url_title($org['name'], '-', true);
-                if (!empty($org['slug'])) {
+                $org['slug'] = FondosPublicos::slug($org['name']);
+                if ($org['slug'] !== '') {
                     $organs[] = $org;
                 }
             }
-            
-            $totalRow = $db->query("SELECT COUNT(DISTINCT organo_contratacion) as total FROM company_contracts WHERE $whereClause", $params)->getRow();
-            $total = $totalRow->total ?? 0;
-            
-            $statsRow = $db->query("SELECT COUNT(id) as total_c, SUM(importe_adjudicacion) as total_a FROM company_contracts WHERE $whereClause", $params)->getRow();
-            $global_contracts = $statsRow->total_c ?? 0;
-            $global_amount = $statsRow->total_a ?? 0;
-            
-            // Get absolute max for progress bar
-            $maxRow = $db->query("SELECT COUNT(id) as c FROM company_contracts WHERE organo_contratacion IS NOT NULL AND organo_contratacion != '' GROUP BY organo_contratacion ORDER BY c DESC LIMIT 1")->getRow();
-            $max_contracts = $maxRow->c ?? 1;
+
+            $statsRow = $db->query("SELECT COUNT(DISTINCT organo_contratacion) as total, COUNT(id) as total_c, SUM(importe_adjudicacion) as total_a FROM company_contracts WHERE $whereClause", $params)->getRow();
+            $maxRow   = $db->query("SELECT COUNT(id) as c FROM company_contracts WHERE organo_contratacion IS NOT NULL AND organo_contratacion != '' AND " . FondosPublicos::soloJuridicas('company_cif') . " GROUP BY organo_contratacion ORDER BY c DESC LIMIT 1")->getRow();
 
             $data = [
-                'organs' => $organs,
-                'total' => $total,
-                'max_contracts' => $max_contracts,
-                'global_contracts' => $global_contracts,
-                'global_amount' => $global_amount
+                'organs'           => $organs,
+                'total'            => (int) ($statsRow->total ?? 0),
+                'max_contracts'    => $maxRow->c ?? 1,
+                'global_contracts' => $statsRow->total_c ?? 0,
+                'global_amount'    => $statsRow->total_a ?? 0,
             ];
-            
-            if ($page === 1 && $q === '') {
-                $cache->save($cacheKey, $data, 86400 * 7);
+
+            if ($page === 1 && $q === '' && $organs) {
+                $cache->save($cacheKey, $data, 86400);
             }
         }
 
-        // Pagination links
-        $pager = \Config\Services::pager();
-        $pagination = $pager->makeLinks($page, $perPage, $data['total'], 'seo_es');
+        $this->validarPagina($page, (int) $data['total'], $q);
 
         return view('seo/hub_contratos', [
             'organs' => $data['organs'],
@@ -107,68 +145,36 @@ class PublicFinancesSEO extends BaseController
             'global_contracts' => $data['global_contracts'],
             'global_amount' => $data['global_amount'],
             'max_contracts' => $data['max_contracts'],
-            'pager' => $pagination,
+            'anos' => array_keys(FondosPublicos::anosContratos()),
+            'pager' => $this->enlaces($page, (int) $data['total']),
             'currentPage' => $page,
             'searchQuery' => $q,
-            'title' => "Licitaciones del Estado: Buscador de Adjudicatarias",
-            'meta_description' => "Descubre qué empresas ganan las licitaciones públicas. Base de datos con el historial de adjudicaciones del Estado y los mayores contratistas públicos.",
+            'title' => "Licitaciones públicas: buscador de empresas adjudicatarias",
+            'meta_description' => "Qué empresas ganan las licitaciones públicas en España, por órgano de contratación. Adjudicaciones, importes y contratistas, a partir de datos públicos.",
             'canonical' => site_url('licitaciones-del-estado') . ($page > 1 ? '?page=' . $page : '')
         ]);
     }
 
-    public function contractsByOrgan($slug)
+    public function contractsByOrgan($slug, $segmento = null)
     {
-        $page = (int) ($this->request->getVar('page') ?? 1);
-        $q    = trim($this->request->getVar('q') ?? '');
-        
-        $slugMap = $this->getContractsSlugMap();
-        $organName = $slugMap[$slug] ?? null;
-        
+        $base = site_url('licitaciones-del-estado/organo-' . $slug);
+        if ($segmento !== null) {
+            return $this->redirigirSegmento($base, $segmento);
+        }
+
+        $page = $this->pagina();
+        $q    = trim((string) ($this->request->getGet('q') ?? ''));
+
+        $organName = FondosPublicos::slugsOrganos()[$slug] ?? null;
         if (!$organName) {
-            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Órgano no encontrado.");
+            $this->noEncontrada('Órgano no encontrado.');
         }
 
-        $db = \Config\Database::connect();
-        
-        $perPage = 50;
-        $offset  = ($page - 1) * $perPage;
-
-        // Build WHERE clause
-        $where  = 'c.organo_contratacion = ?';
-        $params = [$organName];
-        if ($q !== '') {
-            $where   .= ' AND (c.company_cif LIKE ? OR comp.company_name LIKE ?)';
-            $params[] = '%' . $q . '%';
-            $params[] = '%' . $q . '%';
-        }
-
-        $contracts = $db->query("
-            SELECT c.*, comp.company_name
-            FROM company_contracts c
-            LEFT JOIN companies comp ON c.company_cif = comp.cif
-            WHERE $where
-            ORDER BY c.fecha_adjudicacion DESC
-            LIMIT ? OFFSET ?
-        ", array_merge($params, [$perPage, $offset]))->getResultArray();
-
-        // Count for total (need separate query for name filter via JOIN)
-        $countWhere  = 'c.organo_contratacion = ?';
-        $countParams = [$organName];
-        if ($q !== '') {
-            $countWhere   .= ' AND (c.company_cif LIKE ? OR comp.company_name LIKE ?)';
-            $countParams[] = '%' . $q . '%';
-            $countParams[] = '%' . $q . '%';
-        }
-        $totalRow = $db->query("
-            SELECT COUNT(c.id) as total
-            FROM company_contracts c
-            LEFT JOIN companies comp ON c.company_cif = comp.cif
-            WHERE $countWhere
-        ", $countParams)->getRow();
-        $total = $totalRow->total ?? 0;
-
-        $pager      = \Config\Services::pager();
-        $pagination = $pager->makeLinks($page, $perPage, $total, 'seo_es');
+        [$contracts, $total] = $this->listado(
+            'company_contracts', 't.organo_contratacion = ?', [$organName],
+            't.fecha_adjudicacion DESC', 'importe_adjudicacion', self::NOMBRE_CONTRATO,
+            $q, $page, 'fp_total_organo_' . md5($organName)
+        );
 
         $organTitle = mb_convert_case($organName, MB_CASE_TITLE, "UTF-8");
 
@@ -176,101 +182,73 @@ class PublicFinancesSEO extends BaseController
             'organName'   => $organName,
             'organTitle'  => $organTitle,
             'contracts'   => $contracts,
-            'pager'       => $pagination,
+            'pager'       => $this->enlaces($page, $total),
             'currentPage' => $page,
             'total'       => $total,
             'searchQuery' => $q,
             'slug'        => $slug,
-            'title'       => "Licitaciones y Contratos de {$organTitle} | Empresas Adjudicatarias",
-            'meta_description' => "Listado de empresas que han ganado contratos públicos y licitaciones del {$organTitle}. Importes, fechas e historial de contratistas.",
-            'canonical'   => site_url('licitaciones-del-estado/organo-' . $slug . ($page > 1 ? '/' . $page : ''))
+            'title'       => "Licitaciones y contratos de {$organTitle} | Empresas adjudicatarias" . ($page > 1 ? " · Página {$page}" : ''),
+            'meta_description' => "Empresas que han ganado contratos públicos de {$organTitle}. Importes, fechas e historial de adjudicaciones, a partir de datos públicos.",
+            'canonical'   => $base . ($page > 1 ? '?page=' . $page : '')
         ]);
     }
 
-    private function getSubsidiesSlugMap()
-    {
-        $cache = \Config\Services::cache();
-        $cacheKey = 'seo_subsidies_slugmap_v2';
-        $map = $cache->get($cacheKey);
-        
-        if (!$map) {
-            $db = \Config\Database::connect();
-            $convData = $db->query("SELECT DISTINCT convocatoria as name FROM company_subsidies WHERE convocatoria IS NOT NULL AND convocatoria != ''")->getResultArray();
-            helper('text');
-            $map = [];
-            foreach ($convData as $conv) {
-                $slug = url_title($conv['name'], '-', true);
-                if (!empty($slug)) {
-                    $map[$slug] = $conv['name'];
-                }
-            }
-            $cache->save($cacheKey, $map, 86400 * 7);
-        }
-        return $map;
-    }
-
+    // ── SUBVENCIONES ─────────────────────────────────────────────────────────
     public function subsidiesHub()
     {
-        $page = (int) ($this->request->getVar('page') ?? 1);
-        $q = trim($this->request->getVar('q') ?? '');
-        
-        $db = \Config\Database::connect();
-        
-        $perPage = 50;
-        $offset = ($page - 1) * $perPage;
+        $page = $this->pagina();
+        $q    = trim((string) ($this->request->getGet('q') ?? ''));
+        $db   = \Config\Database::connect();
 
-        $cache = \Config\Services::cache();
-        $cacheKey = 'seo_subsidies_hub_page1_v2';
-        $data = null;
-        
-        if ($page === 1 && $q === '') {
-            $data = $cache->get($cacheKey);
-        }
-        
+        $cache    = \Config\Services::cache();
+        $cacheKey = 'seo_subsidies_hub_page1_v3';
+        $data     = ($page === 1 && $q === '') ? $cache->get($cacheKey) : null;
+
         if (!$data) {
-            $where  = '1=1';
+            // Se calcula desde company_subsidies (y no desde la tabla resumen
+            // seo_hub_subvenciones) para poder dejar fuera a las personas físicas.
+            $where  = "convocatoria IS NOT NULL AND convocatoria != '' AND " . FondosPublicos::soloJuridicas('company_cif');
             $params = [];
             if ($q !== '') {
                 $where   .= ' AND convocatoria LIKE ?';
                 $params[] = '%' . $q . '%';
             }
 
-            $convocatoriasData = $db->query("
-                SELECT convocatoria, slug, total_subsidies, total_companies, total_amount
-                FROM seo_hub_subvenciones
+            $filas = $db->query("
+                SELECT convocatoria, COUNT(*) AS total_subsidies, COUNT(DISTINCT company_cif) AS total_companies, SUM(importe) AS total_amount
+                FROM company_subsidies
                 WHERE $where
+                GROUP BY convocatoria
                 ORDER BY total_subsidies DESC
                 LIMIT ? OFFSET ?
-            ", array_merge($params, [$perPage, $offset]))->getResultArray();
+            ", array_merge($params, [self::POR_PAGINA, ($page - 1) * self::POR_PAGINA]))->getResultArray();
 
-            helper('text');
             $convocatorias = [];
-            foreach ($convocatoriasData as $conv) {
+            foreach ($filas as $conv) {
                 $conv['name'] = $conv['convocatoria'];
-                $convocatorias[] = $conv;
+                $conv['slug'] = FondosPublicos::slug($conv['convocatoria']);
+                if ($conv['slug'] !== '') {
+                    $convocatorias[] = $conv;
+                }
             }
 
-            $statsRow = $db->query("
-                SELECT COUNT(*) as total_convocatorias, SUM(total_subsidies) as total_s, MAX(total_subsidies) as max_s, SUM(total_amount) as total_a
-                FROM seo_hub_subvenciones
-                WHERE $where
-            ", $params)->getRow();
+            $statsRow = $db->query("SELECT COUNT(DISTINCT convocatoria) AS total_convocatorias, COUNT(*) AS total_s, SUM(importe) AS total_a FROM company_subsidies WHERE $where", $params)->getRow();
+            $maxRow   = $db->query("SELECT COUNT(*) AS c FROM company_subsidies WHERE convocatoria IS NOT NULL AND convocatoria != '' AND " . FondosPublicos::soloJuridicas('company_cif') . " GROUP BY convocatoria ORDER BY c DESC LIMIT 1")->getRow();
 
             $data = [
                 'convocatorias'    => $convocatorias,
-                'total'            => $statsRow->total_convocatorias ?? 0,
-                'max_subsidies'    => $statsRow->max_s ?? 1,
+                'total'            => (int) ($statsRow->total_convocatorias ?? 0),
+                'max_subsidies'    => $maxRow->c ?? 1,
                 'global_subsidies' => $statsRow->total_s ?? 0,
                 'global_amount'    => $statsRow->total_a ?? 0,
             ];
-            
-            if ($page === 1 && $q === '') {
-                $cache->save($cacheKey, $data, 86400 * 7);
+
+            if ($page === 1 && $q === '' && $convocatorias) {
+                $cache->save($cacheKey, $data, 86400);
             }
         }
 
-        $pager = \Config\Services::pager();
-        $pagination = $pager->makeLinks($page, $perPage, $data['total'], 'seo_es');
+        $this->validarPagina($page, (int) $data['total'], $q);
 
         return view('seo/hub_subvenciones', [
             'convocatorias'    => $data['convocatorias'],
@@ -278,104 +256,64 @@ class PublicFinancesSEO extends BaseController
             'global_subsidies' => $data['global_subsidies'],
             'global_amount'    => $data['global_amount'],
             'max_subsidies'    => $data['max_subsidies'],
-            'pager'            => $pagination,
+            'anos'             => array_keys(FondosPublicos::anosSubvenciones()),
+            'pager'            => $this->enlaces($page, (int) $data['total']),
             'currentPage'      => $page,
             'searchQuery'      => $q,
-            'title'            => "Directorio de Subvenciones a Empresas | Buscador Oficial",
-            'meta_description' => "Listado de las mayores convocatorias de subvenciones de España. Descubre qué fondos europeos, ayudas estatales y autonómicas reciben las empresas.",
+            'title'            => "Subvenciones a empresas y entidades | Buscador de convocatorias",
+            'meta_description' => "Convocatorias de subvenciones y ayudas públicas en España y las empresas y entidades que las han recibido. Importes y fechas, a partir de datos públicos.",
             'canonical'        => site_url('subvenciones-empresas') . ($page > 1 ? '?page=' . $page : '')
         ]);
     }
 
-    public function subsidiesByConvocatoria($slug)
+    public function subsidiesByConvocatoria($slug, $segmento = null)
     {
-        $page = (int) ($this->request->getVar('page') ?? 1);
-        $q    = trim($this->request->getVar('q') ?? '');
-        
-        $slugMap = $this->getSubsidiesSlugMap();
-        $convName = $slugMap[$slug] ?? null;
-        
+        $base = site_url('subvenciones-empresas/convocatoria-' . $slug);
+        if ($segmento !== null) {
+            return $this->redirigirSegmento($base, $segmento);
+        }
+
+        $page = $this->pagina();
+        $q    = trim((string) ($this->request->getGet('q') ?? ''));
+
+        $convName = FondosPublicos::slugsConvocatorias()[$slug] ?? null;
         if (!$convName) {
-            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound("Convocatoria no encontrada.");
+            $this->noEncontrada('Convocatoria no encontrada.');
         }
 
-        $db = \Config\Database::connect();
-        
-        $perPage = 50;
-        $offset  = ($page - 1) * $perPage;
+        [$subsidies, $total] = $this->listado(
+            'company_subsidies', 't.convocatoria = ?', [$convName],
+            't.fecha_concesion DESC', 'importe', self::NOMBRE_SUBVENCION,
+            $q, $page, 'fp_total_conv_' . md5($convName)
+        );
 
-        $where  = 's.convocatoria = ?';
-        $params = [$convName];
-        if ($q !== '') {
-            $where   .= ' AND (s.company_cif LIKE ? OR comp.company_name LIKE ?)';
-            $params[] = '%' . $q . '%';
-            $params[] = '%' . $q . '%';
-        }
-
-        $subsidies = $db->query("
-            SELECT s.*, comp.company_name
-            FROM company_subsidies s
-            LEFT JOIN companies comp ON s.company_cif = comp.cif
-            WHERE $where
-            ORDER BY s.fecha_concesion DESC
-            LIMIT ? OFFSET ?
-        ", array_merge($params, [$perPage, $offset]))->getResultArray();
-
-        $countWhere  = 's.convocatoria = ?';
-        $countParams = [$convName];
-        if ($q !== '') {
-            $countWhere   .= ' AND (s.company_cif LIKE ? OR comp.company_name LIKE ?)';
-            $countParams[] = '%' . $q . '%';
-            $countParams[] = '%' . $q . '%';
-        }
-        $totalRow = $db->query("
-            SELECT COUNT(s.id) as total
-            FROM company_subsidies s
-            LEFT JOIN companies comp ON s.company_cif = comp.cif
-            WHERE $countWhere
-        ", $countParams)->getRow();
-        $total = $totalRow->total ?? 0;
-
-        $pager      = \Config\Services::pager();
-        $pagination = $pager->makeLinks($page, $perPage, $total, 'seo_es');
-        
         $convTitle = mb_convert_case($convName, MB_CASE_TITLE, "UTF-8");
 
         return view('seo/listado_convocatoria', [
             'convocatoriaName' => $convName,
             'convTitle'        => $convTitle,
             'subsidies'        => $subsidies,
-            'pager'            => $pagination,
+            'pager'            => $this->enlaces($page, $total),
             'currentPage'      => $page,
             'total'            => $total,
             'searchQuery'      => $q,
             'slug'             => $slug,
-            'title'            => "Empresas Beneficiarias: {$convTitle}",
-            'meta_description' => "Listado oficial de empresas y entidades que han recibido la subvención {$convTitle}. Importes y fechas de concesión.",
-            'canonical'        => site_url('subvenciones-empresas/convocatoria-' . $slug . ($page > 1 ? '/' . $page : ''))
+            'title'            => "Entidades beneficiarias: {$convTitle}" . ($page > 1 ? " · Página {$page}" : ''),
+            'meta_description' => "Empresas y entidades que han recibido la subvención {$convTitle}. Importes y fechas de concesión, a partir de datos públicos.",
+            'canonical'        => $base . ($page > 1 ? '?page=' . $page : '')
         ]);
     }
 
-    // ── TOP CONTRACTORS ──────────────────────────────────────────────────────
-    public function topContractors()
+    // ── RANKINGS ─────────────────────────────────────────────────────────────
+    private function ranking(string $tabla, string $colRegistros, string $cacheKey, int $page, string $q): array
     {
-        $page = (int) ($this->request->getVar('page') ?? 1);
-        $q    = trim($this->request->getVar('q') ?? '');
-
-        $db      = \Config\Database::connect();
-        $perPage = 50;
-        $offset  = ($page - 1) * $perPage;
-
+        $db    = \Config\Database::connect();
         $cache = \Config\Services::cache();
-        $cacheKey = 'seo_top_contractors_p1';
-        $cachedData = null;
+        $datos = ($page === 1 && $q === '') ? $cache->get($cacheKey) : null;
 
-        if ($page === 1 && $q === '') {
-            $cachedData = $cache->get($cacheKey);
-        }
-
-        if (!$cachedData) {
-            $where  = '1=1';
+        if (!$datos) {
+            $base   = FondosPublicos::soloJuridicas('company_cif');
+            $where  = $base;
             $params = [];
             if ($q !== '') {
                 $where   .= ' AND (company_cif LIKE ? OR company_name LIKE ?)';
@@ -383,241 +321,126 @@ class PublicFinancesSEO extends BaseController
                 $params[] = '%' . $q . '%';
             }
 
-            $rows = $db->query("
-                SELECT *
-                FROM seo_ranking_contratos
-                WHERE $where
-                ORDER BY total_amount DESC
-                LIMIT ? OFFSET ?
-            ", array_merge($params, [$perPage, $offset]))->getResultArray();
+            $rows = $db->query("SELECT * FROM {$tabla} WHERE $where ORDER BY total_amount DESC LIMIT ? OFFSET ?",
+                array_merge($params, [self::POR_PAGINA, ($page - 1) * self::POR_PAGINA]))->getResultArray();
+            $total = (int) ($db->query("SELECT COUNT(*) as total FROM {$tabla} WHERE $where", $params)->getRow()->total ?? 0);
+            $stats = $db->query("SELECT SUM(total_amount) as total_a, SUM({$colRegistros}) as total_n FROM {$tabla} WHERE $base")->getRow();
 
-            $totalRow = $db->query("
-                SELECT COUNT(*) as total
-                FROM seo_ranking_contratos
-                WHERE $where
-            ", $params)->getRow();
-            $total = $totalRow->total ?? 0;
-
-            $statsRow = $db->query("SELECT SUM(total_amount) as total_a, SUM(total_contracts) as total_c FROM seo_ranking_contratos")->getRow();
-            
-            $cachedData = [
-                'rows' => $rows,
-                'total' => $total,
-                'total_a' => $statsRow->total_a ?? 0,
-                'total_c' => $statsRow->total_c ?? 0,
+            $datos = [
+                'rows'    => $rows,
+                'total'   => $total,
+                'total_a' => $stats->total_a ?? 0,
+                'total_n' => $stats->total_n ?? 0,
             ];
-
-            if ($page === 1 && $q === '') {
-                $cache->save($cacheKey, $cachedData, 86400 * 7);
+            if ($page === 1 && $q === '' && $rows) {
+                $cache->save($cacheKey, $datos, 86400);
             }
         }
 
-        $rows = $cachedData['rows'];
-        $total = $cachedData['total'];
-        $global_amount = $cachedData['total_a'];
-        $global_contracts = $cachedData['total_c'];
+        $this->validarPagina($page, (int) $datos['total'], $q);
 
-        $pager      = \Config\Services::pager();
-        $pagination = $pager->makeLinks($page, $perPage, $total, 'seo_es');
+        return $datos;
+    }
+
+    public function topContractors()
+    {
+        $page = $this->pagina();
+        $q    = trim((string) ($this->request->getGet('q') ?? ''));
+        $d    = $this->ranking('seo_ranking_contratos', 'total_contracts', 'seo_top_contractors_p1_v2', $page, $q);
 
         return view('seo/ranking_contratistas', [
-            'companies'       => $rows,
-            'total'           => $total,
-            'global_amount'   => $global_amount,
-            'global_contracts'=> $global_contracts,
-            'pager'           => $pagination,
+            'companies'       => $d['rows'],
+            'total'           => $d['total'],
+            'global_amount'   => $d['total_a'],
+            'global_contracts'=> $d['total_n'],
+            'pager'           => $this->enlaces($page, (int) $d['total']),
             'currentPage'     => $page,
             'searchQuery'     => $q,
-            'title'           => 'Mayores Empresas Contratistas del Estado | Ranking Oficial',
-            'meta_description'=> 'Ranking de las empresas españolas que más contratos públicos acumulan. Volumen adjudicado, número de contratos y datos oficiales del Estado.',
+            'title'           => 'Mayores empresas contratistas del sector público | Ranking',
+            'meta_description'=> 'Ranking de las empresas que más contratos públicos acumulan en España: volumen adjudicado y número de contratos, a partir de datos públicos.',
             'canonical'       => site_url('mayores-empresas-contratistas-del-estado') . ($page > 1 ? '?page=' . $page : ''),
         ]);
     }
 
-    // ── TOP SUBSIDY RECIPIENTS ───────────────────────────────────────────────
     public function topSubsidyRecipients()
     {
-        $page = (int) ($this->request->getVar('page') ?? 1);
-        $q    = trim($this->request->getVar('q') ?? '');
-
-        $db      = \Config\Database::connect();
-        $perPage = 50;
-        $offset  = ($page - 1) * $perPage;
-
-        $cache = \Config\Services::cache();
-        $cacheKey = 'seo_top_subsidies_p1';
-        $cachedData = null;
-
-        if ($page === 1 && $q === '') {
-            $cachedData = $cache->get($cacheKey);
-        }
-
-        if (!$cachedData) {
-            $where  = '1=1';
-            $params = [];
-            if ($q !== '') {
-                $where   .= ' AND (company_cif LIKE ? OR company_name LIKE ?)';
-                $params[] = '%' . $q . '%';
-                $params[] = '%' . $q . '%';
-            }
-
-            $rows = $db->query("
-                SELECT *
-                FROM seo_ranking_subvenciones
-                WHERE $where
-                ORDER BY total_amount DESC
-                LIMIT ? OFFSET ?
-            ", array_merge($params, [$perPage, $offset]))->getResultArray();
-
-            $totalRow = $db->query("
-                SELECT COUNT(*) as total
-                FROM seo_ranking_subvenciones
-                WHERE $where
-            ", $params)->getRow();
-            $total = $totalRow->total ?? 0;
-
-            $statsRow = $db->query("SELECT SUM(total_amount) as total_a, SUM(total_subsidies) as total_s FROM seo_ranking_subvenciones")->getRow();
-            
-            $cachedData = [
-                'rows' => $rows,
-                'total' => $total,
-                'total_a' => $statsRow->total_a ?? 0,
-                'total_s' => $statsRow->total_s ?? 0,
-            ];
-
-            if ($page === 1 && $q === '') {
-                $cache->save($cacheKey, $cachedData, 86400 * 7);
-            }
-        }
-
-        $rows = $cachedData['rows'];
-        $total = $cachedData['total'];
-        $global_amount = $cachedData['total_a'];
-        $global_subsidies = $cachedData['total_s'];
-
-        $pager      = \Config\Services::pager();
-        $pagination = $pager->makeLinks($page, $perPage, $total, 'seo_es');
+        $page = $this->pagina();
+        $q    = trim((string) ($this->request->getGet('q') ?? ''));
+        $d    = $this->ranking('seo_ranking_subvenciones', 'total_subsidies', 'seo_top_subsidies_p1_v2', $page, $q);
 
         return view('seo/ranking_subvencionadas', [
-            'companies'        => $rows,
-            'total'            => $total,
-            'global_amount'    => $global_amount,
-            'global_subsidies' => $global_subsidies,
-            'pager'            => $pagination,
+            'companies'        => $d['rows'],
+            'total'            => $d['total'],
+            'global_amount'    => $d['total_a'],
+            'global_subsidies' => $d['total_n'],
+            'pager'            => $this->enlaces($page, (int) $d['total']),
             'currentPage'      => $page,
             'searchQuery'      => $q,
-            'title'            => 'Empresas más Subvencionadas de España | Ranking Oficial',
-            'meta_description' => 'Descubre qué empresas han recibido más subvenciones públicas en España. Ranking oficial por importe total de ayudas concedidas.',
+            'title'            => 'Empresas y entidades más subvencionadas de España | Ranking',
+            'meta_description' => 'Qué empresas y entidades han recibido más subvenciones públicas en España. Ranking por importe total concedido, a partir de datos públicos.',
             'canonical'        => site_url('empresas-mas-subvencionadas-espana') . ($page > 1 ? '?page=' . $page : ''),
         ]);
     }
 
-    // ── CONTRACTS BY YEAR ────────────────────────────────────────────────────
+    // ── POR AÑO ──────────────────────────────────────────────────────────────
     public function contractsByYear($year)
     {
         $year = (int) $year;
-        $page = (int) ($this->request->getVar('page') ?? 1);
-        $q    = trim($this->request->getVar('q') ?? '');
+        $page = $this->pagina();
+        $q    = trim((string) ($this->request->getGet('q') ?? ''));
 
-        $db      = \Config\Database::connect();
-        $perPage = 50;
-        $offset  = ($page - 1) * $perPage;
-
-        $where  = 'YEAR(c.fecha_adjudicacion) = ?';
-        $params = [$year];
-        if ($q !== '') {
-            $where   .= ' AND (c.company_cif LIKE ? OR comp.company_name LIKE ?)';
-            $params[] = '%' . $q . '%';
-            $params[] = '%' . $q . '%';
+        // Solo años con datos: antes cualquier año (ano-1990) respondía 200 vacío.
+        if (!isset(FondosPublicos::anosContratos()[$year])) {
+            $this->noEncontrada();
         }
 
-        $contracts = $db->query("
-            SELECT c.*, comp.company_name
-            FROM company_contracts c
-            LEFT JOIN companies comp ON c.company_cif = comp.cif
-            WHERE $where
-            ORDER BY c.importe_adjudicacion DESC
-            LIMIT ? OFFSET ?
-        ", array_merge($params, [$perPage, $offset]))->getResultArray();
-
-        $totalRow = $db->query("
-            SELECT COUNT(c.id) as total, SUM(c.importe_adjudicacion) as total_amount
-            FROM company_contracts c
-            LEFT JOIN companies comp ON c.company_cif = comp.cif
-            WHERE $where
-        ", $params)->getRow();
-        $total        = $totalRow->total ?? 0;
-        $total_amount = $totalRow->total_amount ?? 0;
-
-        $pager      = \Config\Services::pager();
-        $pagination = $pager->makeLinks($page, $perPage, $total, 'seo_es');
+        [$contracts, $total, $total_amount] = $this->listado(
+            'company_contracts', FondosPublicos::rangoAno('t.fecha_adjudicacion', $year), [],
+            't.importe_adjudicacion DESC', 'importe_adjudicacion', self::NOMBRE_CONTRATO,
+            $q, $page, 'fp_total_contratos_ano_' . $year
+        );
 
         return view('seo/listado_ano_contratos', [
             'year'         => $year,
             'contracts'    => $contracts,
             'total'        => $total,
             'total_amount' => $total_amount,
-            'pager'        => $pagination,
+            'pager'        => $this->enlaces($page, $total),
             'currentPage'  => $page,
             'searchQuery'  => $q,
-            'title'        => "Contratos Públicos Adjudicados en {$year} | Licitaciones del Estado",
-            'meta_description' => "Listado oficial de contratos públicos adjudicados en {$year}. Empresas adjudicatarias, importes y órganos de contratación.",
+            'title'        => "Contratos públicos adjudicados en {$year} | Licitaciones" . ($page > 1 ? " · Página {$page}" : ''),
+            'meta_description' => "Contratos públicos adjudicados en {$year}: empresas adjudicatarias, importes y órganos de contratación, a partir de datos públicos.",
             'canonical'    => site_url("licitaciones-del-estado/ano-{$year}") . ($page > 1 ? '?page=' . $page : ''),
         ]);
     }
 
-    // ── SUBSIDIES BY YEAR ────────────────────────────────────────────────────
     public function subsidiesByYear($year)
     {
         $year = (int) $year;
-        $page = (int) ($this->request->getVar('page') ?? 1);
-        $q    = trim($this->request->getVar('q') ?? '');
+        $page = $this->pagina();
+        $q    = trim((string) ($this->request->getGet('q') ?? ''));
 
-        $db      = \Config\Database::connect();
-        $perPage = 50;
-        $offset  = ($page - 1) * $perPage;
-
-        $where  = 'YEAR(s.fecha_concesion) = ?';
-        $params = [$year];
-        if ($q !== '') {
-            $where   .= ' AND (s.company_cif LIKE ? OR comp.company_name LIKE ?)';
-            $params[] = '%' . $q . '%';
-            $params[] = '%' . $q . '%';
+        if (!isset(FondosPublicos::anosSubvenciones()[$year])) {
+            $this->noEncontrada();
         }
 
-        $subsidies = $db->query("
-            SELECT s.*, comp.company_name
-            FROM company_subsidies s
-            LEFT JOIN companies comp ON s.company_cif = comp.cif
-            WHERE $where
-            ORDER BY s.importe DESC
-            LIMIT ? OFFSET ?
-        ", array_merge($params, [$perPage, $offset]))->getResultArray();
-
-        $totalRow = $db->query("
-            SELECT COUNT(s.id) as total, SUM(s.importe) as total_amount
-            FROM company_subsidies s
-            LEFT JOIN companies comp ON s.company_cif = comp.cif
-            WHERE $where
-        ", $params)->getRow();
-        $total        = $totalRow->total ?? 0;
-        $total_amount = $totalRow->total_amount ?? 0;
-
-        $pager      = \Config\Services::pager();
-        $pagination = $pager->makeLinks($page, $perPage, $total, 'seo_es');
+        [$subsidies, $total, $total_amount] = $this->listado(
+            'company_subsidies', FondosPublicos::rangoAno('t.fecha_concesion', $year), [],
+            't.importe DESC', 'importe', self::NOMBRE_SUBVENCION,
+            $q, $page, 'fp_total_subvenciones_ano_' . $year
+        );
 
         return view('seo/listado_ano_subvenciones', [
             'year'         => $year,
             'subsidies'    => $subsidies,
             'total'        => $total,
             'total_amount' => $total_amount,
-            'pager'        => $pagination,
+            'pager'        => $this->enlaces($page, $total),
             'currentPage'  => $page,
             'searchQuery'  => $q,
-            'title'        => "Subvenciones Concedidas en {$year} | Directorio Oficial",
-            'meta_description' => "Listado oficial de subvenciones a empresas concedidas en {$year}. Beneficiarios, importes y convocatorias.",
+            'title'        => "Subvenciones concedidas en {$year} a empresas y entidades" . ($page > 1 ? " · Página {$page}" : ''),
+            'meta_description' => "Subvenciones concedidas en {$year} a empresas y entidades: beneficiarios, importes y convocatorias, a partir de datos públicos.",
             'canonical'    => site_url("subvenciones-empresas/ano-{$year}") . ($page > 1 ? '?page=' . $page : ''),
         ]);
     }
 }
-

@@ -143,10 +143,10 @@
             </nav>
             <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.15); color: #34D399; padding: 6px 14px; border-radius: 99px; font-size: 0.85rem; font-weight: 700; margin-bottom: 1.5rem; border: 1px solid rgba(16, 185, 129, 0.25);">
                 <span style="display: inline-block; width: 6px; height: 6px; background: #34D399; border-radius: 99px; box-shadow: 0 0 8px #34D399;"></span>
-                Datos Oficiales del Estado
+                Datos de fuentes públicas
             </div>
             <h1>Empresas más <span class="grad">Subvencionadas</span> de España</h1>
-            <p>Ranking oficial de empresas y entidades ordenadas por volumen total de subvenciones y ayudas públicas recibidas. Datos extraídos directamente de las fuentes estatales oficiales.</p>
+            <p>Empresas y entidades ordenadas por volumen total de subvenciones y ayudas públicas recibidas, a partir de datos públicos. Incluye ayuntamientos, universidades y otras entidades, no solo empresas.</p>
 
                 <?php if (empty($searchQuery)): ?>
                 <?php 
@@ -161,7 +161,7 @@
                         Descargar CSV Completo — <?php if(isset($pricing) && $pricing['is_discounted']): ?><s style="opacity:0.7; font-size:0.9em; margin-right:6px;"><?= number_format($pricing['original_price'], 2, ',', '') ?>€</s><?php endif; ?><?= number_format($dynamic_price, 2, ',', '') ?>€ <span style="font-size: 0.85em; opacity: 0.9; font-weight: 600;">+ IVA</span>
                     </a>
                     <div style="font-size: 0.85rem; color: rgba(255,255,255,0.7); max-width: 480px; margin-top: 10px; margin-left: auto; margin-right: auto; line-height: 1.4;">
-                        Incluye todos los registros (<?= number_format($total_subs, 0, ',', '.') ?>) cruzados con los datos del Registro Mercantil: Sector CNAE, Dirección, Provincia y Teléfono (cuando esté disponible).
+                        Incluye todos los registros (<?= number_format($total_subs, 0, ',', '.') ?>) cruzados con nuestra base de datos de empresas: sector CNAE, dirección, provincia y teléfono, cuando constan.
                     </div>
                 </div>
                 <?php endif; ?>
@@ -201,7 +201,7 @@
                         </div>
                         <div>
                             <div class="dir-stat__num"><?= number_format($total, 0, ',', '.') ?></div>
-                            <div class="dir-stat__label">Empresas Beneficiarias</div>
+                            <div class="dir-stat__label">Entidades beneficiarias</div>
                         </div>
                     </div>
                     <div class="dir-stat">
@@ -311,7 +311,7 @@
 
                 <?php if ($total > 10): ?>
                 <div class="paywall-cta-banner">
-                    <p>🔒 <strong>Solo se muestran los 10 primeros importes.</strong> Accede al Radar para ver el ranking completo de <?= number_format($total, 0, ',', '.') ?> empresas subvencionadas, con filtros y exportación.</p>
+                    <p>🔒 <strong>Solo se muestran los 10 primeros importes.</strong> Accede al Radar para ver el ranking completo de <?= number_format($total, 0, ',', '.') ?> empresas y entidades subvencionadas, con filtros y exportación.</p>
                     <a href="<?= site_url('radar') ?>">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
                         Acceder al Radar
@@ -332,7 +332,7 @@
                         Descargar CSV Completo — <?php if(isset($pricing) && $pricing['is_discounted']): ?><s style="opacity:0.7; font-size:0.9em; margin-right:6px;"><?= number_format($pricing['original_price'], 2, ',', '') ?>€</s><?php endif; ?><?= number_format($dynamic_price, 2, ',', '') ?>€ <span style="font-size: 0.85em; opacity: 0.9; font-weight: 600;">+ IVA</span>
                     </a>
                     <div style="font-size: 0.75rem; color: #94a3b8; max-width: 320px; margin-left: auto; line-height: 1.4;">
-                        Incluye todas las subvenciones (<?= number_format($total_subs, 0, ',', '.') ?> registros) cruzadas con los datos del Registro Mercantil: Sector CNAE, Dirección, Provincia y Teléfono (cuando esté disponible).
+                        Incluye todas las subvenciones (<?= number_format($total_subs, 0, ',', '.') ?> registros) cruzadas con nuestra base de datos de empresas: sector CNAE, dirección, provincia y teléfono, cuando constan.
                     </div>
                 </div>
                 <?php endif; ?>
@@ -351,7 +351,7 @@
                         </div>
                         <div>
                             <h3 style="font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-bottom: 8px;">¿Cómo se calcula el ranking de empresas más subvencionadas?</h3>
-                            <p style="color: #475569; font-size: 0.95rem; line-height: 1.6; margin: 0;">El ranking suma el importe total de todas las subvenciones concedidas a cada empresa (identificada por su CIF). Las empresas con mayor acumulación de ayudas públicas aparecen en las primeras posiciones. Los datos provienen de la Base de Datos Nacional de Subvenciones (BDNS).</p>
+                            <p style="color: #475569; font-size: 0.95rem; line-height: 1.6; margin: 0;">El ranking suma el importe total de todas las subvenciones concedidas a cada entidad (identificada por su CIF). Las entidades con mayor acumulación de ayudas públicas aparecen en las primeras posiciones. Los datos provienen de la Base de Datos Nacional de Subvenciones (BDNS).</p>
                         </div>
                         <div>
                             <h3 style="font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-bottom: 8px;">¿Son públicos los datos de subvenciones a empresas en España?</h3>
@@ -382,7 +382,7 @@
         "name": "¿Cómo se calcula el ranking de empresas más subvencionadas?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "El ranking suma el importe total de todas las subvenciones concedidas a cada empresa (identificada por su CIF). Los datos provienen de la Base de Datos Nacional de Subvenciones (BDNS)."
+          "text": "El ranking suma el importe total de todas las subvenciones concedidas a cada entidad (identificada por su CIF). Los datos provienen de la Base de Datos Nacional de Subvenciones (BDNS)."
         }
       },{
         "@type": "Question",

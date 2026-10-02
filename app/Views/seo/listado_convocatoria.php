@@ -225,14 +225,14 @@
             <nav class="dir-breadcrumbs">
                 <a href="<?= site_url('subvenciones-empresas') ?>">Subvenciones a Empresas</a>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
-                <span>Convocatoria Oficial</span>
+                <span>Convocatoria</span>
             </nav>
             <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.15); color: #34D399; padding: 6px 14px; border-radius: 99px; font-size: 0.85rem; font-weight: 700; margin-bottom: 1.25rem; border: 1px solid rgba(16, 185, 129, 0.25);">
                 <span style="display: inline-block; width: 6px; height: 6px; background: #34D399; border-radius: 99px; box-shadow: 0 0 8px #34D399;"></span>
                 <?= number_format($total, 0, ',', '.') ?> subvenciones registradas
             </div>
             <h1><?= esc($convTitle) ?></h1>
-            <p>Listado oficial de entidades y empresas que han recibido fondos correspondientes a esta convocatoria. Datos obtenidos directamente de las fuentes estatales.</p>
+            <p>Empresas y entidades que han recibido fondos de esta convocatoria, a partir de datos públicos. No se muestran ayudas concedidas a personas físicas.</p>
 
                 <?php if (empty($searchQuery) && $total > 0): ?>
                 <?php 
@@ -365,7 +365,7 @@
                                 </div>
                                 <span style="background: #10b981; color: #fff; font-size: 0.65rem; font-weight: 800; padding: 3px 8px; border-radius: 99px; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Pago único</span>
                             </div>
-                            <p style="margin: 0; font-size: 0.85rem; color: #475569; line-height: 1.5;">Exporta el CSV completo de empresas subvencionadas con datos de contacto: teléfono, CNAE, dirección y provincia. Listo para tu CRM.</p>
+                            <p style="margin: 0; font-size: 0.85rem; color: #475569; line-height: 1.5;">Exporta el CSV de empresas y entidades subvencionadas. Añadimos teléfono, CNAE, dirección y provincia cuando constan en nuestra base de datos.</p>
                             <?php if (!empty($checkoutUrl) && !empty($pricing)): ?>
                             <div style="margin-top: 4px;">
                                 <a href="<?= $checkoutUrl ?>" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: #10b981; color: #fff; padding: 12px 16px; border-radius: 10px; font-weight: 800; font-size: 0.9rem; text-decoration: none; box-shadow: 0 4px 12px rgba(16,185,129,0.3); transition: all 0.2s; width: 100%;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='translateY(0)'">

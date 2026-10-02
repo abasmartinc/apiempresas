@@ -437,6 +437,12 @@ class BillingService
      */
     public function countSubsidies(array $filters): int
     {
+        // Recuento guardado 1 h: se pide en cada página pública para calcular el precio.
+        $clave = 'fp_n_sub_' . md5(json_encode([(string) ($filters['convocatoria'] ?? ''), (string) ($filters['organo'] ?? ''), (string) ($filters['year'] ?? '')]));
+        $guardado = cache($clave);
+        if (is_int($guardado)) {
+            return $guardado;
+        }
         $db = \Config\Database::connect();
         $builder = $db->table('company_subsidies');
         
@@ -447,10 +453,15 @@ class BillingService
             $builder->where('convocatoria', $this->resolveSubsidiesConvocatoria($convocatoria));
         }
         if ($year !== '') {
-            $builder->where('YEAR(fecha_concesion)', $year);
+            $builder->where(\App\Libraries\FondosPublicos::rangoAno('fecha_concesion', $year), null, false);
         }
-        
-        return $builder->countAllResults();
+        // Solo personas jurídicas: lo mismo que se muestra y que se entrega en el CSV.
+        $builder->where(\App\Libraries\FondosPublicos::soloJuridicas('company_cif'), null, false);
+
+        $n = (int) $builder->countAllResults();
+        cache()->save($clave, $n, 3600);
+
+        return $n;
     }
 
     /**
@@ -461,6 +472,11 @@ class BillingService
         $convocatoria = trim($convocatoria);
         if ($convocatoria === '') {
             return '';
+        }
+        // El slug de la URL se resuelve con el mismo mapa que usan las páginas.
+        $porSlug = \App\Libraries\FondosPublicos::slugsConvocatorias()[$convocatoria] ?? null;
+        if ($porSlug !== null) {
+            return $porSlug;
         }
 
         $db = \Config\Database::connect();
@@ -540,19 +556,29 @@ class BillingService
      */
     public function countContracts(array $filters): int
     {
+        // Recuento guardado 1 h: se pide en cada página pública para calcular el precio.
+        $clave = 'fp_n_con_' . md5(json_encode([(string) ($filters['convocatoria'] ?? ''), (string) ($filters['organo'] ?? ''), (string) ($filters['year'] ?? '')]));
+        $guardado = cache($clave);
+        if (is_int($guardado)) {
+            return $guardado;
+        }
         $db = \Config\Database::connect();
         $builder = $db->table('company_contracts');
         
         $year = $filters['year'] ?? '';
         $organo = $filters['organo'] ?? '';
         if ($year !== '') {
-            $builder->where('YEAR(fecha_adjudicacion)', $year);
+            $builder->where(\App\Libraries\FondosPublicos::rangoAno('fecha_adjudicacion', $year), null, false);
         }
         if ($organo !== '') {
             $builder->where('organo_contratacion', $this->resolveContractsOrgano($organo));
         }
-        
-        return $builder->countAllResults();
+        $builder->where(\App\Libraries\FondosPublicos::soloJuridicas('company_cif'), null, false);
+
+        $n = (int) $builder->countAllResults();
+        cache()->save($clave, $n, 3600);
+
+        return $n;
     }
 
     public function resolveContractsOrgano(string $organo): string
@@ -560,6 +586,10 @@ class BillingService
         $organo = trim($organo);
         if ($organo === '') {
             return '';
+        }
+        $porSlug = \App\Libraries\FondosPublicos::slugsOrganos()[$organo] ?? null;
+        if ($porSlug !== null) {
+            return $porSlug;
         }
 
         $db = \Config\Database::connect();

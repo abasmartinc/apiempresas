@@ -310,7 +310,7 @@
                 <?= number_format($total, 0, ',', '.') ?> contratos registrados
             </div>
             <h1><?= esc($organTitle) ?></h1>
-            <p>Historial completo de empresas adjudicatarias que han ganado licitaciones de este órgano de contratación público.</p>
+            <p>Empresas adjudicatarias de licitaciones de este órgano de contratación, a partir de datos públicos.</p>
 
                 <?php if (empty($searchQuery) && $total > 0): ?>
                 <?php 
@@ -331,7 +331,7 @@
                         </div>
                     </div>
                     <div style="font-size: 0.85rem; color: rgba(255,255,255,0.7); max-width: 480px; margin-top: 6px; line-height: 1.4;">
-                        Incluye todos los registros (<?= number_format($total, 0, ',', '.') ?>) cruzados con los datos del Registro Mercantil: Sector CNAE, Dirección, Provincia y Teléfono (cuando esté disponible).
+                        Incluye todos los registros (<?= number_format($total, 0, ',', '.') ?>) cruzados con nuestra base de datos de empresas: sector CNAE, dirección, provincia y teléfono, cuando constan.
                     </div>
                 </div>
                 <?php endif; ?>
@@ -395,8 +395,8 @@
                                     <td colspan="4" style="padding: 0;">
                                         <div style="background: linear-gradient(135deg, #1e3a8a 0%, #2152FF 100%); padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
                                             <div>
-                                                <p style="margin: 0 0 3px; font-size: 0.9rem; color: rgba(255,255,255,0.9); font-weight: 800;">📥 Descarga todas las adjudicaciones en CSV</p>
-                                                <p style="margin: 0; font-size: 0.78rem; color: rgba(255,255,255,0.65); font-weight: 600;">CSV con nombre, CIF, teléfono, CNAE, dirección y provincia de cada adjudicatario</p>
+                                                <p style="margin: 0 0 3px; font-size: 0.9rem; color: rgba(255,255,255,0.9); font-weight: 800;">📥 Descarga estas adjudicaciones en CSV</p>
+                                                <p style="margin: 0; font-size: 0.78rem; color: rgba(255,255,255,0.65); font-weight: 600;">CSV con nombre y CIF de cada adjudicatario; teléfono, CNAE, dirección y provincia cuando constan</p>
                                             </div>
                                             <div style="display: flex; align-items: center; gap: 14px; flex-shrink: 0;">
                                                 <div style="text-align: right;">
@@ -419,7 +419,7 @@
                                                     <?= esc($contract['company_name']) ?>
                                                 </a>
                                             <?php else: ?>
-                                                <span style="color: #0f172a; font-weight: 800; display: block; font-size: 0.95rem;">Empresa <?= esc($contract['company_cif']) ?></span>
+                                                <span style="color: #0f172a; font-weight: 800; display: block; font-size: 0.95rem;"><?= esc(!empty($contract['nombre_origen']) ? $contract['nombre_origen'] : 'Nombre no disponible') ?></span>
                                             <?php endif; ?>
                                             <span class="cif-badge">CIF: <?= esc($contract['company_cif']) ?></span>
                                         </td>

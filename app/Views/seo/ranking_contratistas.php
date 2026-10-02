@@ -178,7 +178,7 @@
                 Plataforma de Contratación del Sector Público
             </div>
             <h1>Mayores Contratistas del <span class="grad">Estado</span></h1>
-            <p>Ranking oficial de empresas españolas ordenadas por volumen total adjudicado en contratación pública. Datos extraídos directamente de la Plataforma de Contratación del Sector Público.</p>
+            <p>Empresas ordenadas por volumen total adjudicado en contratación pública, a partir de datos públicos de la Plataforma de Contratación del Sector Público.</p>
 
                 <?php if (empty($searchQuery)): ?>
                 <?php 
@@ -194,7 +194,7 @@
                         Descargar CSV Completo — <?php if(isset($pricing) && $pricing['is_discounted']): ?><s style="opacity:0.7; font-size:0.9em; margin-right:6px;"><?= number_format($pricing['original_price'], 2, ',', '') ?>€</s><?php endif; ?><?= number_format($dynamic_price, 2, ',', '') ?>€ <span style="font-size: 0.85em; opacity: 0.9; font-weight: 600;">+ IVA</span>
                     </a>
                     <div style="font-size: 0.85rem; color: rgba(255,255,255,0.7); max-width: 480px; margin-top: 10px; margin-left: auto; margin-right: auto; line-height: 1.4;">
-                        Incluye todos los registros (<?= number_format($total_contracts, 0, ',', '.') ?>) cruzados con los datos del Registro Mercantil: Sector CNAE, Dirección, Provincia y Teléfono (cuando esté disponible).
+                        Incluye todos los registros (<?= number_format($total_contracts, 0, ',', '.') ?>) cruzados con nuestra base de datos de empresas: sector CNAE, dirección, provincia y teléfono, cuando constan.
                     </div>
                 </div>
                 <?php endif; ?>
@@ -366,7 +366,7 @@
                         Descargar Base Completa de Contratos — <?php if(isset($pricing) && $pricing['is_discounted']): ?><s style="opacity:0.7; font-size:0.9em; margin-right:6px;"><?= number_format($pricing['original_price'], 2, ',', '') ?>€</s><?php endif; ?><?= number_format($dynamic_price, 2, ',', '') ?>€ <span style="font-size: 0.85em; opacity: 0.9; font-weight: 600;">+ IVA</span>
                     </a>
                     <div style="font-size: 0.75rem; color: #94a3b8; max-width: 320px; margin-left: auto; line-height: 1.4;">
-                        Incluye todos los contratos (<?= number_format($total_contracts, 0, ',', '.') ?> registros) cruzados con los datos del Registro Mercantil: Sector CNAE, Dirección, Provincia y Teléfono (cuando esté disponible).
+                        Incluye todos los contratos (<?= number_format($total_contracts, 0, ',', '.') ?> registros) cruzados con nuestra base de datos de empresas: sector CNAE, dirección, provincia y teléfono, cuando constan.
                     </div>
                 </div>
                 <?php endif; ?>
@@ -384,12 +384,12 @@
                             <p style="color: #475569; font-size: 0.95rem; line-height: 1.6; margin: 0;">El ranking se calcula sumando el importe total de adjudicación de todos los contratos públicos ganados por cada empresa (CIF). Posicionamos en los primeros lugares a aquellas entidades que mayor volumen de capital público han acumulado.</p>
                         </div>
                         <div>
-                            <h3 style="font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-bottom: 8px;">¿De dónde provienen estos datos oficiales?</h3>
+                            <h3 style="font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-bottom: 8px;">¿De dónde provienen estos datos?</h3>
                             <p style="color: #475569; font-size: 0.95rem; line-height: 1.6; margin: 0;">Toda la información se extrae de forma directa y automatizada desde la Plataforma de Contratación del Sector Público (PLACSP). Garantizamos total transparencia al mostrar datos agregados de acceso público.</p>
                         </div>
                         <div>
                             <h3 style="font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-bottom: 8px;">¿Cada cuánto tiempo se actualizan las adjudicaciones?</h3>
-                            <p style="color: #475569; font-size: 0.95rem; line-height: 1.6; margin: 0;">Nuestras tablas resumen se mantienen sincronizadas de forma recurrente. A medida que el Estado publica nuevas adjudicaciones en los boletines oficiales, actualizamos los contadores y las posiciones del ranking.</p>
+                            <p style="color: #475569; font-size: 0.95rem; line-height: 1.6; margin: 0;">Incorporamos nuevas adjudicaciones de forma periódica, sin una frecuencia fija, y recalculamos los totales y las posiciones del ranking.</p>
                         </div>
                     </div>
                 </section>
@@ -413,7 +413,7 @@
         }
       },{
         "@type": "Question",
-        "name": "¿De dónde provienen estos datos oficiales?",
+        "name": "¿De dónde provienen estos datos?",
         "acceptedAnswer": {
           "@type": "Answer",
           "text": "Toda la información se extrae de forma directa y automatizada desde la Plataforma de Contratación del Sector Público (PLACSP)."

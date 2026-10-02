@@ -443,7 +443,7 @@
                 Plataforma de Contratación del Sector Público
             </div>
             <h1>Licitaciones del <span class="grad">Estado</span></h1>
-            <p>Qué empresas ganan los contratos públicos en España. Por Ministerio, Ayuntamiento u Órgano — con datos de contacto del Registro Mercantil.</p>
+            <p>Qué empresas ganan los contratos públicos en España. Por Ministerio, Ayuntamiento u Órgano — a partir de datos públicos de contratación.</p>
 
                 <?php 
                     $billingService = new \App\Services\BillingService();
@@ -548,7 +548,7 @@
                     </div>
                     <div>
                         <div class="dir-stat__num"><?= number_format($total_organs, 0, ',', '.') ?></div>
-                        <div class="dir-stat__label">Órganos Oficiales</div>
+                        <div class="dir-stat__label">Órganos de contratación</div>
                     </div>
                 </div>
                 <div class="dir-stat">
@@ -601,7 +601,7 @@
                             Ranking Top Empresas
                         </a>
                         <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                            <?php foreach ([2020, 2021, 2022, 2023, 2024, 2025, 2026] as $yr): ?>
+                            <?php foreach (array_reverse($anos ?? []) as $yr): ?>
                             <a href="<?= site_url('licitaciones-del-estado/ano-' . $yr) ?>" style="display:inline-flex; align-items:center; justify-content:center; background:#fff; border:1.5px solid #e2e8f0; border-radius:8px; padding:6px 12px; color:#475569; text-decoration:none; font-weight:700; font-size:0.85rem; transition:all 0.2s;" onmouseover="this.style.borderColor='#2152FF'; this.style.color='#2152FF'" onmouseout="this.style.borderColor='#e2e8f0'; this.style.color='#475569'">
                                 <?= $yr ?>
                             </a>
@@ -655,7 +655,7 @@
                                         <div style="background: linear-gradient(135deg, #1e3a8a 0%, #2152FF 100%); padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
                                             <div>
                                                 <p style="margin: 0 0 3px; font-size: 0.9rem; color: rgba(255,255,255,0.9); font-weight: 800;">📥 Descarga las empresas de todos estos órganos</p>
-                                                <p style="margin: 0; font-size: 0.78rem; color: rgba(255,255,255,0.65); font-weight: 600;">CSV con nombre, CIF, teléfono, CNAE, dirección y provincia · Del Registro Mercantil</p>
+                                                <p style="margin: 0; font-size: 0.78rem; color: rgba(255,255,255,0.65); font-weight: 600;">CSV con nombre, CIF, teléfono, CNAE, dirección y provincia, cuando constan en nuestra base de datos</p>
                                             </div>
                                             <div style="display: flex; align-items: center; gap: 14px; flex-shrink: 0;">
                                                 <div style="text-align: right;">
@@ -711,7 +711,7 @@
 <?php if ($total_organs > 10): ?>
 <div class="paywall-cta-banner">
     <div>
-        <p>📥 <strong><?= number_format($total_organs - 10, 0, ',', '.') ?> órganos más</strong> disponibles en el directorio. Descarga la base completa de empresas adjudicatarias con datos de contacto del Registro Mercantil.</p>
+        <p>📥 <strong><?= number_format($total_organs - 10, 0, ',', '.') ?> órganos más</strong> disponibles en el directorio. Descarga la base completa de empresas adjudicatarias con los datos de contacto que constan en nuestra base de datos.</p>
     </div>
     <a href="<?= $checkoutUrl ?>">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -744,7 +744,7 @@
                         Ranking Top Empresas
                     </a>
                     <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                        <?php foreach ([2020, 2021, 2022, 2023, 2024, 2025, 2026] as $yr): ?>
+                        <?php foreach (array_reverse($anos ?? []) as $yr): ?>
                         <a href="<?= site_url('licitaciones-del-estado/ano-' . $yr) ?>" style="display:inline-flex; align-items:center; justify-content:center; background:#fff; border:1.5px solid #e2e8f0; border-radius:8px; padding:6px 12px; color:#475569; text-decoration:none; font-weight:700; font-size:0.85rem; transition:all 0.2s;" onmouseover="this.style.borderColor='#2152FF'; this.style.color='#2152FF'" onmouseout="this.style.borderColor='#e2e8f0'; this.style.color='#475569'">
                             <?= $yr ?>
                         </a>
@@ -849,7 +849,7 @@
                             </h4>
                         </div>
                         <div style="padding: 20px; color: #475569; line-height: 1.6; font-size: 0.95rem;">
-                            La fuente oficial de los datos es la Plataforma de Contratación del Sector Público (PLACSP), gestionada por el Ministerio de Hacienda, que centraliza todas las licitaciones públicas de España.
+                            Los datos proceden de la información pública de la Plataforma de Contratación del Sector Público (PLACSP), gestionada por el Ministerio de Hacienda. APIEmpresas es un servicio privado, sin relación con ningún organismo público, y el listado puede no incluir todas las licitaciones.
                         </div>
                     </div>
 
@@ -873,7 +873,7 @@
                             </h4>
                         </div>
                         <div style="padding: 20px; color: #475569; line-height: 1.6; font-size: 0.95rem;">
-                            Sí, se incluyen los contratos menores adjudicados directamente (obras de valor inferior a 40.000 euros, y servicios/suministros de valor inferior a 15.000 euros), siempre y cuando la administración contratante los publique de acuerdo a la Ley de Contratos del Sector Público.
+                            Se incluyen contratos menores adjudicados directamente (obras de valor inferior a 40.000 euros, y servicios/suministros de valor inferior a 15.000 euros), siempre y cuando la administración contratante los publique de acuerdo a la Ley de Contratos del Sector Público.
                         </div>
                     </div>
                 </div>
@@ -888,7 +888,7 @@
                 "name": "¿Cuál es el origen de estos contratos públicos?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "La fuente oficial de los datos es la Plataforma de Contratación del Sector Público (PLACSP), gestionada por el Ministerio de Hacienda."
+                  "text": "Los datos proceden de la información pública de la Plataforma de Contratación del Sector Público (PLACSP). APIEmpresas es un servicio privado, sin relación con ningún organismo público."
                 }
               },{
                 "@type": "Question",
@@ -902,7 +902,7 @@
                 "name": "¿Incluye contratos menores?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Sí, se incluyen los contratos menores adjudicados directamente, siempre y cuando la administración contratante los publique."
+                  "text": "Se incluyen contratos menores adjudicados directamente, siempre y cuando la administración contratante los publique."
                 }
               }]
             }

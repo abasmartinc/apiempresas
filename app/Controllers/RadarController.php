@@ -1151,8 +1151,10 @@ class RadarController extends BaseController
             $builder->where('s.convocatoria', $billingService->resolveSubsidiesConvocatoria($convocatoria));
         }
         if ($year !== '') {
-            $builder->where('YEAR(s.fecha_concesion)', $year);
+            $builder->where(\App\Libraries\FondosPublicos::rangoAno('s.fecha_concesion', $year), null, false);
         }
+        // Sin personas físicas (becas, ayudas a particulares): ver Libraries/FondosPublicos.
+        $builder->where(\App\Libraries\FondosPublicos::soloJuridicas('s.company_cif'), null, false);
 
         // Fila a fila (getUnbufferedRow): antes getResultArray() cargaba todo el listado
         // en memoria, y hay convocatorias con cientos de miles de registros.
@@ -1255,8 +1257,9 @@ class RadarController extends BaseController
             $builder->where('c_contr.organo_contratacion', $billingService->resolveContractsOrgano($organo));
         }
         if ($year !== '') {
-            $builder->where('YEAR(c_contr.fecha_adjudicacion)', $year);
+            $builder->where(\App\Libraries\FondosPublicos::rangoAno('c_contr.fecha_adjudicacion', $year), null, false);
         }
+        $builder->where(\App\Libraries\FondosPublicos::soloJuridicas('c_contr.company_cif'), null, false);
 
         $n = 0;
         try {

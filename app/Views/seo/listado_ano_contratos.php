@@ -97,12 +97,12 @@
                 <?= number_format($total, 0, ',', '.') ?> contratos registrados
             </div>
             <h1>Contratos Públicos <span class="grad"><?= $year ?></span></h1>
-            <p>Listado oficial de contratos adjudicados en <?= $year ?> ordenados por importe. Volumen total adjudicado: <strong><?= number_format($total_amount, 0, ',', '.') ?> €</strong>.</p>
+            <p>Contratos públicos adjudicados en <?= $year ?> ordenados por importe. Volumen total adjudicado: <strong><?= number_format($total_amount, 0, ',', '.') ?> €</strong>.</p>
 
                 <?php if (empty($searchQuery) && $total > 0): ?>
                 <?php 
                     $billingService = new \App\Services\BillingService();
-                    $checkoutUrl = site_url('billing/contracts_checkout?ano=' . urlencode($year));
+                    $checkoutUrl = site_url('billing/contracts_checkout?year=' . urlencode($year));
                     $pricing = $billingService->getPublicFundsPricingDetails($total);
                     $dynamic_price = $pricing['base_price'];
                 ?>
@@ -112,7 +112,7 @@
                         Descargar CSV Completo — <?php if(isset($pricing) && $pricing['is_discounted']): ?><s style="opacity:0.7; font-size:0.9em; margin-right:6px;"><?= number_format($pricing['original_price'], 2, ',', '') ?>€</s><?php endif; ?><?= number_format($dynamic_price, 2, ',', '') ?>€ <span style="font-size: 0.85em; opacity: 0.9; font-weight: 600;">+ IVA</span>
                     </a>
                     <div style="font-size: 0.85rem; color: rgba(255,255,255,0.7); max-width: 480px; margin-top: 10px; margin-left: auto; margin-right: auto; line-height: 1.4;">
-                        Incluye todos los registros (<?= number_format($total, 0, ',', '.') ?>) cruzados con los datos del Registro Mercantil: Sector CNAE, Dirección, Provincia y Teléfono (cuando esté disponible).
+                        Incluye todos los registros (<?= number_format($total, 0, ',', '.') ?>) cruzados con nuestra base de datos de empresas: sector CNAE, dirección, provincia y teléfono, cuando constan.
                     </div>
                 </div>
                 <?php endif; ?>
@@ -179,7 +179,7 @@
                                         <?php if ($hasCompany): ?>
                                             <a href="<?= esc($cUrl) ?>" style="color: #0f172a; font-weight: 700; text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#2152FF'" onmouseout="this.style.color='#0f172a'"><?= esc($contract['company_name']) ?></a>
                                         <?php else: ?>
-                                            <span style="font-weight: 700; color: #0f172a;">Empresa <?= esc($contract['company_cif']) ?></span>
+                                            <span style="font-weight: 700; color: #0f172a;"><?= esc(!empty($contract['nombre_origen']) ? $contract['nombre_origen'] : 'Nombre no disponible') ?></span>
                                         <?php endif; ?>
                                         <br><span class="cif-badge">CIF: <?= esc($contract['company_cif']) ?></span>
                                     </td>
@@ -214,7 +214,7 @@
                         Descargar CSV Completo (<?= $year ?>) — <?php if(isset($pricing) && $pricing['is_discounted']): ?><s style="opacity:0.7; font-size:0.9em; margin-right:6px;"><?= number_format($pricing['original_price'], 2, ',', '') ?>€</s><?php endif; ?><?= number_format($dynamic_price, 2, ',', '') ?>€ <span style="font-size: 0.85em; opacity: 0.9; font-weight: 600;">+ IVA</span>
                     </a>
                     <div style="font-size: 0.75rem; color: #94a3b8; max-width: 320px; margin-left: auto; line-height: 1.4;">
-                        Incluye todos los registros (<?= number_format($total, 0, ',', '.') ?>) cruzados con los datos del Registro Mercantil: Sector CNAE, Dirección, Provincia y Teléfono (cuando esté disponible).
+                        Incluye todos los registros (<?= number_format($total, 0, ',', '.') ?>) cruzados con nuestra base de datos de empresas: sector CNAE, dirección, provincia y teléfono, cuando constan.
                     </div>
                 </div>
                 <?php endif; ?>
@@ -226,11 +226,11 @@
                 <!-- SEO Content -->
                 <section style="margin-top: 48px; padding-top: 40px; border-top: 1px solid #e2e8f0;">
                     <h2 style="font-size: 1.4rem; font-weight: 800; color: #0f172a; margin-bottom: 0.75rem; letter-spacing: -0.025em;">Contratación Pública en España: Año <?= $year ?></h2>
-                    <p style="color: #475569; font-size: 0.95rem; line-height: 1.7; margin-bottom: 1.5rem;">Este listado recoge todos los contratos públicos adjudicados en <?= $year ?> por órganos del Sector Público Estatal, Autonómico y Local. Los datos son extraídos directamente de la Plataforma de Contratación del Sector Público (PLACSP), garantizando total veracidad y transparencia.</p>
+                    <p style="color: #475569; font-size: 0.95rem; line-height: 1.7; margin-bottom: 1.5rem;">Este listado recoge contratos públicos adjudicados en <?= $year ?> por órganos del Sector Público Estatal, Autonómico y Local. Los datos proceden de la información pública de la Plataforma de Contratación del Sector Público (PLACSP). APIEmpresas es un servicio privado y el listado puede no estar completo.</p>
                     <div style="display: grid; gap: 24px;">
                         <div>
                             <h3 style="font-size: 1.05rem; font-weight: 700; color: #1e293b; margin-bottom: 8px;">¿Qué es la Plataforma de Contratación del Sector Público?</h3>
-                            <p style="color: #475569; font-size: 0.9rem; line-height: 1.6; margin: 0;">La PLACSP es el sistema oficial del Gobierno de España donde se publican todas las licitaciones y adjudicaciones de contratos públicos. Su uso es obligatorio para todos los órganos de contratación del Estado desde la Ley 9/2017 de Contratos del Sector Público.</p>
+                            <p style="color: #475569; font-size: 0.9rem; line-height: 1.6; margin: 0;">La PLACSP es la plataforma pública donde se publican todas las licitaciones y adjudicaciones de contratos públicos. Su uso es obligatorio para todos los órganos de contratación del Estado desde la Ley 9/2017 de Contratos del Sector Público.</p>
                         </div>
                         <div>
                             <h3 style="font-size: 1.05rem; font-weight: 700; color: #1e293b; margin-bottom: 8px;">¿Cómo puedo consultar la ficha de una empresa adjudicataria?</h3>
@@ -250,7 +250,7 @@
       "@context": "https://schema.org",
       "@type": "Dataset",
       "name": "Contratos Públicos Adjudicados en <?= $year ?>",
-      "description": "Listado oficial de <?= number_format($total, 0, ',', '.') ?> contratos públicos adjudicados en <?= $year ?> por órganos del Sector Público en España.",
+      "description": "Listado de <?= number_format($total, 0, ',', '.') ?> contratos públicos adjudicados en <?= $year ?> por órganos del Sector Público en España.",
       "url": "<?= site_url('licitaciones-del-estado/ano-' . $year) ?>",
       "creator": {
         "@type": "Organization",

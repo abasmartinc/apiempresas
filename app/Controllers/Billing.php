@@ -1259,6 +1259,11 @@ class Billing extends BaseController
     public function subsidies_checkout()
     {
         $params = $this->request->getGet();
+        // Las páginas de año enlazaban con ?ano= y el pedido lee year: se vendía la base completa.
+        if (isset($params['ano']) && !isset($params['year'])) {
+            $params['year'] = $params['ano'];
+        }
+        unset($params['ano']);
         return redirect()->to(site_url('checkout/subsidies-export?' . http_build_query($params)));
     }
 
@@ -1270,6 +1275,10 @@ class Billing extends BaseController
         $convocatoriaName = $convocatoria !== '' ? $this->billingService->resolveSubsidiesConvocatoria($convocatoria) : '';
 
         $totalCount = $this->billingService->countSubsidies($params);
+        if ($totalCount === 0) {
+            // Nada que vender (filtro sin registros de empresas o entidades)
+            return redirect()->to(site_url('subvenciones-empresas'));
+        }
         $pricing = $this->billingService->getPublicFundsPricingDetails($totalCount);
         $price = $pricing['base_price'];
         $tax = round($price * 0.21, 2);
@@ -1293,6 +1302,11 @@ class Billing extends BaseController
     public function contracts_checkout()
     {
         $params = $this->request->getGet();
+        // Las páginas de año enlazaban con ?ano= y el pedido lee year: se vendía la base completa.
+        if (isset($params['ano']) && !isset($params['year'])) {
+            $params['year'] = $params['ano'];
+        }
+        unset($params['ano']);
         return redirect()->to(site_url('checkout/contracts-export?' . http_build_query($params)));
     }
 
@@ -1304,6 +1318,10 @@ class Billing extends BaseController
         $organoName = $organo !== '' ? $this->billingService->resolveContractsOrgano($organo) : '';
 
         $totalCount = $this->billingService->countContracts($params);
+        if ($totalCount === 0) {
+            // Nada que vender (filtro sin registros de empresas o entidades)
+            return redirect()->to(site_url('licitaciones-del-estado'));
+        }
         $pricing = $this->billingService->getPublicFundsPricingDetails($totalCount);
         $price = $pricing['base_price'];
         $tax = round($price * 0.21, 2);

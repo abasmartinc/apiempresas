@@ -361,10 +361,10 @@
         <div class="container">
             <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.15); color: #34D399; padding: 6px 14px; border-radius: 99px; font-size: 0.85rem; font-weight: 700; margin-bottom: 1.5rem; border: 1px solid rgba(16, 185, 129, 0.25);">
                 <span style="display: inline-block; width: 6px; height: 6px; background: #34D399; border-radius: 99px; box-shadow: 0 0 8px #34D399;"></span>
-                Registros Oficiales del Estado
+                Datos de fuentes públicas
             </div>
             <h1>Convocatorias de <span class="grad">Subvenciones</span></h1>
-            <p>Directorio oficial de convocatorias públicas. Selecciona una convocatoria para conocer el listado de empresas beneficiarias, importes y fechas de concesión.</p>
+            <p>Convocatorias de subvenciones y ayudas públicas. Selecciona una para ver las empresas y entidades beneficiarias, los importes y las fechas de concesión.</p>
 
                 <?php 
                     $billingService = new \App\Services\BillingService();
@@ -465,7 +465,7 @@
                             Ranking Top Empresas
                         </a>
                         <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                            <?php foreach ([2022, 2023, 2024, 2025, 2026] as $yr): ?>
+                            <?php foreach (array_reverse($anos ?? []) as $yr): ?>
                             <a href="<?= site_url('subvenciones-empresas/ano-' . $yr) ?>" style="display:inline-flex; align-items:center; justify-content:center; background:#fff; border:1.5px solid #e2e8f0; border-radius:8px; padding:6px 12px; color:#475569; text-decoration:none; font-weight:700; font-size:0.85rem; transition:all 0.2s;" onmouseover="this.style.borderColor='#10b981'; this.style.color='#10b981'" onmouseout="this.style.borderColor='#e2e8f0'; this.style.color='#475569'">
                                 <?= $yr ?>
                             </a>
@@ -524,7 +524,7 @@
                                             </div>
                                         </a>
                                         <div style="font-size: 0.8rem; color: #64748b; margin-top: 6px; display: flex; gap: 12px;">
-                                            <span><strong><?= number_format($conv['total_amount'], 2, ',', '.') ?> €</strong> adjudicados</span>
+                                            <span><strong><?= number_format($conv['total_amount'], 2, ',', '.') ?> €</strong> concedidos</span>
                                         </div>
                                     </td>
                                     <td>
@@ -559,7 +559,7 @@
                         Ranking Top Empresas
                     </a>
                     <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                        <?php foreach ([2022, 2023, 2024, 2025, 2026] as $yr): ?>
+                        <?php foreach (array_reverse($anos ?? []) as $yr): ?>
                         <a href="<?= site_url('subvenciones-empresas/ano-' . $yr) ?>" style="display:inline-flex; align-items:center; justify-content:center; background:#fff; border:1.5px solid #e2e8f0; border-radius:8px; padding:6px 12px; color:#475569; text-decoration:none; font-weight:700; font-size:0.85rem; transition:all 0.2s;" onmouseover="this.style.borderColor='#10b981'; this.style.color='#10b981'" onmouseout="this.style.borderColor='#e2e8f0'; this.style.color='#475569'">
                             <?= $yr ?>
                         </a>
@@ -603,7 +603,7 @@
                             </div>
                             <span style="background: #10b981; color: #fff; font-size: 0.65rem; font-weight: 800; padding: 3px 8px; border-radius: 99px; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap;">Pago único</span>
                         </div>
-                        <p style="margin: 0; font-size: 0.85rem; color: #475569; line-height: 1.5;">Exporta el CSV completo de empresas subvencionadas con datos de contacto: teléfono, CNAE, dirección y provincia. Listo para tu CRM.</p>
+                        <p style="margin: 0; font-size: 0.85rem; color: #475569; line-height: 1.5;">Exporta el CSV de empresas y entidades subvencionadas. Añadimos teléfono, CNAE, dirección y provincia cuando constan en nuestra base de datos.</p>
                         <div style="margin-top: 4px;">
                             <a href="<?= $checkoutUrl ?>" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: #10b981; color: #fff; padding: 12px 16px; border-radius: 10px; font-weight: 800; font-size: 0.9rem; text-decoration: none; box-shadow: 0 4px 12px rgba(16,185,129,0.3); transition: all 0.2s; width: 100%;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='translateY(0)'">
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -641,13 +641,13 @@
             <!-- SEO Content & FAQs -->
             <div style="padding: 48px; background: #fff;">
                 <div style="max-width: 800px; margin: 0 auto;">
-                    <h2 style="font-size: 1.5rem; color: #0f172a; margin-bottom: 24px;">Directorio Oficial de Subvenciones en España</h2>
+                    <h2 style="font-size: 1.5rem; color: #0f172a; margin-bottom: 24px;">Subvenciones a empresas y entidades en España</h2>
                     <div style="color: #475569; font-size: 1rem; line-height: 1.7; margin-bottom: 32px;">
                         <p style="margin-bottom: 16px;">
-                            El buscador de <strong>subvenciones a empresas</strong> de APIEmpresas recopila, organiza y facilita el acceso a la información de todas las convocatorias de ayudas públicas gestionadas en España.
+                            El buscador de <strong>subvenciones a empresas</strong> de APIEmpresas recopila y ordena información pública sobre convocatorias de ayudas y las entidades que las reciben.
                         </p>
                         <p style="margin-bottom: 16px;">
-                            Nuestro directorio se actualiza diariamente con los datos procedentes del <strong>Sistema Nacional de Publicidad de Subvenciones y Ayudas Públicas (SNPSAP)</strong>. Gracias a esto, puedes buscar cualquier convocatoria (desde el Kit Digital hasta los grandes fondos Next Generation o PERTEs) y ver qué empresas han sido adjudicatarias, las cuantías y las fechas de concesión.
+                            Los datos proceden de la información pública del <strong>Sistema Nacional de Publicidad de Subvenciones y Ayudas Públicas (SNPSAP)</strong>. Puedes buscar una convocatoria y ver qué empresas y entidades la han recibido, las cuantías y las fechas de concesión. El listado no incluye todas las convocatorias ni ayudas concedidas a personas físicas.
                         </p>
                         <p>
                             La transparencia en el reparto de los fondos públicos es fundamental, y nuestro objetivo es proporcionar una herramienta ágil y accesible para investigadores, periodistas, competencia y ciudadanos.
@@ -664,7 +664,7 @@
                             </h4>
                         </div>
                         <div style="padding: 20px; color: #475569; line-height: 1.6; font-size: 0.95rem;">
-                            Todos los datos provienen del Sistema Nacional de Publicidad de Subvenciones y Ayudas Públicas, la base de datos oficial del Gobierno de España donde las administraciones (estatal, autonómica y local) están obligadas a reportar las concesiones.
+                            Los datos proceden de la información pública del Sistema Nacional de Publicidad de Subvenciones y Ayudas Públicas, donde las administraciones (estatal, autonómica y local) comunican las concesiones. APIEmpresas es un servicio privado, sin relación con ningún organismo público.
                         </div>
                     </div>
 
@@ -676,7 +676,7 @@
                             </h4>
                         </div>
                         <div style="padding: 20px; color: #475569; line-height: 1.6; font-size: 0.95rem;">
-                            Sí. Las convocatorias financiadas con el Mecanismo de Recuperación y Resiliencia (MRR), como por ejemplo el Kit Digital o los PERTE (Proyectos Estratégicos para la Recuperación y Transformación Económica), se gestionan a través de los ministerios y organismos españoles, por lo que están registradas y publicadas en nuestra base de datos.
+                            Las convocatorias financiadas con fondos europeos se gestionan a través de ministerios y organismos españoles y se publican en la misma fuente, así que pueden aparecer en el listado. No garantizamos que estén todas: usa el buscador para comprobar si está la que te interesa.
                         </div>
                     </div>
 
@@ -688,7 +688,7 @@
                             </h4>
                         </div>
                         <div style="padding: 20px; color: #475569; line-height: 1.6; font-size: 0.95rem;">
-                            Nuestro sistema sincroniza diariamente las nuevas concesiones publicadas. Las estadísticas globales de las convocatorias más subvencionadas se recalculan de forma automática cada madrugada para garantizar la máxima exactitud.
+                            Incorporamos nuevas concesiones de forma periódica, sin una frecuencia fija. La fecha de concesión de cada registro indica hasta cuándo llegan los datos.
                         </div>
                     </div>
                 </div>
@@ -703,7 +703,7 @@
                 "name": "¿De dónde proceden los datos de subvenciones?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Todos los datos provienen del Sistema Nacional de Publicidad de Subvenciones y Ayudas Públicas, la base de datos oficial del Gobierno de España."
+                  "text": "Los datos proceden de la información pública del Sistema Nacional de Publicidad de Subvenciones y Ayudas Públicas. APIEmpresas es un servicio privado, sin relación con ningún organismo público."
                 }
               },{
                 "@type": "Question",
@@ -717,7 +717,7 @@
                 "name": "¿Con qué frecuencia se actualiza el listado?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Nuestro sistema sincroniza diariamente las nuevas concesiones publicadas. Las estadísticas se recalculan automáticamente cada madrugada."
+                  "text": "Incorporamos nuevas concesiones de forma periódica, sin una frecuencia fija."
                 }
               }]
             }

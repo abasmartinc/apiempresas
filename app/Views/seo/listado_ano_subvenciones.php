@@ -97,12 +97,12 @@
                 <?= number_format($total, 0, ',', '.') ?> subvenciones registradas
             </div>
             <h1>Subvenciones a Empresas <span class="grad"><?= $year ?></span></h1>
-            <p>Listado oficial de subvenciones y ayudas públicas concedidas a empresas en <?= $year ?>. Importe total concedido: <strong><?= number_format($total_amount, 0, ',', '.') ?> €</strong>.</p>
+            <p>Subvenciones y ayudas públicas concedidas a empresas y entidades en <?= $year ?>. Importe total concedido: <strong><?= number_format($total_amount, 0, ',', '.') ?> €</strong>.</p>
 
                 <?php if (empty($searchQuery) && $total > 0): ?>
                 <?php 
                     $billingService = new \App\Services\BillingService();
-                    $checkoutUrl = site_url('billing/subsidies_checkout?ano=' . urlencode($year));
+                    $checkoutUrl = site_url('billing/subsidies_checkout?year=' . urlencode($year));
                     $pricing = $billingService->getPublicFundsPricingDetails($total);
                     $dynamic_price = $pricing['base_price'];
                 ?>
@@ -112,7 +112,7 @@
                         Descargar CSV Completo — <?php if(isset($pricing) && $pricing['is_discounted']): ?><s style="opacity:0.7; font-size:0.9em; margin-right:6px;"><?= number_format($pricing['original_price'], 2, ',', '') ?>€</s><?php endif; ?><?= number_format($dynamic_price, 2, ',', '') ?>€ <span style="font-size: 0.85em; opacity: 0.9; font-weight: 600;">+ IVA</span>
                     </a>
                     <div style="font-size: 0.85rem; color: rgba(255,255,255,0.7); max-width: 480px; margin-top: 10px; margin-left: auto; margin-right: auto; line-height: 1.4;">
-                        Incluye todos los registros (<?= number_format($total, 0, ',', '.') ?>) cruzados con los datos del Registro Mercantil: Sector CNAE, Dirección, Provincia y Teléfono (cuando esté disponible).
+                        Incluye todos los registros (<?= number_format($total, 0, ',', '.') ?>) cruzados con nuestra base de datos de empresas: sector CNAE, dirección, provincia y teléfono, cuando constan.
                     </div>
                 </div>
                 <?php endif; ?>
@@ -181,7 +181,7 @@
                                             <?php if (!empty($sub['raw_beneficiario'])): ?>
                                                 <span style="font-weight: 700; color: #0f172a;"><?= esc($sub['raw_beneficiario']) ?></span>
                                             <?php else: ?>
-                                                <span style="font-weight: 700; color: #0f172a;">Empresa <?= esc($sub['company_cif']) ?></span>
+                                                <span style="font-weight: 700; color: #0f172a;"><?= esc(!empty($sub['nombre_origen']) ? $sub['nombre_origen'] : 'Nombre no disponible') ?></span>
                                             <?php endif; ?>
                                         <?php endif; ?>
                                         <br><span class="cif-badge">CIF: <?= esc($sub['company_cif']) ?></span>
@@ -214,7 +214,7 @@
                         Descargar CSV Completo (<?= $year ?>) — <?php if(isset($pricing) && $pricing['is_discounted']): ?><s style="opacity:0.7; font-size:0.9em; margin-right:6px;"><?= number_format($pricing['original_price'], 2, ',', '') ?>€</s><?php endif; ?><?= number_format($dynamic_price, 2, ',', '') ?>€ <span style="font-size: 0.85em; opacity: 0.9; font-weight: 600;">+ IVA</span>
                     </a>
                     <div style="font-size: 0.75rem; color: #94a3b8; max-width: 320px; margin-left: auto; line-height: 1.4;">
-                        Incluye todos los registros (<?= number_format($total, 0, ',', '.') ?>) cruzados con los datos del Registro Mercantil: Sector CNAE, Dirección, Provincia y Teléfono (cuando esté disponible).
+                        Incluye todos los registros (<?= number_format($total, 0, ',', '.') ?>) cruzados con nuestra base de datos de empresas: sector CNAE, dirección, provincia y teléfono, cuando constan.
                     </div>
                 </div>
                 <?php endif; ?>
@@ -226,7 +226,7 @@
                 <!-- SEO Content -->
                 <section style="margin-top: 48px; padding-top: 40px; border-top: 1px solid #e2e8f0;">
                     <h2 style="font-size: 1.4rem; font-weight: 800; color: #0f172a; margin-bottom: 0.75rem; letter-spacing: -0.025em;">Subvenciones a Empresas en España: Año <?= $year ?></h2>
-                    <p style="color: #475569; font-size: 0.95rem; line-height: 1.7; margin-bottom: 1.5rem;">Este listado recoge todas las subvenciones y ayudas públicas concedidas a empresas en <?= $year ?>, extraídas de la Base de Datos Nacional de Subvenciones (BDNS). La transparencia en la concesión de fondos públicos es un derecho de todos los ciudadanos españoles, garantizado por la Ley 19/2013 de Transparencia.</p>
+                    <p style="color: #475569; font-size: 0.95rem; line-height: 1.7; margin-bottom: 1.5rem;">Este listado recoge subvenciones y ayudas públicas concedidas a empresas y entidades en <?= $year ?>, extraídas de la Base de Datos Nacional de Subvenciones (BDNS). La transparencia en la concesión de fondos públicos es un derecho de todos los ciudadanos españoles, garantizado por la Ley 19/2013 de Transparencia.</p>
                     <div style="display: grid; gap: 24px;">
                         <div>
                             <h3 style="font-size: 1.05rem; font-weight: 700; color: #1e293b; margin-bottom: 8px;">¿Qué es la Base de Datos Nacional de Subvenciones (BDNS)?</h3>
@@ -250,7 +250,7 @@
       "@context": "https://schema.org",
       "@type": "Dataset",
       "name": "Subvenciones a Empresas Concedidas en <?= $year ?>",
-      "description": "Listado oficial de <?= number_format($total, 0, ',', '.') ?> subvenciones concedidas a empresas en <?= $year ?> en España. Fuente: Base de Datos Nacional de Subvenciones (BDNS).",
+      "description": "Listado de <?= number_format($total, 0, ',', '.') ?> subvenciones concedidas a empresas y entidades en <?= $year ?> en España. Fuente: Base de Datos Nacional de Subvenciones (BDNS).",
       "url": "<?= site_url('subvenciones-empresas/ano-' . $year) ?>",
       "creator": {
         "@type": "Organization",
