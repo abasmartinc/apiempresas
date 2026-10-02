@@ -1054,7 +1054,7 @@ class Billing extends BaseController
         try {
             [, $params] = \App\Libraries\PaidExports::fromContext($ctx);
             $cache = \Config\Services::cache();
-            $clave = 'listado_preview_' . md5(json_encode($params));
+            $clave = 'listado_preview_v2_' . md5(json_encode($params));
             $filas = $cache->get($clave);
             if (!is_array($filas)) {
                 $filas = (new RadarController())->previewExport($params, 5);

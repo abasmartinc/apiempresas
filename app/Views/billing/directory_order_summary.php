@@ -206,10 +206,10 @@
                     </div>
 
                     <?php if (!empty($preview)): ?>
-                    <!-- Vista previa: primeras filas del listado, con contacto y nombres tapados -->
+                    <!-- Vista previa: filas repartidas por el listado, con contacto y nombres tapados -->
                     <div class="preview-box">
                         <h3>Así es el archivo que vas a descargar</h3>
-                        <p class="preview-sub">Las primeras <?= count($preview) ?> empresas de tu listado. Los teléfonos, las direcciones y los nombres de personas van tapados aquí; en el CSV están completos.</p>
+                        <p class="preview-sub"><?= count($preview) ?> empresas de tu listado, tomadas de distintos puntos (de las más recientes a las más antiguas). Los teléfonos, las direcciones y los nombres de personas van tapados aquí; en el CSV están completos.</p>
                         <div class="preview-scroll" tabindex="0" role="region" aria-label="Vista previa del listado">
                             <table class="preview-table">
                                 <thead>

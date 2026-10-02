@@ -772,9 +772,8 @@ class RadarController extends BaseController
     }
 
     /**
-     * Vista previa del listado antes de pagar: las primeras filas del MISMO listado que
-     * se descargará (misma consulta y mismo orden que streamExportData), con las mismas
-     * columnas. Los datos de contacto y los nombres de personas van tapados: se ve que
+     * Vista previa del listado antes de pagar: filas del MISMO listado que se descargará
+     * (misma consulta y mismos filtros que streamExportData), con las mismas columnas. Los datos de contacto y los nombres de personas van tapados: se ve que
      * están, no lo que dicen.
      *
      * @return array<int, array<string, string>> filas con las cabeceras del CSV como clave
@@ -782,9 +781,35 @@ class RadarController extends BaseController
     public function previewExport(array $params, int $n = 5): array
     {
         $params['is_historical'] = '1';
+        $n  = max(1, min(10, $n));
         $db = \Config\Database::connect();
-        [$builder] = $this->buildExportQuery($db, $params);
-        $rows = $this->enrichExportBatch($db, $builder->orderBy('id', 'DESC')->limit(max(1, min(10, $n)))->get()->getResultArray());
+
+        // Filas repartidas por todo el listado, no las N más recientes: las altas de los
+        // últimos días aún no tienen CIF, sector ni teléfono (en Soria, 4 de 5 sin CIF) y
+        // daban una imagen peor que la del archivo. Tampoco se eligen las más completas:
+        // se toma la empresa que cae en el 10 %, 30 %, 50 %, 70 % y 90 % del rango de ids.
+        $extremo = function (string $dir) use ($db, $params): int {
+            [$b] = $this->buildExportQuery($db, $params);
+            $r = $b->orderBy('id', $dir)->limit(1)->get()->getRowArray();
+
+            return (int) ($r['id'] ?? 0);
+        };
+        $max = $extremo('DESC');
+        $min = $extremo('ASC');
+        if ($max <= 0) {
+            return [];
+        }
+
+        $rows = [];
+        for ($i = 0; $i < $n; $i++) {
+            $umbral = (int) round($max - ($max - $min) * (($i + 0.5) / $n));
+            [$b] = $this->buildExportQuery($db, $params);
+            $r = $b->where('id <=', $umbral)->orderBy('id', 'DESC')->limit(1)->get()->getRowArray();
+            if ($r && !isset($rows[$r['id']])) {
+                $rows[$r['id']] = $r;
+            }
+        }
+        $rows = $this->enrichExportBatch($db, array_values($rows));
 
         $out = [];
         foreach ($rows as $c) {
