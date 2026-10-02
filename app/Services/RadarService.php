@@ -101,6 +101,8 @@ class RadarService
 
         $builder->where('fecha_constitucion IS NOT NULL');
         $builder->where('fecha_constitucion <=', date('Y-m-d'));
+        // Fecha de constitución posterior al alta: error de carga (ver getContextStats).
+        $builder->where('(created_at IS NULL OR fecha_constitucion <= DATE(created_at))', null, false);
         $builder->orderBy('fecha_constitucion', 'DESC');
         
         return $builder->get($limit)->getResultArray();
@@ -118,6 +120,10 @@ class RadarService
         $builder->where('fecha_constitucion IS NOT NULL');
         // Solo los últimos 30 días: sin este límite el recuento recorría toda la tabla.
         $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-30 days')));
+        // Sin fechas futuras ni posteriores al alta de la empresa: hay empresas que entran con
+        // una fecha de constitución que aún no ha llegado y aparecían como nuevas ese día.
+        $builder->where('fecha_constitucion <=', date('Y-m-d'));
+        $builder->where('(created_at IS NULL OR fecha_constitucion <= DATE(created_at))', null, false);
         
         $query = $builder->select("
             COUNT(CASE WHEN fecha_constitucion = '" . date('Y-m-d') . "' THEN 1 END) as hoy,

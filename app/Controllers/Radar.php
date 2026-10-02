@@ -131,19 +131,17 @@ class Radar extends BaseController
             crs.priority_level,
             crs.score_reasons
         ');
-        $builder->join('company_radar_scores crs', 'crs.company_id = companies.id', 'inner');
-        
-        $builder->where('crs.score_total >=', 80);
-        $builder->whereIn('crs.priority_level', ['alta', 'muy_alta']);
-        
-        $builder->groupStart()
-            ->like('companies.cnae_label', 'Tecnolog')
-            ->orLike('companies.cnae_label', 'Consult')
-            ->orLike('companies.cnae_label', 'Inform')
-            ->orLike('companies.cnae_label', 'Marketing')
-            ->orLike('companies.cnae_label', 'Constru')
-            ->orLike('companies.cnae_label', 'Ingenier')
-        ->groupEnd();
+        // Las 5 constituciones más recientes, con puntuación si la tienen. Antes se exigía
+        // puntuación de 80 o más y ciertos sectores: la escala actual no pasa de ~76, así
+        // que solo salían empresas de hace meses.
+        $builder->join('company_radar_scores crs', 'crs.company_id = companies.id', 'left');
+        $builder->where('companies.fecha_constitucion IS NOT NULL', null, false);
+        $builder->where('companies.fecha_constitucion >=', date('Y-m-d', strtotime('-30 days')));
+        $builder->where('companies.fecha_constitucion <=', date('Y-m-d'));
+        // Fechas de constitución posteriores al alta: son un error de carga, fuera.
+        $builder->where('(companies.created_at IS NULL OR companies.fecha_constitucion <= DATE(companies.created_at))', null, false);
+        $builder->where('companies.cnae_label IS NOT NULL', null, false);
+        $builder->where('companies.cnae_label !=', '');
 
         $builder->orderBy('companies.fecha_constitucion', 'DESC');
         $builder->orderBy('crs.score_total', 'DESC');
