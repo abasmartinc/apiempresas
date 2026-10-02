@@ -71,8 +71,8 @@ class EmbudoListados extends BaseCommand
         }
 
         // Compras cobradas (una por sesión de pago)
-        $compras = $ingresos = 0;
-        $comprasProvincia = [];
+        $compras = $ingresos = $sinDescargar = $conFallos = 0;
+        $comprasProvincia = $pendientes = [];
         foreach (glob(WRITEPATH . 'listados/*.json') ?: [] as $archivo) {
             $d = json_decode((string) file_get_contents($archivo), true);
             if (!is_array($d) || empty($d['pagado_en']) || $d['pagado_en'] < $desde) {
@@ -80,6 +80,16 @@ class EmbudoListados extends BaseCommand
             }
             $compras++;
             $ingresos += (float) ($d['importe'] ?? 0);
+            // Compras que no han llegado a descargarse enteras (seguimiento desde el 02-10-2026)
+            if (isset($d['descargas']) || isset($d['descargas_fallidas'])) {
+                if ((int) ($d['descargas'] ?? 0) === 0) {
+                    $sinDescargar++;
+                    $pendientes[] = [(string) ($d['pagado_en'] ?? ''), (string) ($d['email'] ?? ''), (string) ($d['session_id'] ?? ''), (int) ($d['descargas_fallidas'] ?? 0)];
+                }
+                if ((int) ($d['descargas_fallidas'] ?? 0) > 0) {
+                    $conFallos++;
+                }
+            }
             $p = trim((string) ($d['contexto']['provincia'] ?? '')) ?: '(sin provincia)';
             $comprasProvincia[$p] = ($comprasProvincia[$p] ?? 0) + 1;
         }
@@ -94,6 +104,12 @@ class EmbudoListados extends BaseCommand
         $tabla[] = ['COMPRAS COBRADAS', $compras, '', $base > 0 ? round($compras * 100 / $base, 1) . ' %' : '—'];
         CLI::table($tabla, ['Paso', 'Eventos', 'Personas', '% sobre quien ve el resumen']);
         CLI::write('Ingresos (con IVA): ' . number_format($ingresos, 2, ',', '.') . ' €');
+        if ($sinDescargar > 0 || $conFallos > 0) {
+            CLI::write("Compras con intentos de descarga y ninguna completa: {$sinDescargar} · con algún intento fallido o cortado: {$conFallos}", $sinDescargar > 0 ? 'red' : 'yellow');
+            if ($pendientes) {
+                CLI::table($pendientes, ['Pagado', 'Cliente', 'Sesión de Stripe', 'Intentos fallidos']);
+            }
+        }
 
         if ($porProvincia || $comprasProvincia) {
             CLI::newLine();

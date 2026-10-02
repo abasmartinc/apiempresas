@@ -559,6 +559,11 @@
                     ✓ Precio máximo: por muchas empresas que tenga el listado, nunca pagas más de <?= number_format($pricing['tope'] ?? 149, 0, ',', '.') ?> € + IVA.
                 </div>
                 <?php endif; ?>
+                <?php /* Opción "solo con teléfono": lleva al resumen de compra con ese filtro, donde se ve
+                         cuántas son y su precio (aquí no se cuenta para no cargar la página). */ ?>
+                <div style="font-size: 0.8rem; max-width: 280px; margin: 0 0 6px auto;">
+                    <a href="<?= $checkoutUrl . (strpos($checkoutUrl, '?') !== false ? '&' : '?') ?>has_phone=1" rel="nofollow" data-track-event="directory_phone_offer_click" style="color: #6ee7b7; font-weight: 700; text-decoration: underline;">¿Solo las que tienen teléfono? Ver cuántas son y su precio →</a>
+                </div>
                 <div style="font-size: 0.75rem; color: #94a3b8; max-width: 280px; margin-left: auto;">
                     Incluye: CIF, Razón social, Dirección, CNAE, Provincia, Fecha constitución, Capital Social, Socio Único y Cargos. <strong style="color: #64748b; font-weight: 600;">(Puede haber empresas sin teléfono)</strong>.
                 </div>

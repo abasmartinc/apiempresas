@@ -153,6 +153,23 @@ class PaidExports
     }
 
     /**
+     * Sesión de pago de Stripe a la que pertenece esta descarga ('' si no se sabe, p. ej.
+     * en modo simulador). Sirve para apuntar la descarga en la compra y avisar si falla.
+     */
+    public static function sesionStripe(\CodeIgniter\HTTP\IncomingRequest $request, string $kind): string
+    {
+        $t = (string) ($request->getGet('t') ?? $request->getPost('t') ?? '');
+        if ($t !== '' && preg_match('/^[a-f0-9]{32}$/', $t)) {
+            $p = ((array) (session(self::KEY) ?? []))[$t] ?? null;
+
+            return (is_array($p) && ($p['kind'] ?? '') === $kind) ? (string) ($p['stripe'] ?? '') : '';
+        }
+        $sid = (string) ($request->getGet('session_id') ?? '');
+
+        return preg_match('/^cs_(live|test)_[A-Za-z0-9]{10,}$/', $sid) ? $sid : '';
+    }
+
+    /**
      * Enlace permanente (30 días) de descarga para el correo.
      */
     public static function urlCorreo(string $sessionId, array $ctx): string

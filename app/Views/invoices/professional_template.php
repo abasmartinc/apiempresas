@@ -1,8 +1,12 @@
+<?php
+$isRectificativa = ((float)($invoice->total_amount ?? 0) < 0);
+$rectified_invoice = $rectified_invoice ?? null;
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Factura <?= $invoice->invoice_number ?></title>
+    <title><?= $isRectificativa ? 'Factura Rectificativa ' : 'Factura ' ?><?= $invoice->invoice_number ?></title>
     <style>
         /* PDF Design System - Corporate Premium */
         @page {
@@ -203,9 +207,9 @@
             right: 100px;
             opacity: 0.08;
             transform: rotate(-30deg);
-            border: 8px solid #166534;
-            color: #166534;
-            font-size: 60pt;
+            border: 8px solid <?= $isRectificativa ? '#dc2626' : '#166534' ?>;
+            color: <?= $isRectificativa ? '#dc2626' : '#166534' ?>;
+            font-size: <?= $isRectificativa ? '42pt' : '60pt' ?>;
             font-weight: bold;
             padding: 10px 30px;
             border-radius: 20px;
@@ -241,7 +245,7 @@
     <div class="header-bar"></div>
     
     <!-- Paid Stamp Background -->
-    <div class="paid-stamp">PAGADA</div>
+    <div class="paid-stamp"><?= $isRectificativa ? 'RECTIFICATIVA' : 'PAGADA' ?></div>
 
     <div class="container">
         <!-- Header Section -->
@@ -275,12 +279,14 @@
                     </div>
                 </td>
                 <td class="invoice-section">
-                    <div class="invoice-title">FACTURA</div>
-                    <div class="status-badge">DOCUMENTO PAGADO</div>
+                    <div class="invoice-title"><?= $isRectificativa ? 'FACTURA RECTIFICATIVA' : 'FACTURA' ?></div>
+                    <div class="status-badge" style="<?= $isRectificativa ? 'background-color: #fee2e2; color: #991b1b;' : '' ?>">
+                        <?= $isRectificativa ? 'DOCUMENTO RECTIFICATIVO' : 'DOCUMENTO PAGADO' ?>
+                    </div>
                     <div style="margin-top: 15px; color: #475569; font-size: 10pt;">
                         FACTURA Nº: <strong><?= $invoice->invoice_number ?></strong><br>
                         FECHA EMISIÓN: <?= date('d/m/Y', strtotime($invoice->created_at)) ?><br>
-                        MODO DE PAGO: Tarjeta (Stripe)
+                        MODO DE PAGO: <?= $isRectificativa ? 'Rectificación / Abono' : 'Tarjeta (Stripe)' ?>
                     </div>
                 </td>
             </tr>
@@ -303,9 +309,16 @@
                 <td style="padding-left: 20px;">
                     <span class="section-label">Detalles del Servicio</span>
                     <div class="info-content">
+                        <?php if ($isRectificativa && !empty($rectified_invoice)): ?>
+                        <strong>Factura Rectificada:</strong><br>
+                        <?= esc($rectified_invoice) ?><br>
+                        <strong>Motivo de Rectificación:</strong><br>
+                        Anulación por emisión errónea<br>
+                        <?php else: ?>
                         <strong>Periodo de Facturación:</strong><br>
                         <?= date('d/m/Y', strtotime($invoice->created_at)) ?> — 
                         <?= date('d/m/Y', strtotime('+1 month', strtotime($invoice->created_at))) ?><br>
+                        <?php endif; ?>
                         <strong>Referencia:</strong> INV-<?= substr(md5($invoice->id), 0, 8) ?>
                     </div>
                 </td>
@@ -324,13 +337,20 @@
             <tbody>
                 <tr>
                     <td class="item-description">
+                        <?php if ($isRectificativa): ?>
+                        <strong>Factura Rectificativa — Anulación Plan <?= esc($plan_name) ?></strong>
+                        <div class="item-subtext">
+                            Rectificación y anulación de la factura <?= esc($rectified_invoice ?? '') ?> emitida por error. Abono íntegro de importes.
+                        </div>
+                        <?php else: ?>
                         <strong>Suscripción mensual API de verificación mercantil – Plan <?= esc($plan_name) ?></strong>
                         <div class="item-subtext">
                             Acceso full API, soporte prioritario 24/7 y actualizaciones en tiempo real.
                         </div>
+                        <?php endif; ?>
                     </td>
                     <td style="text-align: center;">1</td>
-                    <td style="text-align: right; font-weight: bold; color: #1e293b;">
+                    <td style="text-align: right; font-weight: bold; color: <?= $isRectificativa ? '#dc2626' : '#1e293b' ?>;">
                         <?= number_format($invoice->amount, 2, ',', '.') ?> €
                     </td>
                 </tr>
@@ -343,8 +363,12 @@
                 <td class="notes-area">
                     <span class="section-label">Notas Adicionales</span>
                     <p style="margin-top: 0; line-height: 1.4;">
+                        <?php if ($isRectificativa): ?>
+                        Factura rectificativa emitida de conformidad con el art. 15 del Real Decreto 1619/2012 por emisión errónea de la factura <?= esc($rectified_invoice ?? '') ?>. Este documento regulariza la facturación y anula los importes imputados.
+                        <?php else: ?>
                         Gracias por confiar en APIEmpresas. Los cargos aparecerán en su extracto bancario bajo el nombre de "APIEMPRESAS". 
                         Este documento sirve como comprobante legal de su suscripción activa.
+                        <?php endif; ?>
                     </p>
                     <div style="margin-top: 15px;">
                         <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH5QgKDAAAB8A/zQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLm3EAAAF8klEQVR42u2cf0BUVRTHv8+VZWVF/XGXVYIUK1S0LCX8kSBYloZlSloZloZlSloZloZlbGVaGZaGZUlSGRiZkVEZZWRUhmVkRkZmZGSMRpJRmZEJGZFZkeGdmX7H4zV/u/uWPXv37n2/M+/N3XvPue+++865773z7rn37rnn3nvvPW973nvvPe973nvve9/77nvve9/77nvve9/77nvve9/77nvve9/77nvve9/77nvve9/77nvve9/77nvve9/77nvve9/77nvve9/77nvve9/77nvve9/77nvve9/77nvvee973/uW9773vfe9733ve9/73vee9773vfe9733ve9/73vee9773vfe9733ve9/77nvve9/73nvve9/73vee9773vfe9733ve9/73vee9773vfe9733ve+9773vfe9/73vee9773vfe9733ve+9773vfe9733ve+9773vfe9733ve+9773vfe9733ve+9773vfe9733ve+9773vfe9733ve9733ve9733ve+9773vfe9733ve9733vve9773vfe9733ve+9773vfe9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733vve9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733ve+9733veXm9P8AEl08U+AAAAAElFTkSuQmCC" width="60" style="opacity: 0.5;">
@@ -362,7 +386,7 @@
                         </tr>
                         <tr class="row-grand-total">
                             <td class="grand-total-label">TOTAL</td>
-                            <td class="grand-total-value"><?= number_format($invoice->total_amount, 2, ',', '.') ?> €</td>
+                            <td class="grand-total-value" style="<?= $isRectificativa ? 'color: #dc2626;' : '' ?>"><?= number_format($invoice->total_amount, 2, ',', '.') ?> €</td>
                         </tr>
                     </table>
                 </td>

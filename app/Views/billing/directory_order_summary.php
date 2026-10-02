@@ -404,6 +404,10 @@
                             <input type="email" id="quoteEmail" name="email" required placeholder="tu@empresa.com" autocomplete="email" value="<?= esc((string) (session('user_email') ?? '')) ?>">
                             <button type="submit" id="quoteBtn">Enviar</button>
                         </div>
+                        <?php if (filter_var(env('TURNSTILE_ENABLED', false), FILTER_VALIDATE_BOOLEAN)): // mismo interruptor que login, registro y muestra gratuita ?>
+                        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+                        <div class="cf-turnstile" data-sitekey="<?= esc(env('TURNSTILE_SITE_KEY')) ?>" data-theme="light" data-appearance="interaction-only" style="margin-top: 8px;"></div>
+                        <?php endif; ?>
                         <div class="quote-msg" id="quoteMsg" role="status" style="color:#64748b; font-weight:500;">Un solo correo con el enlace a este listado. No te apuntamos a ninguna lista.</div>
                     </form>
                     <script>
@@ -422,7 +426,7 @@
                                     msg.textContent = d.message || (d.success ? 'Enviado. Revisa tu bandeja de entrada.' : 'No hemos podido enviarlo.');
                                     msg.style.color = d.success ? '#047857' : '#b91c1c';
                                     msg.style.fontWeight = '700';
-                                    if (d.success) { btn.textContent = 'Enviado ✓'; if (window.trackEvent) trackEvent('directory_quote_request', window.AE_LISTADO || {}); } else { btn.disabled = false; btn.textContent = 'Enviar'; }
+                                    if (d.success) { btn.textContent = 'Enviado ✓'; if (window.trackEvent) trackEvent('directory_quote_request', window.AE_LISTADO || {}); } else { btn.disabled = false; btn.textContent = 'Enviar'; if (window.turnstile && f.querySelector('.cf-turnstile')) { try { turnstile.reset(); } catch (e) {} } }
                                 })
                                 .catch(function () { msg.textContent = 'Error de conexión. Inténtalo de nuevo.'; msg.style.color = '#b91c1c'; btn.disabled = false; btn.textContent = 'Enviar'; });
                         });

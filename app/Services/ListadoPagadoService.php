@@ -106,6 +106,103 @@ class ListadoPagadoService
         return PaidExports::urlCorreo($sessionId, $ctx) . '&formato=xlsx';
     }
 
+    /**
+     * Apunta una descarga en la compra (writable/listados/{sesión}.json): cuántas veces
+     * se ha descargado, cuándo y cómo acabó. Sirve para atender un "no me llegó el
+     * archivo" y para ver si un enlace se está compartiendo.
+     *
+     * $estado: 'ok' (archivo completo), 'cortada' (el cliente cerró o perdió la conexión)
+     * o 'error' (fallo nuestro: excepción, memoria o tiempo).
+     */
+    public function registrarDescarga(string $sessionId, string $estado, string $formato, int $filas, string $detalle = ''): void
+    {
+        $sessionId = preg_replace('/[^A-Za-z0-9_]/', '', $sessionId);
+        $f = WRITEPATH . 'listados/' . $sessionId . '.json';
+        if ($sessionId === '' || !is_file($f)) {
+            return;   // compra sin ficha (modo simulador o anterior al 01-10-2026)
+        }
+        $fp = @fopen($f, 'c+');
+        if (!$fp) {
+            return;
+        }
+        try {
+            flock($fp, LOCK_EX);
+            $d = json_decode((string) stream_get_contents($fp), true);
+            if (!is_array($d)) {
+                return;
+            }
+            $d['descargas']        = (int) ($d['descargas'] ?? 0) + ($estado === 'ok' ? 1 : 0);
+            $d['descargas_fallidas'] = (int) ($d['descargas_fallidas'] ?? 0) + ($estado === 'ok' ? 0 : 1);
+            if ($estado === 'ok') {
+                $d['ultima_descarga'] = date('Y-m-d H:i:s');
+            }
+            $log   = is_array($d['descargas_log'] ?? null) ? $d['descargas_log'] : [];
+            $log[] = array_filter([
+                'fecha'   => date('Y-m-d H:i:s'),
+                'estado'  => $estado,
+                'formato' => $formato,
+                'filas'   => $filas,
+                'detalle' => mb_substr($detalle, 0, 300, 'UTF-8'),
+            ], static fn ($v) => $v !== '');
+            $d['descargas_log'] = array_slice($log, -30);   // las 30 últimas
+
+            ftruncate($fp, 0);
+            rewind($fp);
+            fwrite($fp, json_encode($d, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        } finally {
+            flock($fp, LOCK_UN);
+            fclose($fp);
+        }
+    }
+
+    /**
+     * Correo interno cuando una descarga pagada falla por nuestra parte. Antes solo se
+     * sabía si el cliente escribía. Uno por compra y hora como mucho.
+     */
+    public function avisarFallo(string $sessionId, string $formato, int $filas, string $detalle): void
+    {
+        try {
+            $cache = \Config\Services::cache();
+            $clave = 'listado_fallo_' . md5($sessionId ?: $detalle);
+            if ($cache->get($clave)) {
+                return;
+            }
+            $cache->save($clave, 1, 3600);
+
+            $limpio = preg_replace('/[^A-Za-z0-9_]/', '', $sessionId);
+            $f = WRITEPATH . 'listados/' . $limpio . '.json';
+            $d = ($limpio !== '' && is_file($f)) ? json_decode((string) file_get_contents($f), true) : null;
+            $titulo  = is_array($d) && is_array($d['contexto'] ?? null) ? $this->titulo($d['contexto']) : '(compra sin ficha)';
+            $cliente = is_array($d) ? (string) ($d['email'] ?? '') : '';
+            $enlace  = is_array($d) && is_array($d['contexto'] ?? null) ? PaidExports::urlCorreo($limpio, $d['contexto']) : '';
+
+            $html = '<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#0f172a">'
+                  . '<p><strong>Una descarga de listado pagado ha fallado.</strong></p>'
+                  . '<ul>'
+                  . '<li>Listado: ' . esc($titulo) . '</li>'
+                  . '<li>Cliente: ' . esc($cliente !== '' ? $cliente : 'desconocido') . '</li>'
+                  . '<li>Sesión de Stripe: ' . esc($sessionId !== '' ? $sessionId : 'desconocida') . '</li>'
+                  . '<li>Formato: ' . esc($formato) . ' · filas escritas antes del fallo: ' . number_format($filas, 0, ',', '.') . '</li>'
+                  . '<li>Motivo: ' . esc($detalle) . '</li>'
+                  . '<li>Hora: ' . date('d/m/Y H:i:s') . '</li>'
+                  . '</ul>'
+                  . ($enlace !== '' ? '<p>Enlace de descarga del cliente (para probarlo): <a href="' . esc($enlace, 'attr') . '">' . esc($enlace) . '</a></p>' : '')
+                  . '<p>El cliente no ha recibido ningún aviso. Si el fallo se repite, escríbele y envíale el archivo.</p>'
+                  . '</div>';
+
+            $mail = \Config\Services::email();
+            $mail->clear(true);
+            $mail->setFrom(env('email.fromEmail', 'soporte@apiempresas.es'), env('email.fromName', 'APIEmpresas.es'));
+            $mail->setTo(env('LISTADOS_ALERTA_EMAIL', 'papelo.amh@gmail.com'));
+            $mail->setSubject('⚠ Fallo en la descarga de un listado pagado');
+            $mail->setMailType('html');
+            $mail->setMessage($html);
+            $mail->send(false);
+        } catch (\Throwable $e) {
+            log_message('error', '[ListadoPagado] No se pudo avisar del fallo de descarga: ' . $e->getMessage());
+        }
+    }
+
     /** Índice por usuario: writable/listados/usuarios/{id}.json → [session_id, …] */
     private function rutaIndice(int $userId): string
     {
@@ -177,6 +274,8 @@ class ListadoPagadoService
                 'caduca'  => date('d/m/Y', $caduca),
                 'vigente' => $caduca > time(),
                 'ref'     => 'EXC-' . strtoupper(substr($sessionId, -8)),
+                'descargas'       => (int) ($d['descargas'] ?? 0),
+                'ultima_descarga' => !empty($d['ultima_descarga']) ? date('d/m/Y', (int) strtotime((string) $d['ultima_descarga'])) : '',
                 'orden'   => $pagado,
             ];
         }

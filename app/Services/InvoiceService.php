@@ -104,7 +104,7 @@ class InvoiceService
         return $invoice;
     }
 
-    public function generatePdf($invoice, $planName)
+    public function generatePdf($invoice, $planName, array $extraData = [])
     {
         $options = new Options();
         $options->set('isHtml5ParserEnabled', true);
@@ -112,10 +112,12 @@ class InvoiceService
         
         $dompdf = new Dompdf($options);
         
-        $html = view('invoices/professional_template', [
+        $viewData = array_merge([
             'invoice'   => $invoice,
             'plan_name' => $planName
-        ]);
+        ], $extraData);
+
+        $html = view('invoices/professional_template', $viewData);
 
         $dompdf->loadHtml($html);
         $dompdf->setPaper('A4', 'portrait');

@@ -158,8 +158,8 @@
                     </h1>
 
                     <p style="font-size: 0.95rem; color: #64748b; line-height: 1.6; margin-bottom: 20px;">
-                        Listado completo de empresas pertenecientes a <strong><?= esc($display_name ?? '') ?></strong>.
-                        Datos enriquecidos cruzando la base de datos pública con el Registro Mercantil. Ideal para prospección B2B y cualificación de leads con liquidez.
+                        Listado de los registros de <strong><?= esc($display_name ?? '') ?></strong>.
+                        Cada registro lleva los datos públicos de la concesión o adjudicación y, cuando la empresa está en nuestra base de datos, su teléfono, sector, provincia y dirección. Una misma empresa puede aparecer en varios registros.
                     </p>
 
                     <!-- Estadísticas clave -->
@@ -175,14 +175,14 @@
                             <div class="stat-box-sub">Descarga tras el pago</div>
                         </div>
                         <div class="stat-box">
-                            <div class="stat-box-label">Precio por empresa</div>
+                            <div class="stat-box-label">Precio por registro</div>
                             <div class="stat-box-value"><?= $total_count > 0 ? number_format($price / $total_count, 4, ',', '.') : '—' ?>€</div>
                             <div class="stat-box-sub">Coste unitario</div>
                         </div>
                         <div class="stat-box">
                             <div class="stat-box-label">Fuente</div>
-                            <div class="stat-box-value">BOE / RM</div>
-                            <div class="stat-box-sub">Datos oficiales + Enriquecidos</div>
+                            <div class="stat-box-value">Datos públicos</div>
+                            <div class="stat-box-sub">Cruzados con nuestra base de empresas</div>
                         </div>
                     </div>
 
@@ -209,19 +209,20 @@
                     <?php if (isset($has_phone) && $has_phone == '1'): ?>
                     <div class="disclaimer-box" style="background-color: #f0fdf4; border-color: #bbf7d0; color: #166534;">
                         ✅ <strong>Este listado SÍ incluye teléfono de contacto.</strong><br>
-                        Has seleccionado el filtro exclusivo de empresas con teléfono. Contiene datos registrales oficiales (identificadores, razón social, actividad) y los números de teléfono recopilados (fijos y móviles).
+                        Has seleccionado solo empresas con teléfono. Contiene los datos públicos de cada registro y los teléfonos que tenemos de cada empresa (fijos y móviles).
                     </div>
                     <?php else: ?>
                     <div class="disclaimer-box">
                         ⚠️ <strong>Puede haber empresas en este listado sin teléfono.</strong><br>
-                        Contiene datos registrales oficiales y teléfonos (cuando están disponibles).
+                        Contiene los datos públicos de cada registro y el teléfono de la empresa cuando lo tenemos.
                         Es perfecto para cruzar con otras fuentes, validar CIFs o analizar el tejido empresarial de una zona.
                     </div>
                     <?php endif; ?>
 
                     <div class="guarantee-box" style="margin-top: 16px;">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                        <p><strong>Garantía de datos:</strong> Extraídos directamente de boletines oficiales (BOE) y enriquecidos con datos del Registro Mercantil Central. Pago seguro 256-bit SSL gestionado por Stripe.</p>
+                        <?php /* Sin nombrar la fuente concreta (antes "BOE" y "Registro Mercantil Central") hasta confirmar cuál es. */ ?>
+                        <p><strong>Origen de los datos:</strong> registros públicos de <?= ($type ?? '') === 'subsidies' ? 'subvenciones' : 'contratación' ?>, cruzados con nuestra base de datos de empresas. Pago seguro gestionado por Stripe.</p>
                     </div>
                 </div>
 
@@ -230,7 +231,7 @@
                     <h2 style="font-size: 1.1rem; font-weight: 900; margin-bottom: 16px; color: #0f172a;">Resumen del pedido</h2>
 
                     <div style="display: flex; justify-content: space-between; margin-bottom: 4px; color: #64748b; font-size: 0.88rem; gap: 12px;">
-                        <span>BBDD <?= esc($display_name ?? '') ?> (<?= number_format($total_count, 0, ',', '.') ?> empresas)</span>
+                        <span>BBDD <?= esc($display_name ?? '') ?> (<?= number_format($total_count, 0, ',', '.') ?> registros)</span>
                         <span style="font-weight: 700; color: #0f172a; white-space: nowrap;">
                             <?php if(isset($pricing) && $pricing['is_discounted']): ?>
                             <s style="opacity:0.55; font-size:0.85em; font-weight:500; margin-right:4px;"><?= number_format($pricing['original_price'], 2, ',', '.') ?> €</s>
@@ -246,7 +247,7 @@
                         <span style="background:#ecfdf5; color:#10b981; padding:2px 8px; border-radius:4px;">✓ Con descuento</span>
                         <?php else: ?>
                         <span style="background: #ecfdf5; color:#10b981; padding: 2px 6px; border-radius: 4px;">
-                            Apenas <?= number_format($price / $total_count, 4, ',', '.') ?>€ por empresa
+                            Apenas <?= number_format($price / $total_count, 4, ',', '.') ?>€ por registro
                         </span>
                         <?php endif; ?>
                     </div>
@@ -308,7 +309,7 @@
                             <span>📄</span> Factura Incluida
                         </div>
                         <div style="display: flex; align-items: center; justify-content: center; gap: 4px; background: #f1f5f9; padding: 8px 4px; border-radius: 6px; white-space: nowrap;">
-                            <span>🏛️</span> Datos del BORME
+                            <span>🏛️</span> Datos públicos
                         </div>
                         <div style="display: flex; align-items: center; justify-content: center; gap: 4px; background: #f1f5f9; padding: 8px 4px; border-radius: 6px; white-space: nowrap;">
                             <span>📥</span> Descarga Inmediata

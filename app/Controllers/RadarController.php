@@ -440,9 +440,13 @@ class RadarController extends BaseController
         $filename = $this->getExportFilename($params);
         $params['dl_token'] = (string) ($this->request->getGet('dl_token') ?? '');
 
+        // Seguimiento: apunta la descarga en la compra y avisa por correo si falla
+        // (App\Libraries\SeguimientoDescarga). Se crea antes de soltar la sesión.
+        $seg = new \App\Libraries\SeguimientoDescarga(\App\Libraries\PaidExports::sesionStripe($this->request, 'excel'), 'csv');
+
         // Excel de verdad (.xlsx) para listados de hasta XLSX_MAX empresas (?formato=xlsx).
         // Si no se puede (sin ZipArchive, listado mayor o cualquier fallo), sigue al CSV.
-        if ($this->request->getGet('formato') === 'xlsx' && $this->enviarXlsx($params, $filename)) {
+        if ($this->request->getGet('formato') === 'xlsx' && $this->enviarXlsx($params, $filename, $seg)) {
             exit();
         }
 
@@ -466,7 +470,13 @@ class RadarController extends BaseController
         }
 
         $fp = fopen('php://output', 'w');
-        $this->streamExportData($params, $fp);
+        try {
+            $filas = $this->streamExportData($params, $fp, null, $seg);
+            $seg->ok($filas);
+        } catch (\Throwable $e) {
+            // El archivo ya ha empezado a salir: no se puede enseñar una página de error.
+            $seg->error($e->getMessage());
+        }
         fclose($fp);
         exit();
     }
@@ -488,7 +498,7 @@ class RadarController extends BaseController
      * terminarlo antes de enviar el primer byte (es un ZIP). Por eso tiene tope: un
      * listado enorme tardaría más de lo que espera el navegador (y Cloudflare, 100 s).
      */
-    private function enviarXlsx(array $params, string $filenameCsv): bool
+    private function enviarXlsx(array $params, string $filenameCsv, ?\App\Libraries\SeguimientoDescarga $seg = null): bool
     {
         if (!\App\Libraries\XlsxEscritor::disponible()) {
             return false;
@@ -523,8 +533,10 @@ class RadarController extends BaseController
         if (!empty($params['dl_token'])) {
             setcookie('dl_token', $params['dl_token'], time() + 120, '/');
         }
+        $seg?->formato('xlsx');
         readfile($tmp);
         @unlink($tmp);
+        $seg?->ok($xlsx->filas());
 
         return true;
     }
@@ -600,6 +612,13 @@ class RadarController extends BaseController
         if (!in_array($period, $allowedPeriods, true)) {
             $period = $cnae !== '' ? 'general' : '30days';
         }
+        // 'general' (todo el histórico) solo para el directorio o un CNAE concreto. En un
+        // listado del Radar el recuento que se cobra es el de los últimos 30 días, y con
+        // period_radar=general en el formulario se pagaba ese precio y se descargaba todo
+        // el histórico del sector (02-10-2026).
+        if ($period === 'general' && ($params['is_historical'] ?? '0') !== '1' && $cnae === '') {
+            $period = '30days';
+        }
 
         $builder = $db->table('companies');
         // phone_mobile y estado (02-10-2026): el filtro "con teléfono" cuenta fijo O móvil,
@@ -669,6 +688,11 @@ class RadarController extends BaseController
             $builder->where('fecha_constitucion', date('Y-m-d'));
         } elseif ($period === 'semana' || $period === '7') {
             $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-7 days')));
+            $builder->where('fecha_constitucion <=', date('Y-m-d'));
+        } elseif ($period === 'mes' || $period === '30days' || $period === '30') {
+            // Los mismos 30 días que cuenta RadarService (lo que se cobra). Antes "mes" y
+            // "30days" caían en el caso por defecto y se exportaban 90 días.
+            $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-30 days')));
             $builder->where('fecha_constitucion <=', date('Y-m-d'));
         } elseif ($period === '90') {
             $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-90 days')));
@@ -781,7 +805,7 @@ class RadarController extends BaseController
      *
      * @return int filas escritas, o -1 si el .xlsx pasaría de XLSX_MAX (se abandona)
      */
-    private function streamExportData($params, $fp, ?\App\Libraries\XlsxEscritor $xlsx = null): int
+    private function streamExportData($params, $fp, ?\App\Libraries\XlsxEscritor $xlsx = null, ?\App\Libraries\SeguimientoDescarga $seg = null): int
     {
         $escritas = 0;
         if ($xlsx === null) {
@@ -791,14 +815,24 @@ class RadarController extends BaseController
         }
 
         $db = \Config\Database::connect();
+
         [$builder, $isHistorical] = $this->buildExportQuery($db, $params);
 
         if (!$isHistorical) {
-            $cnae = $params['cnae'] ?? '';
-            $rows = $builder->orderBy('fecha_constitucion', 'DESC')
-                ->limit($cnae !== '' ? 2000 : 5000)
-                ->get()->getResultArray();
-            return $this->writeExportRows($fp, $this->enrichExportBatch($db, $rows), $xlsx);
+            // Radar (altas de los últimos días): una sola consulta, de la más reciente a
+            // la más antigua, SIN tope. Antes se cortaba en 5.000 filas: si el recuento
+            // cobrado era mayor (España en 30 días) se entregaban menos empresas de las
+            // pagadas (02-10-2026). Se enriquece y escribe por lotes.
+            $rows = $builder->orderBy('fecha_constitucion', 'DESC')->orderBy('id', 'DESC')->get()->getResultArray();
+            foreach (array_chunk($rows, self::EXPORT_BATCH) as $lote) {
+                $escritas += $this->writeExportRows($fp, $this->enrichExportBatch($db, $lote), $xlsx);
+                $seg?->filas($escritas);
+                if ($xlsx !== null && $escritas > self::XLSX_MAX) {
+                    return -1;
+                }
+            }
+
+            return $escritas;
         }
 
         $lastId = null;
@@ -817,6 +851,7 @@ class RadarController extends BaseController
             $lastId = (int) end($rows)['id'];
 
             $escritas += $this->writeExportRows($fp, $this->enrichExportBatch($db, $rows), $xlsx);
+            $seg?->filas($escritas);
             if ($xlsx !== null) {
                 if ($escritas > self::XLSX_MAX) {
                     return -1;
@@ -1056,6 +1091,11 @@ class RadarController extends BaseController
         if ($params === null) {
             return $this->descargaNoAutorizada();
         }
+        // Seguimiento de la descarga (apunta en la compra y avisa si falla), sin límite
+        // de tiempo y sin bloquear la sesión, como los listados de empresas.
+        $seg = new \App\Libraries\SeguimientoDescarga(\App\Libraries\PaidExports::sesionStripe($this->request, 'subsidies'), 'csv');
+        @set_time_limit(0);
+        session_write_close();
         $convocatoria = $params['convocatoria'] ?? '';
         $year = $params['year'] ?? '';
 
@@ -1098,6 +1138,7 @@ class RadarController extends BaseController
             s.fecha_concesion, 
             s.importe,
             c.phone,
+            c.phone_mobile,
             c.cnae_label,
             c.registro_mercantil,
             c.address,
@@ -1113,8 +1154,12 @@ class RadarController extends BaseController
             $builder->where('YEAR(s.fecha_concesion)', $year);
         }
 
+        // Fila a fila (getUnbufferedRow): antes getResultArray() cargaba todo el listado
+        // en memoria, y hay convocatorias con cientos de miles de registros.
+        $n = 0;
+        try {
         $query = $builder->get();
-        foreach ($query->getResultArray() as $row) {
+        while ($row = $query->getUnbufferedRow('array')) {
             $empresa = $row['company_name'] ?: $row['raw_beneficiario'] ?: $row['company_cif'];
             fputcsv($fp, [
                 $empresa,
@@ -1123,11 +1168,21 @@ class RadarController extends BaseController
                 $row['instrumento'],
                 $row['fecha_concesion'] ? date('d/m/Y', strtotime($row['fecha_concesion'])) : '',
                 number_format((float)$row['importe'], 2, ',', ''),
-                $row['phone'] ?? '',
+                self::telefonos($row),   // fijo y móvil (antes solo el fijo)
                 $row['cnae_label'] ?? '',
                 $row['registro_mercantil'] ?? '',
                 $row['address'] ?? ''
             ]);
+            if (++$n % 2000 === 0) {
+                $seg->filas($n);
+                fflush($fp);
+                flush();
+            }
+        }
+            $seg->ok($n);
+        } catch (\Throwable $e) {
+            $seg->filas($n);
+            $seg->error($e->getMessage());
         }
 
         fclose($fp);
@@ -1140,6 +1195,11 @@ class RadarController extends BaseController
         if ($params === null) {
             return $this->descargaNoAutorizada();
         }
+        // Seguimiento de la descarga (apunta en la compra y avisa si falla), sin límite
+        // de tiempo y sin bloquear la sesión, como los listados de empresas.
+        $seg = new \App\Libraries\SeguimientoDescarga(\App\Libraries\PaidExports::sesionStripe($this->request, 'contracts'), 'csv');
+        @set_time_limit(0);
+        session_write_close();
         $year = $params['year'] ?? '';
         $organo = $params['organo'] ?? '';
 
@@ -1183,6 +1243,7 @@ class RadarController extends BaseController
             c_contr.fecha_adjudicacion, 
             c_contr.importe_adjudicacion,
             c.phone,
+            c.phone_mobile,
             c.cnae_label,
             c.registro_mercantil,
             c.address
@@ -1197,8 +1258,10 @@ class RadarController extends BaseController
             $builder->where('YEAR(c_contr.fecha_adjudicacion)', $year);
         }
 
+        $n = 0;
+        try {
         $query = $builder->get();
-        foreach ($query->getResultArray() as $row) {
+        while ($row = $query->getUnbufferedRow('array')) {
             $empresa = $row['company_name'] ?: $row['raw_adjudicatario'] ?: $row['company_cif'];
             fputcsv($fp, [
                 $empresa,
@@ -1207,11 +1270,21 @@ class RadarController extends BaseController
                 $row['titulo_contrato'],
                 $row['fecha_adjudicacion'] ? date('d/m/Y', strtotime($row['fecha_adjudicacion'])) : '',
                 number_format((float)$row['importe_adjudicacion'], 2, ',', ''),
-                $row['phone'] ?? '',
+                self::telefonos($row),   // fijo y móvil (antes solo el fijo)
                 $row['cnae_label'] ?? '',
                 $row['registro_mercantil'] ?? '',
                 $row['address'] ?? ''
             ]);
+            if (++$n % 2000 === 0) {
+                $seg->filas($n);
+                fflush($fp);
+                flush();
+            }
+        }
+            $seg->ok($n);
+        } catch (\Throwable $e) {
+            $seg->filas($n);
+            $seg->error($e->getMessage());
         }
 
         fclose($fp);

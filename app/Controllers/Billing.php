@@ -1110,6 +1110,13 @@ class Billing extends BaseController
             return $this->response->setJSON(['success' => true]); // bot: se le dice que sí y no se envía nada
         }
 
+        // Captcha de Cloudflare, con el mismo interruptor que login, registro y muestra
+        // gratuita (TURNSTILE_ENABLED): apagado, verify_turnstile() devuelve true.
+        helper('turnstile');
+        if (!verify_turnstile($this->request->getPost('cf-turnstile-response'), $this->request->getIPAddress())) {
+            return $this->response->setStatusCode(422)->setJSON(['success' => false, 'message' => 'No hemos podido verificar que no eres un robot. Recarga la página e inténtalo de nuevo.']);
+        }
+
         // Límites (como la muestra gratuita): un presupuesto por correo y listado al día,
         // y 5 por IP al día. Sin ellos se podrían mandar correos a direcciones ajenas.
         $ctx     = $this->contextoListadoDesde((array) $this->request->getPost());

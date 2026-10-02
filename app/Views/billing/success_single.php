@@ -94,25 +94,25 @@
     $itemLabel = 'empresas';
     $itemSingular = 'Empresas';
     $upsellTitle = 'Radar PRO';
-    $upsellFeat1 = 'Oportunidades ilimitadas';
-    $upsellFeat2 = 'Actualización cada hora';
+    $upsellFeat1 = 'Todas las empresas de cada búsqueda';
+    $upsellFeat2 = 'Nuevas empresas cada día laborable';
     $ctaUrl = site_url('radar?source=excel');
-    $ctaText = 'Ver todas las oportunidades ahora';
+    $ctaText = 'Ver el Radar';
     
     if ($type === 'subsidies_excel') {
         $itemLabel = 'subvenciones';
         $itemSingular = 'Subvenciones';
-        $upsellTitle = 'API de Subvenciones';
-        $upsellFeat1 = 'Integración en tiempo real';
-        $upsellFeat2 = 'Automatiza tu CRM';
+        $upsellTitle = 'API de APIEmpresas';
+        $upsellFeat1 = 'Datos de una empresa por su CIF';
+        $upsellFeat2 = 'Desde tu CRM o tu aplicación';
         $ctaUrl = site_url('api-empresas');
         $ctaText = 'Ver Planes API';
     } elseif ($type === 'contracts_excel') {
         $itemLabel = 'licitaciones';
         $itemSingular = 'Licitaciones';
-        $upsellTitle = 'API de Contratos';
-        $upsellFeat1 = 'Alertas de adjudicaciones';
-        $upsellFeat2 = 'Búsqueda por CIF';
+        $upsellTitle = 'API de APIEmpresas';
+        $upsellFeat1 = 'Datos de una empresa por su CIF';
+        $upsellFeat2 = 'Desde tu CRM o tu aplicación';
         $ctaUrl = site_url('api-empresas');
         $ctaText = 'Ver Planes API';
     }
@@ -130,7 +130,7 @@
                     <p style="color: #64748b; font-size: 0.9rem; line-height: 1.5; margin: 0 0 14px;">
                         Este listado incluye <strong><?= number_format($total_count ?? 0, 0, ',', '.') ?> <?= $itemLabel ?></strong>.
                         <?php if($type === 'excel'): ?>
-                        <br><span style="color: #ef4444; font-weight: 700;">Pero mañana habrá nuevas oportunidades disponibles en el Radar.</span>
+                        <br><span style="color: #ef4444; font-weight: 700;">Cada día laborable se publican nuevas empresas: las verás en el Radar.</span>
                         <?php endif; ?>
                     </p>
 
@@ -140,7 +140,7 @@
                                 <h4 style="font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin: 0 0 6px;">Tu archivo CSV</h4>
                                 <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.82rem; color: #475569;">
                                     <li style="margin-bottom: 3px;">✅ <?= number_format($total_count ?? 0, 0, ',', '.') ?> <?= $itemLabel ?></li>
-                                    <li>❌ Datos estáticos (hoy)</li>
+                                    <li>📅 Foto de hoy: no se actualiza</li>
                                 </ul>
                             </div>
                             <div style="border-left: 1px solid #e2e8f0; padding-left: 12px;">
@@ -154,19 +154,16 @@
                     </div>
 
                     <div style="display: flex; flex-direction: column; gap: 8px; max-width: 380px; margin: 0 auto;">
-                        <?php if (($total_count ?? 0) > 100000): ?>
-                            <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 16px; margin-bottom: 12px;">
-                                <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 8px;">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                                </div>
-                                <h3 style="color: #92400e; font-size: 1rem; font-weight: 800; margin: 0 0 6px;">Generando tu archivo...</h3>
-                                <p style="color: #b45309; font-size: 0.85rem; line-height: 1.4; margin: 0;">Debido al gran volumen de datos (<?= number_format($total_count ?? 0, 0, ',', '.') ?> registros), estamos empaquetando el listado. Recibirás un enlace de descarga segura en tu correo electrónico en los próximos minutos.</p>
-                            </div>
-                        <?php else: ?>
+                        <?php /* Antes, con más de 100.000 registros no había botón: se prometía un enlace
+                                 por correo "en los próximos minutos" de una cola que ya no existe. La
+                                 descarga sale ahora por lotes, sea del tamaño que sea, y el correo con el
+                                 enlace se envía siempre (ListadoPagadoService). */ ?>
                             <a href="<?= esc($download_url) ?>" class="btn-download" id="excel_main_download_btn" style="width: 100%; justify-content: center;">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                                 Descargar Listado (.csv)
                             </a>
+                        <?php if (($total_count ?? 0) > 100000): ?>
+                            <p style="color: #64748b; font-size: 0.82rem; line-height: 1.4; margin: 4px 0 0;">Es un listado grande (<?= number_format($total_count ?? 0, 0, ',', '.') ?> registros): la descarga puede tardar varios minutos. También te hemos enviado el enlace por correo.</p>
                         <?php endif; ?>
 
                         <?php if ($type === 'excel'): ?>
@@ -185,22 +182,22 @@
             </div>
 
 <?php
-                $rightTitle = 'Evita que la competencia contacte antes';
-                $rightText = 'Mientras tú descargas este listado, otros proveedores están recibiendo alertas en tiempo real de nuevas empresas que se crean hoy mismo.';
-                $rightBtn = 'Ver nuevas oportunidades ahora';
+                $rightTitle = 'Este listado es una foto de hoy';
+                $rightText = 'Cada día laborable se publican nuevas sociedades en el BORME. En el Radar las ves según salen, con filtros por provincia y sector, y puedes guardar las que te interesan.';
+                $rightBtn = 'Ver el Radar';
                 if ($type === 'subsidies_excel') {
-                    $rightTitle = 'Conecta tu sistema en tiempo real';
-                    $rightText = 'Descargar un archivo estático está bien, pero nuestra API de Subvenciones insertará automáticamente las nuevas ayudas en tu CRM en cuanto se publiquen en el BOE.';
-                    $rightBtn = 'Descubrir Planes API';
+                    $rightTitle = '¿Necesitas datos de empresas en tu sistema?';
+                    $rightText = 'Con la API de APIEmpresas puedes consultar los datos de una empresa por su CIF desde tu CRM o tu aplicación, sin descargar archivos.';
+                    $rightBtn = 'Ver la API';
                 } elseif ($type === 'contracts_excel') {
-                    $rightTitle = 'Recibe alertas de adjudicaciones';
-                    $rightText = 'Descargar el historial es el primer paso. Con nuestra API de Contratos, podrás monitorizar licitaciones y recibir notificaciones instantáneas para actuar rápido.';
-                    $rightBtn = 'Descubrir Planes API';
+                    $rightTitle = '¿Necesitas datos de empresas en tu sistema?';
+                    $rightText = 'Con la API de APIEmpresas puedes consultar los datos de una empresa por su CIF desde tu CRM o tu aplicación, sin descargar archivos.';
+                    $rightBtn = 'Ver la API';
                 }
             ?>
             <div class="upsell-card">
                 <div style="display:inline-block; background:#ef4444; color:white; padding:4px 10px; border-radius:8px; font-size:0.68rem; font-weight:900; text-transform:uppercase; margin-bottom:12px; letter-spacing:0.05em; align-self:flex-start;">
-                    ⚠️ No te quedes atrás
+                    Siguiente paso
                 </div>
 
                 <h3 style="font-size:1.35rem; font-weight:900; margin:0 0 10px; line-height:1.2; color:white;"><?= $rightTitle ?></h3>
@@ -210,7 +207,10 @@
                 </p>
 
                 <ul style="list-style:none; padding:0; margin:0 0 18px;">
-                    <?php foreach (['Descargas ilimitadas diarias', 'Alertas por email al instante', 'Acceso a datos de contacto PRO'] as $feat): ?>
+                    <?php /* Textos reescritos el 02-10-2026: solo lo que el producto hace hoy. */
+                    foreach (($type === 'excel'
+                        ? ['Nuevas empresas cada día laborable', 'Filtros por provincia, sector y teléfono', 'Favoritos, notas y exportación a CSV']
+                        : ['Consulta por CIF', 'Datos publicados en el BORME de cada sociedad', 'Plan gratuito para probar']) as $feat): ?>
                     <li style="display:flex; align-items:center; gap:8px; margin-bottom:7px; color:#f8fafc; font-weight:600; font-size:0.875rem;">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
                         <?= $feat ?>

@@ -76,6 +76,9 @@
                                     <a href="<?= esc($l['url_xlsx'], 'attr') ?>" class="ml-btn" style="background:#fff;color:#047857;border:1px solid #a7f3d0;margin-left:6px;">Excel (.xlsx)</a>
                                     <?php endif; ?>
                                     <div class="ml-nota">Disponible hasta el <?= esc($l['caduca']) ?></div>
+                                    <div class="ml-nota"><?= (int) $l['descargas'] > 0
+                                        ? 'Descargado ' . (int) $l['descargas'] . ((int) $l['descargas'] === 1 ? ' vez' : ' veces') . ($l['ultima_descarga'] !== '' ? ' · la última, el ' . esc($l['ultima_descarga']) : '')
+                                        : 'Aún sin descargar' ?></div>
                                 <?php else: ?>
                                     <span class="ml-caducado">Descarga caducada el <?= esc($l['caduca']) ?></span>
                                 <?php endif; ?>

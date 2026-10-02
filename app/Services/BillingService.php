@@ -333,6 +333,12 @@ class BillingService
             $per  = (isset($postData['period_radar']) && $postData['period_radar'] !== '')
                 ? $postData['period_radar']
                 : ($cnae !== '' ? 'general' : '30days');
+            // Sin CNAE, solo los periodos del Radar. Con period_radar=general en el
+            // formulario se cobraba el recuento de 30 días y la exportación entregaba
+            // todo el histórico del sector (02-10-2026).
+            if ($cnae === '' && !in_array($per, ['hoy', 'semana', 'mes', '30days'], true)) {
+                $per = '30days';
+            }
 
             if ($cnae !== '') {
                 $count = $this->countRadarCompanies([
@@ -358,7 +364,7 @@ class BillingService
                 'total_count' => $count
             ];
             $productName = 'Descarga Listado Radar B2B (' . $count . ' empresas)';
-            $productDesc = 'Listado completo de nuevas empresas constituidas.';
+            $productDesc = 'Listado en CSV (se abre con Excel) de nuevas empresas constituidas.';
             $metadataPlan = 'radar_single';
         }
 
