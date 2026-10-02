@@ -132,6 +132,10 @@ $routes->get('billing/cancel', 'Billing::cancel');   // cancel Stripe/PayPal
 $routes->get('billing/purchase-success', 'Billing::purchase_success');
 $routes->get('billing/manage', 'Billing::billing_manage');
 $routes->get('billing/invoices', 'Billing::invoices');
+// Listados comprados (volver a descargar) y presupuesto por correo desde el resumen de compra.
+// Bajo /billing: la Cache Rule de Cloudflare "Protección Privacidad" no los guarda.
+$routes->get('billing/mis-listados', 'Billing::mis_listados');
+$routes->post('billing/presupuesto-listado', 'Billing::presupuesto_listado');
 $routes->get('billing/invoices/download/(:num)', 'Billing::invoice_download/$1');
 $routes->get('download/secure/(:any)', 'DownloadController::secure/$1');
 $routes->get('billing/portal', 'Billing::portal');

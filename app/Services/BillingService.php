@@ -60,7 +60,7 @@ class BillingService
             'quantity' => 1,
             'price_data' => [
                 'currency' => 'eur',
-                'unit_amount' => (int)($amount * 100),
+                'unit_amount' => (int) round($amount * 100), // round: (int) trunca (19.99 * 100 = 1998.99…)
                 'product_data' => [
                     'name' => $name,
                     'description' => $description
@@ -84,7 +84,7 @@ class BillingService
             'quantity' => 1,
             'price_data' => [
                 'currency' => 'eur',
-                'unit_amount' => (int)($amount * 100),
+                'unit_amount' => (int) round($amount * 100), // round: (int) trunca (19.99 * 100 = 1998.99…)
                 'recurring' => [
                     'interval' => $interval
                 ],
@@ -244,7 +244,8 @@ class BillingService
             ];
             $zona = $municipio !== '' ? $municipio . ' (' . $prov . ')' : $prov;
             $productName = 'BBDD Histórica ' . $zona . ' (' . number_format($count, 0, ',', '.') . ' empresas)';
-            $productDesc = 'Descarga en Excel del listado histórico completo.';
+            // CSV, que es lo que se entrega (antes decía "Excel" en Stripe y en la factura)
+            $productDesc = 'Listado completo en CSV (se abre con Excel, Google Sheets o tu CRM).';
             $metadataPlan = 'directory_single';
 
         } elseif ($plan === 'subsidies_single') {
@@ -266,7 +267,7 @@ class BillingService
             if ($year) $productName .= ' (' . $year . ')';
             $productName .= ' (' . number_format($count, 0, ',', '.') . ' registros)';
             
-            $productDesc = 'Descarga en Excel de empresas subvencionadas con teléfono y CNAE.';
+            $productDesc = 'Listado en CSV (se abre con Excel) de empresas subvencionadas, con CNAE y teléfono cuando lo tenemos.';
             $metadataPlan = 'subsidies_single';
 
         } elseif ($plan === 'contracts_single') {
@@ -288,7 +289,7 @@ class BillingService
             if ($year) $productName .= ' (' . $year . ')';
             $productName .= ' (' . number_format($count, 0, ',', '.') . ' registros)';
             
-            $productDesc = 'Descarga en Excel de empresas adjudicatarias con teléfono y CNAE.';
+            $productDesc = 'Listado en CSV (se abre con Excel) de empresas adjudicatarias, con CNAE y teléfono cuando lo tenemos.';
             $metadataPlan = 'contracts_single';
 
         } elseif ($plan === 'lookalike_single') {

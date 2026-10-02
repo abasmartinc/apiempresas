@@ -146,7 +146,8 @@
         })();
 
         $(document).ready(function() {
-            trackEvent('directory_excel_purchase', { provincia: '<?= esc($export_params["provincia"] ?? "") ?>', total: <?= $total_count ?? 0 ?> });
+            // json_encode: con esc() en modo HTML, "L'Hospitalet" llegaba a la analítica como "L&#039;Hospitalet"
+            trackEvent('directory_excel_purchase', { provincia: <?= json_encode((string) ($export_params["provincia"] ?? ""), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE) ?>, total: <?= (int) ($total_count ?? 0) ?> });
             
             // CSS for spinner and premium modals
             if (!$('#spinner-style').length) {

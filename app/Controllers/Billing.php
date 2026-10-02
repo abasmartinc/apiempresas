@@ -1008,7 +1008,24 @@ class Billing extends BaseController
         $price = $pricing['base_price'];
         $tax = round($price * 0.21, 2);
 
+        // Vista previa: las primeras filas del mismo listado que se descargará, con los
+        // datos de contacto tapados. Hasta ahora se pagaba sin ver qué se recibe.
+        $ctxListado = [
+            'type'      => 'directory_excel',
+            'provincia' => $province,
+            'municipio' => $municipio,
+            'cnae'      => $cnae,
+            'cnae_text' => $cnae_text,
+            'sector'    => $sector,
+            'estado'    => $estado,
+            'has_phone' => $has_phone === '1' ? '1' : '',
+            'date_min'  => (string) ($this->request->getGet('date_min') ?? ''),
+            'date_max'  => (string) ($this->request->getGet('date_max') ?? ''),
+        ];
+        $preview = $totalCount > 0 ? $this->vistaPreviaListado($ctxListado) : [];
+
         return $this->renderView('billing/directory_order_summary', [
+            'preview'  => $preview,
             'province' => $province,
             'display_name' => $displayName,
             'total_count' => $totalCount,
@@ -1025,6 +1042,166 @@ class Billing extends BaseController
             'date_max'  => (string) ($this->request->getGet('date_max') ?? ''),
             'municipio' => $municipio,
             'pricing'   => $pricing
+        ]);
+    }
+
+    /**
+     * Filas de muestra del listado (ver RadarController::previewExport), 6 h en caché por
+     * combinación de filtros. Si algo falla, el resumen se enseña sin vista previa.
+     */
+    private function vistaPreviaListado(array $ctx): array
+    {
+        try {
+            [, $params] = \App\Libraries\PaidExports::fromContext($ctx);
+            $cache = \Config\Services::cache();
+            $clave = 'listado_preview_' . md5(json_encode($params));
+            $filas = $cache->get($clave);
+            if (!is_array($filas)) {
+                $filas = (new RadarController())->previewExport($params, 5);
+                $cache->save($clave, $filas, 21600);
+            }
+
+            return $filas;
+        } catch (\Throwable $e) {
+            log_message('error', '[Billing] Vista previa del listado: ' . $e->getMessage());
+
+            return [];
+        }
+    }
+
+    /** Filtros de un listado del directorio tal como llegan en GET o POST → contexto */
+    private function contextoListadoDesde(array $in): array
+    {
+        $fecha = static fn ($v) => preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $v) ? (string) $v : '';
+
+        return [
+            'type'      => 'directory_excel',
+            'provincia' => trim((string) ($in['provincia'] ?? '')) ?: 'España',
+            'municipio' => trim((string) ($in['municipio'] ?? '')),
+            'cnae'      => preg_replace('/[^0-9]/', '', (string) ($in['cnae'] ?? '')),
+            'cnae_text' => trim((string) ($in['cnae_text'] ?? '')),
+            'sector'    => trim((string) ($in['sector'] ?? '')),
+            'estado'    => trim((string) ($in['estado'] ?? '')),
+            'has_phone' => ((string) ($in['has_phone'] ?? '')) === '1' ? '1' : '',
+            'date_min'  => $fecha($in['date_min'] ?? ''),
+            'date_max'  => $fecha($in['date_max'] ?? ''),
+        ];
+    }
+
+    /**
+     * POST /billing/presupuesto-listado
+     *
+     * "Envíame este presupuesto": quien no compra en el momento se lleva por correo el
+     * enlace a este mismo resumen (mismos filtros). Antes, el visitante sin cuenta solo
+     * escribía su email dentro de Stripe; si se iba antes, no había forma de recuperarlo.
+     * Lo pide él y recibe UN correo: no es una campaña ni un recordatorio automático.
+     */
+    public function presupuesto_listado()
+    {
+        $email = mb_strtolower(trim((string) $this->request->getPost('email')), 'UTF-8');
+        if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 190) {
+            return $this->response->setStatusCode(422)->setJSON(['success' => false, 'message' => 'Escribe un correo electrónico válido.']);
+        }
+        if (trim((string) $this->request->getPost('honeypot')) !== '') {
+            return $this->response->setJSON(['success' => true]); // bot: se le dice que sí y no se envía nada
+        }
+
+        // Límites (como la muestra gratuita): un presupuesto por correo y listado al día,
+        // y 5 por IP al día. Sin ellos se podrían mandar correos a direcciones ajenas.
+        $ctx     = $this->contextoListadoDesde((array) $this->request->getPost());
+        $cache   = \Config\Services::cache();
+        $kMail   = 'presup_mail_' . md5($email . '|' . json_encode($ctx));
+        $kIp     = 'presup_ip_' . md5((string) $this->request->getIPAddress());
+        $usosIp  = (int) ($cache->get($kIp) ?? 0);
+        if ($cache->get($kMail)) {
+            return $this->response->setJSON(['success' => true, 'message' => 'Ya te lo enviamos hoy. Revisa tu bandeja de entrada (y la de spam).']);
+        }
+        if ($usosIp >= 5) {
+            return $this->response->setStatusCode(429)->setJSON(['success' => false, 'message' => 'Has pedido varios presupuestos hoy. Inténtalo mañana o completa la compra ahora.']);
+        }
+
+        // Recuento y precio en el servidor, con los mismos filtros que el pago
+        $filtros = $ctx;
+        unset($filtros['type'], $filtros['sector']);
+        $total = $this->billingService->countDirectoryCompanies($filtros);
+        if ($total <= 0) {
+            return $this->response->setStatusCode(422)->setJSON(['success' => false, 'message' => 'No hay empresas con esos filtros.']);
+        }
+        $pricing = $this->billingService->getDirectoryPricingDetails($total);
+        $ctx['total_count'] = $total;
+
+        $query = array_filter([
+            'provincia' => $ctx['provincia'], 'municipio' => $ctx['municipio'], 'cnae' => $ctx['cnae'],
+            'cnae_text' => $ctx['cnae_text'], 'sector' => $ctx['sector'], 'estado' => $ctx['estado'],
+            'has_phone' => $ctx['has_phone'], 'date_min' => $ctx['date_min'], 'date_max' => $ctx['date_max'],
+        ], static fn ($v) => $v !== '');
+        $url    = site_url('checkout/directory-export') . '?' . http_build_query($query);
+        $titulo = (new \App\Services\ListadoPagadoService())->titulo($ctx);
+        $precio = number_format((float) $pricing['base_price'], 2, ',', '.');
+
+        $html = '<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#0f172a;max-width:560px">'
+              . '<p>Hola,</p>'
+              . '<p>Este es el presupuesto que has pedido en APIEmpresas:</p>'
+              . '<p style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px">'
+              . '<strong>' . esc($titulo) . '</strong><br>'
+              . 'Archivo CSV (se abre con Excel) · ' . esc($precio) . ' € + IVA · pago único</p>'
+              . '<p style="margin:24px 0"><a href="' . esc($url, 'attr') . '" style="background:#10b981;color:#fff;text-decoration:none;'
+              . 'padding:14px 24px;border-radius:10px;font-weight:bold;display:inline-block">Ver el listado y comprarlo</a></p>'
+              . '<p>El número de empresas y el precio son los de hoy; pueden cambiar si entran o salen empresas del listado. En esa página verás una muestra de las primeras filas antes de pagar.</p>'
+              . '<p>Solo te enviamos este correo porque lo has pedido: no te vamos a escribir más por este presupuesto.</p>'
+              . '<p>Un saludo,<br>Equipo de APIEmpresas</p>'
+              . '</div>';
+
+        try {
+            $mail = \Config\Services::email();
+            $mail->clear(true);
+            $mail->setFrom(env('email.fromEmail', 'soporte@apiempresas.es'), env('email.fromName', 'APIEmpresas.es'));
+            $mail->setTo($email);
+            $mail->setSubject('Tu presupuesto: ' . $titulo);
+            $mail->setMailType('html');
+            $mail->setMessage($html);
+            if (!$mail->send(false)) {
+                log_message('error', '[Billing] No se pudo enviar el presupuesto de listado a ' . $email);
+                return $this->response->setStatusCode(500)->setJSON(['success' => false, 'message' => 'No hemos podido enviar el correo. Inténtalo de nuevo en unos minutos.']);
+            }
+        } catch (\Throwable $e) {
+            log_message('error', '[Billing] Presupuesto de listado: ' . $e->getMessage());
+            return $this->response->setStatusCode(500)->setJSON(['success' => false, 'message' => 'No hemos podido enviar el correo. Inténtalo de nuevo en unos minutos.']);
+        }
+
+        $cache->save($kMail, 1, 86400);
+        $cache->save($kIp, $usosIp + 1, 86400);
+
+        // Registro del interesado (misma tabla y columnas que la muestra gratuita del mapa)
+        try {
+            \Config\Database::connect()->table('leads_radar')->insert([
+                'email'      => $email,
+                'province'   => $ctx['provincia'] ?: null,
+                'source'     => 'directory_quote',
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
+        } catch (\Throwable $e) {
+            log_message('error', '[Billing] Lead de presupuesto: ' . $e->getMessage());
+        }
+
+        return $this->response->setJSON(['success' => true, 'message' => 'Enviado. Revisa tu bandeja de entrada.']);
+    }
+
+    /**
+     * GET /billing/mis-listados
+     *
+     * Listados comprados por el usuario con sesión, con su enlace de descarga. Antes la
+     * única forma de volver a descargar era el enlace del correo.
+     */
+    public function mis_listados()
+    {
+        if (!session('logged_in')) {
+            return redirect()->to(site_url('enter'));
+        }
+
+        return $this->renderView('billing/mis_listados', [
+            'title'    => 'Mis listados',
+            'listados' => (new \App\Services\ListadoPagadoService())->comprasDe((int) session('user_id')),
         ]);
     }
 

@@ -138,6 +138,25 @@
         @media (min-width: 901px) {
             .mobile-sticky-cta { display: none; }
         }
+        /* Vista previa del listado */
+        .summary-grid > * { min-width: 0; } /* sin esto la tabla ensancha la columna y la página */
+        .preview-box { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px 20px; margin-bottom: 16px; }
+        .preview-box h3 { font-size: 0.85rem; font-weight: 800; color: #0f172a; margin: 0 0 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .preview-sub { font-size: 0.8rem; color: #64748b; margin: 0 0 12px; line-height: 1.5; }
+        .preview-scroll { overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px; }
+        .preview-table { border-collapse: collapse; font-size: 0.78rem; white-space: nowrap; min-width: 100%; }
+        .preview-table th { background: #f1f5f9; color: #334155; font-weight: 800; text-align: left; padding: 8px 10px; border-bottom: 1px solid #e2e8f0; }
+        .preview-table td { padding: 8px 10px; border-bottom: 1px solid #f1f5f9; color: #0f172a; max-width: 260px; overflow: hidden; text-overflow: ellipsis; }
+        .preview-table tr:last-child td { border-bottom: none; }
+        .preview-vacio { color: #cbd5e1; }
+        /* Presupuesto por correo */
+        .quote-box { margin-top: 16px; padding-top: 16px; border-top: 1px dashed #e2e8f0; }
+        .quote-box label { display: block; font-size: 0.8rem; font-weight: 800; color: #0f172a; margin-bottom: 6px; }
+        .quote-row { display: flex; gap: 8px; }
+        .quote-row input[type=email] { flex: 1; min-width: 0; height: 40px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 0 10px; font-size: 0.9rem; }
+        .quote-row button { height: 40px; padding: 0 14px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; color: #0f172a; font-weight: 800; font-size: 0.85rem; cursor: pointer; white-space: nowrap; }
+        .quote-row button:hover { border-color: #10b981; color: #047857; }
+        .quote-msg { font-size: 0.8rem; margin-top: 8px; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -158,8 +177,8 @@
                     </h1>
 
                     <p style="font-size: 0.95rem; color: #64748b; line-height: 1.6; margin-bottom: 20px;">
-                        Listado completo del Registro Mercantil Central de todas las sociedades constituidas en <strong><?= esc($display_name ?? $province) ?></strong>.
-                        Datos procesados directamente del BORME y Registro Mercantil. Ideal para prospección B2B, enriquecimiento de CRM y análisis de mercado.
+                        Listado de las sociedades de <strong><?= esc($display_name ?? $province) ?></strong> que tenemos registradas, con los datos publicados en el BORME.
+                        Para prospección B2B, enriquecimiento de CRM y análisis de mercado.
                     </p>
 
                     <!-- Estadísticas clave -->
@@ -171,7 +190,7 @@
                         </div>
                         <div class="stat-box">
                             <div class="stat-box-label">Formato</div>
-                            <div class="stat-box-value">CSV (Delimitado por comas)</div>
+                            <div class="stat-box-value">CSV (se abre con Excel)</div>
                             <div class="stat-box-sub">Descarga tras el pago</div>
                         </div>
                         <div class="stat-box">
@@ -181,10 +200,39 @@
                         </div>
                         <div class="stat-box">
                             <div class="stat-box-label">Fuente</div>
-                            <div class="stat-box-value">BORME / RM</div>
-                            <div class="stat-box-sub">Datos oficiales</div>
+                            <div class="stat-box-value">BORME</div>
+                            <div class="stat-box-sub">Boletín Oficial del Registro Mercantil</div>
                         </div>
                     </div>
+
+                    <?php if (!empty($preview)): ?>
+                    <!-- Vista previa: primeras filas del listado, con contacto y nombres tapados -->
+                    <div class="preview-box">
+                        <h3>Así es el archivo que vas a descargar</h3>
+                        <p class="preview-sub">Las primeras <?= count($preview) ?> empresas de tu listado. Los teléfonos, las direcciones y los nombres de personas van tapados aquí; en el CSV están completos.</p>
+                        <div class="preview-scroll" tabindex="0" role="region" aria-label="Vista previa del listado">
+                            <table class="preview-table">
+                                <thead>
+                                    <tr>
+                                        <?php foreach (array_keys($preview[0]) as $col): ?>
+                                        <th><?= esc($col) ?></th>
+                                        <?php endforeach; ?>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($preview as $fila): ?>
+                                    <tr>
+                                        <?php foreach ($fila as $valor): ?>
+                                        <td title="<?= esc($valor) ?>"><?= $valor !== '' ? esc(mb_strimwidth($valor, 0, 48, '…', 'UTF-8')) : '<span class="preview-vacio">—</span>' ?></td>
+                                        <?php endforeach; ?>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="preview-sub" style="margin: 8px 0 0;">Desliza la tabla hacia la derecha para ver todas las columnas. Una raya (—) significa que no tenemos ese dato de esa empresa.</p>
+                    </div>
+                    <?php endif; ?>
 
                     <!-- Campos incluidos -->
                     <div style="background: #f8fafc; border-radius: 12px; padding: 16px 20px; border: 1px solid #e2e8f0;">
@@ -192,17 +240,22 @@
                             Campos incluidos en el CSV
                         </h3>
                         <div class="cols-grid">
+                            <?php /* Las 13 columnas reales del CSV (RadarController::streamExportData). Antes
+                                     se anunciaba "Forma jurídica", que no existe en el archivo. */ ?>
                             <?php foreach ([
-                                'CIF / NIF',
-                                'Razón Social',
-                                'Dirección',
-                                'Sector CNAE',
-                                'Provincia',
+                                'Razón social',
+                                'CIF',
                                 'Fecha de constitución',
-                                'Capital Social',
-                                'Socio Único',
-                                'Forma jurídica',
-                                'Teléfono ⚠️',
+                                'Sector CNAE',
+                                'Municipio',
+                                'Provincia',
+                                'Teléfono (cuando lo tenemos)',
+                                'Dirección',
+                                'Objeto social',
+                                'Capital social',
+                                'Socio único',
+                                'Administradores y cargos',
+                                'Estado',
                             ] as $field): ?>
                             <div class="col-item">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
@@ -216,19 +269,19 @@
                     <?php if (isset($has_phone) && $has_phone == '1'): ?>
                     <div class="disclaimer-box" style="background-color: #f0fdf4; border-color: #bbf7d0; color: #166534;">
                         ✅ <strong>Este listado SÍ incluye teléfono de contacto.</strong><br>
-                        Has seleccionado el filtro exclusivo de empresas con teléfono. Contiene datos registrales oficiales (identificadores, razón social, actividad) y los números de teléfono recopilados (fijos y móviles).
+                        Has seleccionado solo empresas con teléfono. Contiene los datos publicados en el BORME (razón social, CIF, actividad, cargos) y los teléfonos que tenemos de cada una (fijo y móvil).
                     </div>
                     <?php else: ?>
                     <div class="disclaimer-box">
                         ⚠️ <strong>Puede haber empresas en este listado sin teléfono.</strong><br>
-                        Contiene datos registrales oficiales y teléfonos (cuando están disponibles).
+                        Contiene los datos publicados en el BORME y el teléfono cuando lo tenemos.
                         Es perfecto para cruzar con otras fuentes, validar CIFs o analizar el tejido empresarial de una zona.
                     </div>
                     <?php endif; ?>
 
                     <div class="guarantee-box" style="margin-top: 16px;">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                        <p><strong>Garantía de datos:</strong> Extraídos directamente del BORME y Registro Mercantil Central. Pago seguro 256-bit SSL gestionado por Stripe.</p>
+                        <p><strong>Origen de los datos:</strong> anuncios publicados en el BORME. Pago seguro gestionado por Stripe.</p>
                     </div>
                 </div>
 
@@ -322,6 +375,44 @@
                     <p style="font-size: 0.72rem; color: #94a3b8; text-align: center; margin-top: 16px; line-height: 1.5; font-weight: 500;">
                         Al confirmar serás redirigido a la pasarela segura de Stripe.<br>Pago único, sin suscripción.
                     </p>
+
+                    <?php if ((int) $total_count > 0): ?>
+                    <!-- Presupuesto por correo: para quien no compra ahora (Billing::presupuesto_listado) -->
+                    <form class="quote-box" id="quoteForm" action="<?= site_url('billing/presupuesto-listado') ?>" method="POST">
+                        <?= csrf_field() ?>
+                        <?php foreach (['provincia' => $province, 'cnae' => $cnae ?? '', 'cnae_text' => $cnae_text ?? '', 'sector' => $sector ?? '', 'estado' => $estado ?? '', 'municipio' => $municipio ?? '', 'has_phone' => $has_phone ?? '', 'date_min' => $date_min ?? '', 'date_max' => $date_max ?? ''] as $k => $v): ?>
+                            <?php if ((string) $v !== ''): ?><input type="hidden" name="<?= $k ?>" value="<?= esc($v) ?>"><?php endif; ?>
+                        <?php endforeach; ?>
+                        <label for="quoteEmail">¿Lo decides más tarde? Te enviamos este presupuesto</label>
+                        <div class="quote-row">
+                            <input type="email" id="quoteEmail" name="email" required placeholder="tu@empresa.com" autocomplete="email" value="<?= esc((string) (session('user_email') ?? '')) ?>">
+                            <button type="submit" id="quoteBtn">Enviar</button>
+                        </div>
+                        <div class="quote-msg" id="quoteMsg" role="status" style="color:#64748b; font-weight:500;">Un solo correo con el enlace a este listado. No te apuntamos a ninguna lista.</div>
+                    </form>
+                    <script>
+                    (function () {
+                        var f = document.getElementById('quoteForm');
+                        if (!f || !window.fetch) return;   // sin JS, el formulario se envía normal
+                        f.addEventListener('submit', function (e) {
+                            e.preventDefault();
+                            var btn = document.getElementById('quoteBtn'), msg = document.getElementById('quoteMsg');
+                            var t = window.AE_CSRF;   // token del visitante (ver partials/footer)
+                            if (t) f.querySelectorAll('input[name="' + t.name + '"]').forEach(function (i) { i.value = t.hash; });
+                            btn.disabled = true; btn.textContent = 'Enviando…';
+                            fetch(f.action, { method: 'POST', body: new FormData(f), headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }, credentials: 'same-origin' })
+                                .then(function (r) { return r.json().catch(function () { return { success: false, message: 'No hemos podido enviarlo. Recarga la página e inténtalo de nuevo.' }; }); })
+                                .then(function (d) {
+                                    msg.textContent = d.message || (d.success ? 'Enviado. Revisa tu bandeja de entrada.' : 'No hemos podido enviarlo.');
+                                    msg.style.color = d.success ? '#047857' : '#b91c1c';
+                                    msg.style.fontWeight = '700';
+                                    if (d.success) { btn.textContent = 'Enviado ✓'; } else { btn.disabled = false; btn.textContent = 'Enviar'; }
+                                })
+                                .catch(function () { msg.textContent = 'Error de conexión. Inténtalo de nuevo.'; msg.style.color = '#b91c1c'; btn.disabled = false; btn.textContent = 'Enviar'; });
+                        });
+                    })();
+                    </script>
+                    <?php endif; ?>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 16px; font-size: 0.65rem; color: #64748b; font-weight: 800; text-transform: uppercase; letter-spacing: -0.02em;">
                         <div style="display: flex; align-items: center; justify-content: center; gap: 4px; background: #f1f5f9; padding: 8px 4px; border-radius: 6px; white-space: nowrap;">

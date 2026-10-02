@@ -388,6 +388,10 @@
                     <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #1e293b; margin-bottom: 6px;">Tu correo electrónico</label>
                     <input type="email" id="leadEmail" required placeholder="ejemplo@empresa.com" style="width: 100%; height: 44px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 0 12px; font-size: 0.95rem; outline: none; transition: border-color 0.2s; box-sizing: border-box;" onfocus="this.style.borderColor='#2563eb'">
                 </div>
+                <?php if (filter_var(env('TURNSTILE_ENABLED', false), FILTER_VALIDATE_BOOLEAN)): // mismo interruptor que login y registro ?>
+                <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+                <div class="cf-turnstile" data-sitekey="<?= esc(env('TURNSTILE_SITE_KEY')) ?>" data-theme="light" style="margin-bottom: 16px;"></div>
+                <?php endif; ?>
                 <button type="submit" id="leadSubmitBtn" style="width: 100%; height: 44px; background: #2563eb; color: #fff; border: none; border-radius: 8px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">
                     Enviar muestra a mi correo
                 </button>
@@ -1079,6 +1083,8 @@
                 formData.append('cnae_prefix', cnaePrefix);
                 formData.append('cnae_text', cnaeTextValue);
                 formData.append('estado', estadoText);
+                const captcha = document.querySelector('#leadForm [name="cf-turnstile-response"]');
+                if (captcha) formData.append('cf-turnstile-response', captcha.value);
 
                 const targetUrl = "<?= site_url('api/map/request-sample') ?>";
                 
@@ -1099,8 +1105,11 @@
                     document.getElementById('leadForm').style.display = 'none';
                     document.getElementById('leadSuccess').style.display = 'block';
                 } else {
-                    // Límite de muestras (429): aviso, no "error del servidor"
+                    // El token del captcha vale una sola vez: se pide otro para el siguiente intento
+                    if (window.turnstile && document.querySelector('#leadForm .cf-turnstile')) { try { turnstile.reset(); } catch (e) {} }
+                    // Límite de muestras (429) o captcha: aviso, no "error del servidor"
                     const esLimite = data.code === 'SAMPLE_LIMIT';
+                    if (data.code === 'CAPTCHA') { Swal.fire({ icon: 'warning', title: 'Verificación', text: data.message, confirmButtonColor: '#2152ff' }); return; }
                     Swal.fire({
                         icon: esLimite ? 'info' : 'error',
                         title: esLimite ? 'Muestra ya enviada' : 'Oops...',

@@ -40,9 +40,9 @@ class ListadoPagadoService
             return false;
         }
 
-        $email = trim((string) ($session->customer_details->email ?? $session->customer_email ?? ''));
+        $userId = (int) ($session->client_reference_id ?? $session->metadata->user_id ?? 0);
+        $email  = trim((string) ($session->customer_details->email ?? $session->customer_email ?? ''));
         if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $userId = (int) ($session->client_reference_id ?? $session->metadata->user_id ?? 0);
             $user   = $userId > 0 ? (new \App\Models\UserModel())->find($userId) : null;
             $email  = (string) ($user->email ?? '');
         }
@@ -65,6 +65,7 @@ class ListadoPagadoService
         try {
             $previo = is_file($f) ? json_decode((string) file_get_contents($f), true) : null;
             if (!empty($previo['email_enviado'])) {
+                $this->indexar($userId, $sessionId);   // compras anteriores a "Mis listados"
                 return true;
             }
 
@@ -72,6 +73,7 @@ class ListadoPagadoService
 
             file_put_contents($f, json_encode([
                 'session_id'    => $sessionId,
+                'user_id'       => $userId,
                 'email'         => $email,
                 'plan'          => (string) ($session->metadata->plan ?? ''),
                 'contexto'      => $ctx,
@@ -79,6 +81,7 @@ class ListadoPagadoService
                 'pagado_en'     => $previo['pagado_en'] ?? date('Y-m-d H:i:s'),
                 'email_enviado' => $enviado,
             ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            $this->indexar($userId, $sessionId);
 
             return $enviado;
         } finally {
@@ -87,6 +90,84 @@ class ListadoPagadoService
                 fclose($fp);
             }
         }
+    }
+
+    /** Índice por usuario: writable/listados/usuarios/{id}.json → [session_id, …] */
+    private function rutaIndice(int $userId): string
+    {
+        return WRITEPATH . 'listados/usuarios/' . $userId . '.json';
+    }
+
+    /**
+     * Apunta la compra en el índice del usuario (para /billing/mis-listados). Las compras
+     * como invitado (user_id 0) no se apuntan: su acceso es el enlace del correo.
+     */
+    private function indexar(int $userId, string $sessionId): void
+    {
+        if ($userId <= 0) {
+            return;
+        }
+        $f = $this->rutaIndice($userId);
+        if (!is_dir(dirname($f))) {
+            @mkdir(dirname($f), 0755, true);
+        }
+        $fp = @fopen($f, 'c+');
+        if (!$fp) {
+            log_message('error', '[ListadoPagado] No se pudo abrir el índice de compras del usuario ' . $userId);
+            return;
+        }
+        try {
+            flock($fp, LOCK_EX);
+            $ids = json_decode((string) stream_get_contents($fp), true);
+            $ids = is_array($ids) ? $ids : [];
+            if (!in_array($sessionId, $ids, true)) {
+                $ids[] = $sessionId;
+                ftruncate($fp, 0);
+                rewind($fp);
+                fwrite($fp, json_encode($ids));
+            }
+        } finally {
+            flock($fp, LOCK_UN);
+            fclose($fp);
+        }
+    }
+
+    /**
+     * Listados comprados por un usuario, del más reciente al más antiguo.
+     *
+     * @return array<int, array{titulo: string, fecha: string, importe: ?float, url: string, caduca: string, vigente: bool, ref: string}>
+     */
+    public function comprasDe(int $userId): array
+    {
+        if ($userId <= 0 || !is_file($this->rutaIndice($userId))) {
+            return [];
+        }
+        $ids = json_decode((string) file_get_contents($this->rutaIndice($userId)), true);
+        $out = [];
+        foreach (is_array($ids) ? $ids : [] as $sessionId) {
+            $sessionId = preg_replace('/[^A-Za-z0-9_]/', '', (string) $sessionId);
+            $f = WRITEPATH . 'listados/' . $sessionId . '.json';
+            $d = is_file($f) ? json_decode((string) file_get_contents($f), true) : null;
+            // Solo las del propio usuario, aunque el índice dijera otra cosa
+            if (!is_array($d) || (int) ($d['user_id'] ?? 0) !== $userId || !is_array($d['contexto'] ?? null)) {
+                continue;
+            }
+            $pagado = strtotime((string) ($d['pagado_en'] ?? '')) ?: 0;
+            $caduca = $pagado + PaidExports::TTL_CORREO;
+            $out[]  = [
+                'titulo'  => $this->titulo($d['contexto']),
+                'fecha'   => $pagado ? date('d/m/Y', $pagado) : '',
+                'importe' => isset($d['importe']) ? (float) $d['importe'] : null,
+                'url'     => PaidExports::urlCorreo($sessionId, $d['contexto']),
+                'caduca'  => date('d/m/Y', $caduca),
+                'vigente' => $caduca > time(),
+                'ref'     => 'EXC-' . strtoupper(substr($sessionId, -8)),
+                'orden'   => $pagado,
+            ];
+        }
+        usort($out, static fn ($a, $b) => $b['orden'] <=> $a['orden']);
+
+        return $out;
     }
 
     /**

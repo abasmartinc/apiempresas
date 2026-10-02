@@ -49,7 +49,7 @@
 
         <div class="invoice-header">
             <h1>Mis Facturas</h1>
-            <p>Historial de pagos y descarga de facturas oficiales.</p>
+            <p>Historial de pagos y descarga de facturas. Los listados que has comprado están en <a href="<?= site_url('billing/mis-listados') ?>">Mis listados</a>.</p>
         </div>
 
         <div class="invoice-card">

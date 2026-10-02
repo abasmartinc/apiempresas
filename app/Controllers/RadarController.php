@@ -538,7 +538,10 @@ class RadarController extends BaseController
         }
 
         $builder = $db->table('companies');
-        $builder->select('id, company_name as name, cif, fecha_constitucion, cnae_label, registro_mercantil, municipality, address, objeto_social, phone');
+        // phone_mobile y estado (02-10-2026): el filtro "con teléfono" cuenta fijo O móvil,
+        // pero el CSV solo traía el fijo (una empresa con solo móvil salía con el teléfono
+        // vacío), y el mapa prometía la columna "Estado", que no existía.
+        $builder->select('id, company_name as name, cif, fecha_constitucion, cnae_label, registro_mercantil, municipality, address, objeto_social, phone, phone_mobile, estado');
 
         // Prioridad de filtrado CNAE / Sector: si viene código CNAE explícito, no resolver sector para evitar conflicto WHERE
         if ($cnae !== '') {
@@ -720,7 +723,8 @@ class RadarController extends BaseController
             'Objeto Social',
             'Capital Social',
             'Socio Único',
-            'Administradores'
+            'Administradores',
+            'Estado'
         ]);
 
         $db = \Config\Database::connect();
@@ -759,6 +763,98 @@ class RadarController extends BaseController
         } while (true);
     }
 
+    /** Fijo y móvil en la columna "Teléfono" (sin repetir si son el mismo) */
+    private static function telefonos(array $c): string
+    {
+        $t = array_filter(array_map('trim', [(string) ($c['phone'] ?? ''), (string) ($c['phone_mobile'] ?? '')]), 'strlen');
+
+        return implode(' / ', array_unique($t));
+    }
+
+    /**
+     * Vista previa del listado antes de pagar: las primeras filas del MISMO listado que
+     * se descargará (misma consulta y mismo orden que streamExportData), con las mismas
+     * columnas. Los datos de contacto y los nombres de personas van tapados: se ve que
+     * están, no lo que dicen.
+     *
+     * @return array<int, array<string, string>> filas con las cabeceras del CSV como clave
+     */
+    public function previewExport(array $params, int $n = 5): array
+    {
+        $params['is_historical'] = '1';
+        $db = \Config\Database::connect();
+        [$builder] = $this->buildExportQuery($db, $params);
+        $rows = $this->enrichExportBatch($db, $builder->orderBy('id', 'DESC')->limit(max(1, min(10, $n)))->get()->getResultArray());
+
+        $out = [];
+        foreach ($rows as $c) {
+            $out[] = [
+                'Empresa'         => (string) ($c['name'] ?? ''),
+                'CIF'             => (string) ($c['cif'] ?? ''),
+                'Constitución'    => (string) ($c['fecha_constitucion'] ?? ''),
+                'Sector CNAE'     => (string) ($c['cnae_label'] ?? ''),
+                'Municipio'       => (string) ($c['municipality'] ?? ''),
+                'Provincia'       => (string) ($c['registro_mercantil'] ?? ''),
+                'Teléfono'        => self::taparTelefonos(self::telefonos($c)),
+                'Dirección'       => self::taparFinal((string) ($c['address'] ?? ''), 14),
+                'Objeto Social'   => (string) ($c['objeto_social'] ?? ''),
+                'Capital Social'  => (string) ($c['capital_social'] ?? ''),
+                'Socio Único'     => self::taparNombres((string) ($c['socio_unico'] ?? '')),
+                'Administradores' => self::taparNombres((string) ($c['administrators'] ?? '')),
+                'Estado'          => (string) ($c['estado'] ?? ''),
+            ];
+        }
+
+        return $out;
+    }
+
+    /** "912345678 / 600111222" → "912 34• ••• / 600 11• •••" */
+    private static function taparTelefonos(string $t): string
+    {
+        if ($t === '') {
+            return '';
+        }
+        $partes = [];
+        foreach (explode(' / ', $t) as $tel) {
+            $d = preg_replace('/\D/', '', $tel) ?? '';
+            $d = strlen($d) > 9 ? substr($d, -9) : $d;
+            $partes[] = strlen($d) < 6 ? '••• ••• •••' : substr($d, 0, 3) . ' ' . substr($d, 3, 2) . '• •••';
+        }
+
+        return implode(' / ', $partes);
+    }
+
+    /** "Calle Mayor 12, 3º B, Madrid" → "Calle Mayor 12•••" */
+    private static function taparFinal(string $s, int $visibles): string
+    {
+        return mb_strlen($s, 'UTF-8') <= $visibles ? $s : mb_substr($s, 0, $visibles, 'UTF-8') . '•••';
+    }
+
+    /** "Adm. Único: PEREZ GOMEZ JUAN | Apoderado: …" → "Adm. Único: P•••• G•••• J••• | Apoderado: …" */
+    private static function taparNombres(string $s): string
+    {
+        if ($s === '') {
+            return '';
+        }
+        $partes = [];
+        foreach (explode(' | ', $s) as $parte) {
+            $cargo  = '';
+            $nombre = $parte;
+            if (str_contains($parte, ': ')) {
+                [$cargo, $nombre] = explode(': ', $parte, 2);
+                $cargo .= ': ';
+            }
+            $nombre = preg_replace_callback('/[\p{L}\p{N}]+/u', static function ($m) {
+                $w = $m[0];
+
+                return mb_substr($w, 0, 1, 'UTF-8') . str_repeat('•', min(5, max(1, mb_strlen($w, 'UTF-8') - 1)));
+            }, $nombre) ?? '•••';
+            $partes[] = $cargo . $nombre;
+        }
+
+        return implode(' | ', $partes);
+    }
+
     private function writeExportRows($fp, array $companies): void
     {
         foreach ($companies as $c) {
@@ -769,12 +865,13 @@ class RadarController extends BaseController
                 $c['cnae_label'] ?? '',
                 $c['municipality'] ?? '',
                 $c['registro_mercantil'] ?? '',
-                $c['phone'] ?? '',
+                self::telefonos($c),
                 $c['address'] ?? '',
                 $c['objeto_social'] ?? '',
                 $c['capital_social'] ?? '',
                 $c['socio_unico'] ?? '',
-                $c['administrators'] ?? ''
+                $c['administrators'] ?? '',
+                $c['estado'] ?? ''
             ]);
         }
     }

@@ -447,6 +447,14 @@ class CompanyMapV2Controller extends BaseController
             return $this->jsonError(400, 'INVALID_EMAIL', 'Email inválido');
         }
 
+        // Captcha de Cloudflare (Turnstile), con el mismo interruptor que login y registro
+        // (TURNSTILE_ENABLED en .env): apagado, verify_turnstile() devuelve true y la vista
+        // no pinta el recuadro.
+        helper('turnstile');
+        if (!verify_turnstile($req->getPost('cf-turnstile-response'), $req->getIPAddress())) {
+            return $this->jsonError(422, 'CAPTCHA', 'No hemos podido verificar que no eres un robot. Recarga la página e inténtalo de nuevo.');
+        }
+
         // Límites: sin ellos (ruta fuera de CSRF y sin captcha) se podían pedir
         // muestras sin fin —20 empresas con teléfono completo cada una— y mandar
         // correos con adjunto a direcciones ajenas, quemando la reputación del dominio.
