@@ -34,13 +34,13 @@
                             <div>
                                 <div class="ae-radar-page__eyebrow" style="background: #eff6ff; border-color: #dbeafe; color: #2563eb; padding: 6px 14px; font-size: 11px;">
                                     <span class="ae-radar-page__pulse" style="background: #2563eb; width: 8px; height: 8px;"></span>
-                                    Business Intelligence · Datos Reales
+                                    Constituciones del BORME
                                 </div>
                                 <h1 class="ae-radar-page__hero-title" style="margin-top: 8px; margin-bottom: 4px; font-size: 24px;">
                                     Tendencias de <span class="ae-radar-page__hero-title-grad">Mercado</span>
                                 </h1>
                                 <p class="ae-radar-page__hero-text" style="color: #64748b; max-width: 650px; line-height: 1.4; font-size: 13.5px; margin-top: 4px;">
-                                    Analiza el ritmo de creación de empresas por provincia y sector para identificar nichos calientes.
+                                    Analiza el ritmo de creación de empresas por provincia y sector para ver dónde se crean más empresas.
                                 </p>
                             </div>
                         </div>

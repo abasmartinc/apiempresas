@@ -5,16 +5,13 @@
         <header class="ae-ai-modal__header" style="flex-direction: column; align-items: flex-start; gap: 4px; padding: 16px 24px;">
             <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
                 <div class="ae-ai-modal__header-left">
-                    <span class="ae-ai-modal__badge">IA B2B</span>
-                    <h2 class="ae-ai-modal__title" style="margin: 0;">🎯 Oportunidad detectada</h2>
-                    <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b; font-weight: 600;">Alta probabilidad de cierre si contactas en el momento adecuado</p>
+                    <span class="ae-ai-modal__badge">Sugerencias</span>
+                    <h2 class="ae-ai-modal__title" style="margin: 0;">Preparar el primer contacto</h2>
+                    <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b; font-weight: 600;">Sugerencias orientativas a partir del sector y el objeto social</p>
                 </div>
                 <button type="button" class="ae-ai-modal__close" onclick="closeAIModal()" style="position: static; font-size: 28px;">×</button>
             </div>
             <div id="ae-ai-modal-company" style="font-size: 14px; font-weight: 700; color: #2563eb; background: #eff6ff; padding: 4px 12px; border-radius: 8px; margin-top: 8px; display: none;"></div>
-            <div class="ae-ai-modal__urgency-warning" style="background: #fef2f2; color: #dc2626; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 800; margin-top: 8px; border: 1px solid #fee2e2; display: flex; align-items: center; gap: 6px;">
-                <span>⚠️</span> Otros proveedores pueden contactar antes
-            </div>
         </header>
         <div id="ae-ai-content" class="ae-ai-modal__body">
             <!-- Se cargará por AJAX -->
@@ -50,7 +47,7 @@
             <div style="text-align:center; padding: 40px 0;">
                 <div class="ae-spinner"></div>
                 <p style="margin-top:20px; font-weight:700; color:#1e293b; font-size:18px;">
-                    Consultando con la Inteligencia Artificial...
+                    Preparando las sugerencias...
                 </p>
                 <p style="color:#64748b; font-size:14px;">
                     Analizando objeto social y extrayendo nichos estratégicos.
@@ -96,25 +93,6 @@
                             <span class="ae-ai-result__label" style="display: block; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 8px;">Análisis Comercial</span>
                             <div style="font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 8px;">${data.commercial_profile}</div>
                             <p style="font-size: 15px; line-height: 1.6; color: #475569; margin: 0;">${data.summary}</p>
-                        </div>
-
-                        <!-- 2. KPIs Comerciales -->
-                        <div class="ai-kpis-grid">
-                            <div class="ai-kpi-card ai-kpi-card--prob-${data.conversion_probability.label.toLowerCase()}">
-                                <span class="ai-kpi-label">Probabilidad</span>
-                                <span class="ai-kpi-value">${data.conversion_probability.label}</span>
-                                <span class="ai-kpi-desc">${data.conversion_probability.description}</span>
-                            </div>
-                            <div class="ai-kpi-card">
-                                <span class="ai-kpi-label">Ventana óptima</span>
-                                <span class="ai-kpi-value">${data.contact_window.label}</span>
-                                <span class="ai-kpi-desc">${data.contact_window.description}</span>
-                            </div>
-                            <div class="ai-kpi-card">
-                                <span class="ai-kpi-label">Ticket estimado</span>
-                                <span class="ai-kpi-value">${data.estimated_ticket.label}</span>
-                                <span class="ai-kpi-desc">${data.estimated_ticket.description}</span>
-                            </div>
                         </div>
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
@@ -205,7 +183,7 @@
 
                         <!-- Señales detectadas -->
                         <div style="padding-top: 20px; border-top: 1px solid #f1f5f9; margin-top: 20px;">
-                            <span class="ae-ai-result__label" style="display: block; font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 10px;">Señales comerciales utilizadas</span>
+                            <span class="ae-ai-result__label" style="display: block; font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 10px;">Datos utilizados</span>
                             <div style="display: flex; flex-wrap: wrap; gap: 8px;">
                                 ${data.signals.map(s => `<span style="font-size: 10px; background: #f8fafc; color: #64748b; padding: 4px 10px; border-radius: 20px; border: 1px solid #e2e8f0;">${s}</span>`).join('')}
                             </div>
@@ -227,9 +205,9 @@
             } else if (data.status === 'limit_reached') {
                 closeAIModal();
                 if (typeof openUpgradeModal === 'function') {
-                    openUpgradeModal('Límite diario alcanzado', 'Has consumido tus 3 análisis con IA gratuitos por hoy. Actualiza a PRO para desbloquear análisis ilimitados.');
+                    openUpgradeModal('Límite diario alcanzado', 'Has consumido tus 3 análisis gratuitos de hoy. Con Radar PRO no hay límite diario.');
                 } else {
-                    Swal.fire({ icon: 'warning', title: 'Límite alcanzado', text: 'Has consumido tus 3 análisis IA gratuitos de hoy. Pásate a PRO.', confirmButtonColor: '#2563eb' });
+                    Swal.fire({ icon: 'warning', title: 'Límite alcanzado', text: 'Has consumido tus 3 análisis gratuitos de hoy. Con Radar PRO no hay límite diario.', confirmButtonColor: '#2563eb' });
                 }
             } else {
                 $content.innerHTML = `

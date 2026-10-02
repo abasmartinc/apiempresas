@@ -43,7 +43,7 @@ $current_url = current_url();
         </a>
 
         <small class="ae-radar-page__brand-note">
-            Inteligencia comercial en tiempo real
+            Empresas nuevas a partir del BORME
         </small>
     </div>
 
@@ -53,7 +53,7 @@ $current_url = current_url();
 
             <a href="<?= site_url('radar') ?>" class="ae-radar-page__nav-link <?= (rtrim($current_url, '/') == rtrim(site_url('radar'), '/')) ? 'is-active' : '' ?>">
                 <span class="ae-radar-page__nav-icon">📊</span>
-                Dashboard principal
+                Listado de empresas
             </a>
 
             <a href="<?= site_url('radar/favoritos') ?>" class="ae-radar-page__nav-link <?= (rtrim($current_url, '/') == rtrim(site_url('radar/favoritos'), '/')) ? 'is-active' : '' ?>">
@@ -91,13 +91,13 @@ $current_url = current_url();
         <div class="ae-radar-pulse-box" style="margin: 32px 16px 0 16px; padding: 20px; background: rgba(255,255,255,0.03); border-radius: 16px; border: 1px solid rgba(255,255,255,0.06);">
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
                 <div class="ae-pulse-dot"></div>
-                <span style="font-size: 11px; font-weight: 800; color: #22c55e; text-transform: uppercase; letter-spacing: 0.05em;">Radar Live</span>
+                <span style="font-size: 11px; font-weight: 800; color: #22c55e; text-transform: uppercase; letter-spacing: 0.05em;">Radar</span>
             </div>
             <div style="font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.5; font-weight: 500;">
-                Detección activa en <br><strong style="color: white;">Toda España</strong>
+                Empresas nuevas de <br><strong style="color: white;">Toda España</strong>
             </div>
             <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.06);">
-                <div style="font-size: 20px; font-weight: 900; color: white; line-height: 1;"><?= number_format($stats['hoy'] ?? 250) ?></div>
+                <div style="font-size: 20px; font-weight: 900; color: white; line-height: 1;"><?= number_format($stats['hoy'] ?? 0) ?></div>
                 <div style="font-size: 10px; color: rgba(255,255,255,0.4); font-weight: 700; margin-top: 4px; text-transform: uppercase;">Empresas hoy</div>
             </div>
         </div>

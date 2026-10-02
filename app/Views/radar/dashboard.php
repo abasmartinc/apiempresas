@@ -3,7 +3,7 @@
 <head>
     <?= view('partials/head', [
         'title'       => 'Radar B2B - Centro de Prospección Inteligente',
-        'excerptText' => 'Identifica nuevas oportunidades de negocio en tiempo real con el Radar de APIEmpresas.',
+        'excerptText' => 'Empresas recién constituidas y con novedades, a partir del BORME, en el Radar de APIEmpresas.',
     ]) ?>
 
     <!-- Leaflet.js for Radar Map -->
@@ -53,7 +53,7 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, $limitFree) : $allCo
                         <p style="color: #94a3b8; font-size: 0.95rem; line-height: 1.5; margin: 0;">
                             <?php if ($source === 'excel'): ?>
                                 Estas oportunidades son <strong>nuevas</strong> respecto al listado que descargaste. <br>
-                                Monitoriza el mercado en tiempo real para no llegar tarde.
+                                Las empresas recién constituidas, ordenadas para tu prospección.
                             <?php else: ?>
                                 Ya tienes tu listado, pero el mercado no se detiene. <br>
                                 Aquí puedes ver las empresas que se han creado <strong>hoy mismo</strong> en tu sector.
@@ -76,14 +76,14 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, $limitFree) : $allCo
                 <div class="ae-radar-page__topbar-actions">
                     <div class="ae-radar-page__freshness">
                         <span class="ae-radar-page__freshness-dot"></span>
-                        Última actualización: <strong><?= $freshness['lastUpdate'] ?></strong> 
+                        Último BORME cargado: <strong><?= $freshness['lastUpdate'] ?></strong> 
                         <span class="ae-radar-page__freshness-sep">|</span>
-                        Hoy: <strong>+<?= number_format($freshness['todayCount']) ?></strong> empresas
+                        Hoy: <strong><?= number_format($freshness['todayCount']) ?></strong> empresas
                     </div>
 
                     <?php if ($isFree) { ?>
                         <div class="ae-radar-page__pill ae-radar-page__pill--free">
-                            Plan Free · Vista limitada
+                            Plan gratuito · Vista limitada
                         </div>
                     <?php } else { ?>
                         <?php if (isset($userPlan['status']) && $userPlan['status'] === 'canceled') { ?>
@@ -263,7 +263,7 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, $limitFree) : $allCo
                         <div class="ae-pro-crm-bar__right">
                             <span style="font-size:10px; font-weight:700; color:#94a3b8; display:flex; align-items:center; gap:5px;">
                                 <span style="width:6px;height:6px;background:#22c55e;border-radius:50%;display:block;"></span>
-                                En vivo · <?= $freshness['lastUpdate'] ?>
+                                BORME del <?= $freshness['lastUpdate'] ?>
                             </span>
                             <button class="js-start-radar-tour" style="display:flex;align-items:center;gap:5px;padding:6px 14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;color:#475569;font-size:11px;font-weight:700;cursor:pointer;">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" style="width:12px;height:12px;"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
@@ -285,12 +285,12 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, $limitFree) : $allCo
                                 <?= $isFree ? 'DISPONIBLE EN PRO' : 'BETA' ?>
                             </span>
                         </div>
-                        <div style="display:flex;gap:12px;align-items:center;">
-                            <div style="position:relative;flex-grow:1;">
+                        <div class="ae-pro-search-hero__row" style="display:flex;gap:12px;align-items:center;">
+                            <div style="position:relative;flex-grow:1;min-width:0;">
                                 <input type="text" id="radar-ai-query"
                                     class="ae-pro-search-hero__input"
                                     <?= $isFree ? 'style="opacity:0.7;"' : '' ?>
-                                    placeholder="Ej: Empresas nuevas de construcción en Madrid con score alto..."
+                                    placeholder="Ej: empresas nuevas de construcción en Madrid"
                                     onkeypress="if(event.key==='Enter') handleAiSearch()">
                                 <div style="position:absolute;right:18px;top:50%;transform:translateY(-50%);color:#94a3b8;">
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -303,9 +303,9 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, $limitFree) : $allCo
                         </div>
                         <div style="margin-top:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
                             <span style="font-size:11px;font-weight:700;color:#94a3b8;">Ejemplos:</span>
-                            <button class="ae-ai-example" onclick="fillAiQuery('Empresas nuevas en Madrid con score alto')">Empresas nuevas en Madrid con score alto</button>
-                            <button class="ae-ai-example" onclick="fillAiQuery('Leads recientes de construcción en Valencia')">Leads recientes de construcción en Valencia</button>
-                            <button class="ae-ai-example" onclick="fillAiQuery('Empresas que puedan necesitar software de facturación')">Empresas que puedan necesitar software de facturación</button>
+                            <button class="ae-ai-example" onclick="fillAiQuery('Empresas nuevas en Madrid con puntuación alta')">Empresas nuevas en Madrid con puntuación alta</button>
+                            <button class="ae-ai-example" onclick="fillAiQuery('Empresas recientes de construcción en Valencia')">Empresas recientes de construcción en Valencia</button>
+                            <button class="ae-ai-example" onclick="fillAiQuery('Empresas de hostelería constituidas esta semana en Barcelona')">Empresas de hostelería constituidas esta semana en Barcelona</button>
                         </div>
                         <div id="ai-search-explanation" style="display:none;margin-top:16px;padding:16px 20px;background:linear-gradient(to right, #eff6ff, #f8fafc);border-radius:12px;border:1px solid #dbeafe;align-items:flex-start;gap:12px;animation:ae-slide-in 0.4s ease-out;">
                             <span style="font-size:18px;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.1));">💡</span>
@@ -331,7 +331,7 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, $limitFree) : $allCo
                                     'todas'   => ['label' => 'Todas', 'icon' => '📊', 'url' => site_url('radar')],
                                     'sin_ver' => ['label' => 'Sin contactar', 'icon' => '🆕', 'url' => site_url('radar?' . http_build_query(array_merge($filters, ['status' => 'nuevo', 'intel' => null])))],
                                     'ventana' => ['label' => 'Esta semana', 'icon' => '⏱', 'url' => site_url('radar?' . http_build_query(array_merge($filters, ['rango' => '7', 'intel' => null])))],
-                                    'mejores' => ['label' => 'Score alto', 'icon' => '🔥', 'url' => site_url('radar?' . http_build_query(array_merge($filters, ['min_score' => 75, 'intel' => 'active'])))],
+                                    'mejores' => ['label' => 'Score alto', 'icon' => '🔥', 'url' => site_url('radar?' . http_build_query(array_merge($filters, ['min_score' => 70, 'intel' => 'active'])))],
                                 ];
                                 foreach ($chips as $key => $chip):
                                     $active = ($activeFilter === $key) ? 'is-active' : '';
@@ -402,16 +402,20 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, $limitFree) : $allCo
 
                     <?php else: ?>
                     <!-- USUARIO FREE -->
-                    <div class="ae-usage-counter" style="margin-bottom:24px;background:linear-gradient(to right, #fff, #f8fafc);border-radius:16px;padding:24px 32px;border:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+                    <?php
+                        $rangoTxt = (string) ($filters['rango'] ?? 'hoy');
+                        $periodoTxt = $rangoTxt === 'hoy' ? 'de hoy' : ($rangoTxt === '7' ? 'de esta semana' : 'de los últimos ' . (int) $rangoTxt . ' días');
+                    ?>
+                    <div class="ae-usage-counter" style="margin-bottom:24px;background:linear-gradient(to right, #fff, #f8fafc);border-radius:16px;padding:24px 32px;border:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
                         <div>
-                            <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-                                <span style="background:#fef2f2; color:#ef4444; font-size:10px; font-weight:800; padding:2px 8px; border-radius:999px; text-transform:uppercase;">Plan Gratuito</span>
-                                <h3 style="margin:0;font-size:16px;font-weight:800;color:#1e293b;">Has desbloqueado 3 de <?= number_format($pagination['total']) ?> leads hoy</h3>
+                            <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; flex-wrap:wrap;">
+                                <span style="background:#fef2f2; color:#ef4444; font-size:10px; font-weight:800; padding:2px 8px; border-radius:999px; text-transform:uppercase; white-space:nowrap;">Plan gratuito</span>
+                                <h3 style="margin:0;font-size:16px;font-weight:800;color:#1e293b;">Estás viendo 3 de <?= number_format($pagination['total']) ?> empresas <?= $periodoTxt ?></h3>
                             </div>
-                            <p style="margin:0;font-size:13px;color:#64748b;">Los datos están difuminados a partir del 3er resultado. Actualiza a PRO para acceso total.</p>
+                            <p style="margin:0;font-size:13px;color:#64748b;">El resto aparece difuminado. Con Radar PRO ves el listado completo, con filtros y exportación.</p>
                         </div>
                         <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar&source=' . esc($source)) ?>" class="ae-radar-page__cta-top ae-shine-btn" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color:#fff; box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4); border:none; padding: 12px 24px; border-radius: 12px; font-weight: 900; display: flex; align-items: center; gap: 8px;">
-                            <span>👑</span> Desbloquear todo ahora
+                            Ver el listado completo
                         </a>
                     </div>
 
@@ -463,7 +467,7 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, $limitFree) : $allCo
                 </div>
                 <h3 style="font-size: 20px; font-weight: 900; color: #1e293b; margin-bottom: 12px; letter-spacing: -0.02em;">¿Seguro que quieres cancelar?</h3>
                 <p style="font-size: 14px; color: #64748b; line-height: 1.6; margin-bottom: 30px;">
-                    Perderás el acceso a la <strong>Búsqueda IA</strong>, los filtros avanzados y la detección de leads en tiempo real. 
+                    Perderás el acceso a la <strong>Búsqueda IA</strong>, los filtros avanzados y el listado completo de empresas nuevas. 
                     Las oportunidades no esperan.
                 </p>
                 <div style="display: flex; flex-direction: column; gap: 10px;">
@@ -498,19 +502,19 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, $limitFree) : $allCo
                         <span style="color: #10b981; font-size: 18px;">✔</span> Búsqueda con IA
                     </div>
                     <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 700; color: #475569;">
-                        <span style="color: #10b981; font-size: 18px;">✔</span> Contactos Directos
+                        <span style="color: #10b981; font-size: 18px;">✔</span> Exportación a Excel
                     </div>
                     <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 700; color: #475569;">
-                        <span style="color: #10b981; font-size: 18px;">✔</span> Filtros Premium
+                        <span style="color: #10b981; font-size: 18px;">✔</span> Filtros por provincia y sector
                     </div>
                     <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 700; color: #475569;">
-                        <span style="color: #10b981; font-size: 18px;">✔</span> Alertas en Vivo
+                        <span style="color: #10b981; font-size: 18px;">✔</span> Listado completo
                     </div>
                 </div>
                 <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar') ?>" style="display: block; background: #2563eb; color: white; text-align: center; padding: 18px; border-radius: 14px; font-weight: 900; font-size: 16px; text-decoration: none; box-shadow: 0 10px 25px rgba(37,99,235,0.3); transition: transform 0.2s;">
                     Desbloquear acceso PRO ahora
                 </a>
-                <p style="text-align: center; margin-top: 16px; font-size: 11px; color: #94a3b8; font-weight: 700;">Recupera tu inversión con solo 1 cliente ganado</p>
+                <p style="text-align: center; margin-top: 16px; font-size: 11px; color: #94a3b8; font-weight: 700;">Sin permanencia: cancela cuando quieras</p>
             </div>
         </div>
     </div>
@@ -801,15 +805,15 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, $limitFree) : $allCo
                 'estado': 'Estado',
                 'cpv': 'Código CPV',
                 'expediente': 'Expediente',
-                'url': 'Enlace Oficial',
-                'link': 'Enlace Oficial',
+                'url': 'Enlace de origen',
+                'link': 'Enlace de origen',
                 'enlace_licitacion': 'Enlace a Licitación',
                 'id_licitacion': 'ID Licitación'
             };
 
             let html = `
                 <div style="font-size: 13px; color: #64748b; margin-bottom: 16px; text-align: left; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0;">
-                    Información oficial extraída del boletín correspondiente.
+                    Información extraída del boletín correspondiente.
                 </div>
                 <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; text-align: left; font-family: 'Inter', system-ui, sans-serif; max-height: 400px; overflow-y: auto; padding-right: 8px;">
             `;

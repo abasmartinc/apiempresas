@@ -4,7 +4,7 @@
             <span class="ae-qv__badge">Perfil de empresa</span>
             <h2 class="ae-qv__name"><?= esc($co['company_name']) ?></h2>
             <div class="ae-qv__meta">
-                <span class="ae-qv__cif">CIF: <?= esc($co['cif'] ?? 'N/D') ?></span>
+                <span class="ae-qv__cif">CIF: <?= esc($co['cif'] ?? 'No consta') ?></span>
                 <?php 
                     $isValidDate = false;
                     $displayDate = '';
@@ -39,7 +39,7 @@
                 <div class="ae-qv__item">
                     <label>Sector (CNAE)</label>
                     <div class="ae-radar-page__badge ae-radar-page__badge--sector" style="display:inline-block; margin-top:4px;">
-                        <?= esc($co['cnae_label'] ?? 'N/D') ?>
+                        <?= esc($co['cnae_label'] ?? 'No consta') ?>
                     </div>
                 </div>
             </div>
@@ -48,8 +48,8 @@
         <div class="ae-qv__section">
             <h3 class="ae-qv__section-title">Administración y Cargos</h3>
             <div class="ae-qv__admins">
-                <?php if ($isFree): ?>
-                    <div class="ae-radar-page__locked-phone" style="padding: 12px 0;">🔒 Administradores bloqueados en Plan Free</div>
+                <?php if ($isFree && !empty($admins)): ?>
+                    <div class="ae-radar-page__locked-phone" style="padding: 12px 0;">🔒 <?= count($admins) ?> <?= count($admins) === 1 ? 'administrador' : 'administradores' ?> · visible con Radar PRO</div>
                 <?php elseif (!empty($admins)): ?>
                     <ul class="ae-qv__admin-list">
                         <?php foreach ($admins as $admin): ?>
@@ -77,47 +77,47 @@
             <div class="ae-qv__grid ae-qv__grid--2">
                 <div class="ae-qv__item">
                     <label>Provincia / Registro</label>
-                    <p><?= esc($co['registro_mercantil'] ?? 'N/D') ?></p>
+                    <p><?= esc($co['registro_mercantil'] ?? 'No consta') ?></p>
                 </div>
                 <div class="ae-qv__item">
                     <label>Municipio</label>
-                    <p><?= esc($co['municipality'] ?? 'N/D') ?></p>
+                    <p><?= esc($co['municipality'] ?? 'No consta') ?></p>
                 </div>
                 <div class="ae-qv__item">
                     <label>Teléfono</label>
                     <p class="ae-qv__contact-value">
-                        <?php if ($isFree): ?>
-                            <span class="ae-radar-page__locked-phone">🔒 Bloqueado</span>
+                        <?php if ($isFree && !empty($co['phone'])): ?>
+                            <span class="ae-radar-page__locked-phone">🔒 Visible con Radar PRO</span>
                         <?php elseif (!empty($co['phone'])): ?>
                             <strong><?= esc($co['phone']) ?></strong>
                         <?php else: ?>
-                            -
+                            No consta
                         <?php endif; ?>
                     </p>
                 </div>
                 <div class="ae-qv__item">
-                    <label>Email de Contacto</label>
+                    <label>Email de contacto</label>
                     <p class="ae-qv__contact-value">
-                        <?php if ($isFree): ?>
-                            <span class="ae-radar-page__locked-phone">🔒 Bloqueado</span>
+                        <?php if ($isFree && !empty($co['email'])): ?>
+                            <span class="ae-radar-page__locked-phone">🔒 Visible con Radar PRO</span>
                         <?php elseif (!empty($co['email'])): ?>
                             <a href="mailto:<?= esc($co['email']) ?>" style="color: #2563eb; text-decoration: underline; font-weight: 500;">
                                 <?= esc($co['email']) ?>
                             </a>
                         <?php else: ?>
-                            -
+                            No consta
                         <?php endif; ?>
                     </p>
                 </div>
                 <div class="ae-qv__item">
-                    <label>Sitio Web Oficial</label>
+                    <label>Sitio web</label>
                     <p>
                         <?php if (!empty($co['website_official'])): ?>
                             <a href="<?= esc($co['website_official']) ?>" target="_blank" style="color: #2563eb; text-decoration: underline; font-weight: 500;">
                                 Visitar web ↗
                             </a>
                         <?php else: ?>
-                            -
+                            No consta
                         <?php endif; ?>
                     </p>
                 </div>

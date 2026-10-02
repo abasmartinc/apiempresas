@@ -340,7 +340,7 @@
                 <div class="ae-radar-page__container">
                     <div class="ae-favorites-page__header">
                         <h1 class="ae-favorites-page__title">Mis Empresas Favoritas</h1>
-                        <p class="ae-favorites-page__subtitle">Gestiona tus leads guardados, analiza su potencial con IA y organiza el seguimiento comercial.</p>
+                        <p class="ae-favorites-page__subtitle">Gestiona tus leads guardados, prepara el primer contacto y organiza el seguimiento comercial.</p>
                     </div>
 
                     <!-- Nueva Barra de Filtros -->
@@ -358,7 +358,7 @@
                                     <option value="contactado" <?= ($currentStatus == 'contactado') ? 'selected' : '' ?>>Contactado</option>
                                     <option value="negociacion" <?= ($currentStatus == 'negociacion') ? 'selected' : '' ?>>Negociación</option>
                                     <option value="ganado" <?= ($currentStatus == 'ganado') ? 'selected' : '' ?>>Ganado</option>
-                                    <option value="seguimiento" <?= ($currentStatus == 'seguimiento') ? 'selected' : '' ?>>En Seguimiento (IA)</option>
+                                    <option value="seguimiento" <?= ($currentStatus == 'seguimiento') ? 'selected' : '' ?>>En seguimiento</option>
                                 </select>
                             </div>
                         </div>

@@ -379,10 +379,12 @@ class Radar extends BaseController
         // Auto-fallback inteligente: Si el pipeline de hoy no se ha ejecutado aún (0 empresas),
         // y el usuario no ha forzado el filtro "hoy", ampliamos la búsqueda para que no se vea vacío.
         if (empty($requestedRange)) {
+            // '7' y '30', que es lo que entiende el filtro. Antes se ponía 'semana' o 'mes',
+            // que como número de días valían 0: el listado seguía siendo el de hoy.
             if ($stats['hoy'] == 0 && $stats['semana'] > 0) {
-                $timeRange = 'semana';
+                $timeRange = '7';
             } elseif ($stats['hoy'] == 0 && $stats['semana'] == 0 && $stats['mes'] > 0) {
-                $timeRange = 'mes';
+                $timeRange = '30';
             }
         }
 
@@ -392,6 +394,7 @@ class Radar extends BaseController
             companies.company_name, 
             companies.cif, 
             companies.fecha_constitucion, 
+            companies.cnae_code,
             companies.cnae_label, 
             companies.registro_mercantil, 
             companies.municipality, 
@@ -407,9 +410,7 @@ class Radar extends BaseController
         $this->companyModel->join('company_radar_scores crs', 'crs.company_id = companies.id', 'left');
         $this->companyModel->where('companies.fecha_constitucion IS NOT NULL');
 
-        if ($province) {
-            $this->companyModel->where('companies.registro_mercantil', strtoupper(str_replace('-', ' ', $province)));
-        }
+        $this->filtrarProvinciaPanel($this->companyModel, $province);
         if ($cnae) {
             if (is_numeric($cnae) && strlen($cnae) >= 2) {
                 // Filtro por código directo (retrocompatibilidad o directo)
@@ -449,7 +450,9 @@ class Radar extends BaseController
         $ai = $this->request->getGet('ai');
 
         if ($minScore || $intel === 'active') {
-            $scoreLimit = $minScore ? (int)$minScore : 70;
+            // 60 = prioridad "alta" en la escala actual (máximo real ~76). Con 70 quedaba
+            // fuera más del 90 % de las constituciones.
+            $scoreLimit = $minScore ? (int)$minScore : 60;
             $this->companyModel->where('crs.score_total >=', $scoreLimit);
         }
 
@@ -471,25 +474,11 @@ class Radar extends BaseController
         }
         // Nota: has_email y has_website no existen como columnas en companies
 
-        // Rango de tiempo
-        $today = date('Y-m-d');
-        if ($timeRange === 'hoy') {
-            $dateLimit = $today;
-        } else {
-            $days = (int)$timeRange;
-            $dateLimit = date('Y-m-d', strtotime("-$days days"));
-        }
-        
-        // Límite superior de +15 días para evitar typos de scraper
-        $maxDateLimit = date('Y-m-d', strtotime('+15 days'));
+        // Rango de tiempo (con tope de días) y empresas con novedades, por id
+        $dateLimit  = $this->fechaDesde($timeRange);
+        $unionQuery = $this->eventosSql($dateLimit);
 
-        $unionQuery = "SELECT cif FROM companies WHERE fecha_constitucion >= '{$dateLimit}' AND fecha_constitucion <= '{$maxDateLimit}' 
-                       UNION 
-                       SELECT company_cif AS cif FROM company_subsidies WHERE created_at >= '{$dateLimit} 00:00:00' 
-                       UNION 
-                       SELECT company_cif AS cif FROM company_contracts WHERE created_at >= '{$dateLimit} 00:00:00'";
-                       
-        $this->companyModel->join("({$unionQuery}) matched_events", "matched_events.cif = companies.cif", "inner");
+        $this->companyModel->join("({$unionQuery}) matched_events", "matched_events.id = companies.id", "inner");
 
         // Orden por defecto: Score Total y luego fecha
         $this->companyModel->orderBy('crs.score_total', 'DESC');
@@ -557,7 +546,7 @@ class Radar extends BaseController
         $metricsService = new \App\Libraries\RadarMetricsService();
         $pipelineMetrics = $metricsService->getMetrics($totalCount);
         $todayMetrics = $metricsService->getMetrics($stats['hoy']);
-        $intelMetrics = $metricsService->getMetrics(round(($freshness['todayCount'] ?? 250) * 0.15)); // Proporción de alta prob.
+        $intelMetrics = $metricsService->getMetrics((int) round($stats['hoy'] * 0.15));
 
         // 4. Estadísticas de progreso CRM (Ajuste 1)
         $crmStats = ['contactado' => 0, 'seguimiento' => 0, 'nuevo' => 0];
@@ -565,11 +554,9 @@ class Radar extends BaseController
             ->select('uf.status, COUNT(*) as total')
             ->join('companies c', 'c.id = uf.company_id')
             ->where('uf.user_id', $userId)
-            ->join("({$unionQuery}) matched_events", "matched_events.cif = c.cif", "inner");
+            ->join("({$unionQuery}) matched_events", "matched_events.id = c.id", "inner");
         
-        if ($province) {
-            $statusCounts->where('c.registro_mercantil', strtoupper(str_replace('-', ' ', $province)));
-        }
+        $this->filtrarProvinciaPanel($statusCounts, $province, 'c.registro_mercantil');
         if ($q) {
             $statusCounts->groupStart()
                 ->like('c.objeto_social', $q)
@@ -620,7 +607,9 @@ class Radar extends BaseController
         });
 
         // 4. Datos para Filtros
-        $provinces = $db->query("SELECT province as name FROM seo_stats ORDER BY total_companies DESC LIMIT 52")->getResultArray();
+        // Las 52 provincias con su nombre canónico (antes salían de seo_stats, con duplicados
+        // como "Alicante", "Alicante/Alacant" y "ALACANT").
+        $provinces = array_map(static fn ($n) => ['name' => $n], \App\Libraries\Provincias::nombres());
         
         $data = [
             'source' => $source,
@@ -660,7 +649,8 @@ class Radar extends BaseController
                 'period_end' => $activePlan ? $activePlan->current_period_end : null,
             ],
             'freshness' => [
-                'lastUpdate' => date('H:i', strtotime('-12 minutes')),
+                // Fecha del último BORME cargado. Antes: la hora actual menos 12 minutos.
+                'lastUpdate' => $this->ultimaCargaBorme() ?? 'sin datos',
                 'todayCount' => $stats['hoy']
             ]
         ];
@@ -671,14 +661,82 @@ class Radar extends BaseController
         return view('radar/dashboard', $data);
     }
 
+    /** Tope de días del filtro de periodo (antes no había: rango=99999 exportaba toda la base) */
+    private const RANGO_MAX_DIAS = 90;
+    /** Tope de filas de una exportación */
+    private const EXPORT_MAX_FILAS = 20000;
+
+    /** Fecha desde la que mirar, a partir del filtro "rango" ('hoy' o número de días) */
+    private function fechaDesde($rango): string
+    {
+        if ($rango === 'hoy' || $rango === null || $rango === '') {
+            return date('Y-m-d');
+        }
+        $dias = max(1, min((int) $rango, self::RANGO_MAX_DIAS));
+
+        return date('Y-m-d', strtotime("-{$dias} days"));
+    }
+
+    /**
+     * Ids de las empresas con novedades desde una fecha: constituciones, subvenciones y
+     * contratos cargados.
+     *
+     * Cambios del 02-10-2026:
+     *  - Se cruza por id, no por CIF: el 83 % de las empresas recién constituidas aún no
+     *    tiene CIF y no aparecían en el panel (los contadores sí las contaban).
+     *  - Sin fechas de constitución futuras ni posteriores al alta (antes se admitían
+     *    hasta 15 días en el futuro).
+     *  - Subvenciones y contratos solo de personas jurídicas.
+     */
+    private function eventosSql(string $desde): string
+    {
+        $hoy = date('Y-m-d');
+        $jurS = \App\Libraries\FondosPublicos::soloJuridicas('s.company_cif');
+        $jurC = \App\Libraries\FondosPublicos::soloJuridicas('ctr.company_cif');
+
+        return "SELECT id FROM companies
+                    WHERE fecha_constitucion >= '{$desde}' AND fecha_constitucion <= '{$hoy}'
+                      AND (created_at IS NULL OR fecha_constitucion <= DATE(created_at))
+                UNION
+                SELECT c.id FROM company_subsidies s INNER JOIN companies c ON c.cif = s.company_cif
+                    WHERE s.created_at >= '{$desde} 00:00:00' AND {$jurS}
+                UNION
+                SELECT c.id FROM company_contracts ctr INNER JOIN companies c ON c.cif = ctr.company_cif
+                    WHERE ctr.created_at >= '{$desde} 00:00:00' AND {$jurC}";
+    }
+
+    /** Filtro de provincia con todas las formas en que está escrita en la base de datos */
+    private function filtrarProvinciaPanel($builder, $provincia, string $columna = 'companies.registro_mercantil'): void
+    {
+        if (!$provincia) {
+            return;
+        }
+        $builder->whereIn($columna, \App\Libraries\Provincias::variantes((string) $provincia));
+    }
+
+    /** Fecha del último BORME cargado (d/m/Y), o null si no se puede saber */
+    private function ultimaCargaBorme(): ?string
+    {
+        $fecha = cache('radar_ultima_carga_borme');
+        if ($fecha === null) {
+            try {
+                $fila  = \Config\Database::connect()->query('SELECT MAX(borme_date) AS f FROM borme_posts')->getRowArray();
+                $fecha = !empty($fila['f']) ? date('d/m/Y', strtotime($fila['f'])) : '';
+            } catch (\Throwable $e) {
+                $fecha = '';
+            }
+            cache()->save('radar_ultima_carga_borme', $fecha, 900);
+        }
+
+        return $fecha !== '' ? $fecha : null;
+    }
+
     /**
      * Contador rápido de empresas nuevas por periodo
      */
     private function countNewCompanies($period)
     {
         $builder = $this->companyModel->builder();
-        
-        $maxDateLimit = date('Y-m-d', strtotime('+15 days'));
         
         $dateLimit = date('Y-m-d');
         if ($period === 'semana') {
@@ -687,11 +745,7 @@ class Radar extends BaseController
             $dateLimit = date('Y-m-01');
         }
 
-        $unionQuery = "SELECT id FROM companies WHERE fecha_constitucion >= '{$dateLimit}' AND fecha_constitucion <= '{$maxDateLimit}' 
-                       UNION 
-                       SELECT c.id FROM company_subsidies s INNER JOIN companies c ON c.cif = s.company_cif WHERE s.created_at >= '{$dateLimit} 00:00:00' 
-                       UNION 
-                       SELECT c.id FROM company_contracts ctr INNER JOIN companies c ON c.cif = ctr.company_cif WHERE ctr.created_at >= '{$dateLimit} 00:00:00'";
+        $unionQuery = $this->eventosSql($dateLimit);
 
         $builder->join("({$unionQuery}) matched_events", "matched_events.id = companies.id", "inner");
         $builder->where('companies.fecha_constitucion IS NOT NULL');
@@ -1028,11 +1082,12 @@ class Radar extends BaseController
 
         $format = $this->request->getGet('format') ?? 'csv';
 
-        // Obtener filtros
-        $province = $this->request->getGet('provincia');
-        $cnae = $this->request->getGet('cnae');
+        // Mismos filtros que el listado en pantalla (antes se ignoraban sector, puntuación
+        // mínima, teléfono y estado, y el periodo no tenía tope).
+        $province  = $this->request->getGet('provincia');
+        $cnae      = $this->request->getGet('cnae');
         $timeRange = $this->request->getGet('rango') ?? 'hoy';
-        $q = $this->request->getGet('q');
+        $q         = $this->request->getGet('q');
 
         $builder = $this->companyModel->builder();
         $builder->select('
@@ -1051,8 +1106,9 @@ class Radar extends BaseController
         $builder->join('company_radar_scores crs', 'crs.company_id = companies.id', 'left');
         $builder->where('companies.fecha_constitucion IS NOT NULL');
 
-        if ($province) {
-            $builder->where('companies.registro_mercantil', strtoupper(str_replace('-', ' ', $province)));
+        $this->filtrarProvinciaPanel($builder, $province);
+        if ($cnae && is_numeric($cnae) && strlen($cnae) >= 2) {
+            $builder->like('companies.cnae_code', $cnae, 'after');
         }
         if ($q) {
             $builder->groupStart()
@@ -1061,38 +1117,39 @@ class Radar extends BaseController
                 ->groupEnd();
         }
 
-        // Nuevos Filtros Radar Scoring en Exportación
         $priority = $this->request->getGet('priority_level');
         if ($priority) {
             $builder->where('crs.priority_level', $priority);
         }
-
         $actType = $this->request->getGet('main_act_type');
         if ($actType) {
             $builder->where('crs.main_act_type', $actType);
         }
-
-        $today = date('Y-m-d');
-        if ($timeRange === 'hoy') {
-            $dateLimit = $today;
-        } else {
-            $days = (int)$timeRange;
-            $dateLimit = date('Y-m-d', strtotime("-$days days"));
+        $minScore = $this->request->getGet('min_score');
+        if ($minScore || $this->request->getGet('intel') === 'active') {
+            $builder->where('crs.score_total >=', $minScore ? (int) $minScore : 60);
         }
-        
-        $maxDateLimit = date('Y-m-d', strtotime('+15 days'));
-        
-        $unionQuery = "SELECT cif FROM companies WHERE fecha_constitucion >= '{$dateLimit}' AND fecha_constitucion <= '{$maxDateLimit}' 
-                       UNION 
-                       SELECT company_cif AS cif FROM company_subsidies WHERE created_at >= '{$dateLimit} 00:00:00' 
-                       UNION 
-                       SELECT company_cif AS cif FROM company_contracts WHERE created_at >= '{$dateLimit} 00:00:00'";
+        if ($this->request->getGet('has_phone')) {
+            $builder->where('companies.phone !=', '');
+            $builder->where('companies.phone IS NOT NULL');
+        }
+        $status = $this->request->getGet('status');
+        if ($status) {
+            $builder->join('user_favorites uf_filter', 'uf_filter.company_id = companies.id AND uf_filter.user_id = ' . (int) $userId, 'left');
+            if ($status === 'nuevo') {
+                $builder->where('(uf_filter.status IS NULL OR uf_filter.status = "nuevo")');
+            } else {
+                $builder->where('uf_filter.status', $status);
+            }
+        }
 
-        $builder->join("({$unionQuery}) matched_events", "matched_events.cif = companies.cif", "inner");
-        
+        $unionQuery = $this->eventosSql($this->fechaDesde($timeRange));
+        $builder->join("({$unionQuery}) matched_events", "matched_events.id = companies.id", "inner");
+
         $companies = $builder->orderBy('crs.score_total', 'DESC')
                             ->orderBy('crs.last_borme_date', 'DESC')
                             ->orderBy('companies.fecha_constitucion', 'DESC')
+                            ->limit(self::EXPORT_MAX_FILAS)
                             ->get()
                             ->getResultArray();
 
@@ -1206,9 +1263,7 @@ class Radar extends BaseController
         $builder->where('crs.last_borme_date IS NOT NULL');
 
         // Aplicar mismos filtros que en el listado
-        if ($province) {
-            $builder->where('companies.registro_mercantil', strtoupper(str_replace('-', ' ', $province)));
-        }
+        $this->filtrarProvinciaPanel($builder, $province);
         if ($cnae) {
             // Simplificado para el mapa
             $builder->like('companies.cnae_code', $cnae, 'after');
@@ -1224,8 +1279,7 @@ class Radar extends BaseController
         if ($timeRange === 'hoy') {
             $builder->where('crs.last_borme_date >=', $today);
         } else {
-            $days = (int)$timeRange;
-            $builder->where('crs.last_borme_date >=', date('Y-m-d', strtotime("-$days days")));
+            $builder->where('crs.last_borme_date >=', $this->fechaDesde($timeRange));
         }
 
         $results = $builder->groupBy('companies.registro_mercantil')
@@ -1483,7 +1537,9 @@ class Radar extends BaseController
 
 
         $db = \Config\Database::connect();
-        $provinces = $db->query("SELECT province as name FROM seo_stats ORDER BY total_companies DESC LIMIT 52")->getResultArray();
+        // Las 52 provincias con su nombre canónico (antes salían de seo_stats, con duplicados
+        // como "Alicante", "Alicante/Alacant" y "ALACANT").
+        $provinces = array_map(static fn ($n) => ['name' => $n], \App\Libraries\Provincias::nombres());
         $sections = $db->query("SELECT id, name FROM cnae_sections ORDER BY name ASC")->getResultArray();
 
         $data = [
@@ -1515,7 +1571,7 @@ class Radar extends BaseController
         $builder->where('fecha_constitucion <=', date('Y-m-d'));
 
         if ($province) {
-            $builder->where('registro_mercantil', strtoupper(str_replace('-', ' ', $province)));
+            $this->filtrarProvinciaPanel($builder, $province, 'registro_mercantil');
         }
 
         if ($sectionId) {
@@ -1560,7 +1616,7 @@ class Radar extends BaseController
         $sectorsBuilder->where('c.fecha_constitucion <=', date('Y-m-d'));
         
         if ($province) {
-            $sectorsBuilder->where('c.registro_mercantil', strtoupper(str_replace('-', ' ', $province)));
+            $this->filtrarProvinciaPanel($sectorsBuilder, $province, 'c.registro_mercantil');
         }
         
         $sectorsRaw = $sectorsBuilder->groupBy('s.id, s.name')
@@ -1593,15 +1649,6 @@ class Radar extends BaseController
             $db = \Config\Database::connect();
             $date = date('Y-m-d');
             
-            // Aseguramos que la tabla exista (ligero)
-            $db->query("CREATE TABLE IF NOT EXISTS radar_daily_unlocks (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                user_id INT NOT NULL,
-                unlock_date DATE NOT NULL,
-                unlock_count INT DEFAULT 0,
-                UNIQUE KEY (user_id, unlock_date)
-            )");
-
             $row = $db->table('radar_daily_unlocks')
                       ->where('user_id', $userId)
                       ->where('unlock_date', $date)
@@ -1657,6 +1704,10 @@ class Radar extends BaseController
         }
 
         $userId = session('user_id');
+        $companyId = (int) $companyId;
+        if ($companyId <= 0 || !$this->companyModel->select('id')->find($companyId)) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Empresa no encontrada']);
+        }
         $messageBody = $this->request->getPost('message');
         $notes = $this->request->getPost('notes') ?? 'Lead preparado desde Modal IA';
 
@@ -1784,8 +1835,7 @@ class Radar extends BaseController
 
         // Filtro de provincia
         if (!empty($f['provincia'])) {
-            $provFormatted = strtoupper(str_replace('-', ' ', $f['provincia']));
-            $this->companyModel->where('companies.registro_mercantil', $provFormatted);
+            $this->filtrarProvinciaPanel($this->companyModel, $f['provincia']);
         }
 
         // Filtro de palabras clave (nicho/sector) - busca en objeto social y en etiqueta CNAE
@@ -1829,8 +1879,9 @@ class Radar extends BaseController
 
         // Filtro de rango temporal
         $rango = $f['rango'] ?? '30';
-        $dateLimit = ($rango === 'hoy') ? date('Y-m-d') : date('Y-m-d', strtotime('-' . (int)$rango . ' days'));
+        $dateLimit = $this->fechaDesde($rango);
         $this->companyModel->where('companies.fecha_constitucion >=', $dateLimit);
+        $this->companyModel->where('companies.fecha_constitucion <=', date('Y-m-d'));
 
         $this->companyModel->orderBy('crs.score_total', 'DESC');
         $this->companyModel->orderBy('crs.last_borme_date', 'DESC');

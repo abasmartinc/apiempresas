@@ -38,7 +38,7 @@
                                     Embudo de Ventas <span class="ae-radar-page__hero-title-grad">Interactivo</span>
                                 </h1>
                                 <p class="ae-radar-page__hero-text" style="color: #64748b; max-width: 650px; line-height: 1.4; font-size: 13.5px; margin-top: 4px;">
-                                    Gestiona tus favoritos por etapas comerciales arrastrando las tarjetas en tiempo real.
+                                    Gestiona tus favoritos por etapas comerciales arrastrando las tarjetas.
                                 </p>
                             </div>
                         </div>
@@ -52,7 +52,7 @@
                                 'contactado' => ['label' => 'Contactado', 'icon' => 'fa-paper-plane', 'color' => '#8b5cf6'],
                                 'negociacion' => ['label' => 'En Negociación', 'icon' => 'fa-comments', 'color' => '#f59e0b'],
                                 'ganado' => ['label' => 'Ganado', 'icon' => 'fa-check-circle', 'color' => '#10b981'],
-                                'seguimiento' => ['label' => 'Seguimiento (IA)', 'icon' => 'fa-robot', 'color' => '#2563eb']
+                                'seguimiento' => ['label' => 'Seguimiento', 'icon' => 'fa-robot', 'color' => '#2563eb']
                             ];
                             
                             foreach ($columnConfig as $id => $config): ?>

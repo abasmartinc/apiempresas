@@ -126,18 +126,25 @@ class RadarAnalyzer
             ],
         ];
 
+        // Las palabras clave van sin tildes: se quitan también del texto. Y se buscan como
+        // palabras enteras: antes "it" o "bar" coincidían dentro de cualquier otra palabra
+        // y "consultoría" (con tilde) no coincidía con "consultoria".
+        $text = strtr($text, ['á' => 'a', 'é' => 'e', 'í' => 'i', 'ó' => 'o', 'ú' => 'u', 'ü' => 'u']);
+
         foreach ($mappings as $key => $data) {
             foreach ($data['keywords'] as $word) {
-                if (mb_stripos($text, $word) !== false) {
+                if (preg_match('/(?<![a-zñ0-9])' . preg_quote($word, '/') . '(?![a-zñ0-9])/u', $text)) {
                     return array_merge($data, ['slug' => $key]);
                 }
             }
         }
 
-        // Final Fallback
+        // Sin perfil reconocido: se usa el sector de la empresa si lo tiene.
+        $sector = trim((string) ($company['cnae_label'] ?? ''));
         return [
             'slug' => 'general',
-            'label' => 'Sociedad de reciente creación / Actividad general',
+            'label' => $sector !== '' ? $sector : 'Empresa de reciente creación',
+            'tiene_sector' => $sector !== '',
             'keywords' => []
         ];
     }
@@ -193,7 +200,7 @@ class RadarAnalyzer
     private static function buildSummary(array $company, array $profile): string
     {
         if ($profile['slug'] !== 'general') {
-            return "Empresa identificada en el sector de " . $profile['label'] . " con perfil comercial probable y necesidad de estructura operativa inicial.";
+            return "Empresa identificada en el sector de " . $profile['label'] . " recién constituida.";
         }
 
         // Fallback for general
@@ -201,7 +208,11 @@ class RadarAnalyzer
             return "Sociedad con señales de " . $company['main_act_type'] . " reciente, orientada probablemente a servicios locales u operativos.";
         }
 
-        return "Empresa de reciente creación con actividad aún por definir, pero con perfil activo para soluciones de puesta en marcha.";
+        if (!empty($profile['tiene_sector'])) {
+            return "Empresa de reciente creación. Sector: " . $profile['label'] . ".";
+        }
+
+        return "Empresa de reciente creación. Todavía no consta su sector.";
     }
 
     /**
@@ -222,7 +233,7 @@ class RadarAnalyzer
     private static function buildFirstMessage(array $company, array $profile, array $needs): string
     {
         $name = $company['company_name'] ?? 'vuestra empresa';
-        return "Hola, hemos visto que acabáis de constituir " . $name . ". En esta fase inicial, muchas empresas como la vuestra necesitan resolver rápido temas de presencia web, gestión fiscal y captación de clientes. Te escribo porque ayudamos a negocios de " . $profile['label'] . " a arrancar con todo esto de forma muy práctica. ¿Te encajaría comentarlo brevemente?";
+        return "Hola, hemos visto que acabáis de constituir " . $name . ". En esta fase inicial, muchas empresas como la vuestra necesitan resolver rápido temas de presencia web, gestión fiscal y captación de clientes. Te escribo porque ayudamos a " . (($profile['slug'] ?? 'general') === 'general' ? 'empresas recién constituidas' : 'negocios de ' . $profile['label']) . " a arrancar con todo esto de forma muy práctica. ¿Te encajaría comentarlo brevemente?";
     }
 
     /**
@@ -393,7 +404,7 @@ class RadarAnalyzer
             'has_any_contact' => false,
             'status_label'    => 'sin_contacto',
             'status_title'    => 'Sin contacto detectado todavía',
-            'status_message'  => 'No se ha detectado email, teléfono ni web por el momento, pero sigue siendo una oportunidad temprana valiosa.'
+            'status_message'  => 'No se ha detectado email, teléfono ni web por el momento. Puedes guardarla y preparar el mensaje para cuando los tengas.'
         ];
     }
 

@@ -26,30 +26,41 @@ class RadarScoringSystem
         // 2. Si es 0, usamos el fallback de cálculo en tiempo real (mismo algoritmo que el script externo)
         
         $triggerType = $company['trigger_type'] ?? '';
+
+        // Empresa nueva que el cálculo nocturno aún no ha puntuado: su acto es la
+        // constitución. Antes salía "Sin acto reciente" con 25 puntos.
+        if (empty($company['main_act_type']) && $triggerType === 'nueva_empresa' && !empty($company['fecha_constitucion'])) {
+            $company['main_act_type'] = 'Constitución';
+            if (empty($company['last_borme_date'])) {
+                $company['last_borme_date'] = $company['fecha_constitucion'];
+            }
+        }
         $isHighValueTrigger = in_array($triggerType, ['contrato', 'subvencion']);
 
         $dbScore = (int)($company['score_total'] ?? 0);
         
         if ($dbScore > 0) {
-            $baseScore = $isHighValueTrigger ? max($dbScore, 95) : $dbScore;
-            $bormeScore = $isHighValueTrigger ? 100 : (int)($company['borme_score_static'] ?? $dbScore);
+            // Una subvención o un contrato ya no fuerzan 95 puntos: copaban el listado por
+            // encima de todas las constituciones (02-10-2026).
+            $baseScore = $dbScore;
+            $bormeScore = (int)($company['borme_score_static'] ?? $dbScore);
             $qualityScore = self::calculateQualityScore($company);
             $contactScore = self::calculateContactScore($company);
         } else {
-            $bormeScore = $isHighValueTrigger ? 100 : self::calculateBormeScore($company);
+            $bormeScore = $isHighValueTrigger ? 70 : self::calculateBormeScore($company);
             $qualityScore = self::calculateQualityScore($company);
             $contactScore = self::calculateContactScore($company);
             
-            $baseScore = (($bormeScore * 0.60) + ($qualityScore * 0.15) + ($contactScore * 0.15)) / 0.90;
-            if ($isHighValueTrigger) {
-                $baseScore = max($baseScore, 95);
-            }
+            // Misma escala que la puntuación guardada (máximo 90), sin dividir entre 0,90.
+            $baseScore = ($bormeScore * 0.60) + ($qualityScore * 0.15) + ($contactScore * 0.15);
         }
 
         $personalizationScore = self::calculatePersonalizationScore($engagementScore, $groupScore, $userPrefScore);
 
         // FÓRMULA HÍBRIDA: 90% Base Estática (DB o Fallback) + 10% Personalización IA
-        $finalScore = ($baseScore * 0.90) + ($personalizationScore * 0.10);
+        // La puntuación guardada se muestra tal cual; la personalización suma hasta 10 puntos.
+        // Antes se mostraba el 90 % de la guardada, y las etiquetas altas eran inalcanzables.
+        $finalScore = $baseScore + ($personalizationScore * 0.10);
 
         // Cap at 100 and floor at 0
         $finalScore = max(0, min(100, round($finalScore)));
@@ -185,7 +196,7 @@ class RadarScoringSystem
      */
     private static function getVisuals(int $score, string $mainAct): array
     {
-        if ($mainAct === 'Extinción' || $score === 0) {
+        if ($mainAct === 'Extinción') {
             return [
                 'label' => 'No contactar',
                 'icon' => '🚫',
@@ -194,10 +205,20 @@ class RadarScoringSystem
                 'priority' => 'ninguna'
             ];
         }
-
-        if ($score >= 85) {
+        // Sin puntuación no es "No contactar": eso queda para las extinguidas.
+        if ($score === 0) {
             return [
-                'label' => 'Lead prioritario',
+                'label' => 'Sin puntuar',
+                'icon' => '⚪',
+                'color' => '#94a3b8',
+                'bg' => 'rgba(148, 163, 184, 0.1)',
+                'priority' => 'ninguna'
+            ];
+        }
+        // Tramos acordes con la escala real (la puntuación guardada no pasa de ~76).
+        if ($score >= 70) {
+            return [
+                'label' => 'Prioridad alta',
                 'icon' => '🔥',
                 'color' => '#ef4444',
                 'bg' => 'rgba(239, 68, 68, 0.1)',
@@ -205,9 +226,9 @@ class RadarScoringSystem
             ];
         }
 
-        if ($score >= 70) {
+        if ($score >= 60) {
             return [
-                'label' => 'Oportunidad alta',
+                'label' => 'Prioridad media-alta',
                 'icon' => '🟡',
                 'color' => '#f59e0b',
                 'bg' => 'rgba(245, 158, 11, 0.1)',
@@ -215,9 +236,9 @@ class RadarScoringSystem
             ];
         }
 
-        if ($score >= 50) {
+        if ($score >= 45) {
             return [
-                'label' => 'Oportunidad media',
+                'label' => 'Prioridad media',
                 'icon' => '🟢',
                 'color' => '#10b981',
                 'bg' => 'rgba(16, 185, 129, 0.1)',
@@ -227,7 +248,7 @@ class RadarScoringSystem
 
         if ($score >= 30) {
             return [
-                'label' => 'Potencial bajo',
+                'label' => 'Prioridad baja',
                 'icon' => '⚪',
                 'color' => '#94a3b8',
                 'bg' => 'rgba(148, 163, 184, 0.1)',
@@ -236,7 +257,7 @@ class RadarScoringSystem
         }
 
         return [
-            'label' => 'Baja prioridad',
+            'label' => 'Prioridad muy baja',
             'icon' => '⚠️',
             'color' => '#fbbf24',
             'bg' => 'rgba(251, 191, 36, 0.1)',
@@ -248,15 +269,15 @@ class RadarScoringSystem
     {
         $reasons = [];
         if ($triggerType === 'contrato') {
-            $reasons[] = "Adjudicatario de contrato público (Alta solvencia)";
+            $reasons[] = "Contrato público adjudicado recientemente";
         } elseif ($triggerType === 'subvencion') {
-            $reasons[] = "Subvención concedida (Inyección de liquidez)";
+            $reasons[] = "Subvención concedida recientemente";
         } else {
-            $reasons[] = trim($act) !== '' ? "Señal BORME ($act): $borme/100" : "Señal BORME: $borme/100";
+            $reasons[] = trim($act) !== '' ? "Acto en el BORME: $act" : "Sin acto reciente en el BORME";
         }
-        if ($quality > 50) $reasons[] = "Perfil de empresa de alta calidad";
-        if ($contact > 50) $reasons[] = "Múltiples vías de contacto detectadas";
-        if ($personalization > 50) $reasons[] = "Alta afinidad con tus intereses detectada por IA";
+        if ($quality > 50) $reasons[] = "Ficha con bastantes datos (sector, capital, objeto social)";
+        if ($contact > 50) $reasons[] = "Tiene datos de contacto";
+        if ($personalization > 50) $reasons[] = "Parecida a empresas que has guardado o contactado";
         
         return implode(". ", $reasons);
     }

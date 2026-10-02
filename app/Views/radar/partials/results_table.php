@@ -50,22 +50,24 @@ $formatCapital = function($val) {
     return (float)$clean;
 };
 
-$getOpportunityText = function($score) {
-    if ($score >= 85) return ['label' => 'Lead prioritario', 'class' => 'hot'];
-    if ($score >= 70) return ['label' => 'Oportunidad alta', 'class' => 'high'];
-    if ($score >= 50) return ['label' => 'Oportunidad media', 'class' => 'now'];
-    if ($score >= 30) return ['label' => 'Potencial bajo', 'class' => 'medium'];
-    if ($score > 0) return ['label' => 'Baja prioridad', 'class' => 'low-priority'];
-    return ['label' => 'No contactar', 'class' => 'no-contact'];
+// Tramos acordes con la escala real (máximo ~76). Sin puntuación no es "No contactar":
+// eso queda solo para las extinguidas.
+$getOpportunityText = function($score, $acto = '') {
+    if ($acto === 'Extinción') return ['label' => 'No contactar', 'class' => 'no-contact'];
+    if ($score >= 70) return ['label' => 'Prioridad alta', 'class' => 'hot'];
+    if ($score >= 60) return ['label' => 'Prioridad media-alta', 'class' => 'high'];
+    if ($score >= 45) return ['label' => 'Prioridad media', 'class' => 'now'];
+    if ($score >= 30) return ['label' => 'Prioridad baja', 'class' => 'medium'];
+    if ($score > 0) return ['label' => 'Prioridad muy baja', 'class' => 'low-priority'];
+    return ['label' => 'Sin puntuar', 'class' => 'low-priority'];
 };
 
 
-$getEstimatedTicket = function($capital) {
-    if (!$capital || $capital <= 0) return '500€ - 1.500€';
-    if ($capital > 100000) return '5.000€ - 12.000€';
-    if ($capital > 50000) return '3.000€ - 7.000€';
-    if ($capital > 10000) return '1.500€ - 4.000€';
-    return '1.000€ - 2.500€';
+// Antes: "ticket estimado" inventado a partir del capital. Ahora se muestra el capital
+// social tal como lo publica el BORME, o nada.
+$getEstimatedTicket = function($capitalRaw) {
+    $t = trim((string) $capitalRaw);
+    return $t !== '' ? mb_strimwidth($t, 0, 22, '…') : '—';
 };
 
 $filters = $filters ?? [];
@@ -99,7 +101,7 @@ $hiddenCount = max(0, $totalItems - $limitFree);
     </h3>
     <div style="font-size: 13px; font-weight: 700; color: #64748b; background: #f8fafc; padding: 6px 12px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 8px;">
         <span style="font-size: 14px;">⚖️</span>
-        Ordenado por: <span style="color: #2563eb;">Inteligencia Radar (Relevancia) ↓</span>
+        Ordenado por: <span style="color: #2563eb;">Puntuación ↓</span>
     </div>
 </div>
 <?php endif; ?>
@@ -426,12 +428,12 @@ $hiddenCount = max(0, $totalItems - $limitFree);
                             $scoreTotal = (int)round($scoreData['numeric']);
                             
                             // Escala cromática estratégica
-                            if ($scoreTotal >= 80) {
+                            if ($scoreTotal >= 70) {
                                 $scoreColor = '#10b981'; // Emerald (Alta calidad)
                                 $scoreBg = '#ecfdf5';
                                 $scoreBorder = '#d1fae5';
                                 $scoreIcon = '💎';
-                            } elseif ($scoreTotal >= 60) {
+                            } elseif ($scoreTotal >= 55) {
                                 $scoreColor = '#f59e0b'; // Amber (Interés medio)
                                 $scoreBg = '#fffbeb';
                                 $scoreBorder = '#fef3c7';
@@ -444,9 +446,9 @@ $hiddenCount = max(0, $totalItems - $limitFree);
                             }
 
                             // 2. Datos Comerciales
-                            $opp = $getOpportunityText($scoreTotal);
+                            $opp = $getOpportunityText($scoreTotal, $co['main_act_type'] ?? '');
                             $capitalNum = $formatCapital($co['capital_social_raw'] ?? '');
-                            $ticket = $getEstimatedTicket($capitalNum);
+                            $ticket = $getEstimatedTicket($co['capital_social_raw'] ?? '');
                             
                             // 3. Timing y Urgencia (Temporal FOMO)
                             $fechaCalculo = $co['fecha_constitucion'] ?? $co['last_borme_date'] ?? 'today';
@@ -461,12 +463,12 @@ $hiddenCount = max(0, $totalItems - $limitFree);
                             if ($daysSince <= 0) $timingLabel = 'Reciente (Hoy)';
                             elseif ($daysSince == 1) $timingLabel = 'Detectada ayer';
                             elseif ($daysSince <= 7) $timingLabel = "Detectada hace $daysSince días";
-                            else $timingLabel = 'Oportunidad activa';
+                            else $timingLabel = "Hace $daysSince días";
 
                             // 4. Motivo Inteligente (Fallback mejorado)
                             $sectorSimple = esc(mb_strimwidth($co['cnae_label'] ?? 'su sector', 0, 30, '...'));
                             if (empty($co['need_text']) || $co['need_text'] == 'Necesidad detectada por Radar') {
-                                $reason = $scoreData['details']['explanation'] ?? "Empresa de $sectorSimple con señales de interés detectadas.";
+                                $reason = $scoreData['details']['explanation'] ?? "Empresa de $sectorSimple constituida recientemente.";
                             } else {
                                 $reason = $co['need_text'];
                             }
@@ -486,7 +488,7 @@ $hiddenCount = max(0, $totalItems - $limitFree);
                             <td class="ae-radar-page__td-identity" style="padding: 24px 20px;">
                                 <div style="display: flex; flex-direction: column;">
                                     <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px;">
-                                        <a href="javascript:void(0)" onclick="<?= $isFree ? "showConversionNudge('Oportunidad real bloqueada', 'Activa Radar PRO para ver los detalles de esta empresa y del resto de oportunidades detectadas hoy.', {id: '".$co['id']."', action: 'view'})" : "openQuickView('".$co['id']."')" ?>" style="text-decoration: none;">
+                                        <a href="javascript:void(0)" onclick="openQuickView('<?= (int) $co['id'] ?>')" style="text-decoration: none;">
                                             <span style="font-size: 17px; font-weight: 800; color: #0f172a; line-height: 1.2; letter-spacing: -0.01em;">
                                                 <?= esc($co['company_name']) ?>
                                             </span>
@@ -500,24 +502,6 @@ $hiddenCount = max(0, $totalItems - $limitFree);
                                         </div>
                                     </div>
                                     
-                                    <!-- Desglose de Score amigable para el usuario -->
-                                    <?php if (isset($scoreData['details'])): ?>
-                                        <div style="font-size: 10px; color: #64748b; display: flex; gap: 14px; margin-bottom: 8px; font-weight: 700; align-items: center;">
-                                            <span title="Fuerza de la señal comercial (BORME)" style="display: flex; align-items: center; gap: 4px; cursor: help;">
-                                                <span style="opacity: 0.6; font-size: 12px;">🎯</span> 
-                                                <span>Oportunidad: <span style="color: #0f172a;"><?= $scoreData['details']['borme'] ?>%</span></span>
-                                            </span>
-                                            <span title="Calidad y solidez del perfil de empresa" style="display: flex; align-items: center; gap: 4px; cursor: help;">
-                                                <span style="opacity: 0.6; font-size: 12px;">💎</span> 
-                                                <span>Perfil: <span style="color: #0f172a;"><?= $scoreData['details']['quality'] ?>%</span></span>
-                                            </span>
-                                            <span title="Nivel de datos de contacto disponibles" style="display: flex; align-items: center; gap: 4px; cursor: help;">
-                                                <span style="opacity: 0.6; font-size: 12px;">📞</span> 
-                                                <span>Contacto: <span style="color: #0f172a;"><?= $scoreData['details']['contact'] ?>%</span></span>
-                                            </span>
-                                        </div>
-                                    <?php endif; ?>
-
                                     
                                     <div class="ae-meta-sub">
                                         <div class="ae-meta-item" title="Actividad">
@@ -560,9 +544,6 @@ $hiddenCount = max(0, $totalItems - $limitFree);
                                             }
                                         ?>
                                         <span style="font-size: 10px; color: #94a3b8; font-weight: 600;">(<?= $datePrefix . $formatEsDate($co['trigger_date'] ?? $co['fecha_constitucion'] ?? $co['last_borme_date']) ?>)</span>
-                                        <?php if (($co['trigger_type'] ?? 'nueva_empresa') === 'nueva_empresa' && $daysSince <= 3) { ?>
-                                            <span style="font-size: 10px; font-weight: 900; color: #e11d48; text-transform: uppercase;">🔥 Alta Relevancia</span>
-                                        <?php } ?>
                                     </div>
                                 </div>
                             </td>
@@ -573,7 +554,7 @@ $hiddenCount = max(0, $totalItems - $limitFree);
                                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                                         <span class="ae-opp-badge <?= $opp['class'] ?>"><?= $opp['label'] ?></span>
                                         <div style="text-align: right;">
-                                            <div style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 1px;">Ticket Est.</div>
+                                            <div style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 1px;">Capital social</div>
                                             <div class="ae-ticket-val"><?= $ticket ?></div>
                                         </div>
                                     </div>
@@ -615,7 +596,7 @@ $hiddenCount = max(0, $totalItems - $limitFree);
                                     </div>
                                     
                                     <!-- Píldora de Estado (V3) -->
-                                    <div style="margin-top: 4px;">
+                                    <div style="margin-top: 4px;<?= $isFree ? ' display:none;' : '' ?>">
                                         <div class="ae-status-pill-v3" onclick="this.querySelector('select').focus()">
                                             <div style="display: flex; align-items: center; gap: 6px;">
                                                 <span class="ae-status-dot" style="background: <?= $st['color'] ?>;"></span>
@@ -639,19 +620,19 @@ $hiddenCount = max(0, $totalItems - $limitFree);
 
                         <?php if ($isFree && !empty($lockedCompanies)) { ?>
                         <?php foreach ($lockedCompanies as $co): ?>
-                            <tr class="ae-radar-row ae-locked-overlay" onclick="showConversionNudge('Oportunidad real bloqueada', 'Activa Radar PRO para ver los detalles de esta empresa y del resto de oportunidades detectadas hoy.', {id: '<?= $co['id'] ?>', action: 'view'})">
+                            <tr class="ae-radar-row ae-locked-overlay" onclick="showConversionNudge('Empresa bloqueada', 'Activa Radar PRO para ver los detalles de esta empresa y del resto de empresas del listado.', {id: '<?= $co['id'] ?>', action: 'view'})">
                                 <td class="ae-radar-page__td-identity" style="padding: 24px 20px;">
                                     <div class="ae-radar-row-blurred" style="filter: blur(6px); pointer-events: none; opacity: 0.7;">
                                         <span style="font-size: 17px; font-weight: 800; color: #0f172a;"><?= esc($co['company_name']) ?></span>
                                         <div class="ae-meta-sub">
-                                            <span>B********</span> · <span>Sector Reservado</span>
+                                            <span>Datos ocultos</span>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="ae-radar-page__td-opportunity" style="padding: 24px 10px;">
                                     <div class="ae-radar-row-blurred" style="filter: blur(6px); pointer-events: none; opacity: 0.7;">
                                         <div class="ae-value-box">
-                                            <div style="font-size: 15px; font-weight: 800;">Potencial Reservado</div>
+                                            <div style="font-size: 15px; font-weight: 800;">Puntuación oculta</div>
                                         </div>
                                     </div>
                                 </td>
@@ -672,8 +653,8 @@ $hiddenCount = max(0, $totalItems - $limitFree);
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                     </span>
                 </div>
-                <h4 style="font-weight: 950; font-size: 1.25rem; margin-bottom: 8px; color: #ffffff; letter-spacing: -0.02em;">Has descubierto 3 de <?= number_format($totalItems) ?> empresas</h4>
-                <p style="color: rgba(255,255,255,0.85); font-size: 0.95rem; font-weight: 500; margin-bottom: 20px; line-height: 1.5;">Quedan <strong style="color: #ffffff; font-weight: 800;"><?= number_format($hiddenCount) ?> empresas</strong> ocultas con datos de contacto, actividad y subvenciones recientes.</p>
+                <h4 style="font-weight: 950; font-size: 1.25rem; margin-bottom: 8px; color: #ffffff; letter-spacing: -0.02em;">Estás viendo 3 de <?= number_format($totalItems) ?> empresas</h4>
+                <p style="color: rgba(255,255,255,0.85); font-size: 0.95rem; font-weight: 500; margin-bottom: 20px; line-height: 1.5;">Quedan <strong style="color: #ffffff; font-weight: 800;"><?= number_format($hiddenCount) ?> empresas</strong> ocultas, con su sector, objeto social y puntuación.</p>
                 
                 <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar&source=radar_locked_cta') ?>" onclick="event.stopPropagation()" style="display: block; text-decoration: none; background: linear-gradient(90deg, #fde047 0%, #f59e0b 50%, #ea580c 100%); color: #0f172a; border-radius: 12px; padding: 14px; font-weight: 800; font-size: 1rem; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);">
                     Desbloquear todo el Radar
@@ -705,7 +686,7 @@ $hiddenCount = max(0, $totalItems - $limitFree);
             </h3>
             <div style="font-size: 13px; font-weight: 700; color: #64748b; background: #f8fafc; padding: 6px 12px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 8px;">
                 <span style="font-size: 14px;">⚖️</span>
-                Ordenado por: <span style="color: #2563eb;">Inteligencia Radar (Relevancia) ↓</span>
+                Ordenado por: <span style="color: #2563eb;">Puntuación ↓</span>
             </div>
         </div>
 
