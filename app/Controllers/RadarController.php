@@ -763,6 +763,9 @@ class RadarController extends BaseController
         } while (true);
     }
 
+    /** Ids que lee como máximo cada consulta de la vista previa */
+    private const PREVIEW_VENTANA = 20000;
+
     /** Fijo y móvil en la columna "Teléfono" (sin repetir si son el mismo) */
     private static function telefonos(array $c): string
     {
@@ -786,27 +789,35 @@ class RadarController extends BaseController
 
         // Filas repartidas por todo el listado, no las N más recientes: las altas de los
         // últimos días aún no tienen CIF, sector ni teléfono (en Soria, 4 de 5 sin CIF) y
-        // daban una imagen peor que la del archivo. Tampoco se eligen las más completas:
-        // se toma la empresa que cae en el 10 %, 30 %, 50 %, 70 % y 90 % del rango de ids.
-        $extremo = function (string $dir) use ($db, $params): int {
-            [$b] = $this->buildExportQuery($db, $params);
-            $r = $b->orderBy('id', $dir)->limit(1)->get()->getRowArray();
-
-            return (int) ($r['id'] ?? 0);
-        };
-        $max = $extremo('DESC');
-        $min = $extremo('ASC');
-        if ($max <= 0) {
-            return [];
-        }
-
+        // daban una imagen peor que la del archivo. Tampoco se eligen las más completas.
+        //
+        // Cada fila se busca en una VENTANA de ids (clave primaria) en el 10 %, 30 %, 50 %,
+        // 70 % y 90 % de la tabla: la consulta lee como mucho VENTANA filas, tarde lo que
+        // tarde el filtro. La primera versión ordenaba todo el listado en cada consulta
+        // (ORDER BY id … LIMIT 1 sin acotar): 14 s en Madrid y error por tiempo con el
+        // filtro de teléfono (02-10-2026).
+        $max  = (int) ($db->query('SELECT MAX(id) AS m FROM companies')->getRowArray()['m'] ?? 0);
         $rows = [];
-        for ($i = 0; $i < $n; $i++) {
-            $umbral = (int) round($max - ($max - $min) * (($i + 0.5) / $n));
+        for ($i = 0; $i < $n && $max > 0; $i++) {
+            $hasta = (int) round($max * (1 - ($i + 0.5) / $n));
             [$b] = $this->buildExportQuery($db, $params);
-            $r = $b->where('id <=', $umbral)->orderBy('id', 'DESC')->limit(1)->get()->getRowArray();
-            if ($r && !isset($rows[$r['id']])) {
+            $r = $b->where('id <=', $hasta)
+                ->where('id >', $hasta - self::PREVIEW_VENTANA)
+                ->orderBy('id', 'DESC')->limit(1)->get()->getRowArray();
+            if ($r) {
                 $rows[$r['id']] = $r;
+            }
+        }
+        // Listados pequeños (pocas empresas entre millones): las ventanas pueden salir
+        // vacías. Se completa con las primeras filas del archivo, que es la misma
+        // consulta con la que empieza la descarga.
+        if (count($rows) < $n) {
+            [$b] = $this->buildExportQuery($db, $params);
+            foreach ($b->orderBy('id', 'DESC')->limit($n)->get()->getResultArray() as $r) {
+                if (count($rows) >= $n) {
+                    break;
+                }
+                $rows[$r['id']] = $rows[$r['id']] ?? $r;
             }
         }
         $rows = $this->enrichExportBatch($db, array_values($rows));
