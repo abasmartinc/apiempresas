@@ -105,7 +105,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
             <div class="ae-radar-page__hero-inner">
                 <div class="ae-radar-page__hero-shell">
                     <span class="ae-radar-page__pill">
-                        OPORTUNIDADES B2B • ÚLTIMAS CONSTITUCIONES
+                        EMPRESAS NUEVAS • ÚLTIMAS CONSTITUCIONES
                     </span>
 
                     <style>
@@ -159,11 +159,11 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                     </h1>
 
                     <p class="ae-radar-page__subtitle" style="font-size: 1.25rem; font-weight: 600; margin-top: 1rem; color: #1e293b;">
-                    +<?= number_format($conversion_count ?? 0, 0, ',', '.') ?> empresas en <?= esc($heading_location ?? 'España') ?> listas para ser contactadas antes que tu competencia
+                    <?= number_format($conversion_count ?? 0, 0, ',', '.') ?> empresas en <?= esc(($heading_location ?? '') !== '' ? $heading_location : ucfirst(mb_strtolower((string) ($province ?? 'España'), 'UTF-8'))) ?> constituidas recientemente
                 </p>
 
                     <p class="ae-radar-page__hero-copy" style="margin-top: 1rem; opacity: 0.8; font-size: 1.1rem; color: #64748b; max-width: 600px; margin-left: auto; margin-right: auto;">
-                    Llega antes de que tus competidores sepan que existen. El 70% de las ventas B2B se las lleva el primer proveedor que contacta.
+                    Constituciones publicadas en el BORME, con sector, provincia y objeto social, para tu prospección comercial.
                 </p>
 
                     <div class="ae-radar-page__hero-actions">
@@ -171,7 +171,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                         Desbloquear Radar Completo
                     </a>
                 </div>
-                <p style="font-size: 0.85rem; color: #64748b; margin-top: 0.75rem; font-weight: 500; text-align: center;">La mayoría de usuarios consigue su primer cliente en días</p>
+                <p style="font-size: 0.85rem; color: #64748b; margin-top: 0.75rem; font-weight: 500; text-align: center;">Sin permanencia: cancela cuando quieras</p>
 
 
 
@@ -207,12 +207,12 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                     <div style="display: flex; align-items: center; gap: 0.6rem;">
                         <span style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase; color: #3b82f6; background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); padding: 0.3rem 0.8rem; border-radius: 999px;">
                             <span style="width: 6px; height: 6px; background: #3b82f6; border-radius: 50%; display: inline-block; animation: pulse 2s infinite;"></span>
-                            Muestra comercial en tiempo real
+                            Muestra del listado
                         </span>
                     </div>
                     <span style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase; color: #10b981; background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.25); padding: 0.3rem 0.8rem; border-radius: 999px;">
                         <span style="width: 6px; height: 6px; background: #10b981; border-radius: 50%; display: inline-block;"></span>
-                        Actualizado hoy
+                        Últimas constituciones
                     </span>
                 </div>
                 <h2 style="font-size: 2rem; font-weight: 900; color: #0f172a; margin: 0 0 0.6rem; letter-spacing: -0.025em; line-height: 1.15;">
@@ -221,7 +221,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                 
                 </h2>
                 <p style="color: #64748b; font-size: 1rem; margin: 0; line-height: 1.65; max-width: 680px;">
-                    Empresas recién constituidas detectadas en BORME y listas para prospección comercial. Ideal para despachos, software, marketing, seguros, asesoría, financiación y proveedores B2B.
+                    Empresas recién constituidas publicadas en el BORME. Útil para despachos, software, marketing, seguros, asesoría y financiación.
                 </p>
             </div>
             
@@ -229,8 +229,8 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
         <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-left: 5px solid #22c55e; padding: 1.25rem 1.5rem; border-radius: 0.5rem; color: #166534; margin: 0 0 2rem 0; display: flex; align-items: center; gap: 1rem; box-shadow: none;">
             <span style="font-size: 1.8rem;">💡</span>
             <div>
-                <strong style="font-size: 1.2rem; display: block; margin-bottom: 0.25rem;">Ventaja competitiva inmediata (Time-to-Market)</strong>
-                <p style="margin: 0; opacity: 0.9;">Tus competidores suelen tardar semanas en actualizar sus bases de datos. Prospectar hoy te da prioridad exclusiva.</p>
+                <strong style="font-size: 1.2rem; display: block; margin-bottom: 0.25rem;">Empresas en su primera etapa</strong>
+                <p style="margin: 0; opacity: 0.9;">Una empresa recién constituida suele tener por delante decisiones de gestoría, banca, seguros, software o web. Aquí ves quiénes son desde que se publican.</p>
             </div>
         </div>
     
@@ -276,7 +276,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                                 </div>
 
                                 <div class="ae-radar-page__lead-intent">
-                                    <div class="ae-radar-page__lead-intent-label">Potenciales necesidades</div>
+                                    <div class="ae-radar-page__lead-intent-label">Servicios habituales al empezar</div>
                                     <div class="ae-radar-page__lead-intent-text"><?= esc($leadSignals) ?></div>
                                 </div>
                             </div>
@@ -286,7 +286,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                             $coUrl = company_url($co);
                             ?>
                             <a href="<?= $coUrl ?>" class="ae-radar-page__lead-btn">
-                                Ver oportunidad
+                                Ver empresa
                             </a>
                         </article>
 
@@ -297,9 +297,9 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                     <?php if (empty($premiumLeads)): ?>
                 <div class="ae-radar-page__lead-overlay-cta" style="position: absolute; bottom: 0; left: 0; right: 0; height: 350px; background: linear-gradient(to top, rgba(245,248,255,1) 30%, rgba(245,248,255,0.9) 60%, transparent); display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 2rem; z-index: 10;">
         <a href="<?= site_url('radar/preview') ?>" class="ae-radar-page__btn ae-radar-page__btn--primary" style="padding: 1.1rem 3rem; font-size: 1.15rem; font-weight: 800; border-radius: 100px; background: linear-gradient(135deg, #3b82f6, #6366f1); border: none; box-shadow: 0 8px 24px rgba(99,102,241,0.45), 0 2px 8px rgba(59,130,246,0.3); color: white; text-decoration: none; display: inline-block; transition: all 0.25s ease;">
-            Detectar estas oportunidades antes que tu competencia
+            Ver el listado completo en el Radar
         </a>
-        <p style="font-weight: 700; color: #1e293b; margin-top: 1rem; margin-bottom: 0; font-size: 1rem; text-align: center;">Estas empresas están activas ahora mismo — accede antes de que otros proveedores las contacten</p>
+        <p style="font-weight: 700; color: #1e293b; margin-top: 1rem; margin-bottom: 0; font-size: 1rem; text-align: center;">El Radar incluye todas las empresas del periodo, con filtros por provincia y sector</p>
     </div>
                 <?php endif; ?>
                 </div>
@@ -573,7 +573,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                             } elseif (str_contains($sectorText, 'restaur') || str_contains($sectorText, 'hostel')) {
                                 $sectorMeta = [
                                     'title' => $sectorLabel,
-                                    'desc'  => 'Necesidades frecuentes de TPV, reservas, software y proveedores.',
+                                    'desc'  => 'Servicios habituales al empezar: TPV, reservas, software y suministros.',
                                     'tag'   => 'Alta rotación',
                                 ];
                             } elseif (str_contains($sectorText, 'tecnolog') || str_contains($sectorText, 'inform')) {
@@ -632,21 +632,29 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
 
                     <div class="ae-radar-page__excel-actions">
                             <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 700px;">
+                                <?php if ((int) ($total_context_count ?? 0) >= 25): ?>
                                 <a href="<?= site_url('excel/preview?period=' . urlencode($period) . ($sector_label ? '&sector=' . urlencode($sector_label) : '')) ?>" class="ae-radar-page__excel-btn js-loading-btn" style="white-space: nowrap !important;">
                                     Descargar listado <?= esc($heading_time) ?> (<?= number_format($total_context_count ?? 0, 0, ',', '.') ?> empresas) · <?php if(isset($dynamic_price['is_discounted']) && $dynamic_price['is_discounted']): ?><s style="opacity:0.65; font-size:0.85em; margin-right:4px;"><?= number_format($dynamic_price['original_price'], 0) ?>€</s><?php endif; ?><?= number_format($dynamic_price['base_price'] ?? 9, 0) ?>€ <span style="font-size:0.85em; opacity:0.85; font-weight:600;">+ IVA</span>
                                 </a>
+                                <?php endif; ?>
                             </div>
 
                         <div class="ae-radar-page__excel-alt-links">
                             <span class="ae-radar-page__excel-alt-label">Otras opciones:</span>
                             <?php if ($period !== 'hoy' && ($stats['hoy'] ?? 0) > 0): ?>
-                                <a href="<?= site_url('excel/preview?period=hoy') ?>" class="js-loading-btn">Nacional Hoy (<?= number_format($stats['hoy'] ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($prices['hoy'] ?? 2, 0) ?>€</a>
+                                <?php if ((int) ($stats['hoy'] ?? 0) >= 25): ?>
+                                <a href="<?= site_url('excel/preview?period=hoy') ?>" class="js-loading-btn">Nacional Hoy (<?= number_format($stats['hoy'] ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($prices['hoy'] ?? 14, 0) ?>€</a>
+                                <?php endif; ?>
                             <?php endif; ?>
                             <?php if ($period !== 'semana' && ($stats['semana'] ?? 0) > 0): ?>
+                                <?php if ((int) ($stats['semana'] ?? 0) >= 25): ?>
                                 <a href="<?= site_url('excel/preview?period=semana') ?>" class="js-loading-btn">Nacional Semana (<?= number_format($stats['semana'] ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($prices['semana'] ?? 4, 0) ?>€</a>
+                                <?php endif; ?>
                             <?php endif; ?>
                             <?php if ($period !== 'mes' && $period !== 'general' && ($stats['30days'] ?? 0) > 0): ?>
+                                <?php if ((int) ($stats['30days'] ?? 0) >= 25): ?>
                                 <a href="<?= site_url('excel/preview?period=30days') ?>" class="js-loading-btn">Nacional Mes (<?= number_format($stats['30days'] ?? 0, 0, ',', '.') ?> empresas) · <?= number_format($prices['mes'] ?? 9, 0) ?>€</a>
+                                <?php endif; ?>
                             <?php endif; ?>
                         </div>
                     </div>
@@ -655,7 +663,7 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
 
         <section class="ae-radar-page__section ae-radar-page__section--strategic container">
             <div class="ae-radar-page__section-head ae-radar-page__section-head--center">
-                <span class="ae-radar-page__section-kicker">Cierre rápido</span>
+                <span class="ae-radar-page__section-kicker">Más listados</span>
                 <h3 class="ae-radar-page__section-title">Directorios estratégicos de empresas nuevas</h3>
                 <p class="ae-radar-page__section-subtitle">
                     Accede a rutas clave por provincia, periodo y sector para detectar nuevas oportunidades antes que otros.
@@ -713,11 +721,11 @@ $premiumLeads = ($paywall_level === 'none') ? [] : array_slice($companies, $free
                     </p>
 
                     <p>
-                        Especialmente en sectores como la tecnología y los servicios profesionales, estas <a href="<?= site_url('empresas-nuevas') ?>">empresas nuevas</a> suelen contratar marketing, asesoría y proveedores tecnológicos durante sus primeros meses de actividad.
+                        Especialmente en sectores como la tecnología y los servicios profesionales, estas <a href="<?= site_url('empresas-nuevas') ?>">empresas nuevas</a> suelen necesitar marketing, asesoría y servicios tecnológicos durante sus primeros meses de actividad.
                     </p>
 
                     <p class="ae-radar-page__seo-highlight">
-                        Con el Radar puedes detectar estas nuevas empresas antes que tu competencia y posicionarte como su proveedor desde el primer día.
+                        Con el Radar puedes ver estas nuevas empresas desde que se publican y presentarte pronto.
                         <a href="<?= site_url('empresas-nuevas-hoy') ?>">Empresas creadas hoy</a>,
                         <a href="<?= site_url('empresas-nuevas-semana') ?>">esta semana</a>
                         o <a href="<?= site_url('empresas-nuevas-mes') ?>">este mes</a>.

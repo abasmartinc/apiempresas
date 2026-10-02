@@ -23,8 +23,8 @@ $pagination = [
 <html lang="es">
 <head>
     <?= view('partials/head', [
-        'title'       => $title ?? 'Radar B2B — Empresas detectadas hoy listas para contactar',
-        'excerptText' => $excerptText ?? 'Descubre empresas recién creadas que necesitan proveedores ahora mismo. Accede antes que tu competencia.',
+        'title'       => $title ?? 'Radar B2B — Empresas recién constituidas en España',
+        'excerptText' => $excerptText ?? 'Empresas recién constituidas en España, a partir del BORME, para tu prospección comercial.',
         'canonical'   => site_url('radar/preview'),
         'robots'      => 'noindex,follow',
     ]) ?>
@@ -252,7 +252,7 @@ $pagination = [
     <div id="radar-loading-overlay">
         <div style="width: 60px; height: 60px; border: 5px solid rgba(255,255,255,0.1); border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 24px;"></div>
         <h3 style="font-size: 1.75rem; font-weight: 900; margin-bottom: 8px; letter-spacing: -0.02em;">Preparando tu Radar B2B...</h3>
-        <p style="font-size: 1.1rem; color: #94a3b8; font-weight: 500;">Activando acceso a las oportunidades de hoy</p>
+        <p style="font-size: 1.1rem; color: #94a3b8; font-weight: 500;">Cargando las empresas más recientes</p>
     </div>
 
     <div class="ae-radar-page">
@@ -272,7 +272,7 @@ $pagination = [
                     <div class="ae-radar-page__topbar-actions">
                         <div class="ae-radar-page__freshness">
                             <span class="ae-radar-page__freshness-dot" style="background: #10b981; width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 8px; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);"></span>
-                            Actualizado hace 2 min · Hoy: <strong style="color: #1e293b;">+<?= number_format($opps_count) ?></strong> empresas
+                            Hoy: <strong style="color: #1e293b;"><?= number_format($opps_count) ?></strong> empresas con novedades
                         </div>
                     </div>
                 </header>
@@ -285,13 +285,13 @@ $pagination = [
                             <!-- Clean minimal header -->
 
                             <h1 class="preview-header-banner__title">
-                                <span style="background: linear-gradient(90deg, #60a5fa, #34d399); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">+<?= $opps_count ?> señales de compra en</span><br>
-                                empresas de nueva creación hoy
+                                <span style="background: linear-gradient(90deg, #60a5fa, #34d399); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;"><?= $opps_count ?> empresas con novedades hoy</span><br>
+                                y las constituciones más recientes
                             </h1>
 
                             <p class="preview-header-banner__subtitle">
-                                El 70% de las nuevas empresas eligen al primer proveedor que las contacta. <br>
-                                <strong>Llena tu pipeline diario sin perder horas investigando en el BORME.</strong>
+                                Empresas recién constituidas, con su sector, provincia y objeto social. <br>
+                                <strong>Organiza tu prospección sin revisar el BORME a mano.</strong>
                             </p>
 
                         </section>
@@ -300,7 +300,7 @@ $pagination = [
                         <div style="padding: 0;">
                             <div style="margin-bottom: 24px; text-align: center;">
                                 <div style="font-size: 1rem; color: #16a34a; font-weight: 800; background: #f0fdf4; padding: 12px; border-radius: 12px; border: 1px solid #dcfce7; display: inline-block;">
-                                    💰 Oportunidades con tickets estimados entre 5.000€ y 12.000€
+                                    Muestra de empresas reales con puntuación alta
                                 </div>
                             </div>
 
@@ -319,7 +319,7 @@ $pagination = [
                             <div style="position: absolute; width: 400px; height: 400px; background: radial-gradient(circle, rgba(37, 99, 235, 0.03) 0%, transparent 70%); top: -150px; left: -150px; pointer-events: none;"></div>
                             
                             <h2 style="font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight:950; margin-bottom:20px; letter-spacing: -0.03em; position: relative;">¿Listo para automatizar tu <span style="background: linear-gradient(90deg, #2563eb, #10b981); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">prospección B2B</span>?</h2>
-                            <p style="font-size:1.15rem; color:#64748b; margin-bottom:40px; max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.5; font-weight: 500; position: relative;">Accede al Radar y recibe tu listado de prospectos cualificados cada mañana antes de encender el CRM.</p>
+                            <p style="font-size:1.15rem; color:#64748b; margin-bottom:40px; max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.5; font-weight: 500; position: relative;">Accede al Radar y consulta cada día hábil las nuevas empresas, ordenadas por puntuación.</p>
                             
                             <div style="max-width: 480px; margin: 0 auto; position: relative;">
                                 <form class="preview-form-handler" style="display: flex; flex-direction: column; gap: 16px;">
@@ -332,7 +332,7 @@ $pagination = [
                                 <div style="display: flex; align-items: center; justify-content: center; gap: 20px; margin-top: 24px; font-size: 0.85rem; color: #64748b; font-weight: 700;">
                                     <span style="display: flex; align-items: center; gap: 6px;"><span style="color: #10b981; font-size: 1.1rem;">✓</span> Sin tarjeta</span>
                                     <span style="display: flex; align-items: center; gap: 6px;"><span style="color: #10b981; font-size: 1.1rem;">✓</span> Acceso 24/7</span>
-                                    <span style="display: flex; align-items: center; gap: 6px;"><span style="color: #10b981; font-size: 1.1rem;">✓</span> Leads reales</span>
+                                    <span style="display: flex; align-items: center; gap: 6px;"><span style="color: #10b981; font-size: 1.1rem;">✓</span> Empresas reales</span>
                                 </div>
                             </div>
                         </div>

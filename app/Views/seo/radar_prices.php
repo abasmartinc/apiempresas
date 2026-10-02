@@ -3,7 +3,7 @@
 <head>
     <?= view('partials/head', [
         'title'       => 'Leads de Empresas Nuevas en España | Captación Comercial B2B',
-        'excerptText' => 'Consigue leads diarios de empresas recién constituidas en España. Accede a oportunidades comerciales antes que tu competencia con análisis de IA.',
+        'excerptText' => 'Radar de empresas recién constituidas en España: filtros por provincia y sector, favoritos, notas, embudo y exportación. A partir del BORME.',
         'canonical'   => site_url('leads-empresas-nuevas'),
         'robots'      => 'index,follow',
     ]) ?>
@@ -23,18 +23,18 @@
                 </div>
 
                 <h1 class="radar-hero__title">
-                    +94 empresas detectadas <span>HOY listas para ser contactadas</span> antes que tu competencia
+                    Empresas recién constituidas en España, <span>ordenadas para tu prospección</span>
                 </h1>
 
                 <p class="radar-hero__subtitle">
-                    Algunas ya están siendo contactadas por otros equipos comerciales. No esperes a que otros lleguen antes.
+                    Cada día hábil incorporamos las nuevas constituciones publicadas en el BORME. Fíltralas por provincia y sector y organiza tu prospección.
                 </p>
 
                 <div class="radar-hero__counter-bar" style="max-width: 700px; margin: 32px auto; background: #f0fdf4; border: 1px solid #bdf4d4; border-radius: 99px; padding: 14px 28px; display: flex; align-items: center; justify-content: center; gap: 14px; box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.1); position: relative; overflow: hidden;">
                    <div style="display: flex; align-items: center; gap: 10px;">
                         <span style="width: 10px; height: 10px; background: #10b981; border-radius: 50%; display: block; animation: pulse-dot 2s infinite;"></span>
                         <span style="font-size: 1.05rem; font-weight: 800; color: #065f46; letter-spacing: -0.01em;">
-                            <strong>+94 empresas</strong> detectadas <strong>HOY</strong> — otras empresas ya están contactando estas oportunidades
+                            Nuevas constituciones del BORME <strong>cada día hábil</strong>
                         </span>
                    </div>
                 </div>
@@ -49,7 +49,7 @@
                     <div class="radar-hero__feature-copy">
                         <h2>El Centro de Control para tu captación B2B</h2>
                         <ul style="display: grid; gap: 16px;">
-                            <li><strong>Scoring de Lead:</strong> Detectamos automáticamente qué empresas tienen mayor probabilidad de compra.</li>
+                            <li><strong>Scoring de Lead:</strong> Una puntuación de 0 a 100 según tipo de acto, capital social y sector, para ordenar el listado.</li>
                             <li><strong>Embudo Kanban:</strong> Gestiona tu prospección sin salir de la plataforma.</li>
                             <li><strong>Análisis IA:</strong> Nicho comercial, cargos clave y guiones de venta personalizados.</li>
                         </ul>
@@ -57,14 +57,14 @@
 
                     <div class="radar-hero__mini-dashboard">
                         <div class="radar-hero__mini-card" style="background: #eff6ff; border-color: #dbeafe;">
-                            <span class="radar-hero__mini-label" style="color: #2563eb;">Oportunidad Hoy</span>
+                            <span class="radar-hero__mini-label" style="color: #2563eb;">Puntuación (ejemplo)</span>
                             <strong>95/100</strong>
-                            <small>Alta probabilidad de cierre</small>
+                            <small>Prioridad alta</small>
                         </div>
                         <div class="radar-hero__mini-card">
                             <span class="radar-hero__mini-label">Fase del Radar</span>
                             <strong>Constitución</strong>
-                            <small>Momento óptimo de contacto</small>
+                            <small>Recién constituida</small>
                         </div>
                     </div>
                 </div>
@@ -76,9 +76,9 @@
     <section class="radar-section radar-section--preview" style="padding-top: 0; margin-top: -40px;">
         <div class="container">
             <div class="radar-heading radar-heading--center" style="margin-bottom: 32px;">
-                <div class="radar-kicker">Oportunidades reales</div>
-                <h2 class="radar-title" style="font-size: 1.8rem;">Estas empresas ya están generando oportunidades reales</h2>
-                <p style="font-weight: 700; color: #475569; font-size: 1.1rem; margin-top: -10px;">Accede ahora antes de que otras empresas las contacten</p>
+                <div class="radar-kicker">Ejemplo</div>
+                <h2 class="radar-title" style="font-size: 1.8rem;">Así se ve el listado</h2>
+                <p style="font-weight: 700; color: #475569; font-size: 1.1rem; margin-top: -10px;">Filas de ejemplo con datos ficticios</p>
             </div>
 
             <div class="radar-preview" style="background: white; border: 2px solid #e2e8f0; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.05);">
@@ -95,42 +95,42 @@
                         <tbody>
                             <tr style="background: #f8fafc;">
                                 <td>
-                                    <div style="font-weight: 850; color: #0f172a; filter: blur(4px);">TECH FLOW SOLUTIONS SL</div>
+                                    <div style="font-weight: 850; color: #0f172a; filter: blur(4px);">EMPRESA DE EJEMPLO UNO SL</div>
                                     <div style="display: flex; gap: 8px; margin-top: 4px;">
-                                        <span style="font-size: 10px; background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 4px; font-weight: 800;">OPORTUNIDAD ACTIVA</span>
-                                        <span style="font-size: 10px; color: #64748b; font-weight: 700;">Hace 2h</span>
+                                        <span style="font-size: 10px; background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 4px; font-weight: 800;">EJEMPLO</span>
+                                        <span style="font-size: 10px; color: #64748b; font-weight: 700;">Constituida esta semana</span>
                                     </div>
                                 </td>
                                 <td>Barcelona</td>
-                                <td style="color: #059669; font-weight: 800; font-size: 0.9rem;">Alta probabilidad de compra</td>
+                                <td style="color: #059669; font-weight: 800; font-size: 0.9rem;">Puntuación alta</td>
                                 <td>
                                     <button disabled style="background: #e2e8f0; color: #94a3b8; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 800; font-size: 0.8rem; cursor: not-allowed;">Contactar ahora</button>
                                 </td>
                             </tr>
                             <tr>
                                 <td>
-                                    <div style="font-weight: 850; color: #0f172a; filter: blur(4px);">LOGISTIC AI GROUP SL</div>
+                                    <div style="font-weight: 850; color: #0f172a; filter: blur(4px);">EMPRESA DE EJEMPLO DOS SL</div>
                                     <div style="display: flex; gap: 8px; margin-top: 4px;">
-                                        <span style="font-size: 10px; background: #fef3c7; color: #92400e; padding: 2px 6px; border-radius: 4px; font-weight: 800;">CONTACTANDO AHORA</span>
-                                        <span style="font-size: 10px; color: #64748b; font-weight: 700;">Hace 2h</span>
+                                        <span style="font-size: 10px; background: #fef3c7; color: #92400e; padding: 2px 6px; border-radius: 4px; font-weight: 800;">EJEMPLO</span>
+                                        <span style="font-size: 10px; color: #64748b; font-weight: 700;">Constituida esta semana</span>
                                     </div>
                                 </td>
                                 <td>Madrid</td>
-                                <td style="color: #059669; font-weight: 800; font-size: 0.9rem;">Alta probabilidad de compra</td>
+                                <td style="color: #059669; font-weight: 800; font-size: 0.9rem;">Puntuación alta</td>
                                 <td>
                                     <button disabled style="background: #e2e8f0; color: #94a3b8; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 800; font-size: 0.8rem; cursor: not-allowed;">Contactar ahora</button>
                                 </td>
                             </tr>
                             <tr style="background: #f8fafc;">
                                 <td>
-                                    <div style="font-weight: 850; color: #0f172a; filter: blur(4px);">CONSTRUCCIONES VALENCIA 2026 SL</div>
+                                    <div style="font-weight: 850; color: #0f172a; filter: blur(4px);">EMPRESA DE EJEMPLO TRES SL</div>
                                     <div style="display: flex; gap: 8px; margin-top: 4px;">
-                                        <span style="font-size: 10px; background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 4px; font-weight: 800;">OPORTUNIDAD ACTIVA</span>
-                                        <span style="font-size: 10px; color: #64748b; font-weight: 700;">Hace 2h</span>
+                                        <span style="font-size: 10px; background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 4px; font-weight: 800;">EJEMPLO</span>
+                                        <span style="font-size: 10px; color: #64748b; font-weight: 700;">Constituida esta semana</span>
                                     </div>
                                 </td>
                                 <td>Valencia</td>
-                                <td style="color: #059669; font-weight: 800; font-size: 0.9rem;">Alta probabilidad de compra</td>
+                                <td style="color: #059669; font-weight: 800; font-size: 0.9rem;">Puntuación alta</td>
                                 <td>
                                     <button disabled style="background: #e2e8f0; color: #94a3b8; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 800; font-size: 0.8rem; cursor: not-allowed;">Contactar ahora</button>
                                 </td>
@@ -139,11 +139,11 @@
                     </table>
                 </div>
                 <div style="padding: 24px; text-align: center; background: #fffbeb; border-top: 1px solid #fef3c7;">
-                    <p style="margin: 0 0 16px; font-weight: 800; color: #92400e; font-size: 1rem;">Accede ahora antes de que otras empresas las contacten</p>
+                    <p style="margin: 0 0 16px; font-weight: 800; color: #92400e; font-size: 1rem;">Las empresas reales están en el Radar</p>
                     <a href="<?= getRadarRedirect('landing_table') ?>" class="radar-btn radar-btn--primary" style="max-width: 400px; margin: 0 auto; display: block;" data-cta="radar_landing" data-source="landing_table">
                         Acceder a empresas ahora
                     </a>
-                    <small style="display: block; margin-top: 16px; font-weight: 700; color: #94a3b8; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">Accede ahora antes de que estas oportunidades se saturen</small>
+                    <small style="display: block; margin-top: 16px; font-weight: 700; color: #94a3b8; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;">Datos de ejemplo</small>
                 </div>
             </div>
         </div>
@@ -188,7 +188,7 @@
                     </p>
                     <ul class="radar-ai-list">
                         <li><strong>Favoritos:</strong> Marca empresas para no perderles la pista.</li>
-                        <li><strong>Historial:</strong> Notas privadas compartidas con tu equipo.</li>
+                        <li><strong>Historial:</strong> Notas privadas en cada empresa.</li>
                         <li><strong>Pipeline Visual:</strong> Arrastra y suelta para cambiar estados.</li>
                     </ul>
                </div>
@@ -202,8 +202,8 @@
                 <div class="radar-ai-visual">
                     <div class="radar-ai-card" style="overflow: hidden; border-radius: 24px; border: 1px solid #e2e8f0; background: white; box-shadow: 0 20px 40px rgba(0,0,0,0.08);">
                         <div class="radar-ai-card__header" style="background: #0f172a; padding: 28px 24px 20px;">
-                            <span class="radar-ai-card__tag" style="background: #2563eb; color: white; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block;">Analizado por IA v4.0</span>
-                            <h3 style="color: white; font-size: 20px; margin: 12px 0 0; font-weight: 900; letter-spacing: -0.02em;">DIGITAL SOLUTIONS SL</h3>
+                            <span class="radar-ai-card__tag" style="background: #2563eb; color: white; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block;">Análisis con IA (ejemplo)</span>
+                            <h3 style="color: white; font-size: 20px; margin: 12px 0 0; font-weight: 900; letter-spacing: -0.02em;">EMPRESA DE EJEMPLO SL</h3>
                         </div>
                         <div class="radar-ai-card__body" style="padding: 24px;">
                             <div class="radar-ai-feature">
@@ -224,20 +224,20 @@
                         </div>
                         <div class="radar-ai-card__footer" style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 16px;">
                             <div class="radar-ai-script" style="font-style: italic; color: #64748b; font-size: 12px; line-height: 1.4;">
-                                "Hola [Nombre], he visto que acabáis de fundar Digital Solutions. Al estar en fase inicial de logística, probablemente os preocupe [Pain Point]..."
+                                "Hola [Nombre], he visto que acabáis de fundar la empresa. Al estar en fase inicial de logística, probablemente os preocupe [Pain Point]..."
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="radar-ai-content">
                     <div class="radar-kicker">Socio de Prospección</div>
-                    <h2 class="radar-title">IA que prepara tus ventas al instante</h2>
+                    <h2 class="radar-title">IA que te ayuda a preparar el primer contacto</h2>
                     <p class="radar-text">
-                        Nuestra Inteligencia Artificial no solo analiza datos; te entrega información de valor para que tu primer contacto sea demoledor.
+                        A partir del objeto social y el sector, la IA propone un nicho probable, a quién dirigirte y un guion de contacto. Son sugerencias orientativas, no datos verificados.
                     </p>
                     <ul class="radar-ai-list">
                         <li><strong>Detección de Nicho Deep:</strong> Entiende el valor real detrás de un CNAE genérico.</li>
-                        <li><strong>Buyer Persona:</strong> Identifica al cargo con mayor probabilidad de compra.</li>
+                        <li><strong>Buyer Persona:</strong> Sugiere el cargo al que dirigirte.</li>
                         <li><strong>Deep Pain Points:</strong> Descubre los desafíos que enfrentan en su mes 1.</li>
                         <li><strong>Sales Scripts:</strong> Guiones personalizados para llamadas y LinkedIn.</li>
                     </ul>
@@ -249,10 +249,10 @@
     <section class="radar-section radar-section--soft">
         <div class="container">
             <div class="radar-heading radar-heading--center">
-                <div class="radar-kicker">Vista previa real</div>
+                <div class="radar-kicker">Vista de ejemplo</div>
                 <h2 class="radar-title">Centro de Prospección Directa</h2>
                 <p class="radar-subtitle">
-                    Esta es la interfaz profesional que utilizarás para detectar y cerrar nuevas oportunidades.
+                    Así es el panel del Radar. Las filas son de ejemplo.
                 </p>
             </div>
 
@@ -268,7 +268,7 @@
                         </div>
                         <div style="display: flex; align-items: center; gap: 8px; font-size: 10px; font-weight: 900; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">
                             <div style="width: 8px; height: 8px; min-width: 8px; min-height: 8px; background: #10b981; border-radius: 50%; flex-shrink: 0;"></div>
-                            SISTEMA EN VIVO
+                            EJEMPLO
                         </div>
                     </div>
                 </div>
@@ -286,13 +286,13 @@
                         <tbody>
                             <tr>
                                 <td data-label="Empresa">
-                                    <div style="font-weight: 850; color: #0f172a;">TECH FLOW SOLUTIONS SL</div>
+                                    <div style="font-weight: 850; color: #0f172a;">EMPRESA DE EJEMPLO UNO SL</div>
                                     <div style="font-size: 11px; color: #64748b;">Barcelona · 05/03/2026</div>
                                 </td>
                                 <td data-label="Score">
                                     <div style="display: flex; align-items: center; gap: 6px;">
                                         <span style="font-weight: 900; color: #10b981; background: rgba(16, 185, 129, 0.1); padding: 4px 10px; border-radius: 6px; font-size: 13px;">🟢 94/100</span>
-                                        <span style="font-size: 11px; color: #64748b; font-weight: 700;">Cap. Sólido · Tech Hub</span>
+                                        <span style="font-size: 11px; color: #64748b; font-weight: 700;">Capital alto · Sector tecnológico</span>
                                     </div>
                                 </td>
                                 <td data-label="Estado">
@@ -304,7 +304,7 @@
                             </tr>
                             <tr>
                                 <td data-label="Empresa">
-                                    <div style="font-weight: 850; color: #0f172a;">LOGISTIC AI GROUP SL</div>
+                                    <div style="font-weight: 850; color: #0f172a;">EMPRESA DE EJEMPLO DOS SL</div>
                                     <div style="font-size: 11px; color: #64748b;">Madrid · 04/03/2026</div>
                                 </td>
                                 <td data-label="Score">
@@ -359,15 +359,15 @@
                 </div>
                 <div class="radar-include">
                     <div class="radar-include__icon">✓</div>
-                    <span>Actualización diaria (07:00 AM)</span>
+                    <span>Nuevas empresas cada día hábil</span>
                 </div>
                 <div class="radar-include">
                     <div class="radar-include__icon">📍</div>
-                    <span>Ubicación y Registro oficial</span>
+                    <span>Provincia y registro mercantil</span>
                 </div>
                 <div class="radar-include">
                     <div class="radar-include__icon">📂</div>
-                    <span>Exportación Excel / CSV ilimitada</span>
+                    <span>Exportación a Excel / CSV</span>
                 </div>
             </div>
         </div>
@@ -377,21 +377,21 @@
         <div class="container">
             <div class="radar-band__header">
                 <div class="radar-kicker radar-kicker--dark">Datos del mercado</div>
-                <h2 class="radar-band__title">La base de datos más completa <br> de nuevas empresas en España</h2>
+                <h2 class="radar-band__title">Nuevas empresas de toda España, <br> a partir del BORME</h2>
             </div>
 
             <div class="radar-metrics">
                 <div class="radar-metric">
-                    <strong>+4,5M</strong>
-                    <span>empresas analizadas</span>
+                    <strong>BORME</strong>
+                    <span>fuente de las constituciones</span>
                 </div>
                 <div class="radar-metric">
-                    <strong>+200</strong>
-                    <span>nuevas empresas detectadas cada día</span>
+                    <strong>Cada día hábil</strong>
+                    <span>se incorporan las nuevas empresas</span>
                 </div>
                 <div class="radar-metric">
-                    <strong>100%</strong>
-                    <span>datos oficiales del BORME</span>
+                    <strong>0–100</strong>
+                    <span>puntuación para ordenar el listado</span>
                 </div>
             </div>
         </div>
@@ -403,7 +403,7 @@
                 <div class="radar-kicker">Precio</div>
                 <h2 class="radar-title">Plan Radar</h2>
                 <p class="radar-subtitle">
-                    Acceso mensual completo al radar de nuevas empresas en España, con filtros avanzados y exportación ilimitada.
+                    Acceso mensual completo al radar de nuevas empresas en España, con filtros por provincia y sector y exportación a Excel / CSV.
                 </p>
             </div>
 
@@ -421,7 +421,7 @@
                         <ul class="radar-pricing-list">
                             <li>Acceso completo al Radar</li>
                             <li>Filtros por sector y provincia</li>
-                            <li>Exportación ilimitada Excel / CSV</li>
+                            <li>Exportación a Excel / CSV</li>
                             <li>Actualización diaria de nuevas empresas</li>
                             <li>Sin permanencia</li>
                         </ul>
@@ -448,10 +448,10 @@
                     </div>
 
                     <div class="radar-pricing-side__card radar-pricing-side__card--soft" style="background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%); border: 1px solid #dbeafe;">
-                        <h3 style="color: #2563eb;">Rentabilidad Estimada (ROI)</h3>
-                        <p style="font-weight: 700; color: #1e3a8a; font-size: 1.1rem; margin: 12px 0;">+450% ROI</p>
+                        <h3 style="color: #2563eb;">Sin permanencia</h3>
+                        <p style="font-weight: 700; color: #1e3a8a; font-size: 1.1rem; margin: 12px 0;">79 € al mes</p>
                         <p style="font-size: 0.9rem;">
-                            Solo un cliente conseguido gracias al radar amortiza más de <strong>5 años</strong> de suscripción. 
+                            Suscripción mensual. Puedes cancelarla cuando quieras desde tu cuenta. 
                         </p>
                     </div>
                 </div>
@@ -465,7 +465,7 @@
                 <div class="radar-kicker">Comparativa</div>
                 <h2 class="radar-title">Radar vs Excel puntual</h2>
                 <p class="radar-subtitle">
-                    Si necesitas captar oportunidades de forma continua, Radar es claramente la opción más rentable.
+                    Si necesitas captar oportunidades de forma continua, Radar te da el listado siempre al día; el Excel puntual es una descarga única.
                 </p>
             </div>
 
@@ -495,7 +495,7 @@
                                 <td>Filtros</td>
                                 <td class="radar-comparison__col-radar">
                                     <span class="radar-comparison__val-icon">🔍</span>
-                                    Avanzados e ilimitados
+                                    Por provincia y sector
                                 </td>
                                 <td class="radar-comparison__col-excel">Sin filtros dinámicos</td>
                             </tr>
@@ -511,7 +511,7 @@
                                 <td>Exportación</td>
                                 <td class="radar-comparison__col-radar">
                                     <span class="radar-comparison__val-icon">📂</span>
-                                    Ilimitada
+                                    Incluida
                                 </td>
                                 <td class="radar-comparison__col-excel">Puntual / Por pago</td>
                             </tr>
@@ -529,7 +529,7 @@
                                     <div class="radar-comparison__price">79€<span>/mes</span></div>
                                 </td>
                                 <td class="radar-comparison__col-excel">
-                                    <div class="radar-comparison__price-alt">Desde 2€<span>/listado</span></div>
+                                    <div class="radar-comparison__price-alt">Desde 14€<span>/listado</span></div>
                                 </td>
                             </tr>
                         </tbody>
@@ -555,7 +555,7 @@
                     <div class="radar-kicker radar-kicker--dark">Cualificación Proactiva</div>
                     <h2 class="radar-title" style="color: white;">Algoritmo de Scoring de 100 Puntos</h2>
                     <p class="radar-text" style="color: rgba(255,255,255,0.7);">
-                        No todos los leads son iguales. Nuestro algoritmo analiza cada nueva empresa en tiempo real basándose en múltiples señales de mercado para que te centres en las que tienen mayor ROI potencial.
+                        No todos los leads son iguales. Cada nueva empresa recibe una puntuación según los datos que publica el BORME, para que ordenes el listado y empieces por las que más te interesan. No mide intención de compra.
                     </p>
                     <div class="radar-scoring-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 32px;">
                         <div class="radar-scoring-item" style="display: flex; align-items: flex-start; gap: 12px;">
@@ -618,11 +618,11 @@
             <div class="radar-faq">
                 <div class="radar-faq__item">
                     <h3>¿De dónde salen los datos?</h3>
-                    <p>Los datos se obtienen diariamente del BORME y de registros mercantiles oficiales en España.</p>
+                    <p>Los datos se obtienen de lo que publica el BORME cada día hábil.</p>
                 </div>
                 <div class="radar-faq__item">
                     <h3>¿Cada cuánto se actualiza el radar?</h3>
-                    <p>Radar se actualiza diariamente con todas las nuevas constituciones detectadas.</p>
+                    <p>Radar incorpora cada día hábil las nuevas constituciones publicadas en el BORME.</p>
                 </div>
                 <div class="radar-faq__item">
                     <h3>¿Puedo cancelar la suscripción?</h3>
@@ -644,7 +644,7 @@
         <div class="container">
             <div class="radar-final__shell">
                 <div class="radar-kicker radar-kicker--dark">Empieza hoy</div>
-                <h2>Accede a empresas antes que tu competencia ahora</h2>
+                <h2>Empieza a trabajar con las empresas recién constituidas</h2>
                 <p>
                     Accede al Radar y convierte nuevas constituciones mercantiles en oportunidades comerciales reales cada día.
                 </p>
@@ -723,7 +723,7 @@
         {
           "@type": "Product",
           "name": "Plan Radar B2B",
-          "description": "Acceso mensual completo al radar de nuevas empresas en España, con filtros avanzados y exportación ilimitada.",
+          "description": "Acceso mensual completo al radar de nuevas empresas en España, con filtros por provincia y sector y exportación a Excel / CSV.",
           "image": "<?= base_url('public/images/logo.png') ?>",
           "brand": {
             "@type": "Brand",
@@ -749,7 +749,7 @@
               "name": "¿De dónde salen los datos?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "Los datos se obtienen diariamente del BORME y de registros mercantiles oficiales en España."
+                "text": "Los datos se obtienen de lo que publica el BORME cada día hábil."
               }
             },
             {
@@ -757,7 +757,7 @@
               "name": "¿Cada cuánto se actualiza el radar?",
               "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "Radar se actualiza diariamente con todas las nuevas constituciones detectadas."
+                "text": "Radar incorpora cada día hábil las nuevas constituciones publicadas en el BORME."
               }
             },
             {

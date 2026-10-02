@@ -3,7 +3,7 @@
 <head>
     <?= view('partials/head', [
         'title'       => 'Desbloquea tu listado Excel — APIEmpresas',
-        'excerptText' => 'Introduce tu email para acceder al listado completo de empresas detectadas hoy.',
+        'excerptText' => 'Listado de empresas recién constituidas en Excel, a partir del BORME.',
         'robots'      => 'noindex,follow',
     ]) ?>
     <style>
@@ -150,21 +150,9 @@
             </div>
             
             <h1 class="hero-card__title">Desbloquea las <?= number_format($total_context_count, 0, ',', '.') ?> empresas de <?= esc($province) ?></h1>
-            <p class="hero-card__subtitle">Estas son las mismas oportunidades que acabas de ver. Desbloquea el acceso completo para descargar el listado y contactar antes que otros proveedores.</p>
+            <p class="hero-card__subtitle">Son las mismas empresas que acabas de ver. Descarga el listado completo en Excel con un pago único.</p>
 
             <div class="capture-box" style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 1px solid #bfdbfe; padding: 32px;">
-                <div style="text-align: center; margin-bottom: 24px;">
-                    <p style="font-size: 1.1rem; color: #1e40af; font-weight: 800; margin-bottom: 8px;">
-                        💰 Valor estimado de estas oportunidades:
-                    </p>
-                    <div style="font-size: 1.8rem; font-weight: 950; color: #1e3a8a; letter-spacing: -0.02em;">
-                        <?= number_format($total_context_count * 500, 0, ',', '.') ?>€ – <?= number_format($total_context_count * 2000, 0, ',', '.') ?>€
-                    </div>
-                    <p style="font-size: 0.85rem; color: #60a5fa; font-weight: 600; margin-top: 4px;">
-                        Estimación basada en el ticket medio B2B para <?= number_format($total_context_count, 0, ',', '.') ?> empresas
-                    </p>
-                </div>
-
                 <a href="<?= site_url('checkout/radar-export?' . http_build_query($_GET)) ?>" class="submit-btn" style="text-decoration: none; text-align: center; display: block; line-height: 60px;" id="excel_checkout_btn">
                     Desbloquear Listado Completo · <?= number_format($dynamic_price['base_price'] ?? 15, 0) ?>€
                 </a>
@@ -179,7 +167,7 @@
                     </div>
                     <div class="feature-item" style="color: #1e40af;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        Garantía oficial BORME
+                        Datos a partir del BORME
                     </div>
                 </div>
             </div>

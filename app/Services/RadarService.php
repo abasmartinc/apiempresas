@@ -116,6 +116,8 @@ class RadarService
         
         $builder = $this->applyFilters($builder, $province, $sector);
         $builder->where('fecha_constitucion IS NOT NULL');
+        // Solo los últimos 30 días: sin este límite el recuento recorría toda la tabla.
+        $builder->where('fecha_constitucion >=', date('Y-m-d', strtotime('-30 days')));
         
         $query = $builder->select("
             COUNT(CASE WHEN fecha_constitucion = '" . date('Y-m-d') . "' THEN 1 END) as hoy,
@@ -139,12 +141,15 @@ class RadarService
         $statKey = ($period === 'general' || $period === 'mes' || $period === '30days') ? 'mes' : $period;
         $totalCount = $stats[$statKey] ?? $stats['mes'];
         
-        $periodLabel = "ahora";
+        // Textos SEO (02-10-2026): antes decían "buscando / contratando / necesitan
+        // proveedores". De una empresa recién constituida solo sabemos eso: que se ha
+        // constituido. Ahora describen el listado tal cual es.
+        $periodLabel = "";
         if ($period === 'hoy') $periodLabel = "hoy";
         if ($period === 'semana') $periodLabel = "esta semana";
-        if ($period === 'mes' || $period === '30days') $periodLabel = "últimos 30 días";
+        if ($period === 'mes' || $period === '30days') $periodLabel = "en los últimos 30 días";
 
-        $displayCount = ($totalCount > 0) ? "+{$totalCount} " : "";
+        $displayCount = ($totalCount > 0) ? number_format($totalCount, 0, ',', '.') . " " : "";
         if ($period === 'hoy' && $stats['hoy'] >= $stats['mes'] && $stats['mes'] > 0) {
             $displayCount = "";
         }
@@ -176,11 +181,14 @@ class RadarService
         }
 
         $tVariants = [
-            'A' => "{$displayCount}Empresas en {$seoContext} buscando proveedores {$periodLabel}",
-            'B' => "{$displayCount}Empresas en {$seoContext} contratando proveedores {$periodLabel}",
-            'C' => "{$displayCount}Empresas en {$seoContext} necesitan proveedores {$periodLabel}",
-            'D' => "{$displayCount}Empresas en {$seoContext} buscan proveedores {$periodLabel}",
+            'A' => trim("{$displayCount}empresas nuevas en {$seoContext} {$periodLabel}"),
+            'B' => trim("{$displayCount}empresas recién constituidas en {$seoContext} {$periodLabel}"),
+            'C' => trim("Nuevas empresas en {$seoContext} {$periodLabel}") . ": listado",
+            'D' => trim("{$displayCount}sociedades constituidas en {$seoContext} {$periodLabel}"),
         ];
+        foreach ($tVariants as $k => $v) {
+            $tVariants[$k] = mb_strtoupper(mb_substr($v, 0, 1)) . mb_substr($v, 1);
+        }
         $seoTitle = $tVariants[$variantId] ?? $tVariants['A'];
         
         if (mb_strlen($seoTitle) > 60) {
@@ -199,18 +207,14 @@ class RadarService
             }
         }
 
+        $cuando = $periodLabel !== '' ? " {$periodLabel}" : '';
         $mVariants = [
-            'V1' => "Accede a {$displayCount}empresas en {$context} que están buscando proveedores {$periodLabel}. Las primeras en contactar son las que consiguen el cliente.",
-            'V2' => "Accede a {$displayCount}empresas en {$context} que buscan proveedores {$periodLabel} de forma activa. Las primeras en contactar son las que consiguen el cliente.",
-            'V3' => "Accede a {$displayCount}empresas en {$context} con necesidad de proveedores {$periodLabel}. Las primeras en contactar son las que consiguen el cliente.",
+            'V1' => "Listado de {$displayCount}empresas constituidas en {$context}{$cuando}, a partir del BORME: nombre, sector, provincia y objeto social. Filtra y exporta a Excel.",
+            'V2' => "{$displayCount}empresas recién constituidas en {$context}{$cuando}. Consulta nombre, sector y objeto social de cada una, a partir de lo publicado en el BORME.",
+            'V3' => "Nuevas empresas en {$context}{$cuando}: {$displayCount}constituciones publicadas en el BORME, con sector, provincia y objeto social. Descarga el listado en Excel.",
         ];
-
-        if ($period === 'hoy') {
-            $mVariants = [
-                'V1' => "Accede a {$displayCount}empresas en {$context} que están buscando proveedores hoy. Cada día aparecen nuevas oportunidades — las primeras en contactar son las que consiguen el cliente.",
-                'V2' => "Accede a {$displayCount}empresas en {$context} que buscan proveedores hoy. Cada día aparecen nuevas oportunidades — las primeras en contactar son las que consiguen el cliente.",
-                'V3' => "Accede a {$displayCount}empresas en {$context} con necesidad de proveedores hoy. Cada día aparecen nuevas oportunidades — las primeras en contactar son las que consiguen el cliente.",
-            ];
+        foreach ($mVariants as $k => $v) {
+            $mVariants[$k] = mb_strtoupper(mb_substr($v, 0, 1)) . mb_substr($v, 1);
         }
 
         // Headings Generation

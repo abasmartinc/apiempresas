@@ -93,7 +93,7 @@ $province = 'España';
         <section class="ae-radar-page__hero container">
             <div class="ae-radar-page__hero-inner">
                 <span class="ae-radar-page__pill">
-                    OPORTUNIDADES B2B • ÚLTIMAS CONSTITUCIONES
+                    EMPRESAS NUEVAS • ÚLTIMAS CONSTITUCIONES
                 </span>
                 
                 <style>
@@ -147,11 +147,11 @@ $province = 'España';
                 </h1>
 
                 <p class="ae-radar-page__subtitle" style="font-size: 1.25rem; font-weight: 600; margin-top: 1rem; color: #1e293b;">
-                    +<?= number_format($conversion_count ?? 0, 0, ',', '.') ?> empresas en <?= esc($heading_location ?? 'España') ?> listas para ser contactadas antes que tu competencia
+                    <?= number_format($conversion_count ?? 0, 0, ',', '.') ?> empresas en <?= esc(($heading_location ?? '') !== '' ? $heading_location : ucfirst(mb_strtolower((string) ($province ?? 'España'), 'UTF-8'))) ?> constituidas recientemente
                 </p>
 
                 <p class="ae-radar-page__hero-copy" style="margin-top: 1rem; opacity: 0.8; font-size: 1.1rem; max-width: 600px; margin-left: auto; margin-right: auto; color: #64748b;">
-                    Llega antes de que tus competidores sepan que existen. El 70% de las ventas B2B se las lleva el primer proveedor que contacta.
+                    Constituciones publicadas en el BORME, con sector, provincia y objeto social, para tu prospección comercial.
                 </p>
 
                 <div class="ae-radar-page__hero-actions">
@@ -159,7 +159,7 @@ $province = 'España';
                         Desbloquear Radar Completo
                     </a>
                 </div>
-                <p style="font-size: 0.85rem; color: #64748b; margin-top: 0.75rem; font-weight: 500; text-align: center;">La mayoría de usuarios consigue su primer cliente en días</p>
+                <p style="font-size: 0.85rem; color: #64748b; margin-top: 0.75rem; font-weight: 500; text-align: center;">Sin permanencia: cancela cuando quieras</p>
 
                 </section>
 
@@ -187,12 +187,12 @@ $province = 'España';
                     <div style="display: flex; align-items: center; gap: 0.6rem;">
                         <span style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase; color: #3b82f6; background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); padding: 0.3rem 0.8rem; border-radius: 999px;">
                             <span style="width: 6px; height: 6px; background: #3b82f6; border-radius: 50%; display: inline-block; animation: pulse 2s infinite;"></span>
-                            Muestra comercial en tiempo real
+                            Muestra del listado
                         </span>
                     </div>
                     <span style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase; color: #10b981; background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.25); padding: 0.3rem 0.8rem; border-radius: 999px;">
                         <span style="width: 6px; height: 6px; background: #10b981; border-radius: 50%; display: inline-block;"></span>
-                        Actualizado hoy
+                        Últimas constituciones
                     </span>
                 </div>
                 <h2 style="font-size: 2rem; font-weight: 900; color: #0f172a; margin: 0 0 0.6rem; letter-spacing: -0.025em; line-height: 1.15;">
@@ -201,15 +201,15 @@ $province = 'España';
                 
                 </h2>
                 <p style="color: #64748b; font-size: 1rem; margin: 0; line-height: 1.65; max-width: 680px;">
-                    Empresas recién constituidas detectadas en BORME y listas para prospección comercial. Ideal para despachos, software, marketing, seguros, asesoría, financiación y proveedores B2B.
+                    Empresas recién constituidas publicadas en el BORME. Útil para despachos, software, marketing, seguros, asesoría y financiación.
                 </p>
             </div>
 <!-- Bloque de Contexto Competitivo -->
         <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-left: 5px solid #22c55e; padding: 1.25rem 1.5rem; border-radius: 0.5rem; color: #166534; margin: 0 0 2rem 0; display: flex; align-items: center; gap: 1rem; box-shadow: none;">
             <span style="font-size: 1.8rem;">💡</span>
             <div>
-                <strong style="font-size: 1.2rem; display: block; margin-bottom: 0.25rem;">Ventaja competitiva inmediata (Time-to-Market)</strong>
-                <p style="margin: 0; opacity: 0.9;">Tus competidores suelen tardar semanas en actualizar sus bases de datos. Prospectar hoy te da prioridad exclusiva.</p>
+                <strong style="font-size: 1.2rem; display: block; margin-bottom: 0.25rem;">Empresas en su primera etapa</strong>
+                <p style="margin: 0; opacity: 0.9;">Una empresa recién constituida suele tener por delante decisiones de gestoría, banca, seguros, software o web. Aquí ves quiénes son desde que se publican.</p>
             </div>
         </div>
     
@@ -255,7 +255,7 @@ $province = 'España';
                             </div>
 
                             <div class="ae-radar-page__lead-intent">
-                                <div class="ae-radar-page__lead-intent-label">Potenciales necesidades</div>
+                                <div class="ae-radar-page__lead-intent-label">Servicios habituales al empezar</div>
                                 <div class="ae-radar-page__lead-intent-text"><?= esc($leadSignals) ?></div>
                             </div>
                         </div>
@@ -265,7 +265,7 @@ $province = 'España';
                         $coUrl = company_url($co);
                         ?>
                         <a href="<?= $coUrl ?>" class="ae-radar-page__lead-btn">
-                            Ver oportunidad
+                            Ver empresa
                         </a>
                     </article>
 
@@ -336,7 +336,7 @@ $province = 'España';
                         <div>
                             <div class="ae-radar-page__stat-label" style="color: #ef4444; font-weight: 800;">Últimas 24h</div>
                             <div class="ae-radar-page__stat-value"><?= number_format($stats['hoy'] ?? 0, 0, ',', '.') ?></div>
-                            <p style="font-size: 0.7rem; color: #64748b; margin-top: 4px; line-height: 1.2;">Máxima oportunidad — menor competencia</p>
+                            <p style="font-size: 0.7rem; color: #64748b; margin-top: 4px; line-height: 1.2;">Las más recientes</p>
                         </div>
                     </a>
 
@@ -353,7 +353,7 @@ $province = 'España';
                         <div>
                             <div class="ae-radar-page__stat-label" style="color: #3b82f6; font-weight: 800;">Últimos 7 días</div>
                             <div class="ae-radar-page__stat-value"><?= number_format($stats['semana'] ?? 0, 0, ',', '.') ?></div>
-                            <p style="font-size: 0.7rem; color: #64748b; margin-top: 4px; line-height: 1.2;">Equilibrio volumen y calidad</p>
+                            <p style="font-size: 0.7rem; color: #64748b; margin-top: 4px; line-height: 1.2;">Volumen intermedio</p>
                         </div>
                     </a>
 
@@ -367,7 +367,7 @@ $province = 'España';
                         <div>
                             <div class="ae-radar-page__stat-label" style="color: #64748b; font-weight: 800;">Últimos 30 días</div>
                             <div class="ae-radar-page__stat-value"><?= number_format($stats['30days'] ?? 0, 0, ',', '.') ?></div>
-                            <p style="font-size: 0.7rem; color: #64748b; margin-top: 4px; line-height: 1.2;">Mayor volumen — más competencia</p>
+                            <p style="font-size: 0.7rem; color: #64748b; margin-top: 4px; line-height: 1.2;">Mayor volumen</p>
                         </div>
                     </a>
                 </div>
@@ -497,7 +497,7 @@ $province = 'España';
 
         <section class="ae-radar-page__section ae-radar-page__section--strategic container">
             <div class="ae-radar-page__section-head ae-radar-page__section-head--center">
-                <span class="ae-radar-page__section-kicker">Cierre rápido</span>
+                <span class="ae-radar-page__section-kicker">Más listados</span>
                 <h3 class="ae-radar-page__section-title">Directorios estratégicos</h3>
             </div>
 
@@ -548,10 +548,10 @@ $province = 'España';
 
                 <div class="ae-radar-page__seo-content">
                     <p>
-                        Cada día se registran cientos de nuevas empresas en España. El Radar de APIEmpresas monitoriza el BORME para ofrecerte un listado actualizado de estas constituciones mercantiles.
+                        Cada día hábil se publican nuevas constituciones de empresas en España. El Radar de APIEmpresas monitoriza el BORME para ofrecerte un listado actualizado de estas constituciones mercantiles.
                     </p>
                     <p>
-                        Esta herramienta te permite detectar oportunidades de negocio B2B en el momento preciso en que surge la necesidad de nuevos proveedores.
+                        Esta herramienta te permite ver qué empresas se acaban de constituir, filtrarlas por provincia y sector y preparar tu prospección comercial.
                     </p>
                 </div>
             </section>

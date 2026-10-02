@@ -41,7 +41,8 @@ class RadarController extends BaseController
             return redirect()->to(site_url("empresas-nuevas/{$provinceSlug}"));
         }
 
-        return $this->renderRadar('general', $province, $sector);
+        // Misma página que /empresas-nuevas/{sector}-en-{provincia}: esa es la canónica.
+        return $this->renderRadar('general', $province, $sector, site_url("empresas-nuevas/{$sectorSlug}-en-{$provinceSlug}"));
     }
 
 
@@ -92,8 +93,9 @@ class RadarController extends BaseController
             return redirect()->to(site_url('empresas-nuevas'));
         }
 
-        $data['title'] = "Empresas en {$province} hoy | +120 oportunidades activas";
-        $data['excerptText'] = "Descubre " . number_format($data['total_context_count'], 0, ',', '.') . " empresas en {$province} detectadas hoy. Oportunidades reales listas para contactar antes que tu competencia.";
+        $provinciaTitulo = mb_convert_case(mb_strtolower($province, 'UTF-8'), MB_CASE_TITLE, 'UTF-8');
+        $data['title'] = "Empresas en {$provinciaTitulo}: nuevas constituciones de los últimos 30 días";
+        $data['excerptText'] = number_format($data['total_context_count'], 0, ',', '.') . " empresas constituidas en {$provinciaTitulo} en los últimos 30 días, a partir del BORME: nombre, sector y objeto social. Filtra y exporta a Excel.";
         $data['meta_description'] = $data['excerptText'];
         $data['canonical'] = site_url(uri_string());
 
@@ -132,11 +134,29 @@ class RadarController extends BaseController
         return $this->renderRadar('mes', $province);
     }
 
-    private function renderRadar($period, $province = null, $sector = null)
+    /** Mínimo de empresas para ofrecer la compra de un listado suelto */
+    public const VENTA_MINIMA = 25;
+
+    /** true si el último slug de provincia no estaba en la lista conocida */
+    private bool $provinciaDesconocida = false;
+
+    private function renderRadar($period, $province = null, $sector = null, ?string $canonical = null)
     {
         $data = $this->getRadarData($province, $sector, $period);
         if (!$data)
             return redirect()->to(site_url('empresas-nuevas'));
+
+        // Provincia inventada (/empresas-nuevas/noexiste-xyz): antes respondía 200.
+        if ($this->provinciaDesconocida && empty($data['stats']['mes'])) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+        }
+
+        // Los datos van en caché con el canonical de la primera URL que los pidió:
+        // se fija aquí en cada visita. Con menos de 5 empresas la página no se indexa.
+        $data['canonical'] = $canonical ?? site_url(uri_string());
+        if ((int) ($data['total_context_count'] ?? 0) < 5) {
+            $data['robots'] = 'noindex, follow';
+        }
 
         // Tracking (Runs every visit, even if data is cached)
         $this->logSeoVariant($data);
@@ -155,6 +175,10 @@ class RadarController extends BaseController
     {
         if (!isset($data['variant_id']))
             return;
+        // Sin bots: cada visita de un rastreador añadía una fila a la tabla.
+        if ($this->request->getUserAgent()->isRobot()) {
+            return;
+        }
 
         $db = \Config\Database::connect();
         try {
@@ -180,20 +204,38 @@ class RadarController extends BaseController
         if (!$data)
             return redirect()->to(site_url('empresas-nuevas'));
 
+        // Listados con muy pocas empresas (se ofrecían 2 empresas por 14 €): se pasa al
+        // periodo siguiente y, si ni con 30 días llega al mínimo, se quita el sector.
+        if ((int) ($data['total_context_count'] ?? 0) < self::VENTA_MINIMA) {
+            $q = ['provincia' => $province, 'sector' => $sector, 'cnae' => $cnae];
+            if ($period === 'hoy') {
+                $q['period'] = 'semana';
+            } elseif ($period === 'semana') {
+                $q['period'] = '30days';
+            } elseif ($sector !== '' && $province !== 'España') {
+                $q['period'] = '30days';
+                $q['sector'] = '';
+                $q['cnae']   = '';
+            } else {
+                return redirect()->to(site_url('radar/preview'));
+            }
+            return redirect()->to(site_url('excel/preview?' . http_build_query(array_filter($q, static fn ($v) => $v !== ''))));
+        }
+
         $data['cnae'] = $cnae;
         // Deterministic Rotation for Excel
         $hash = crc32(uri_string());
         $tVariants = [
-            "Descargar listado de clientes potenciales | Excel listo ahora",
-            "Listado de empresas contratando en Excel | Descarga inmediata",
-            "Oportunidades B2B en Excel: Descarga leads activos",
-            "Descarga base de datos de empresas con necesidad activa"
+            "Listado de empresas nuevas en Excel | Descarga inmediata",
+            "Empresas recién constituidas en Excel | Descarga inmediata",
+            "Descarga el listado de nuevas empresas en Excel",
+            "Nuevas constituciones del BORME en Excel"
         ];
         $mVariants = [
-            "Descarga un listado de empresas activas que necesitan proveedores ahora mismo. Ideal para prospección comercial inmediata y generación de ventas.",
-            "Listado completo de empresas de reciente creación en formato Excel. Empieza a captar clientes hoy con datos actualizados y reales.",
-            "Accede a los datos de contacto de nuevas empresas en España. Descarga tu Excel y adelántate a tu competencia cerrando ventas.",
-            "Bases de datos de empresas recién constituidas listas para tu CRM. Aumenta tus ventas con leads B2B de alta intención comercial."
+            "Descarga en Excel el listado de empresas recién constituidas, a partir del BORME. Para prospección comercial B2B.",
+            "Listado de empresas de reciente creación en formato Excel, con sector, provincia y objeto social.",
+            "Nuevas empresas en España en Excel: nombre, CIF, sector y provincia, y teléfono cuando consta.",
+            "Empresas recién constituidas, listas para importar en tu CRM. Datos a partir del BORME."
         ];
 
         $data['title'] = $tVariants[$hash % count($tVariants)];
@@ -278,7 +320,8 @@ class RadarController extends BaseController
         $sectorCacheKey = is_array($sectorInput) ? implode(',', $sectorInput['codes'] ?? []) : (string) $sectorInput;
         $cacheKey = 'radar_' . md5("{$period}_{$province}_{$limit}_{$sectorCacheKey}");
 
-        $forceNoCache = service('request')->getGet('nocache') === '1';
+        // ?nocache=1 era público: cualquiera podía forzar el recálculo. Solo administradores.
+        $forceNoCache = service('request')->getGet('nocache') === '1' && (int) (session('is_admin') ?? 0) === 1;
         if ($forceNoCache) {
             $cache->delete($cacheKey);
         }
@@ -423,6 +466,7 @@ class RadarController extends BaseController
         ];
 
         $key = strtolower($slug);
+        $this->provinciaDesconocida = !isset($provinces[$key]);
         return $provinces[$key] ?? strtoupper(str_replace('-', ' ', $slug));
     }
 

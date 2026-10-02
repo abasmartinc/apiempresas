@@ -89,7 +89,7 @@ $slugProvince = url_title($province, '-', true);
                     <span class="ae-radar-page__title-sub">Listado nacional de sociedades por ubicación</span>
 
                     <p class="ae-radar-page__subtitle">
-                        Accede a la base de datos de <strong><?= number_format($total_context_count ?? 0, 0, ',', '.') ?> empresas activas</strong> en la provincia de <?= esc($province) ?>. Obtén leads enriquecidos y actualizados diariamente de BORME.
+                        Accede a la base de datos de <strong><?= number_format($total_context_count ?? 0, 0, ',', '.') ?> empresas constituidas en los últimos 30 días</strong> en la provincia de <?= esc($province) ?>, a partir de lo publicado en el BORME.
                     </p>
 
                     <div class="ae-radar-page__hero-actions">
@@ -102,9 +102,11 @@ $slugProvince = url_title($province, '-', true);
                                 Ver cómo captar clientes con el Radar
                             </a>
 
+                            <?php if ((int) ($total_context_count ?? 0) >= 25): ?>
                             <a href="<?= site_url('checkout/radar-export?type=single&provincia=' . urlencode($province)) ?>" class="ae-radar-page__btn ae-radar-page__btn--soft js-loading-btn">
                                 Descargar listado (<?= number_format($total_context_count ?? 0, 0, ',', '.') ?> empresas) · <?php if(isset($dynamic_price['is_discounted']) && $dynamic_price['is_discounted']): ?><s style="opacity:0.65; font-size:0.85em; margin-right:4px;"><?= number_format($dynamic_price['original_price'], 0) ?>€</s><?php endif; ?><?= number_format($dynamic_price['base_price'] ?? 9, 0) ?>€ <span style="font-size:0.85em; opacity:0.85; font-weight:600;">+ IVA</span>
                             </a>
+                            <?php endif; ?>
                         <?php else: ?>
                             <a href="#avisarme-seccion" class="ae-radar-page__btn ae-radar-page__btn--soft">
                                 Avisarme de nuevas empresas
@@ -209,7 +211,7 @@ $slugProvince = url_title($province, '-', true);
                         <div>
                             <div class="ae-radar-page__section-kicker ae-radar-page__section-kicker--with-dot">
                                 <span class="ae-radar-page__section-kicker-dot"></span>
-                                Muestra oficial en tiempo real
+                                Muestra del listado
                             </div>
 
                             <h2 class="ae-radar-page__section-title ae-radar-page__section-title--left">
@@ -223,7 +225,7 @@ $slugProvince = url_title($province, '-', true);
 
                         <div class="ae-radar-page__live-badge">
                             <span class="ae-radar-page__live-badge-dot"></span>
-                            Actualizado hoy
+                            Últimas constituciones
                         </div>
                     </div>
                 <?php endif; ?>
@@ -314,7 +316,7 @@ $slugProvince = url_title($province, '-', true);
                                 </div>
 
                                 <div class="ae-radar-page__lead-intent">
-                                    <div class="ae-radar-page__lead-intent-label">Potenciales necesidades</div>
+                                    <div class="ae-radar-page__lead-intent-label">Servicios habituales al empezar</div>
                                     <div class="ae-radar-page__lead-intent-text"><?= esc($leadSignals) ?></div>
                                 </div>
                             </div>
@@ -377,7 +379,7 @@ $slugProvince = url_title($province, '-', true);
                                     <div class="ae-radar-page__paywall-benefits">
                                         <span>Filtros avanzados por sector</span>
                                         <span>Exportación Excel / CSV</span>
-                                        <span>Actualización diaria oficial</span>
+                                        <span>Nuevas empresas cada día hábil</span>
                                     </div>
                                         <a href="<?= site_url('radar') ?>" class="ae-radar-page__paywall-btn ae-radar-page__paywall-btn--primary">
                                             <span>Abrir Radar</span>
@@ -405,7 +407,7 @@ $slugProvince = url_title($province, '-', true);
                 <span class="ae-radar-page__section-kicker">Exploración rápida</span>
                 <h3 class="ae-radar-page__section-title">Directorios estratégicos de empresas</h3>
                 <p class="ae-radar-page__section-subtitle">
-                    Accede a nuestras rutas optimizadas para descubrir nuevas oportunidades B2B de forma segmentada.
+                    Otros listados de empresas nuevas, por periodo, provincia y sector.
                 </p>
             </div>
 

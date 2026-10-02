@@ -151,17 +151,14 @@ class Radar extends BaseController
         
         $companies = $builder->get()->getResultArray();
 
-        // Procesar estrategias para el JS de la demo y simular fechas recientes para la vista
-        $today = date('Y-m-d');
-        $yesterday = date('Y-m-d', strtotime('-1 day'));
+        // Empresas reales con su fecha real. Antes se les ponía a la fuerza fecha de hoy
+        // o de ayer "para demostrar frescura": era un dato falso sobre empresas con nombre.
         foreach ($companies as $index => &$co) {
             $co['strategy'] = $this->generateDemoStrategy($co);
             $co['lead_score_data'] = ['numeric' => $co['score_total'], 'base' => $co['score_total']];
-            
-            // Forzar fechas de hoy/ayer para que el preview siempre demuestre "frescura"
-            $co['fecha_constitucion'] = ($index % 2 == 0) ? $today : $yesterday;
             $co['last_borme_date'] = $co['fecha_constitucion'];
         }
+        unset($co);
 
         // 2. Métricas de Escala
         $todayCount = $this->countNewCompanies('hoy');
@@ -170,16 +167,16 @@ class Radar extends BaseController
         // Deterministic Rotation for Preview
         $hash = crc32(uri_string());
         $tVariants = [
-            "Señales de compra detectadas en nuevas constituciones hoy",
-            "Llena tu pipeline B2B con empresas de nueva creación hoy",
-            "Oportunidades de negocio y leads B2B cualificados",
-            "Prospectos B2B en fase de alta intención de compra"
+            "Radar de empresas nuevas: constituciones recientes del BORME",
+            "Empresas de nueva creación para tu prospección B2B",
+            "Radar B2B: empresas recién constituidas en España",
+            "Nuevas empresas en España, ordenadas para prospección"
         ];
         $mVariants = [
-            "El 70% de las nuevas empresas eligen al primer proveedor que las contacta. Accede a las constituciones del BORME y llena tu pipeline antes que tu competencia.",
-            "Descubre empresas con potencial de compra inmediato. Leads B2B frescos detectados hoy en el BORME para tu equipo comercial.",
-            "Automatiza tu prospección y contacta con empresas recién creadas con necesidades activas. Accede a oportunidades antes de encender el CRM.",
-            "Listado de empresas con necesidades de contratación activas. Ideal para prospección comercial B2B de alto impacto."
+            "Accede a las constituciones recientes del BORME, con filtros por provincia y sector, favoritos y exportación.",
+            "Empresas recién constituidas en España para tu equipo comercial: filtros, notas y exportación a Excel.",
+            "Organiza tu prospección con empresas de nueva creación: filtra por sector y provincia y guarda tus favoritas.",
+            "Listado de empresas de nueva creación a partir del BORME, para prospección comercial B2B."
         ];
 
         return view('radar/preview', [
@@ -334,7 +331,7 @@ class Radar extends BaseController
             'motivo' => !empty($reasons) ? $reasons[0] : "Empresa de nueva creación con alta prioridad en sector estratégico ($sector).",
             'que_vender' => "Servicios profesionales B2B, consultoría de expansión, suministros industriales o software de gestión operativa.",
             'objecion' => "No tenemos presupuesto asignado todavía.",
-            'enfoque' => "Enfocarse en la 'ventaja del primer paso'. Al ser una empresa en fase de constitución, aún no han cerrado contratos fijos con proveedores locales en $location.",
+            'enfoque' => "Presentarse pronto. Al ser una empresa recién constituida, es posible que todavía esté eligiendo proveedores en $location.",
             'mensaje' => "Hola, he visto que acabáis de registrar la sociedad para [Proyecto]. Enhorabuena por el lanzamiento en $location. Te escribo porque ayudamos a empresas de $sector a optimizar su fase de arranque reduciendo costes operativos en un 15%..."
         ];
     }
