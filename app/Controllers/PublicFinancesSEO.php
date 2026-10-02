@@ -43,7 +43,7 @@ class PublicFinancesSEO extends BaseController
      * se saca con subconsulta: con LEFT JOIN, un CIF repetido en companies duplicaba
      * filas e inflaba el total.
      */
-    private function listado(string $tabla, string $cond, array $params, string $orden, string $colImporte, string $nombreOrigen, string $q, int $page, string $claveTotal): array
+    private function listado(string $tabla, string $cond, array $params, string $orden, string $colImporte, array $colsNombre, string $q, int $page, string $claveTotal): array
     {
         $db    = \Config\Database::connect();
         $where = $cond . ' AND ' . FondosPublicos::soloJuridicas('t.company_cif');
@@ -66,13 +66,29 @@ class PublicFinancesSEO extends BaseController
         $this->validarPagina($page, $totales['total'], $q);
 
         $filas = $db->query("
-            SELECT t.*, {$nombreOrigen} AS nombre_origen,
-                   (SELECT comp.company_name FROM companies comp WHERE comp.cif = t.company_cif LIMIT 1) AS company_name
+            SELECT t.*,
+                   (SELECT comp.company_name FROM companies comp WHERE comp.cif = t.company_cif LIMIT 1) AS nombre_ficha
             FROM {$tabla} t
             WHERE {$where}
             ORDER BY {$orden}
             LIMIT ? OFFSET ?
         ", array_merge($params, [self::POR_PAGINA, ($page - 1) * self::POR_PAGINA]))->getResultArray();
+
+        // company_name = nombre de la ficha (si la empresa está en nuestra base);
+        // nombre_origen = el que trae el registro público. Se resuelve aquí y no en SQL
+        // para no depender de qué columnas de nombre tiene cada tabla.
+        foreach ($filas as &$f) {
+            $origen = '';
+            foreach ($colsNombre as $col) {
+                if (!empty($f[$col])) {
+                    $origen = $f[$col];
+                    break;
+                }
+            }
+            $f['nombre_origen'] = $origen;
+            $f['company_name']  = $f['nombre_ficha'] ?? null;
+        }
+        unset($f);
 
         return [$filas, $totales['total'], $totales['importe']];
     }
@@ -82,8 +98,8 @@ class PublicFinancesSEO extends BaseController
         return \Config\Services::pager()->makeLinks($page, self::POR_PAGINA, $total, 'seo_es');
     }
 
-    private const NOMBRE_CONTRATO   = "COALESCE(NULLIF(t.company_name, ''), t.raw_adjudicatario)";
-    private const NOMBRE_SUBVENCION = 't.raw_beneficiario';
+    private const NOMBRE_CONTRATO   = ['raw_adjudicatario', 'company_name', 'adjudicatario'];
+    private const NOMBRE_SUBVENCION = ['raw_beneficiario', 'beneficiario'];
 
     // ── LICITACIONES ─────────────────────────────────────────────────────────
     public function contractsHub()
