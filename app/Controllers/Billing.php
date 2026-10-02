@@ -1058,7 +1058,11 @@ class Billing extends BaseController
             $filas = $cache->get($clave);
             if (!is_array($filas)) {
                 $filas = (new RadarController())->previewExport($params, 5);
-                $cache->save($clave, $filas, 21600);
+                // Muestra completa: 6 h. Incompleta (base de datos cargada o listado muy
+                // pequeño): 10 min, para volver a intentarlo. Vacía: no se guarda.
+                if ($filas) {
+                    $cache->save($clave, $filas, count($filas) >= 5 ? 21600 : 600);
+                }
             }
 
             return $filas;

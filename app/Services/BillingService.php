@@ -107,9 +107,6 @@ class BillingService
      */
     public function countDirectoryCompanies(array $filters): int
     {
-        $db = \Config\Database::connect();
-        $builder = $db->table('companies');
-
         $prov = $filters['provincia'] ?? 'España';
         $estado = $filters['estado'] ?? '';
         $has_phone = $filters['has_phone'] ?? '';
@@ -118,6 +115,22 @@ class BillingService
         $cnae = $filters['cnae'] ?? '';
         $cnae_text = $filters['cnae_text'] ?? '';
         $municipio = trim((string) ($filters['municipio'] ?? ''));
+
+        // Caché de 15 min por combinación de filtros (02-10-2026). El resumen de compra
+        // contaba en cada visita: Madrid tardaba hasta 4 s y Madrid "solo activas", 9 s.
+        // La usan el resumen y el pago, así que el precio que se ve es el que se cobra.
+        $cache = \Config\Services::cache();
+        $clave = 'dir_count_' . md5(json_encode([
+            mb_strtolower(trim((string) $prov), 'UTF-8'), (string) $estado, (string) $has_phone === '1' ? '1' : '',
+            (string) $date_min, (string) $date_max, (string) $cnae, $cnae === '' ? (string) $cnae_text : '', $municipio,
+        ]));
+        $guardado = $cache->get($clave);
+        if (is_int($guardado)) {
+            return $guardado;
+        }
+
+        $db = \Config\Database::connect();
+        $builder = $db->table('companies');
 
         if ($estado !== '') {
             $builder->where('estado', $estado);
@@ -142,7 +155,10 @@ class BillingService
         }
         
         self::filtrarProvincia($builder, (string) $prov);
-        return $builder->countAllResults();
+        $total = (int) $builder->countAllResults();
+        $cache->save($clave, $total, 900);
+
+        return $total;
     }
 
     /**

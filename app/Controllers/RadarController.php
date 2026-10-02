@@ -766,6 +766,9 @@ class RadarController extends BaseController
     /** Ids que lee como máximo cada consulta de la vista previa */
     private const PREVIEW_VENTANA = 20000;
 
+    /** Tiempo máximo buscando filas para la vista previa */
+    private const PREVIEW_SEGUNDOS = 1.5;
+
     /** Fijo y móvil en la columna "Teléfono" (sin repetir si son el mismo) */
     private static function telefonos(array $c): string
     {
@@ -797,8 +800,16 @@ class RadarController extends BaseController
         // (ORDER BY id … LIMIT 1 sin acotar): 14 s en Madrid y error por tiempo con el
         // filtro de teléfono (02-10-2026).
         $max  = (int) ($db->query('SELECT MAX(id) AS m FROM companies')->getRowArray()['m'] ?? 0);
-        $rows = [];
+        $rows  = [];
+        $t0    = microtime(true);
+        $lento = false;
         for ($i = 0; $i < $n && $max > 0; $i++) {
+            // La vista previa no puede retrasar la página de pago: si la base de datos va
+            // cargada y las consultas se alargan, se queda con las filas que ya tiene.
+            if (microtime(true) - $t0 > self::PREVIEW_SEGUNDOS) {
+                $lento = true;
+                break;
+            }
             $hasta = (int) round($max * (1 - ($i + 0.5) / $n));
             [$b] = $this->buildExportQuery($db, $params);
             $r = $b->where('id <=', $hasta)
@@ -811,7 +822,7 @@ class RadarController extends BaseController
         // Listados pequeños (pocas empresas entre millones): las ventanas pueden salir
         // vacías. Se completa con las primeras filas del archivo, que es la misma
         // consulta con la que empieza la descarga.
-        if (count($rows) < $n) {
+        if (count($rows) < $n && !$lento) {
             [$b] = $this->buildExportQuery($db, $params);
             foreach ($b->orderBy('id', 'DESC')->limit($n)->get()->getResultArray() as $r) {
                 if (count($rows) >= $n) {
