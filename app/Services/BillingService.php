@@ -171,10 +171,11 @@ class BillingService
         if ($p === '' || $p === 'españa') {
             return;
         }
-        if (in_array($p, ['alicante', 'alacant', 'alicante/alacant'], true)) {
-            $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant', 'ALACANT']);
-        } elseif (in_array($p, ['araba/álava', 'álava', 'álava-araba', 'araba', 'alava'], true)) {
-            $builder->whereIn('registro_mercantil', ['Álava', 'ÁLAVA', 'Álava-Araba', 'Araba/Álava', 'ALAVA']);
+        // Todas las formas en que está escrita la provincia (02-10-2026): vale antes y después
+        // de normalizar la base de datos ("Baleares", "Illes Balears", "Islas Baleares"…).
+        // Si no se reconoce como provincia, se compara tal cual, como antes.
+        if (\App\Libraries\Provincias::canonica($prov) !== null) {
+            $builder->whereIn('registro_mercantil', \App\Libraries\Provincias::variantes($prov));
         } else {
             $builder->where('registro_mercantil', $prov);
         }
@@ -194,13 +195,7 @@ class BillingService
         $builder->where('cnae_code LIKE', $cnae . '%');
         $builder->where('fecha_constitucion IS NOT NULL');
         
-        if (strtolower($prov) !== 'españa') {
-            if (in_array(strtolower($prov), ['alicante', 'alacant', 'alicante/alacant'])) {
-                $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant', 'ALACANT']);
-            } else {
-                $builder->where('registro_mercantil', $prov);
-            }
-        }
+        self::filtrarProvincia($builder, (string) $prov);
         return $builder->countAllResults();
     }
 

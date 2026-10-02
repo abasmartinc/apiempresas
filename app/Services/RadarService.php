@@ -60,8 +60,10 @@ class RadarService
     private function applyFilters($builder, $province, $sector)
     {
         if ($province && mb_strtolower($province, 'UTF-8') !== 'españa') {
-            if (strtolower($province) === 'alicante') {
-                $builder->whereIn('registro_mercantil', ['Alicante', 'Alicante/Alacant']);
+            // Todas las formas en que está escrita la provincia (vale antes y después de
+            // normalizar la base de datos). Antes Baleares y Tenerife no devolvían nada.
+            if (\App\Libraries\Provincias::canonica($province) !== null) {
+                $builder->whereIn('registro_mercantil', \App\Libraries\Provincias::variantes($province));
             } else {
                 $builder->where('registro_mercantil', $province);
             }

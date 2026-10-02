@@ -13,7 +13,11 @@ namespace App\Libraries;
  */
 class Provincias
 {
-    /** nombre a mostrar => variantes en la base de datos */
+    /**
+     * nombre a mostrar => variantes en la base de datos. Los nombres son los mismos 52 que
+     * usan los scripts (scrapers_v2/comun/provincias.py), para que coincidan con lo que
+     * queda guardado tras normalizar.
+     */
     private const MAPA = [
         'A Coruña'               => ['A Coruña', 'La Coruña', 'Coruña, A', 'Coruña'],
         'Álava'                  => ['Araba/Álava', 'Álava', 'Álava-Araba', 'Araba'],
@@ -24,7 +28,7 @@ class Provincias
         'Ávila'                  => ['Ávila'],
         'Badajoz'                => ['Badajoz'],
         'Barcelona'              => ['Barcelona'],
-        'Bizkaia'                => ['Bizkaia', 'Vizcaya', 'Vizcaya-Bizkaia'],
+        'Vizcaya'                => ['Vizcaya', 'Bizkaia', 'Vizcaya-Bizkaia'],
         'Burgos'                 => ['Burgos'],
         'Cáceres'                => ['Cáceres'],
         'Cádiz'                  => ['Cádiz'],
@@ -34,13 +38,13 @@ class Provincias
         'Ciudad Real'            => ['Ciudad Real'],
         'Córdoba'                => ['Córdoba'],
         'Cuenca'                 => ['Cuenca'],
-        'Gipuzkoa'               => ['Gipuzkoa', 'Guipúzcoa', 'Guipúzcoa-Gipuzkoa'],
+        'Guipúzcoa'              => ['Guipúzcoa', 'Gipuzkoa', 'Guipúzcoa-Gipuzkoa'],
         'Girona'                 => ['Girona', 'Gerona'],
         'Granada'                => ['Granada'],
         'Guadalajara'            => ['Guadalajara'],
         'Huelva'                 => ['Huelva'],
         'Huesca'                 => ['Huesca'],
-        'Illes Balears'          => ['Illes Balears', 'Islas Baleares', 'Baleares', 'Balears, Illes'],
+        'Islas Baleares'         => ['Islas Baleares', 'Illes Balears', 'Baleares', 'Balears, Illes'],
         'Jaén'                   => ['Jaén'],
         'La Rioja'               => ['La Rioja', 'Rioja, La', 'Rioja'],
         'Las Palmas'             => ['Las Palmas', 'Palmas, Las'],
