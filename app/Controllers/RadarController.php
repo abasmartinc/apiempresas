@@ -440,6 +440,12 @@ class RadarController extends BaseController
         $filename = $this->getExportFilename($params);
         $params['dl_token'] = (string) ($this->request->getGet('dl_token') ?? '');
 
+        // Excel de verdad (.xlsx) para listados de hasta XLSX_MAX empresas (?formato=xlsx).
+        // Si no se puede (sin ZipArchive, listado mayor o cualquier fallo), sigue al CSV.
+        if ($this->request->getGet('formato') === 'xlsx' && $this->enviarXlsx($params, $filename)) {
+            exit();
+        }
+
         // Listados grandes: se escriben por lotes y pueden tardar minutos. Sin límite
         // de tiempo, sin búferes (cada lote sale al navegador según se escribe) y
         // soltando la sesión para no bloquear al usuario en otras pestañas.
@@ -463,6 +469,64 @@ class RadarController extends BaseController
         $this->streamExportData($params, $fp);
         fclose($fp);
         exit();
+    }
+
+    /** Empresas como máximo en un .xlsx: por encima, solo CSV (ver enviarXlsx) */
+    public const XLSX_MAX = 50000;
+
+    /** ¿Se ofrece el .xlsx para un listado de ese tamaño? Lo usan las vistas y el correo. */
+    public static function ofreceXlsx(int $total): bool
+    {
+        return $total > 0 && $total <= self::XLSX_MAX && \App\Libraries\XlsxEscritor::disponible();
+    }
+
+    /**
+     * Genera el listado en .xlsx y lo envía. Devuelve false, sin haber enviado nada, si no
+     * se puede: el que llama sigue con el CSV.
+     *
+     * A diferencia del CSV, que sale por lotes según se escribe, el .xlsx hay que
+     * terminarlo antes de enviar el primer byte (es un ZIP). Por eso tiene tope: un
+     * listado enorme tardaría más de lo que espera el navegador (y Cloudflare, 100 s).
+     */
+    private function enviarXlsx(array $params, string $filenameCsv): bool
+    {
+        if (!\App\Libraries\XlsxEscritor::disponible()) {
+            return false;
+        }
+        @set_time_limit(0);
+        session_write_close();
+
+        $tmp = tempnam(sys_get_temp_dir(), 'listado');
+        try {
+            $xlsx = new \App\Libraries\XlsxEscritor(self::CABECERAS_EXPORT, [42, 12, 13, 40, 22, 18, 24, 42, 60, 18, 32, 60, 14]);
+            if ($this->streamExportData($params, null, $xlsx) < 0) {
+                $xlsx->descartar();      // más de XLSX_MAX filas
+                @unlink($tmp);
+                return false;
+            }
+            $xlsx->guardar($tmp, 'Listado');
+        } catch (\Throwable $e) {
+            log_message('error', '[RadarController] No se pudo generar el .xlsx: ' . $e->getMessage());
+            @unlink($tmp);
+            return false;
+        }
+
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . preg_replace('/\.csv$/i', '', $filenameCsv) . '.xlsx"');
+        header('Content-Length: ' . filesize($tmp));
+        header('Cache-Control: no-cache, no-store, must-revalidate');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+        if (!empty($params['dl_token'])) {
+            setcookie('dl_token', $params['dl_token'], time() + 120, '/');
+        }
+        readfile($tmp);
+        @unlink($tmp);
+
+        return true;
     }
 
     public function sendExportEmail()
@@ -706,26 +770,25 @@ class RadarController extends BaseController
      */
     private const EXPORT_BATCH = 2000;
 
-    private function streamExportData($params, $fp)
-    {
-        // BOM for Excel compatibility with UTF-8
-        fprintf($fp, chr(0xEF) . chr(0xBB) . chr(0xBF));
+    /** Columnas del archivo, en orden (CSV, .xlsx y vista previa) */
+    public const CABECERAS_EXPORT = [
+        'Empresa', 'CIF', 'Constitución', 'Sector CNAE', 'Municipio', 'Provincia', 'Teléfono',
+        'Dirección', 'Objeto Social', 'Capital Social', 'Socio Único', 'Administradores', 'Estado',
+    ];
 
-        fputcsv($fp, [
-            'Empresa',
-            'CIF',
-            'Constitución',
-            'Sector CNAE',
-            'Municipio',
-            'Provincia',
-            'Teléfono',
-            'Dirección',
-            'Objeto Social',
-            'Capital Social',
-            'Socio Único',
-            'Administradores',
-            'Estado'
-        ]);
+    /**
+     * Escribe el listado en $fp (CSV) o, si se pasa $xlsx, en el Excel.
+     *
+     * @return int filas escritas, o -1 si el .xlsx pasaría de XLSX_MAX (se abandona)
+     */
+    private function streamExportData($params, $fp, ?\App\Libraries\XlsxEscritor $xlsx = null): int
+    {
+        $escritas = 0;
+        if ($xlsx === null) {
+            // BOM for Excel compatibility with UTF-8
+            fprintf($fp, chr(0xEF) . chr(0xBB) . chr(0xBF));
+            fputcsv($fp, self::CABECERAS_EXPORT);
+        }
 
         $db = \Config\Database::connect();
         [$builder, $isHistorical] = $this->buildExportQuery($db, $params);
@@ -735,8 +798,7 @@ class RadarController extends BaseController
             $rows = $builder->orderBy('fecha_constitucion', 'DESC')
                 ->limit($cnae !== '' ? 2000 : 5000)
                 ->get()->getResultArray();
-            $this->writeExportRows($fp, $this->enrichExportBatch($db, $rows));
-            return;
+            return $this->writeExportRows($fp, $this->enrichExportBatch($db, $rows), $xlsx);
         }
 
         $lastId = null;
@@ -754,13 +816,21 @@ class RadarController extends BaseController
             }
             $lastId = (int) end($rows)['id'];
 
-            $this->writeExportRows($fp, $this->enrichExportBatch($db, $rows));
-            fflush($fp);
-            if (function_exists('flush')) {
-                flush();
+            $escritas += $this->writeExportRows($fp, $this->enrichExportBatch($db, $rows), $xlsx);
+            if ($xlsx !== null) {
+                if ($escritas > self::XLSX_MAX) {
+                    return -1;
+                }
+            } else {
+                fflush($fp);
+                if (function_exists('flush')) {
+                    flush();
+                }
             }
             unset($rows);
         } while (true);
+
+        return $escritas;
     }
 
     /** Ids que lee como máximo cada consulta de la vista previa */
@@ -902,10 +972,10 @@ class RadarController extends BaseController
         return implode(' | ', $partes);
     }
 
-    private function writeExportRows($fp, array $companies): void
+    private function writeExportRows($fp, array $companies, ?\App\Libraries\XlsxEscritor $xlsx = null): int
     {
         foreach ($companies as $c) {
-            fputcsv($fp, [
+            $fila = [
                 $c['name'] ?? '',
                 $c['cif'] ?? '',
                 $c['fecha_constitucion'] ?? '',
@@ -918,9 +988,16 @@ class RadarController extends BaseController
                 $c['capital_social'] ?? '',
                 $c['socio_unico'] ?? '',
                 $c['administrators'] ?? '',
-                $c['estado'] ?? ''
-            ]);
+                $c['estado'] ?? '',
+            ];
+            if ($xlsx !== null) {
+                $xlsx->fila($fila);
+            } else {
+                fputcsv($fp, $fila);
+            }
         }
+
+        return count($companies);
     }
 
     // REMOVED OLD METHODS:

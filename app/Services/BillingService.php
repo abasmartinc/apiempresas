@@ -116,7 +116,7 @@ class BillingService
         $cnae_text = $filters['cnae_text'] ?? '';
         $municipio = trim((string) ($filters['municipio'] ?? ''));
 
-        // Caché de 15 min por combinación de filtros (02-10-2026). El resumen de compra
+        // Caché de 1 h por combinación de filtros (02-10-2026). El resumen de compra
         // contaba en cada visita: Madrid tardaba hasta 4 s y Madrid "solo activas", 9 s.
         // La usan el resumen y el pago, así que el precio que se ve es el que se cobra.
         $cache = \Config\Services::cache();
@@ -156,7 +156,7 @@ class BillingService
         
         self::filtrarProvincia($builder, (string) $prov);
         $total = (int) $builder->countAllResults();
-        $cache->save($clave, $total, 900);
+        $cache->save($clave, $total, 3600);
 
         return $total;
     }

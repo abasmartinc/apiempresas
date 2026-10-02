@@ -809,6 +809,15 @@
         </script>
 
         <script>
+            // Embudo: clic en "CSV · N €" de una fila (un solo listener para las ~900 filas)
+            document.addEventListener('click', function (e) {
+                var a = e.target.closest ? e.target.closest('a.action-buy') : null;
+                if (a && window.trackEvent) {
+                    var u = new URL(a.href, location.href);
+                    trackEvent('directory_index_buy_click', { provincia: u.searchParams.get('provincia') || '', cnae: u.searchParams.get('cnae') || '' });
+                }
+            });
+
             document.addEventListener('DOMContentLoaded', function() {
                 // Mostrar u ocultar con una clase: el display lo pone el CSS (tabla o tarjeta en móvil)
                 function mostrarFila(row, visible) {

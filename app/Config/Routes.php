@@ -136,6 +136,7 @@ $routes->get('billing/invoices', 'Billing::invoices');
 // Bajo /billing: la Cache Rule de Cloudflare "Protección Privacidad" no los guarda.
 $routes->get('billing/mis-listados', 'Billing::mis_listados');
 $routes->post('billing/presupuesto-listado', 'Billing::presupuesto_listado');
+$routes->get('billing/recuento-telefono', 'Billing::recuento_telefono');
 $routes->get('billing/invoices/download/(:num)', 'Billing::invoice_download/$1');
 $routes->get('download/secure/(:any)', 'DownloadController::secure/$1');
 $routes->get('billing/portal', 'Billing::portal');

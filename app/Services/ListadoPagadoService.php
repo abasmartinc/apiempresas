@@ -92,6 +92,20 @@ class ListadoPagadoService
         }
     }
 
+    /**
+     * Enlace al mismo listado en Excel (.xlsx), o null si no se ofrece: solo listados de
+     * empresas de hasta RadarController::XLSX_MAX filas (subvenciones y licitaciones, CSV).
+     */
+    public function urlXlsx(string $sessionId, array $ctx): ?string
+    {
+        if (!in_array($ctx['type'] ?? '', ['excel', 'directory_excel'], true)
+            || !\App\Controllers\RadarController::ofreceXlsx((int) ($ctx['total_count'] ?? 0))) {
+            return null;
+        }
+
+        return PaidExports::urlCorreo($sessionId, $ctx) . '&formato=xlsx';
+    }
+
     /** Índice por usuario: writable/listados/usuarios/{id}.json → [session_id, …] */
     private function rutaIndice(int $userId): string
     {
@@ -159,6 +173,7 @@ class ListadoPagadoService
                 'fecha'   => $pagado ? date('d/m/Y', $pagado) : '',
                 'importe' => isset($d['importe']) ? (float) $d['importe'] : null,
                 'url'     => PaidExports::urlCorreo($sessionId, $d['contexto']),
+                'url_xlsx' => $this->urlXlsx($sessionId, $d['contexto']),
                 'caduca'  => date('d/m/Y', $caduca),
                 'vigente' => $caduca > time(),
                 'ref'     => 'EXC-' . strtoupper(substr($sessionId, -8)),
@@ -208,6 +223,7 @@ class ListadoPagadoService
     private function enviar(string $email, string $nombre, string $sessionId, array $ctx): bool
     {
         $url    = PaidExports::urlCorreo($sessionId, $ctx);
+        $xlsx   = $this->urlXlsx($sessionId, $ctx);
         $titulo = $this->titulo($ctx);
         $nombre = trim($nombre) !== '' ? explode(' ', trim($nombre))[0] : '';
         $ref    = 'EXC-' . strtoupper(substr($sessionId, -8));
@@ -217,6 +233,7 @@ class ListadoPagadoService
               . '<p>Hemos recibido tu pago. Tu listado <strong>' . esc($titulo) . '</strong> está listo para descargar:</p>'
               . '<p style="margin:24px 0"><a href="' . esc($url, 'attr') . '" style="background:#10b981;color:#fff;text-decoration:none;'
               . 'padding:14px 24px;border-radius:10px;font-weight:bold;display:inline-block">Descargar el CSV</a></p>'
+              . ($xlsx !== null ? '<p>¿Prefieres Excel? <a href="' . esc($xlsx, 'attr') . '" style="color:#047857;font-weight:bold">Descargar en formato Excel (.xlsx)</a>: mismas empresas y mismas columnas.</p>' : '')
               . '<p>El enlace es personal: puedes usarlo las veces que necesites durante 30 días, desde cualquier dispositivo y sin iniciar sesión. Guárdalo y no lo compartas.</p>'
               . '<p>El archivo está en formato CSV (UTF-8) y se abre con Excel, Google Sheets o tu CRM. Los listados grandes pueden tardar un poco en empezar a descargarse.</p>'
               . '<p>Si tienes cualquier problema con la descarga, responde a este correo y te lo enviamos.</p>'

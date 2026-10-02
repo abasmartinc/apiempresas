@@ -149,6 +149,11 @@
         .preview-table td { padding: 8px 10px; border-bottom: 1px solid #f1f5f9; color: #0f172a; max-width: 260px; overflow: hidden; text-overflow: ellipsis; }
         .preview-table tr:last-child td { border-bottom: none; }
         .preview-vacio { color: #cbd5e1; }
+        /* Empresas con teléfono */
+        .phone-box { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 14px 18px; margin-top: 16px; font-size: 0.9rem; color: #1e3a8a; line-height: 1.5; }
+        .phone-box__dato { font-weight: 700; }
+        .phone-box__oferta { display: inline-block; margin-top: 6px; color: #1d4ed8; text-decoration: none; }
+        .phone-box__oferta:hover { text-decoration: underline; }
         /* Presupuesto por correo */
         .quote-box { margin-top: 16px; padding-top: 16px; border-top: 1px dashed #e2e8f0; }
         .quote-box label { display: block; font-size: 0.8rem; font-weight: 800; color: #0f172a; margin-bottom: 6px; }
@@ -265,6 +270,17 @@
                         </div>
                     </div>
 
+                    <?php if ((int) $total_count > 0 && empty($has_phone)): ?>
+                    <!-- Cuántas tienen teléfono y oferta de comprar solo esas (se rellena por JS:
+                         Billing::recuento_telefono). Oculto hasta tener el dato. -->
+                    <div class="phone-box" id="phoneBox" hidden>
+                        <div class="phone-box__dato"><span id="phoneCount"></span> de las <?= number_format($total_count, 0, ',', '.') ?> empresas tienen teléfono (<span id="phonePct"></span>).</div>
+                        <a class="phone-box__oferta" id="phoneOffer" href="#" rel="nofollow">
+                            ¿Solo quieres las que tienen teléfono? <strong><span id="phoneCount2"></span> empresas por <span id="phonePrice"></span> € + IVA</strong> →
+                        </a>
+                    </div>
+                    <?php endif; ?>
+
                     <!-- Aviso NO/SI incluye teléfono -->
                     <?php if (isset($has_phone) && $has_phone == '1'): ?>
                     <div class="disclaimer-box" style="background-color: #f0fdf4; border-color: #bbf7d0; color: #166534;">
@@ -361,7 +377,7 @@
                         <?php endif; ?>
                         <?php /* El precio y el recuento NO viajan en el formulario: los calcula el servidor al pagar. */ ?>
 
-                        <button type="submit" class="btn js-loading-btn"
+                        <button type="submit" class="btn js-loading-btn" data-track-event="directory_checkout_click"
                             style="width: 100%; padding: 18px; font-size: 1rem; font-weight: 900; background: #10b981; color: white; border-radius: 16px; border: none; cursor: pointer; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.35); text-transform: uppercase; letter-spacing: 0.01em; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.2;"
                             onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 14px 30px rgba(16, 185, 129, 0.45)';"
                             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 25px rgba(16, 185, 129, 0.35)';">
@@ -406,7 +422,7 @@
                                     msg.textContent = d.message || (d.success ? 'Enviado. Revisa tu bandeja de entrada.' : 'No hemos podido enviarlo.');
                                     msg.style.color = d.success ? '#047857' : '#b91c1c';
                                     msg.style.fontWeight = '700';
-                                    if (d.success) { btn.textContent = 'Enviado ✓'; } else { btn.disabled = false; btn.textContent = 'Enviar'; }
+                                    if (d.success) { btn.textContent = 'Enviado ✓'; if (window.trackEvent) trackEvent('directory_quote_request', window.AE_LISTADO || {}); } else { btn.disabled = false; btn.textContent = 'Enviar'; }
                                 })
                                 .catch(function () { msg.textContent = 'Error de conexión. Inténtalo de nuevo.'; msg.style.color = '#b91c1c'; btn.disabled = false; btn.textContent = 'Enviar'; });
                         });
@@ -440,12 +456,59 @@
             </div>
             <button type="button" class="btn"
                 style="background: #10b981; color: white; border-radius: 12px; font-weight: 800; padding: 14px 24px; border: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); cursor: pointer;"
-                onclick="var f = document.querySelector('.order-card form'); if (f) f.submit();">
+                onclick="if (window.trackEvent) trackEvent('directory_checkout_click', { movil: 1 }); var f = document.querySelector('.order-card form'); if (f) f.submit();">
                 Pagar y Descargar
             </button>
         </div>
     </main>
 
     <?= view('partials/footer') ?>
+
+    <?php /* Embudo de compra (eventos en tracking_events; informe: php spark listados:embudo)
+             y recuento de empresas con teléfono. Va después del pie: tracking.js ya está cargado. */ ?>
+    <script>
+    (function () {
+        var L = window.AE_LISTADO = <?= json_encode([
+            'provincia' => (string) $province,
+            'municipio' => (string) ($municipio ?? ''),
+            'cnae'      => (string) ($cnae ?? ''),
+            'estado'    => (string) ($estado ?? ''),
+            'telefono'  => !empty($has_phone) ? 1 : 0,
+            'total'     => (int) $total_count,
+            'precio'    => (float) $price,
+            'muestra'   => isset($preview) ? count($preview) : 0,
+        ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE) ?>;
+        if (window.trackEvent) trackEvent('directory_summary_view', L);
+
+        var box = document.getElementById('phoneBox');
+        if (!box || !window.fetch) return;
+        var q = new URLSearchParams(<?= json_encode(array_filter([
+            'provincia' => (string) $province, 'municipio' => (string) ($municipio ?? ''), 'cnae' => (string) ($cnae ?? ''),
+            'cnae_text' => (string) ($cnae_text ?? ''), 'sector' => (string) ($sector ?? ''), 'estado' => (string) ($estado ?? ''),
+            'date_min' => (string) ($date_min ?? ''), 'date_max' => (string) ($date_max ?? ''),
+        ], static fn ($v) => $v !== ''), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE) ?>);
+        fetch('<?= site_url('billing/recuento-telefono') ?>?' + q.toString(), { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (d) {
+                if (!d || !d.success || !d.total) return;
+                // Miles con punto, como el resto de la página (Intl en español no agrupa los números de 4 cifras)
+                var n = d.con_telefono, f = { format: function (x) { return String(x).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); } };
+                document.getElementById('phoneCount').textContent = f.format(n);
+                document.getElementById('phonePct').textContent = (n * 100 / d.total < 1 && n > 0 ? '<1' : Math.round(n * 100 / d.total)) + ' %';
+                var oferta = document.getElementById('phoneOffer');
+                // La oferta solo si hay alguna con teléfono y no son todas
+                if (n > 0 && n < d.total && d.precio) {
+                    document.getElementById('phoneCount2').textContent = f.format(n);
+                    document.getElementById('phonePrice').textContent = f.format(d.precio);
+                    oferta.href = d.url;
+                    oferta.addEventListener('click', function () { if (window.trackEvent) trackEvent('directory_phone_offer_click', { provincia: L.provincia, con_telefono: n, precio: d.precio }); });
+                } else {
+                    oferta.hidden = true;
+                }
+                box.hidden = false;
+            })
+            .catch(function () {});
+    })();
+    </script>
 </body>
 </html>

@@ -103,7 +103,7 @@
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <span style="font-size: 0.85rem; color: #64748b; font-weight: 600; text-transform: uppercase;">Formato</span>
-                        <span style="font-size: 0.9rem; color: #0f172a; font-weight: 800;">CSV (Delimitado por comas)</span>
+                        <span style="font-size: 0.9rem; color: #0f172a; font-weight: 800;">CSV (se abre con Excel)</span>
                     </div>
                 </div>
 
@@ -111,6 +111,15 @@
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                     Descargar CSV Ahora
                 </a>
+
+                <?php if (\App\Controllers\RadarController::ofreceXlsx((int) ($total_count ?? 0)) && strpos((string) $download_url, 'billing/export-excel') !== false): ?>
+                <?php /* Mismo listado en Excel de verdad (.xlsx): un CSV a veces se abre con todo en una columna */ ?>
+                <p style="margin-top: 14px; font-size: 0.95rem;">
+                    <a href="<?= esc($download_url . (strpos((string) $download_url, '?') !== false ? '&' : '?') . 'formato=xlsx') ?>" id="xlsx_download_btn" style="color: #047857; font-weight: 800; text-decoration: none;">
+                        ¿Prefieres Excel? Descargar en formato .xlsx
+                    </a>
+                </p>
+                <?php endif; ?>
                 
                 <p style="margin-top: 16px; font-size: 0.85rem; color: #94a3b8;">
                     La descarga comenzará automáticamente.<br>
@@ -153,6 +162,8 @@
             if (!$('#spinner-style').length) {
                 $('<style id="spinner-style">@keyframes spin_pulse { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } } .swal-premium { border-radius: 24px !important; padding: 32px 24px !important; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15) !important; border: 1px solid #e2e8f0; } .swal-premium .swal2-title { font-weight: 800 !important; color: #0f172a !important; font-size: 1.75rem !important; margin-bottom: 8px !important; letter-spacing: -0.02em; } .swal-premium .swal2-html-container { margin: 0 !important; } .swal-close-btn-upsell { border-radius: 12px !important; padding: 12px 24px !important; font-weight: 700 !important; transition: all 0.2s !important; }</style>').appendTo('head');
             }
+
+            $('#xlsx_download_btn').on('click', function() { trackEvent('directory_xlsx_download'); });
 
             $('#excel_main_download_btn').on('click', function(e) { 
                 e.preventDefault();

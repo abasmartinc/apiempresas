@@ -5,29 +5,27 @@ if (!function_exists('calculate_core_price')) {
      * Core pricing logic to ensure consistency across Radar and Directory.
      * Math:
      * - First 1,000 companies: 9€
-     * - From 1,001 to 10,000: +5€ per 1,000
-     * - Over 10,000: +1€ per 1,000
+     * - From 1,001 to 10,000: +0.005€ per company (5€ per 1,000), rounded up to the euro
+     * - Over 10,000: +0.001€ per company (1€ per 1,000), rounded up to the euro
+     * - Cap: 149€
      * - Premium multiplier (Recent data): x1.5
      */
     function calculate_core_price(int $count, bool $isPremium): array
     {
-        $basePrice = 9.00;
-
+        // Precio por tramos SUAVES (02-10-2026). Antes cada bloque de 1.000 empresas
+        // empezado se cobraba entero: de 1.000 a 1.001 empresas el precio saltaba de 9 €
+        // a 14 €. Ahora sube 1 € cada 200 empresas hasta 10.000 y 1 € cada 1.000 después.
+        // En los múltiplos de 1.000 cuesta lo mismo que antes y nunca cuesta más.
+        // Se calcula en milésimas de euro (enteros) y se redondea al euro hacia arriba.
+        $milesimas = 9000;
         if ($count > 1000) {
-            $extraCount = $count - 1000;
-            
-            // Calculate tier 2: 1,001 to 10,000 (max 9 blocks of 1,000)
-            $tier2Count = min($extraCount, 9000);
-            $tier2Blocks = ceil($tier2Count / 1000);
-            $basePrice += $tier2Blocks * 5.00;
-            
-            // Calculate tier 3: Over 10,000
-            if ($extraCount > 9000) {
-                $tier3Count = $extraCount - 9000;
-                $tier3Blocks = ceil($tier3Count / 1000);
-                $basePrice += $tier3Blocks * 1.00;
+            $extra      = $count - 1000;
+            $milesimas += min($extra, 9000) * 5;      // 5 € por cada 1.000 hasta 10.000
+            if ($extra > 9000) {
+                $milesimas += ($extra - 9000) * 1;    // 1 € por cada 1.000 a partir de 10.000
             }
         }
+        $basePrice = (float) intdiv($milesimas + 999, 1000);
 
         if ($isPremium) {
             $basePrice = round($basePrice * 1.5, 2);

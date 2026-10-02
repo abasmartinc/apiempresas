@@ -1192,6 +1192,46 @@ class Billing extends BaseController
     }
 
     /**
+     * GET /billing/recuento-telefono?provincia=…&cnae=…
+     *
+     * Cuántas empresas del listado tienen teléfono y cuánto cuesta comprar solo esas.
+     * El resumen de compra lo pide después de cargar (no retrasa la página): hasta ahora
+     * solo decía "puede haber empresas sin teléfono", sin decir cuántas.
+     */
+    public function recuento_telefono()
+    {
+        $ctx = $this->contextoListadoDesde((array) $this->request->getGet());
+        $filtros = $ctx;
+        unset($filtros['type'], $filtros['sector']);
+
+        try {
+            $filtros['has_phone'] = '';
+            $total = $this->billingService->countDirectoryCompanies($filtros);
+            $filtros['has_phone'] = '1';
+            $conTelefono = $this->billingService->countDirectoryCompanies($filtros);
+        } catch (\Throwable $e) {
+            log_message('error', '[Billing] Recuento con teléfono: ' . $e->getMessage());
+            return $this->response->setStatusCode(500)->setJSON(['success' => false]);
+        }
+
+        $query = array_filter([
+            'provincia' => $ctx['provincia'], 'municipio' => $ctx['municipio'], 'cnae' => $ctx['cnae'],
+            'cnae_text' => $ctx['cnae_text'], 'sector' => $ctx['sector'], 'estado' => $ctx['estado'],
+            'has_phone' => '1', 'date_min' => $ctx['date_min'], 'date_max' => $ctx['date_max'],
+        ], static fn ($v) => $v !== '');
+
+        return $this->response
+            ->setHeader('Cache-Control', 'private, max-age=600')
+            ->setJSON([
+                'success'      => true,
+                'total'        => $total,
+                'con_telefono' => $conTelefono,
+                'precio'       => $conTelefono > 0 ? $this->billingService->calculateDirectoryPrice($conTelefono) : null,
+                'url'          => site_url('checkout/directory-export') . '?' . http_build_query($query),
+            ]);
+    }
+
+    /**
      * GET /billing/mis-listados
      *
      * Listados comprados por el usuario con sesión, con su enlace de descarga. Antes la

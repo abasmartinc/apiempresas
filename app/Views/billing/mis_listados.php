@@ -72,6 +72,9 @@
                             <td style="text-align: right;">
                                 <?php if ($l['vigente']): ?>
                                     <a href="<?= esc($l['url'], 'attr') ?>" class="ml-btn">Descargar CSV</a>
+                                    <?php if (!empty($l['url_xlsx'])): ?>
+                                    <a href="<?= esc($l['url_xlsx'], 'attr') ?>" class="ml-btn" style="background:#fff;color:#047857;border:1px solid #a7f3d0;margin-left:6px;">Excel (.xlsx)</a>
+                                    <?php endif; ?>
                                     <div class="ml-nota">Disponible hasta el <?= esc($l['caduca']) ?></div>
                                 <?php else: ?>
                                     <span class="ml-caducado">Descarga caducada el <?= esc($l['caduca']) ?></span>
