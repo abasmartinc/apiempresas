@@ -97,7 +97,7 @@ $current_url = current_url();
                 Empresas nuevas de <br><strong style="color: white;">Toda España</strong>
             </div>
             <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.06);">
-                <div style="font-size: 20px; font-weight: 900; color: white; line-height: 1;"><?= number_format($stats['hoy'] ?? 0) ?></div>
+                <div style="font-size: 20px; font-weight: 900; color: white; line-height: 1;"><?= number_format($stats['hoy'] ?? 0, 0, ',', '.') ?></div>
                 <div style="font-size: 10px; color: rgba(255,255,255,0.4); font-weight: 700; margin-top: 4px; text-transform: uppercase;">Empresas hoy</div>
             </div>
         </div>

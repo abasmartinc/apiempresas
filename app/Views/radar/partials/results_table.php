@@ -340,7 +340,7 @@ $hiddenCount = max(0, $totalItems - $limitFree);
         <div class="ae-radar-page__lead-headings">
             <h2 class="ae-radar-page__lead-title" style="margin-bottom:4px;">Oportunidades con potencial de compra</h2>
             <div class="ae-radar-page__lead-desc">
-                Mostrando del <strong><?= $pagination['start'] ?> al <?= $pagination['end'] ?></strong> de <strong><?= number_format($pagination['total']) ?></strong> oportunidades con potencial de compra.
+                Mostrando del <strong><?= $pagination['start'] ?> al <?= $pagination['end'] ?></strong> de <strong><?= number_format($pagination['total'], 0, ',', '.') ?></strong> oportunidades con potencial de compra.
             </div>
         </div>
 
@@ -653,8 +653,8 @@ $hiddenCount = max(0, $totalItems - $limitFree);
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                     </span>
                 </div>
-                <h4 style="font-weight: 950; font-size: 1.25rem; margin-bottom: 8px; color: #ffffff; letter-spacing: -0.02em;">Estás viendo 3 de <?= number_format($totalItems) ?> empresas</h4>
-                <p style="color: rgba(255,255,255,0.85); font-size: 0.95rem; font-weight: 500; margin-bottom: 20px; line-height: 1.5;">Quedan <strong style="color: #ffffff; font-weight: 800;"><?= number_format($hiddenCount) ?> empresas</strong> ocultas, con su sector, objeto social y puntuación.</p>
+                <h4 style="font-weight: 950; font-size: 1.25rem; margin-bottom: 8px; color: #ffffff; letter-spacing: -0.02em;">Estás viendo 3 de <?= number_format($totalItems, 0, ',', '.') ?> empresas</h4>
+                <p style="color: rgba(255,255,255,0.85); font-size: 0.95rem; font-weight: 500; margin-bottom: 20px; line-height: 1.5;">Quedan <strong style="color: #ffffff; font-weight: 800;"><?= number_format($hiddenCount, 0, ',', '.') ?> empresas</strong> ocultas, con su sector, objeto social y puntuación.</p>
                 
                 <a href="<?= site_url('checkout/radar-export?type=subscription&plan=radar&source=radar_locked_cta') ?>" onclick="event.stopPropagation()" style="display: block; text-decoration: none; background: linear-gradient(90deg, #fde047 0%, #f59e0b 50%, #ea580c 100%); color: #0f172a; border-radius: 12px; padding: 14px; font-weight: 800; font-size: 1rem; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);">
                     Desbloquear todo el Radar
@@ -692,7 +692,7 @@ $hiddenCount = max(0, $totalItems - $limitFree);
 
         <div class="ae-radar-page__table-footer" style="display:flex; justify-content:space-between; align-items:center; margin-top:28px; padding:0 26px 30px;">
             <div class="ae-radar-page__pagination-info" style="font-size:13px; font-weight:700; color:#64748b; background:#f8fafc; padding:8px 16px; border-radius:12px; border:1px solid #e2e8f0;">
-                Mostrando <span style="color:#1e293b;"><?= $pagination['start'] ?> a <?= $pagination['end'] ?></span> de <span style="color:#1e293b;"><?= number_format($pagination['total']) ?></span> empresas
+                Mostrando <span style="color:#1e293b;"><?= $pagination['start'] ?> a <?= $pagination['end'] ?></span> de <span style="color:#1e293b;"><?= number_format($pagination['total'], 0, ',', '.') ?></span> empresas
             </div>
             
             <div class="ae-radar-page__pagination">

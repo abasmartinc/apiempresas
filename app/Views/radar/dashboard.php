@@ -78,7 +78,7 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, $limitFree) : $allCo
                         <span class="ae-radar-page__freshness-dot"></span>
                         Último BORME cargado: <strong><?= $freshness['lastUpdate'] ?></strong> 
                         <span class="ae-radar-page__freshness-sep">|</span>
-                        Hoy: <strong><?= number_format($freshness['todayCount']) ?></strong> empresas
+                        Hoy: <strong><?= number_format($freshness['todayCount'], 0, ',', '.') ?></strong> empresas
                     </div>
 
                     <?php if ($isFree) { ?>
@@ -235,28 +235,28 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, $limitFree) : $allCo
                     <div class="ae-pro-crm-bar">
                         <div class="ae-pro-crm-bar__stat">
                             <div>
-                                <div id="kpi-contactadas" class="ae-pro-crm-bar__num"><?= number_format($crmStats['contactado'] ?? 0) ?></div>
+                                <div id="kpi-contactadas" class="ae-pro-crm-bar__num"><?= number_format($crmStats['contactado'] ?? 0, 0, ',', '.') ?></div>
                                 <div class="ae-pro-crm-bar__label">Contactadas</div>
                             </div>
                         </div>
                         <div class="ae-pro-crm-bar__sep"></div>
                         <div class="ae-pro-crm-bar__stat">
                             <div>
-                                <div id="kpi-seguimiento" class="ae-pro-crm-bar__num"><?= number_format($crmStats['seguimiento'] ?? 0) ?></div>
+                                <div id="kpi-seguimiento" class="ae-pro-crm-bar__num"><?= number_format($crmStats['seguimiento'] ?? 0, 0, ',', '.') ?></div>
                                 <div class="ae-pro-crm-bar__label">En seguimiento</div>
                             </div>
                         </div>
                         <div class="ae-pro-crm-bar__sep"></div>
                         <div class="ae-pro-crm-bar__stat">
                             <div>
-                                <div id="kpi-sin-contactar" class="ae-pro-crm-bar__num" style="color:#2563eb;"><?= number_format($crmStats['nuevo'] ?? 0) ?></div>
+                                <div id="kpi-sin-contactar" class="ae-pro-crm-bar__num" style="color:#2563eb;"><?= number_format($crmStats['nuevo'] ?? 0, 0, ',', '.') ?></div>
                                 <div class="ae-pro-crm-bar__label">Sin contactar</div>
                             </div>
                         </div>
                         <div class="ae-pro-crm-bar__sep"></div>
                         <div class="ae-pro-crm-bar__stat">
                             <div>
-                                <div class="ae-pro-crm-bar__num" style="color:#10b981;"><?= number_format($stats['hoy']) ?></div>
+                                <div class="ae-pro-crm-bar__num" style="color:#10b981;"><?= number_format($stats['hoy'], 0, ',', '.') ?></div>
                                 <div class="ae-pro-crm-bar__label">Nuevas hoy</div>
                             </div>
                         </div>
@@ -410,7 +410,7 @@ $visibleCompanies = $isFree ? array_slice($allCompanies, 0, $limitFree) : $allCo
                         <div>
                             <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px; flex-wrap:wrap;">
                                 <span style="background:#fef2f2; color:#ef4444; font-size:10px; font-weight:800; padding:2px 8px; border-radius:999px; text-transform:uppercase; white-space:nowrap;">Plan gratuito</span>
-                                <h3 style="margin:0;font-size:16px;font-weight:800;color:#1e293b;">Estás viendo 3 de <?= number_format($pagination['total']) ?> empresas <?= $periodoTxt ?></h3>
+                                <h3 style="margin:0;font-size:16px;font-weight:800;color:#1e293b;">Estás viendo 3 de <?= number_format($pagination['total'], 0, ',', '.') ?> empresas <?= $periodoTxt ?></h3>
                             </div>
                             <p style="margin:0;font-size:13px;color:#64748b;">El resto aparece difuminado. Con Radar PRO ves el listado completo, con filtros y exportación.</p>
                         </div>

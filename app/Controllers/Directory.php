@@ -119,6 +119,14 @@ class Directory extends BaseController
         }
         
         $provinceName = urldecode(implode('/', $args));
+
+        // Una sola URL por provincia (03-10-2026): tras normalizar la base de datos,
+        // /Bizkaia, /Illes Balears o /MADRID mostraban la misma página que /Vizcaya,
+        // /Islas Baleares o /Madrid, cada una indexable. Se redirigen a la canónica.
+        $canonica = \App\Libraries\Provincias::canonica($provinceName);
+        if ($canonica !== null && $canonica !== $provinceName) {
+            return redirect()->to(site_url('listado-de-empresas/' . urlencode($canonica) . ($page > 1 ? '/' . $page : '')), 301);
+        }
         
         // Pagination
         if ($page < 1) $page = 1;
@@ -489,6 +497,11 @@ class Directory extends BaseController
 
         if ($provinceName === '' || !ctype_digit($cnaeCode)) {
             return redirect()->to(site_url('listado-de-empresas'));
+        }
+
+        $canonica = \App\Libraries\Provincias::canonica($provinceName);
+        if ($canonica !== null && $canonica !== $provinceName) {
+            return redirect()->to(site_url('listado-de-empresas/' . urlencode($canonica) . "/sector-{$cnaeCode}" . ($page > 1 ? '/' . $page : '')), 301);
         }
 
         if ($page < 1) $page = 1;

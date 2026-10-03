@@ -296,7 +296,7 @@ $pagination = [
                     <div class="ae-radar-page__topbar-actions">
                         <div class="ae-radar-page__freshness">
                             <span class="ae-radar-page__freshness-dot" style="background: #10b981; width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 8px; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);"></span>
-                            Hoy: <strong style="color: #1e293b;"><?= number_format($opps_count) ?></strong> empresas con novedades
+                            <?php if ((int) $opps_count > 0): ?>Hoy: <strong style="color: #1e293b;"><?= number_format($opps_count, 0, ',', '.') ?></strong> empresas con novedades<?php else: ?>Constituciones del BORME<?php endif; ?>
                         </div>
                     </div>
                 </header>
@@ -309,8 +309,9 @@ $pagination = [
                             <!-- Clean minimal header -->
 
                             <h1 class="preview-header-banner__title">
-                                <span style="background: linear-gradient(90deg, #60a5fa, #34d399); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;"><?= $opps_count ?> empresas con novedades hoy</span><br>
-                                y las constituciones más recientes
+                                <span style="background: linear-gradient(90deg, #60a5fa, #34d399); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;"><?php if ((int) $opps_count > 0): ?><?= number_format((int) $opps_count, 0, ',', '.') ?> empresas con novedades hoy</span><br>
+                                y las constituciones más recientes<?php else: ?>Las constituciones más recientes</span><br>
+                                de empresas en España<?php endif; ?>
                             </h1>
 
                             <p class="preview-header-banner__subtitle">
