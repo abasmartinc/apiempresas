@@ -1656,8 +1656,7 @@ class Billing extends BaseController
             // Si el webhook aún no ha guardado la suscripción, se guarda aquí: la página
             // dice "plan activo" y el panel seguía en Free con el botón de pago hasta que
             // llegaba el webhook. Misma función que el webhook: quien llegue segundo
-            // actualiza la fila del primero. El resto (cancelar el plan anterior,
-            // bienvenida, factura) lo sigue haciendo el webhook.
+            // actualiza la fila del primero. La bienvenida y la factura siguen en el webhook.
             try {
                 $subStripe = $packStripe->subscription ?? '';
                 $subId     = is_string($subStripe) ? $subStripe : (string) ($subStripe->id ?? '');
@@ -1671,6 +1670,14 @@ class Billing extends BaseController
                             [$ini, $fin] = \App\Libraries\SuscripcionStripe::periodoDe($subObj);
                             \App\Libraries\SuscripcionStripe::guardar($uidPago, (int) $planRow->id, $subId, $ini, $fin);
                         }
+                    }
+                    // Y sustituye a lo anterior (fila Free, o el Pro al subir a Business),
+                    // igual que el webhook: el estado queda bien aunque el webhook tarde.
+                    $filaNueva = \Config\Database::connect()->table('user_subscriptions')
+                        ->select('id')->where('stripe_subscription_id', $subId)->where('status', 'active')
+                        ->orderBy('id', 'DESC')->get()->getRowArray();
+                    if ($filaNueva) {
+                        \App\Libraries\SuscripcionStripe::sustituirAnteriores($uidPago, 'api', $subId, (int) $filaNueva['id']);
                     }
                 }
             } catch (\Throwable $e) {

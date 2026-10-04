@@ -1830,6 +1830,12 @@ class EmailService
             default => 'A partir de entonces tu cuenta pasa al plan gratuito.',
         };
 
+        // Quien ya gastó las 100 gratuitas no "vuelve al plan gratuito": se queda sin
+        // consultas y su integración se para. Antes el correo no lo decía.
+        if ($tipo === 'api' && $this->freeAgotado((int) ($userData['user_id'] ?? $userData['id'] ?? 0))) {
+            $despues = 'A partir de entonces tu cuenta deja de tener consultas incluidas (las gratuitas ya están gastadas): las llamadas a la API con tu clave devolverán un error 429 y <strong>tu integración dejará de recibir datos</strong> hasta que reactives el plan o recargues un bono de créditos.';
+        }
+
         $extra = '';
         if ($tipo === 'api' && in_array($motivo, ['too_expensive', 'low_usage'], true)) {
             $extra = 'Si no llegabas a gastar el cupo del mes, un <strong>bono de créditos</strong> (' . $this->lineaBono() . ') te dura meses sin pagar cuota: <a href="' . $bono . '" style="color:#2563eb;font-weight:700;">crear bono</a>.';
@@ -1854,6 +1860,62 @@ class EmailService
             'button_text' => 'Ver mi cuenta',
             'button_url'  => site_url('billing'),
         ], $userData['email'], ['papelo.amh@gmail.com'], [], (int) ($userData['user_id'] ?? $userData['id'] ?? 0));
+    }
+
+    /**
+     * ¿Ha gastado ya las consultas gratuitas de por vida? Misma cuenta que ApiKeyFilter
+     * (todo el uso desde FREE_DESDE, también el hecho con un plan de pago).
+     */
+    private function freeAgotado(int $userId): bool
+    {
+        if ($userId <= 0) {
+            return false;
+        }
+        try {
+            helper('api');   // get_free_plan_limit()
+            $fila = \Config\Database::connect()->table('api_usage_daily')
+                ->selectSum('requests_count')
+                ->where('user_id', $userId)
+                ->where('date >=', \App\Filters\ApiKeyFilter::FREE_DESDE)
+                ->get()->getRow();
+            return (int) ($fila->requests_count ?? 0) >= (int) get_free_plan_limit();
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
+    /**
+     * El día que termina de verdad un Pro/Business de la API (fin del periodo tras una
+     * baja, o Stripe se rinde con la tarjeta). Hasta ahora ese día no se avisaba: el
+     * cliente se enteraba por el 429. Usa la plantilla genérica de suscripciones.
+     *
+     * @param array $plan name, slug
+     */
+    public function sendSubscriptionEnded(array $userData, array $plan): array
+    {
+        $userId = (int) ($userData['user_id'] ?? $userData['id'] ?? 0);
+        $nombre = trim((string) ($plan['name'] ?? '')) ?: 'de pago';
+        $slug   = in_array(($plan['slug'] ?? ''), ['pro', 'business'], true) ? $plan['slug'] : 'pro';
+        $parada = $this->freeAgotado($userId);
+        $volver = site_url('billing?plan=' . $slug . '&period=monthly&source=email_plan_ended');
+        $bono   = site_url('crear-bono-api?source=email_plan_ended');
+
+        $ahora = $parada
+            ? 'Tu cuenta ya no tiene consultas incluidas: desde hoy las llamadas a la API con tu clave devuelven un error 429 y <strong>tu integración ha dejado de recibir datos</strong>.'
+            : 'Tu cuenta pasa al plan gratuito: tu API Key sigue funcionando con las consultas gratuitas que te quedan, y los datos de pago vuelven a llegar enmascarados.';
+
+        $contenido = $this->p('Tu plan <strong>' . esc($nombre) . '</strong> ha terminado hoy.')
+            . $this->p($ahora)
+            . $this->p('Para volver a tenerlo todo al momento, con la misma API Key y sin cambiar nada en tu código, reactiva el plan. Si prefieres no pagar cuota, un <strong>bono de créditos</strong> (' . $this->lineaBono() . ') no caduca: <a href="' . $bono . '" style="color:#2563eb;font-weight:700;">crear bono</a>.');
+
+        return $this->sendTemplateEmail('subscription_canceled', [
+            'subject'     => 'Tu plan ' . $nombre . ' ha terminado' . ($parada ? ': tu integración se ha parado' : ''),
+            'preheader'   => $parada ? 'Las llamadas a la API devuelven un error 429 desde hoy. Así se reactiva.' : 'Tu cuenta pasa al plan gratuito. Así se reactiva.',
+            'name'        => esc(trim((string) ($userData['name'] ?? '')) ?: explode('@', (string) $userData['email'])[0]),
+            'content'     => $contenido,
+            'button_text' => 'Reactivar ' . $nombre,
+            'button_url'  => $volver,
+        ], $userData['email'], ['papelo.amh@gmail.com'], [], $userId);
     }
 
     /**

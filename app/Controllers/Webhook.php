@@ -565,16 +565,6 @@ class Webhook extends Controller
             }
         }
 
-        $oldSubscriptions = [];
-        if ($targetProductType !== '') {
-            $oldSubscriptions = $subscriptionModel->select('user_subscriptions.*')
-                                                  ->join('api_plans', 'api_plans.id = user_subscriptions.plan_id')
-                                                  ->where('user_subscriptions.user_id', $userId)
-                                                  ->where('user_subscriptions.status', 'active')
-                                                  ->where('api_plans.product_type', $targetProductType)
-                                                  ->findAll();
-        }
-
         /*
          * Primero se guarda la suscripción nueva y solo después se cancela la anterior.
          * Antes era al revés: si la consulta a Stripe fallaba en medio, el cliente
@@ -585,31 +575,9 @@ class Webhook extends Controller
         [$start, $end] = $this->periodoDe($stripeSub);
         $nuevaId = $this->guardarSuscripcion($userId, (int) $plan->id, (string) $stripeSubscriptionId, $start, $end);
 
-        // La propia suscripción (fila creada antes por invoice.paid) no es "anterior"
-        $oldSubscriptions = array_values(array_filter($oldSubscriptions, static function ($s) use ($stripeSubscriptionId, $nuevaId) {
-            return (int) $s->id !== $nuevaId && (string) ($s->stripe_subscription_id ?? '') !== (string) $stripeSubscriptionId;
-        }));
-
-        foreach ($oldSubscriptions as $oldSub) {
-            // Si es una suscripción de Stripe diferente a la actual, cancelarla en Stripe
-            if (!empty($oldSub->stripe_subscription_id) && $oldSub->stripe_subscription_id !== $stripeSubscriptionId) {
-                try {
-                    $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET_KEY'));
-                    $stripe->subscriptions->cancel($oldSub->stripe_subscription_id);
-                    log_message('info', "[Webhook::stripe] Cancelada suscripción anterior de {$targetProductType} en Stripe: {$oldSub->stripe_subscription_id}");
-                } catch (\Exception $e) {
-                    log_message('error', "[Webhook::stripe] Error al cancelar suscripción anterior en Stripe: " . $e->getMessage());
-                }
-            }
-        }
-
-        // 3. Desactivar SOLO suscripciones anteriores del MISMO product_type en nuestra BD
-        $oldSubIds = array_column($oldSubscriptions, 'id');
-        if (!empty($oldSubIds)) {
-            $subscriptionModel->whereIn('id', $oldSubIds)->set(['status' => ''])->update();
-        }
-
-        // 4. La suscripción nueva ya está guardada arriba (guardarSuscripcion).
+        // 3. Cancelar y desactivar SOLO las anteriores del MISMO product_type (misma
+        //    función que usa la página de éxito del pago).
+        \App\Libraries\SuscripcionStripe::sustituirAnteriores((int) $userId, $targetProductType, (string) $stripeSubscriptionId, $nuevaId);
 
         // Enviar email de bienvenida a Solvencia Pro si corresponde
         if ($plan->slug === 'risk_pro') {
@@ -1232,9 +1200,53 @@ class Webhook extends Controller
             ->groupEnd()
             ->update(['current_period_end' => $ahora]);
                          
-        // Motivo: cancellation_requested (baja normal), payment_failed (tarjeta), payment_disputed...
-        $this->registrarCiclo('subscription_ended', (string) $stripeSubscriptionId, [],
-            (string) ($subscription->cancellation_details->reason ?? ''));
+        // ¿La ha sustituido otro plan de la API (subida Pro → Business)? Entonces no es
+        // una baja: ni cuenta como tal en el embudo ni se le escribe "tu plan ha terminado".
+        $db   = \Config\Database::connect();
+        $fila = $db->table('user_subscriptions us')
+            ->select('us.user_id, us.plan_id, p.slug, p.name')
+            ->join('api_plans p', 'p.id = us.plan_id')
+            ->where('us.stripe_subscription_id', $stripeSubscriptionId)
+            ->orderBy('us.id', 'DESC')
+            ->get()->getRowArray();
+        $sustituida = false;
+        if ($fila && in_array((int) $fila['plan_id'], [2, 3], true)) {
+            $sustituida = $db->table('user_subscriptions')
+                ->where('user_id', (int) $fila['user_id'])
+                ->whereIn('plan_id', [2, 3, 7])
+                ->where('stripe_subscription_id !=', $stripeSubscriptionId)
+                ->groupStart()
+                    ->where('status', 'active')
+                    ->orGroupStart()->where('status', 'canceled')->where('current_period_end >', date('Y-m-d H:i:s'))->groupEnd()
+                ->groupEnd()
+                ->countAllResults() > 0;
+        }
+
+        if (!$sustituida) {
+            // Motivo: cancellation_requested (baja normal), payment_failed (tarjeta), payment_disputed...
+            $this->registrarCiclo('subscription_ended', (string) $stripeSubscriptionId, [],
+                (string) ($subscription->cancellation_details->reason ?? ''));
+        }
+
+        // Aviso al cliente el día que termina su plan de la API (Pro o Business)
+        if (!$sustituida && $fila && in_array((int) $fila['plan_id'], [2, 3], true)) {
+            try {
+                $userId     = (int) $fila['user_id'];
+                $automation = new \App\Models\EmailAutomationModel();
+                if (!$automation->wasSentRecently($userId, 'subscription_ended', 2)) {
+                    $user = $db->table('users')->select('id, email, name')->where('id', $userId)->get()->getRowArray();
+                    if ($user) {
+                        $res = (new \App\Services\EmailService())->sendSubscriptionEnded($user, ['name' => $fila['name'], 'slug' => $fila['slug']]);
+                        if (!empty($res['success']) && empty($res['skipped'])) {
+                            $automation->markAsSent($userId, 'subscription_ended', $res['body'] ?? '');
+                        }
+                    }
+                }
+            } catch (\Throwable $e) {
+                // Un correo nunca debe tumbar el webhook
+                log_message('error', '[Webhook::subDeleted] Aviso de fin de plan: ' . $e->getMessage());
+            }
+        }
 
         log_message('info', "[Webhook::stripe] Subscription canceled: {$stripeSubscriptionId}");
     }

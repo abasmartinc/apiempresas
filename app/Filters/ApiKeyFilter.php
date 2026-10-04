@@ -452,6 +452,44 @@ class ApiKeyFilter implements FilterInterface
                         ? 'Has consumido las ' . $monthlyQuota . ' consultas gratuitas garantizadas y no tienes saldo suficiente en el monedero. Recarga créditos o actualiza a un plan de pago.'
                         : 'Has superado el límite de consultas de tu plan (' . $monthlyQuota . ') y no tienes saldo suficiente en el monedero. Recarga créditos para continuar.';
 
+                    // Dos casos del Free en los que el mensaje de "has consumido las 100
+                    // gratuitas" no era verdad. Mismo 429 y mismo code; cambia el texto y
+                    // el origen de los enlaces, y se añade plan_ended_at.
+                    $origen429 = 'api_429_quota';
+                    $extra429  = [];
+                    $planPrevio = null;
+                    if ((int) $planId === 1) {
+                        if ($walletBalance > 0) {
+                            // Tiene bono, pero menos saldo del que cuesta esta consulta
+                            $errorMsg  = 'Te quedan ' . (int) $walletBalance . ' créditos en el monedero y esta consulta cuesta ' . (int) $creditCost . '. Recarga créditos para continuar.';
+                            $origen429 = 'api_429_bono';
+                        } else {
+                            try {
+                                // Ex-cliente de pago: su último plan ya terminó
+                                $planPrevio = $db->table('user_subscriptions us')
+                                    ->select('p.slug, p.name, us.current_period_end')
+                                    ->join('api_plans p', 'p.id = us.plan_id')
+                                    ->where('us.user_id', (int) $row->user_id)
+                                    ->whereIn('us.plan_id', [2, 3])
+                                    ->orderBy('us.current_period_end', 'DESC')
+                                    ->get()->getRow();
+                            } catch (\Throwable $e) {
+                                $planPrevio = null;
+                            }
+                            if ($planPrevio && !empty($planPrevio->current_period_end)) {
+                                $finTs     = strtotime((string) $planPrevio->current_period_end);
+                                $errorMsg  = 'Tu plan ' . $planPrevio->name . ' terminó el ' . date('d/m/Y', $finTs) . ' y tu cuenta ya no tiene consultas incluidas. Reactiva el plan o recarga créditos para continuar.';
+                                $origen429 = 'api_429_winback';
+                                $extra429  = ['plan_ended_at' => date('c', $finTs)];
+                            }
+                        }
+                    }
+                    $enlaces429 = self::enlacesCompra((int) $planId, $origen429);
+                    if ($planPrevio && $origen429 === 'api_429_winback' && $planPrevio->slug === 'business') {
+                        // Vuelve al plan que tenía
+                        $enlaces429['checkout_url'] = site_url('billing?plan=business&period=monthly&source=' . $origen429);
+                    }
+
                     // Mismo 429 y mismos campos de siempre. Lo añadido (code, RFC 7807,
                     // quota_resets_at, X-Quota-Reset) permite distinguirlo del 429 por
                     // velocidad: este NO se arregla reintentando (no lleva Retry-After).
@@ -478,7 +516,7 @@ class ApiKeyFilter implements FilterInterface
                         'cost_required' => $creditCost,
                         'upgrade_url' => site_url('billing'),
                         'quota_resets_at' => $quotaReset !== null ? date('c', $quotaReset) : null,
-                    ] + self::enlacesCompra((int) $planId, 'api_429_quota'), 'QUOTA_EXCEEDED', $errorMsg, $quotaHeaders);
+                    ] + $extra429 + $enlaces429, 'QUOTA_EXCEEDED', $errorMsg, $quotaHeaders);
                 }
             }
 

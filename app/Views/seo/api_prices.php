@@ -1115,11 +1115,11 @@
 
                 <!-- TOGGLE ANUAL / MENSUAL -->
                 <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 64px; margin-top: 16px; gap: 12px;">
-                    <span style="font-size: 0.95rem; font-weight: 600; color: #94a3b8; transition: all 0.3s;" id="labelMonthly">Mensual</span>
+                    <span style="font-size: 0.95rem; font-weight: 800; color: #2563eb; transition: all 0.3s;" id="labelMonthly">Mensual</span>
                     <button type="button" id="billingToggle" style="width: 56px; height: 32px; background: #0f172a; border-radius: 99px; position: relative; cursor: pointer; border: none; padding: 4px; transition: background 0.3s;" onclick="togglePricing()">
-                        <div id="toggleKnob" style="width: 24px; height: 24px; background: white; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); transform: translateX(24px);"></div>
+                        <div id="toggleKnob" style="width: 24px; height: 24px; background: white; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); transform: translateX(0px);"></div>
                     </button>
-                    <span style="font-size: 0.95rem; font-weight: 800; color: #2563eb; display: flex; align-items: center; gap: 8px; transition: all 0.3s;" id="labelAnnual">Anual <span style="background: #dcfce7; color: #166534; font-size: 10px; padding: 4px 8px; border-radius: 99px; letter-spacing: 0.05em; font-weight: 800;">AHORRA 20%</span></span>
+                    <span style="font-size: 0.95rem; font-weight: 600; color: #94a3b8; display: flex; align-items: center; gap: 8px; transition: all 0.3s;" id="labelAnnual">Anual <span style="background: #dcfce7; color: #166534; font-size: 10px; padding: 4px 8px; border-radius: 99px; letter-spacing: 0.05em; font-weight: 800;">AHORRA 20%</span></span>
                 </div>
 
                 <div class="api-pricing-grid">
@@ -1167,8 +1167,8 @@
                         <div class="api-pricing-card__header">
                             <h3>Pro</h3>
                         </div>
-                        <div class="api-price-value"><b id="pricePro" data-monthly="19" data-annual="15,17" style="font-weight: inherit;">15,17</b>€<span>/ mes + IVA</span></div>
-                        <div class="api-annual-note" style="margin: -6px 0 10px; font-size: 0.8rem; font-weight: 700; color: #ecfdf5; opacity: .92;">Pago anual: 182 € + IVA (ahorras 46 €)</div>
+                        <div class="api-price-value"><b id="pricePro" data-monthly="19" data-annual="15,17" style="font-weight: inherit;">19</b>€<span>/ mes + IVA</span></div>
+                        <div class="api-annual-note" style="display: none; margin: -6px 0 10px; font-size: 0.8rem; font-weight: 700; color: #ecfdf5; opacity: .92;">Pago anual: 182 € + IVA (ahorras 46 €)</div>
                         <p class="api-pricing-card__desc">Para el KYB completo: administradores, domicilio, historial del BORME y revisión de cartera.</p>
 
                         <ul class="api-price-list">
@@ -1214,7 +1214,7 @@
                                 </svg> Soporte prioritario por email: respuesta en menos de 2 h</li>
                         </ul>
 
-                        <a href="<?= site_url('register?intent=api&plan=pro&period=annual&source=api_kyb_pricing_pro') ?>" class="api-pricing-btn primary">Activar Plan Pro</a>
+                        <a href="<?= site_url('register?intent=api&plan=pro&period=monthly&source=api_kyb_pricing_pro') ?>" class="api-pricing-btn primary">Activar Plan Pro</a>
                     </div>
 
                     <!-- BUSINESS -->
@@ -1222,8 +1222,8 @@
                         <div class="api-pricing-card__header">
                             <h3>Business</h3>
                         </div>
-                        <div class="api-price-value"><b id="priceBusiness" data-monthly="49" data-annual="39,17" style="font-weight: inherit;">39,17</b>€<span>/ mes + IVA</span></div>
-                        <div class="api-annual-note" style="margin: -6px 0 10px; font-size: 0.8rem; font-weight: 700; color: #ecfdf5; opacity: .92;">Pago anual: 470 € + IVA (ahorras 118 €)</div>
+                        <div class="api-price-value"><b id="priceBusiness" data-monthly="49" data-annual="39,17" style="font-weight: inherit;">49</b>€<span>/ mes + IVA</span></div>
+                        <div class="api-annual-note" style="display: none; margin: -6px 0 10px; font-size: 0.8rem; font-weight: 700; color: #ecfdf5; opacity: .92;">Pago anual: 470 € + IVA (ahorras 118 €)</div>
                         <p class="api-pricing-card__desc">Para más volumen y análisis de riesgo: perfil de solvencia, contratos públicos y webhooks.</p>
 
                         <ul class="api-price-list">
@@ -1257,7 +1257,7 @@
                                 </svg> Soporte prioritario por email: respuesta en menos de 2 h</li>
                         </ul>
 
-                        <a href="<?= site_url('register?intent=api&plan=business&period=annual&source=api_kyb_pricing_business') ?>" class="api-pricing-btn">Activar Business</a>
+                        <a href="<?= site_url('register?intent=api&plan=business&period=monthly&source=api_kyb_pricing_business') ?>" class="api-pricing-btn">Activar Business</a>
                     </div>
                 </div>
                 <p style="text-align:center; margin-top:28px; font-weight:800;"><a href="<?= site_url() ?>#precios" style="color:#2563eb; text-decoration:none;">Ver la comparativa completa de planes y funciones →</a></p>
@@ -1811,7 +1811,7 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
             }
             
             // Pricing Toggle
-            let isAnnual = true;
+            let isAnnual = false; // arranca en mensual: es lo que se compra y evita la sorpresa del cobro anual
             function togglePricing() {
                 isAnnual = !isAnnual;
                 const knob = document.getElementById('toggleKnob');

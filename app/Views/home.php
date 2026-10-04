@@ -620,11 +620,11 @@
                 
                 <!-- TOGGLE ANUAL / MENSUAL -->
                 <div style="display: flex; justify-content: flex-start; align-items: center; margin-bottom: 40px; margin-top: 24px; gap: 12px;">
-                    <span style="font-size: 0.95rem; font-weight: 600; color: #94a3b8; transition: all 0.3s;" id="labelMonthlyHome">Mensual</span>
+                    <span style="font-size: 0.95rem; font-weight: 800; color: #2563eb; transition: all 0.3s;" id="labelMonthlyHome">Mensual</span>
                     <button type="button" id="billingToggleHome" style="width: 56px; height: 32px; background: #0f172a; border-radius: 99px; position: relative; cursor: pointer; border: none; padding: 4px; transition: background 0.3s;" onclick="togglePricingHome()">
-                        <div id="toggleKnobHome" style="width: 24px; height: 24px; background: white; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); transform: translateX(24px);"></div>
+                        <div id="toggleKnobHome" style="width: 24px; height: 24px; background: white; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); transform: translateX(0px);"></div>
                     </button>
-                    <span style="font-size: 0.95rem; font-weight: 800; color: #2563eb; display: flex; align-items: center; gap: 8px; transition: all 0.3s;" id="labelAnnualHome">Anual <span style="background: #dcfce7; color: #166534; font-size: 10px; padding: 4px 8px; border-radius: 99px; letter-spacing: 0.05em; font-weight: 800;">AHORRA 20%</span></span>
+                    <span style="font-size: 0.95rem; font-weight: 600; color: #94a3b8; display: flex; align-items: center; gap: 8px; transition: all 0.3s;" id="labelAnnualHome">Anual <span style="background: #dcfce7; color: #166534; font-size: 10px; padding: 4px 8px; border-radius: 99px; letter-spacing: 0.05em; font-weight: 800;">AHORRA 20%</span></span>
                 </div>
 
 <?php
@@ -696,15 +696,15 @@
                         <h3>Pro</h3>
                         <div class="tier-subtitle">Para automatizar validaciones</div>
                         <div class="tier-desc">La opción ideal para SaaS, ERPs y productos que ya necesitan validación en producción.</div>
-                        <div class="price"><b id="priceProHome" data-monthly="19" data-annual="15,17" style="font-weight: inherit;">15,17</b>€<span>/mes + IVA</span></div>
-                        <div class="annual-note-home">Facturado 182 € + IVA al año (ahorras 46 €)</div>
+                        <div class="price"><b id="priceProHome" data-monthly="19" data-annual="15,17" style="font-weight: inherit;">19</b>€<span>/mes + IVA</span></div>
+                        <div class="annual-note-home" style="visibility: hidden;">Facturado 182 € + IVA al año (ahorras 46 €)</div>
                         <ul class="tier-features">
                             <li style="font-weight: 800;"><?= $tierTick ?> Todo lo del plan Free, más:</li>
                             <?php foreach ($tierFeatures['pro'] as $f): ?>
                             <li><?= $tierTick ?> <?= esc($f) ?></li>
                             <?php endforeach; ?>
                         </ul>
-                        <a href="<?= site_url('register?intent=api&plan=pro&period=annual&source=home_pricing_pro') ?>" class="btn-tier" data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Empezar con Pro", "plan": "pro", "source_block": "pricing_cta", "page_type": "home"}'>Empezar con Pro</a>
+                        <a href="<?= site_url('register?intent=api&plan=pro&period=monthly&source=home_pricing_pro') ?>" class="btn-tier" data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Empezar con Pro", "plan": "pro", "source_block": "pricing_cta", "page_type": "home"}'>Empezar con Pro</a>
                         <div style="text-align: center; margin-top: 16px;">
                             <a href="<?= site_url('planes/pro') ?>" style="color: #c7d2fe; font-size: 0.9rem; text-decoration: none; font-weight: 500; border-bottom: 1px dashed #818cf8; padding-bottom: 2px; transition: color 0.2s;">Ver casos de uso y ejemplos &rarr;</a>
                         </div>
@@ -716,15 +716,15 @@
                         <h3>Business</h3>
                         <div class="tier-subtitle">Para equipos y alto volumen</div>
                         <div class="tier-desc">Pensado para plataformas con más carga, procesos críticos y necesidades de mayor disponibilidad.</div>
-                        <div class="price"><b id="priceBizHome" data-monthly="49" data-annual="39,17" style="font-weight: inherit;">39,17</b>€<span>/mes + IVA</span></div>
-                        <div class="annual-note-home">Facturado 470 € + IVA al año (ahorras 118 €)</div>
+                        <div class="price"><b id="priceBizHome" data-monthly="49" data-annual="39,17" style="font-weight: inherit;">49</b>€<span>/mes + IVA</span></div>
+                        <div class="annual-note-home" style="visibility: hidden;">Facturado 470 € + IVA al año (ahorras 118 €)</div>
                         <ul class="tier-features">
                             <li style="font-weight: 800;"><?= $tierTick ?> Todo lo del plan Pro, más:</li>
                             <?php foreach ($tierFeatures['business'] as $f): ?>
                             <li><?= $tierTick ?> <?= esc($f) ?></li>
                             <?php endforeach; ?>
                         </ul>
-                        <a href="<?= site_url('register?intent=api&plan=business&period=annual&source=home_pricing_business') ?>" class="btn-tier" data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Empezar con Business", "plan": "business", "source_block": "pricing_cta", "page_type": "home"}'>Empezar con Business</a>
+                        <a href="<?= site_url('register?intent=api&plan=business&period=monthly&source=home_pricing_business') ?>" class="btn-tier" data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Empezar con Business", "plan": "business", "source_block": "pricing_cta", "page_type": "home"}'>Empezar con Business</a>
                         <div style="text-align: center; margin-top: 16px;">
                             <a href="<?= site_url('planes/business') ?>" style="color: #a7f3d0; font-size: 0.9rem; text-decoration: none; font-weight: 500; border-bottom: 1px dashed #34d399; padding-bottom: 2px; transition: color 0.2s;">Ver casos de uso y ejemplos &rarr;</a>
                         </div>
@@ -1521,7 +1521,7 @@
         })();
 
         // Pricing Toggle Home
-        let isAnnualHome = true;
+        let isAnnualHome = false; // arranca en mensual: es lo que se compra y evita la sorpresa del cobro anual
         function togglePricingHome() {
             isAnnualHome = !isAnnualHome;
             const knob = document.getElementById('toggleKnobHome');
