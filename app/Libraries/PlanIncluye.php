@@ -47,7 +47,7 @@ class PlanIncluye
             ],
             [
                 'clave'   => 'watchlist',
-                'titulo'  => 'Vigilancia de hasta 100 empresas',
+                'titulo'  => 'Vigilancia de hasta ' . ($planId === 3 ? '1.000' : '100') . ' empresas',
                 'detalle' => 'Te avisa de actos en el BORME, cambios de estado y de riesgo. Vigilar no gasta consultas.',
                 'ejemplo' => 'POST /api/v1/watchlist  {"cifs": ["' . $cif . '"]}',
                 'patron'  => '/api/v1/watchlist',
@@ -68,6 +68,14 @@ class PlanIncluye
                 'ejemplo' => 'POST /api/v1/companies/batch  {"cifs": ["' . $cif . '", "..."]}',
                 'patron'  => '/api/v1/companies/batch',
                 'doc'     => 'endpoint-expanded',
+            ],
+            [
+                'clave'   => 'borme',
+                'titulo'  => 'Historial del BORME',
+                'detalle' => 'Los actos publicados de cada empresa: nombramientos, ceses, ampliaciones, disoluciones.',
+                'ejemplo' => 'GET /api/v1/companies/borme?cif=' . $cif,
+                'patron'  => '/api/v1/companies/borme',
+                'doc'     => 'endpoint-borme',
             ],
         ];
 
@@ -95,7 +103,7 @@ class PlanIncluye
             [
                 'clave'   => 'filter',
                 'titulo'  => 'Segmentos',
-                'detalle' => 'Descarga empresas por sector, zona y tamaño (el recuento es gratis).',
+                'detalle' => 'Descarga empresas por sector, zona y tamaño. El recuento es gratis; cada empresa descargada gasta 5 consultas.',
                 'ejemplo' => 'GET /api/v1/companies/filter?cnae=62&province=Madrid&count_only=true',
                 'patron'  => '/api/v1/companies/filter',
                 'doc'     => 'endpoint-filter',

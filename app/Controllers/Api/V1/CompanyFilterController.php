@@ -101,6 +101,9 @@ class CompanyFilterController extends BaseApiController
                 'message' => 'No te quedan consultas suficientes para descargar filas (' . S::ROW_COST . ' por fila). El recuento sigue siendo gratis.',
                 'cost_per_row' => S::ROW_COST,
                 'upgrade_url'  => site_url('billing'),
+                // Mismo identificador que el 429 de cupo del resto de la API
+                'code'   => 'QUOTA_EXCEEDED',
+                'status' => 429,
             ] + ApiKeyFilter::enlacesCompra($planId, 'api_429_filter'));
         }
         $truncated = $pay['rows'] < $limit;

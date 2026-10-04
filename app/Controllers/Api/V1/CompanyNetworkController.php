@@ -61,6 +61,10 @@ class CompanyNetworkController extends BaseApiController
             
             $model = new CompanyModel();
             $company = $model->getByCif($cif);
+            // Los recuentos reales solo dentro del tope diario de ganchos (el 403 no se cobra)
+            if ($company && !\App\Services\ApiCompanyEnricher::teaserAllowed((int) ($validation['user_id'] ?? 0))) {
+                $company = null;
+            }
             
             $stats = [
                 'total_administrators' => '🔒 Pro/Business Plan',

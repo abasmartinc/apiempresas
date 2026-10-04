@@ -70,6 +70,10 @@ class CompanyEnrichmentController extends BaseApiController
             // La vista recortada del Free ya no gasta una de sus 100 consultas: solo trae
             // la cifra, y cobrarla restaba cupo sin dar motivo para comprar.
             \App\Filters\ApiKeyFilter::$apiSkipBilling = true;
+            // Como no se cobra, lleva tope diario
+            if (!\App\Services\ApiCompanyEnricher::teaserAllowed((int) (\App\Filters\ApiKeyFilter::$apiMeta['user_id'] ?? 0))) {
+                return $this->topeVistasPrevias('pro', 'api_free_score_limit');
+            }
             return $this->respond([
                 'success' => true,
                 'data' => [
@@ -124,15 +128,19 @@ class CompanyEnrichmentController extends BaseApiController
 
         $planSlug = \App\Filters\ApiKeyFilter::$apiMeta['access_slug'] ?? (\App\Filters\ApiKeyFilter::$apiMeta['plan_slug'] ?? 'free');
         if (!$this->planAccess->canAccess($planSlug, 'company_signals')) {
-            $signals = $this->scoringService->getSignals($cif);
+            // El recuento real solo dentro del tope diario de ganchos (el 403 no se cobra)
+            $conDato = \App\Services\ApiCompanyEnricher::teaserAllowed((int) (\App\Filters\ApiKeyFilter::$apiMeta['user_id'] ?? 0));
+            $signals = $conDato ? $this->scoringService->getSignals($cif) : null;
             $count = is_array($signals) ? count($signals) : 0;
             return $this->respond([
                 'success' => false,
                 // Campo nuevo: sin él el error salía como UNKNOWN_ERROR
                 'error'   => 'PLAN_RESTRICTION',
-                'message' => "Te estás perdiendo {$count} eventos societarios recientes (nombramientos, ampliaciones, etc.). Actualiza al plan Pro para acceder al historial completo y tomar mejores decisiones.",
+                'message' => $conDato
+                    ? "Te estás perdiendo {$count} eventos societarios recientes (nombramientos, ampliaciones, etc.). Actualiza al plan Pro para acceder al historial completo y tomar mejores decisiones."
+                    : 'Los eventos societarios (nombramientos, ampliaciones, etc.) requieren el plan Pro.',
                 'upsell_opportunities' => [
-                    'eventos_ocultos' => $count,
+                    'eventos_ocultos' => $conDato ? $count : null,
                     'checkout_url'    => self::checkoutUrl('pro', 'api_403_signals'),
                 ]
             ], 403);
@@ -187,7 +195,8 @@ class CompanyEnrichmentController extends BaseApiController
             return $this->respond([
                 'success' => false,
                 'error'   => 'PLAN_RESTRICTION',
-                'message' => 'El análisis IA requiere un plan Business.',
+                'message' => 'El análisis IA completo requiere un plan Business. Con Pro tienes una vista previa (perfil y probabilidad).',
+                'required_plan' => 'business',
                 'upsell_opportunities' => [
                     'pain_points' => '🔒 Desbloquea Business para ver los puntos de dolor',
                     'buyer_persona' => '🔒 Desbloquea Business para ver quién toma las decisiones',
@@ -195,6 +204,8 @@ class CompanyEnrichmentController extends BaseApiController
                     // Con Pro ya hay una vista previa (perfil y probabilidad)
                     'vista_previa_en_pro' => true,
                     'checkout_url'        => self::checkoutUrl('pro', 'api_403_insights'),
+                    // El enlace de arriba lleva a Pro (vista previa); este, al análisis completo
+                    'checkout_url_business' => self::checkoutUrl('business', 'api_403_insights_business'),
                 ]
             ], 403);
         }
@@ -205,6 +216,10 @@ class CompanyEnrichmentController extends BaseApiController
         if ($accessLevel === 'preview') {
             // Solo mostramos el perfil básico y probabilidad. La vista previa no se cobra.
             \App\Filters\ApiKeyFilter::$apiSkipBilling = true;
+            // Como no se cobra, lleva tope diario
+            if (!\App\Services\ApiCompanyEnricher::teaserAllowed((int) (\App\Filters\ApiKeyFilter::$apiMeta['user_id'] ?? 0))) {
+                return $this->topeVistasPrevias('business', 'api_pro_insights_limit');
+            }
             return $this->respond([
                 'success' => true,
                 'data' => [

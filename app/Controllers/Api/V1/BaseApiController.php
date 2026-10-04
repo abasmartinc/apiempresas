@@ -55,6 +55,46 @@ class BaseApiController extends ResourceController
                     if ($reqId === '') $reqId = 'req_' . bin2hex(random_bytes(4));
                     $data['instance'] = $reqId;
                 }
+
+                // 403 de plan: lo mismo en todos los endpoints (solo se añade). Unos
+                // traían checkout_url y otros upgrade_url, y ninguno decía de forma
+                // legible por código qué plan hace falta.
+                if ($finalStatusCode === 403 && isset($data['upsell_opportunities']) && is_array($data['upsell_opportunities'])) {
+                    $uo  = $data['upsell_opportunities'];
+                    $url = null;
+                    foreach (['checkout_url', 'upgrade_url'] as $k) {
+                        if (!empty($uo[$k]) && is_string($uo[$k]) && preg_match('/[?&]plan=(pro|business)\b/', $uo[$k])) {
+                            $url = $uo[$k];
+                            break;
+                        }
+                    }
+                    if ($url !== null) {
+                        if (empty($uo['checkout_url'])) {
+                            $data['upsell_opportunities']['checkout_url'] = $url;
+                        }
+                        if (empty($uo['upgrade_url'])) {
+                            $data['upsell_opportunities']['upgrade_url'] = $url;
+                        }
+                        if (!isset($data['required_plan'])) {
+                            preg_match('/[?&]plan=(pro|business)\b/', $url, $mPlan);
+                            $data['required_plan'] = $mPlan[1];
+                        }
+                    }
+                    if (!isset($data['current_plan'])) {
+                        $data['current_plan'] = (string) (\App\Filters\ApiKeyFilter::$apiMeta['plan_slug'] ?? 'free');
+                    }
+                }
+            } elseif (($data['success'] ?? null) === true && !isset($data['notice'])) {
+                // Aviso de cupo desde el 80 % en todas las respuestas que se cobran del
+                // plan (antes solo en /companies). Campo nuevo de primer nivel.
+                try {
+                    $aviso = self::avisoCupo();
+                    if ($aviso !== null) {
+                        $data['notice'] = $aviso;
+                    }
+                } catch (\Throwable $e) {
+                    // El aviso nunca debe romper una respuesta correcta
+                }
             }
         }
 
@@ -68,6 +108,28 @@ class BaseApiController extends ResourceController
     protected static function checkoutUrl(string $plan, string $source): string
     {
         return \App\Filters\ApiKeyFilter::urlGancho($plan, $source);
+    }
+
+    /**
+     * Respuesta cuando se agota el tope diario de vistas previas que no se cobran
+     * (ApiCompanyEnricher::TEASERS_POR_DIA, compartido con los ganchos de los 403).
+     * Sin tope, /score en Free o /insights en Pro servían para sacar gratis ese dato
+     * de miles de empresas.
+     */
+    protected function topeVistasPrevias(string $plan, string $source)
+    {
+        $msg = 'Has alcanzado el límite diario de vistas previas gratuitas de este endpoint. Vuelve mañana o pasa al plan '
+            . ucfirst($plan) . ' para usarlo sin este límite.';
+        $this->response->setHeader('Retry-After', (string) max(60, strtotime('tomorrow') - time()));
+        return $this->respond([
+            'success' => false,
+            'error'   => 'PREVIEW_LIMIT_EXCEEDED',
+            'message' => $msg,
+            'required_plan' => $plan,
+            'upsell_opportunities' => [
+                'checkout_url' => self::checkoutUrl($plan, $source),
+            ],
+        ], 429);
     }
 
     /** Plan al que subir desde el actual: Free → pro, Pro → business, resto → null. */

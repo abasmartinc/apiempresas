@@ -79,9 +79,9 @@ class ApiKeyFilter implements FilterInterface
     {
         self::marcarGancho($source);
         $siguiente = $planId === 1 ? 'pro' : ($planId === 2 ? 'business' : null);
-        // Free → Pro abre en mensual (casi nadie compra anual de primeras: el primer
-        // pago es 19 € y no 182 €). Pro → Business sigue en anual.
-        $periodo = $planId === 1 ? 'monthly' : 'annual';
+        // Siempre en mensual: casi nadie compra anual de primeras (11 de 12 Pro pagan
+        // mensual) y a un Pro que agota el cupo se le enseñaban 470 € de golpe.
+        $periodo = 'monthly';
         return [
             'checkout_url' => $siguiente !== null
                 ? site_url('billing?plan=' . $siguiente . '&period=' . $periodo . '&source=' . $source)
@@ -368,16 +368,27 @@ class ApiKeyFilter implements FilterInterface
             
             if ($requestsThisSecond >= $maxRequestsPerSecond) {
                 $this->registrarRechazo($request, $row, 429, 'rate');
+                // Al Free se le recomendaba /batch, que en su plan da 403. Quien choca
+                // con 2 por segundo está integrando en bucle: se le dice lo que da Pro.
+                $esFree  = (int) $planId === 1;
+                $msgRate = 'Has superado el límite de ' . $maxRequestsPerSecond . ' peticiones por segundo. '
+                    . ($esFree
+                        ? 'Reduce la velocidad de tus peticiones. Con el plan Pro tienes 20 peticiones por segundo y consultas por lotes (/batch, hasta 100 CIF por petición).'
+                        : 'Por favor, reduce la velocidad de tus peticiones o utiliza el endpoint /batch.');
+                $ganchoRate = $esFree ? ['upsell_opportunities' => [
+                    'mensaje'      => 'Pro: 20 peticiones por segundo y /batch de hasta 100 CIF por petición.',
+                    'checkout_url' => self::enlacesCompra(1, 'api_429_rate')['checkout_url'],
+                ]] : [];
                 return $this->errorResponse(429, [
                     'success' => false,
                     'error'   => 'TOO_MANY_REQUESTS',
-                    'message' => 'Has superado el límite de ' . $maxRequestsPerSecond . ' peticiones por segundo. Por favor, reduce la velocidad de tus peticiones o utiliza el endpoint /batch.',
+                    'message' => $msgRate,
                     'type'    => 'https://apiempresas.es/docs/errors/too_many_requests',
                     'title'   => 'TOO_MANY_REQUESTS',
                     'status'  => 429,
-                    'detail'  => 'Has superado el límite de ' . $maxRequestsPerSecond . ' peticiones por segundo. Por favor, reduce la velocidad de tus peticiones o utiliza el endpoint /batch.',
+                    'detail'  => $msgRate,
                     'instance'=> self::$apiRequestId
-                ], 'TOO_MANY_REQUESTS', 'Has superado el límite de ' . $maxRequestsPerSecond . ' peticiones por segundo.', [
+                ] + $ganchoRate, 'TOO_MANY_REQUESTS', 'Has superado el límite de ' . $maxRequestsPerSecond . ' peticiones por segundo.', [
                     'X-RateLimit-Limit'     => $maxRequestsPerSecond,
                     'X-RateLimit-Remaining' => '0',
                     'X-RateLimit-Reset'     => time() + 1,

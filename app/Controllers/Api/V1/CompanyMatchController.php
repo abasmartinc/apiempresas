@@ -69,6 +69,10 @@ class CompanyMatchController extends BaseApiController
             
             $model = new CompanyModel();
             $company = $model->getByCif($cif);
+            // El nivel de encaje real solo dentro del tope diario de ganchos (el 403 no se cobra)
+            if ($company && !\App\Services\ApiCompanyEnricher::teaserAllowed((int) ($validation['user_id'] ?? 0))) {
+                $company = null;
+            }
             
             $previewLevel = '🔒 Business Plan';
             if ($company) {
