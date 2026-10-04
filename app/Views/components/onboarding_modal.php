@@ -208,10 +208,65 @@ print(response.json())</pre>
     .json-number { color: #f472b6; }
     .json-boolean { color: #fbbf24; }
     .json-null { color: #94a3b8; }
+
+    /* La capa se desplaza si la tarjeta no cabe (antes quedaba cortada y sin scroll):
+       la tarjeta se centra con margin:auto cuando cabe y se puede recorrer cuando no. */
+    #api-wizard-overlay { align-items: flex-start !important; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    #api-wizard-overlay, #api-wizard-overlay .wizard-card { box-sizing: border-box; }
+    #api-wizard-overlay .wizard-card { margin: auto; }
+    #wizard-step-2 > div:first-child > div { min-width: 0; }
+    #wiz-json-container { overflow-wrap: anywhere; }
+    #wiz-cif-input { min-width: 0; box-sizing: border-box; }
+
+    /* Móvil y pantallas estrechas: una sola columna y menos relleno */
+    @media (max-width: 820px) {
+        #api-wizard-overlay { padding: 12px !important; }
+        #api-wizard-overlay .wizard-card { padding: 20px !important; border-radius: 18px !important; }
+        #wizard-step-2 > div:first-child { grid-template-columns: 1fr !important; gap: 20px !important; }
+        #wizard-step-2 #wiz-json-container { max-height: 240px; overflow-y: auto; }
+        #api-wizard-overlay h2 { font-size: 1.3rem !important; }
+        #wizard-step-3 pre { font-size: 0.72rem !important; }
+    }
 </style>
 
 <script>
     let currentCompany = {};
+
+    // Medición del asistente: entre el alta y la primera llamada no se veía nada.
+    function wizTrack(nombre, meta) {
+        try {
+            if (window.trackEvent) window.trackEvent(nombre, meta || {});
+        } catch (e) {}
+    }
+    window.addEventListener('load', function () {
+        if (document.getElementById('api-wizard-overlay')) wizTrack('wizard_shown');
+    });
+
+    // Tras la primera llamada, el panel de detrás deja de estar en "0 de 100" y
+    // activa sus pasos 2 y 3, igual que cuando se busca desde el propio panel.
+    function wizActualizarPanel(res) {
+        try {
+            if (typeof actualizarContadorPanel === 'function') actualizarContadorPanel(res);
+
+            const clave = document.getElementById('section-api-key');
+            if (clave) {
+                clave.style.opacity = '1';
+                clave.style.borderColor = '#2152ff';
+                clave.style.boxShadow = '0 10px 15px -3px rgba(33, 82, 255, 0.1)';
+                const insignia = clave.querySelector('div');
+                if (insignia) insignia.style.background = '#2152ff';
+                const copiar = document.getElementById('btnCopyKey');
+                if (copiar) { copiar.style.background = ''; copiar.style.borderColor = ''; }
+            }
+            const paso3 = document.getElementById('section-paso3');
+            if (paso3) {
+                paso3.style.opacity = '1';
+                paso3.style.pointerEvents = 'auto';
+                const insignia3 = paso3.querySelector('div');
+                if (insignia3) insignia3.style.background = '#2152ff';
+            }
+        } catch (e) {}
+    }
 
     function syntaxHighlight(json) {
         if (typeof json != 'string') {
@@ -261,9 +316,12 @@ print(response.json())</pre>
             });
             const body = await res.json().catch(() => ({}));
             if (!res.ok || !body.data) {
+                wizTrack('wizard_call_error', { cif: cif, status: res.status });
                 wizardError(body.message || body.detail || (typeof body.error === 'string' ? body.error : 'No hemos podido consultar esa empresa. Prueba con otro CIF.'));
                 return;
             }
+            wizTrack('wizard_call_ok', { cif: cif });
+            wizActualizarPanel(res);
             freeResponse = body;
             currentCompany = body.data;
             document.getElementById('wiz-res-name').innerText = body.data.name || cif;
@@ -271,6 +329,7 @@ print(response.json())</pre>
             document.getElementById('wizard-step-2').style.display = 'block';
             togglePlan('free'); // Primero lo que recibe hoy
         } catch (e) {
+            wizTrack('wizard_call_error', { cif: cif, status: 0 });
             wizardError('No hemos podido conectar con la API. Inténtalo de nuevo.');
         }
     }
@@ -293,6 +352,7 @@ print(response.json())</pre>
     }
 
     function showCodeSnippets() {
+        wizTrack('wizard_code_viewed');
         document.getElementById('wizard-step-2').style.display = 'none';
         document.getElementById('wizard-step-3').style.display = 'block';
     }
@@ -394,15 +454,21 @@ print(response.json())</pre>
         }).catch(err => console.error('Error marking wizard done:', err));
     }
 
-    function finishWizard() {
+    function cerrarWizard() {
         markWizardDone();
         const overlay = document.getElementById('api-wizard-overlay');
         overlay.style.opacity = '0';
         setTimeout(() => overlay.remove(), 300);
     }
 
+    function finishWizard() {
+        wizTrack('wizard_finished');
+        cerrarWizard();
+    }
+
     function skipWizard() {
-        finishWizard();
+        wizTrack('wizard_skipped');
+        cerrarWizard();
     }
 </script>
 <?php endif; ?>

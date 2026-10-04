@@ -608,7 +608,18 @@ class ApiKeyFilter implements FilterInterface
                 } else {
                     $ipQuery->where('r.ip_address', $redIp['valor']);
                 }
-                $ipUsage = $ipQuery->countAllResults();
+                // Solo las consultas que gastan cupo gratuito (/companies y /companies/search).
+                // Antes contaban también /usage y la vista previa de /score, que no se
+                // cobran: 100 llamadas a /usage dejaban la IP bloqueada para siempre.
+                $ipQuery->groupStart()
+                    ->like('r.endpoint', '/api/v1/companies', 'before')
+                    ->orLike('r.endpoint', '/api/v1/companies/search', 'before')
+                ->groupEnd();
+                // Ni este límite ni el de cuentas vinculadas se aplican a direcciones
+                // locales o privadas (desarrollo en localhost, redes internas): ahí todas
+                // las cuentas de prueba comparten dirección.
+                $ipPublica = filter_var((string) $ipAddress, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) !== false;
+                $ipUsage   = $ipPublica ? $ipQuery->countAllResults() : 0;
 
                 if ($ipUsage >= 100) {
                     $this->registrarRechazo($request, $row, 429, 'ip');
@@ -623,7 +634,9 @@ class ApiKeyFilter implements FilterInterface
                 // Cuentas gratuitas vinculadas: quien agota las 100 y abre otra cuenta
                 // desde la misma conexión. Si varias cuentas Free han usado esta red y
                 // entre todas ya han gastado el doble del cupo gratuito, no hay más.
-                $vinculadas = self::usoCuentasVinculadas($db, $redIp, (int) $row->user_id);
+                $vinculadas = $ipPublica
+                    ? self::usoCuentasVinculadas($db, $redIp, (int) $row->user_id)
+                    : ['cuentas' => 1, 'uso' => 0];
                 if ($vinculadas['cuentas'] >= 2 && $vinculadas['uso'] >= 2 * (int) $monthlyQuota) {
                     $msgRed = 'Has alcanzado el límite de consultas gratuitas para tu red: varias cuentas gratuitas comparten esta conexión. Pasa al plan Pro para seguir consultando.';
                     $this->registrarRechazo($request, $row, 429, 'ip');
