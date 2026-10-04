@@ -70,7 +70,7 @@
                         required
                         class="auth-input"
                         placeholder="nombre@empresa.com"
-                        value="<?= esc($prefill_email ?? '') ?>"
+                        value="<?= esc(old('email', $prefill_email ?? '')) ?>"
                     />
                 </div>
 

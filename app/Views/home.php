@@ -696,8 +696,8 @@
                         <h3>Pro</h3>
                         <div class="tier-subtitle">Para automatizar validaciones</div>
                         <div class="tier-desc">La opción ideal para SaaS, ERPs y productos que ya necesitan validación en producción.</div>
-                        <div class="price"><b id="priceProHome" data-monthly="19" data-annual="15,17" style="font-weight: inherit;">15,17</b>€<span>/mes</span></div>
-                        <div class="annual-note-home">Facturado 182 € al año (ahorras 46 €)</div>
+                        <div class="price"><b id="priceProHome" data-monthly="19" data-annual="15,17" style="font-weight: inherit;">15,17</b>€<span>/mes + IVA</span></div>
+                        <div class="annual-note-home">Facturado 182 € + IVA al año (ahorras 46 €)</div>
                         <ul class="tier-features">
                             <li style="font-weight: 800;"><?= $tierTick ?> Todo lo del plan Free, más:</li>
                             <?php foreach ($tierFeatures['pro'] as $f): ?>
@@ -716,8 +716,8 @@
                         <h3>Business</h3>
                         <div class="tier-subtitle">Para equipos y alto volumen</div>
                         <div class="tier-desc">Pensado para plataformas con más carga, procesos críticos y necesidades de mayor disponibilidad.</div>
-                        <div class="price"><b id="priceBizHome" data-monthly="49" data-annual="39,17" style="font-weight: inherit;">39,17</b>€<span>/mes</span></div>
-                        <div class="annual-note-home">Facturado 470 € al año (ahorras 118 €)</div>
+                        <div class="price"><b id="priceBizHome" data-monthly="49" data-annual="39,17" style="font-weight: inherit;">39,17</b>€<span>/mes + IVA</span></div>
+                        <div class="annual-note-home">Facturado 470 € + IVA al año (ahorras 118 €)</div>
                         <ul class="tier-features">
                             <li style="font-weight: 800;"><?= $tierTick ?> Todo lo del plan Pro, más:</li>
                             <?php foreach ($tierFeatures['business'] as $f): ?>

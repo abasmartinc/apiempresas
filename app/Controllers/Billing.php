@@ -190,6 +190,19 @@ class Billing extends BaseController
             && empty($this->request->getGet('plan'));
 
         if (!$reanudando && $lastCheckout && ($currentTime - $lastCheckout) < 10) { // 10 seconds limit
+            // Reintento del mismo plan y periodo (vuelve de Stripe y pulsa otra vez):
+            // se le devuelve a la sesión de pago que ya tiene abierta, sin error.
+            $abierta   = $session->get('checkout_abierto');
+            $planRep   = strtolower(trim((string) $this->request->getVar('plan')));
+            $periodRep = strtolower(trim((string) $this->request->getVar('period')));
+            if (is_array($abierta) && !empty($abierta['url'])
+                && in_array($planRep, ['pro', 'business'], true)
+                && ($abierta['plan'] ?? '') === $planRep
+                && ($abierta['period'] ?? '') === $periodRep
+                && (int) ($abierta['user'] ?? 0) === (int) session('user_id')
+                && ($currentTime - (int) ($abierta['ts'] ?? 0)) < 1800) {
+                return redirect()->to($abierta['url']);
+            }
             return redirect()->back()->with('error', lang('Messages.flash_4'));
         }
         $session->set('last_checkout_time', $currentTime);
@@ -256,6 +269,27 @@ class Billing extends BaseController
                 'error',
                 'Ya tienes Solvencia Pro en tu cuenta, así que no te lo volvemos a cobrar. Para pasar a anual, reactivarlo o darte de baja, usa «Gestionar suscripción».'
             );
+        }
+
+        // Lo mismo para Pro y Business: con el plan ya activo, un segundo pago crea otra
+        // suscripción y el webhook cancela la primera sin reembolso.
+        if (in_array($plan, ['pro', 'business'], true) && $userId > 0) {
+            $yaLoTiene = \Config\Database::connect()->table('user_subscriptions us')
+                ->join('api_plans p', 'p.id = us.plan_id')
+                ->where('us.user_id', $userId)
+                ->where('p.slug', $plan)
+                ->where('us.status', 'active')
+                ->where('us.stripe_subscription_id IS NOT NULL')
+                ->where('us.stripe_subscription_id !=', '')
+                ->where('us.current_period_end >', date('Y-m-d H:i:s'))
+                ->countAllResults() > 0;
+            if ($yaLoTiene) {
+                session()->remove('pending_checkout');
+                return redirect()->to(site_url('billing'))->with(
+                    'info',
+                    'Ya tienes el plan ' . ucfirst($plan) . ' activo, así que no te lo volvemos a cobrar.'
+                );
+            }
         }
 
         // Datos opcionales de facturación (solo para pre-rellenar)
@@ -745,6 +779,14 @@ class Billing extends BaseController
             // $sessionParams['allow_promotion_codes'] = true para los planes que toque.
 
             $session = $this->stripeService->createCheckoutSession($sessionParams);
+
+            if (in_array($plan, ['pro', 'business'], true) && $userId > 0) {
+                // Para el reintento inmediato (ver el antirrebote de checkout())
+                session()->set('checkout_abierto', [
+                    'plan' => $plan, 'period' => $period, 'user' => $userId,
+                    'url'  => (string) $session->url, 'ts' => time(),
+                ]);
+            }
 
             return redirect()->to($session->url);
 
@@ -1610,6 +1652,31 @@ class Billing extends BaseController
             $planSlug = (string) $packStripe->metadata->plan;
             $isAnnual = ($packStripe->metadata->period ?? '') === 'annual';
             $planRow  = (new \App\Models\ApiPlanModel())->where('slug', $planSlug)->first();
+
+            // Si el webhook aún no ha guardado la suscripción, se guarda aquí: la página
+            // dice "plan activo" y el panel seguía en Free con el botón de pago hasta que
+            // llegaba el webhook. Misma función que el webhook: quien llegue segundo
+            // actualiza la fila del primero. El resto (cancelar el plan anterior,
+            // bienvenida, factura) lo sigue haciendo el webhook.
+            try {
+                $subStripe = $packStripe->subscription ?? '';
+                $subId     = is_string($subStripe) ? $subStripe : (string) ($subStripe->id ?? '');
+                $uidPago   = (int) ($packStripe->client_reference_id ?? ($packStripe->metadata->user_id ?? 0));
+                if ($subId !== '' && $planRow && $uidPago > 0 && $uidPago === (int) session('user_id')) {
+                    $existe = \Config\Database::connect()->table('user_subscriptions')
+                        ->where('stripe_subscription_id', $subId)->countAllResults() > 0;
+                    if (!$existe) {
+                        $subObj = (new \Stripe\StripeClient(env('STRIPE_SECRET_KEY')))->subscriptions->retrieve($subId);
+                        if (in_array((string) ($subObj->status ?? ''), ['active', 'trialing'], true)) {
+                            [$ini, $fin] = \App\Libraries\SuscripcionStripe::periodoDe($subObj);
+                            \App\Libraries\SuscripcionStripe::guardar($uidPago, (int) $planRow->id, $subId, $ini, $fin);
+                        }
+                    }
+                }
+            } catch (\Throwable $e) {
+                log_message('error', '[Billing::success] No se pudo activar el plan desde la página de éxito: ' . $e->getMessage());
+            }
+
             $precioBd = $isAnnual ? ($planRow->price_annual ?? null) : ($planRow->price_monthly ?? null);
             $data = [
                 'plan_name'      => (string) ($planRow->name ?? ucfirst($planSlug)),

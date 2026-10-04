@@ -268,6 +268,7 @@ $isEn = (service('request')->getLocale() === 'en');
                         <form action="<?= site_url('register/quick_store') ?>" method="POST" id="quick-reg-form" style="display: grid; gap: 16px; text-align: left;">
                             <?= csrf_field() ?>
                             <input type="hidden" name="redirect" value="dashboard">
+                            <input type="hidden" name="intent" value="api">
                             
                             <div class="input-group-premium">
                                 <label style="display: block; font-size: 0.85rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; margin-left: 4px;">Correo Electrónico Profesional</label>
@@ -371,6 +372,15 @@ $isEn = (service('request')->getLocale() === 'en');
                 $el.prepend('<span class="btn-spinner"></span>');
             }
         }
+
+        // Al volver con "atrás" (p. ej. desde Stripe) el navegador restaura la página
+        // con el botón desactivado y el spinner: se deja otra vez utilizable.
+        window.addEventListener('pageshow', function (e) {
+            if (!e.persisted) return;
+            $('.btn-loading').each(function () {
+                $(this).removeClass('btn-loading').prop('disabled', false).find('.btn-spinner').remove();
+            });
+        });
     });
 });
 </script>

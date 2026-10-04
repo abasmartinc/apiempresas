@@ -40,7 +40,9 @@ class Register extends BaseController
         $destinoPago = null;
         $planPedido  = strtolower(trim((string) $this->request->getGet('plan')));
         if (in_array($planPedido, ['pro', 'business'], true)) {
-            $periodo     = $this->request->getGet('period') === 'monthly' ? 'monthly' : 'annual';
+            $periodo     = // Sin periodo en el enlace se asume mensual (lo que elige casi todo el mundo):
+            // antes caía en anual y el pago abría en 182 € a quien había visto 19 €/mes.
+            $periodo     = $this->request->getGet('period') === 'annual' ? 'annual' : 'monthly';
             $destinoPago = 'billing?plan=' . $planPedido . '&period=' . $periodo . '&from=signup';
             // El origen del botón (home_pricing_pro, planes_pro...) llega hasta el
             // pago: antes se perdía aquí y las ventas quedaban sin atribuir.
@@ -202,6 +204,16 @@ class Register extends BaseController
 
         if ($existingUser) {
             $msg = $isEnglish ? 'An account already exists with this email address.' : 'Ya existe una cuenta registrada con este correo en APIEmpresas.';
+            if (!$isEnglish) {
+                // Ya es cliente: al acceso con su correo puesto y conservando el destino
+                // (p. ej. billing?plan=pro...). Antes se quedaba en el alta sin salida y,
+                // si entraba por su cuenta, perdía el plan, el periodo y el origen.
+                $destinoPrevio = \App\Services\LoginLinkService::limpiarDestino((string) $this->request->getPost('redirect'));
+                return redirect()
+                    ->to(site_url('enter' . ($destinoPrevio !== '' ? '?redirect=' . urlencode($destinoPrevio) : '')))
+                    ->with('prefill_email', $email)
+                    ->with('info', 'Ya tienes una cuenta con este correo. Inicia sesión para continuar.');
+            }
             return redirect()
                 ->back()
                 ->withInput()

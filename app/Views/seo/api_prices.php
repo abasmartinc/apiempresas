@@ -1167,8 +1167,8 @@
                         <div class="api-pricing-card__header">
                             <h3>Pro</h3>
                         </div>
-                        <div class="api-price-value"><b id="pricePro" data-monthly="19" data-annual="15,17" style="font-weight: inherit;">15,17</b>€<span>/ mes</span></div>
-                        <div class="api-annual-note" style="margin: -6px 0 10px; font-size: 0.8rem; font-weight: 700; color: #ecfdf5; opacity: .92;">Pago anual: 182 € (ahorras 46 €)</div>
+                        <div class="api-price-value"><b id="pricePro" data-monthly="19" data-annual="15,17" style="font-weight: inherit;">15,17</b>€<span>/ mes + IVA</span></div>
+                        <div class="api-annual-note" style="margin: -6px 0 10px; font-size: 0.8rem; font-weight: 700; color: #ecfdf5; opacity: .92;">Pago anual: 182 € + IVA (ahorras 46 €)</div>
                         <p class="api-pricing-card__desc">Para el KYB completo: administradores, domicilio, historial del BORME y revisión de cartera.</p>
 
                         <ul class="api-price-list">
@@ -1222,8 +1222,8 @@
                         <div class="api-pricing-card__header">
                             <h3>Business</h3>
                         </div>
-                        <div class="api-price-value"><b id="priceBusiness" data-monthly="49" data-annual="39,17" style="font-weight: inherit;">39,17</b>€<span>/ mes</span></div>
-                        <div class="api-annual-note" style="margin: -6px 0 10px; font-size: 0.8rem; font-weight: 700; color: #ecfdf5; opacity: .92;">Pago anual: 470 € (ahorras 118 €)</div>
+                        <div class="api-price-value"><b id="priceBusiness" data-monthly="49" data-annual="39,17" style="font-weight: inherit;">39,17</b>€<span>/ mes + IVA</span></div>
+                        <div class="api-annual-note" style="margin: -6px 0 10px; font-size: 0.8rem; font-weight: 700; color: #ecfdf5; opacity: .92;">Pago anual: 470 € + IVA (ahorras 118 €)</div>
                         <p class="api-pricing-card__desc">Para más volumen y análisis de riesgo: perfil de solvencia, contratos públicos y webhooks.</p>
 
                         <ul class="api-price-list">

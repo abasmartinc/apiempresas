@@ -438,8 +438,19 @@ class Webhook extends Controller
             // CUSTOM BONUS WALLET RECHARGE
             if ($planSlug === 'custom_bonus') {
                 $credits = (int) ($session->metadata->credits ?? 0);
-                if ($credits > 0 && $userId > 0) {
-                    $db = \Config\Database::connect();
+                $db = \Config\Database::connect();
+                // Un evento repetido (reintento o "Reenviar" desde Stripe) no abona dos
+                // veces: una recarga por sesión de pago, y solo si está cobrada.
+                $yaAbonado = $credits > 0 && $userId > 0 && $db->table('user_wallet_transactions')
+                    ->where('transaction_type', 'stripe_payment')
+                    ->where('reference_id', (string) $session->id)
+                    ->countAllResults() > 0;
+                $cobrado = ($session->payment_status ?? 'paid') === 'paid';
+                if ($yaAbonado) {
+                    log_message('info', "[Webhook::stripe] Bono ya abonado para la sesión {$session->id}: no se repite.");
+                } elseif (!$cobrado) {
+                    log_message('info', "[Webhook::stripe] Bono sin cobrar todavía ({$session->id}): no se abona.");
+                } elseif ($credits > 0 && $userId > 0) {
                     
                     // 1. Añadir saldo al wallet
                     $db->query("INSERT INTO user_wallets (user_id, balance) VALUES (?, ?) ON DUPLICATE KEY UPDATE balance = balance + ?", [$userId, $credits, $credits]);
@@ -564,6 +575,21 @@ class Webhook extends Controller
                                                   ->findAll();
         }
 
+        /*
+         * Primero se guarda la suscripción nueva y solo después se cancela la anterior.
+         * Antes era al revés: si la consulta a Stripe fallaba en medio, el cliente
+         * quedaba cobrado, con el plan viejo cancelado y sin fila nueva.
+         */
+        $stripe    = new \Stripe\StripeClient(env('STRIPE_SECRET_KEY'));
+        $stripeSub = $stripe->subscriptions->retrieve($stripeSubscriptionId);
+        [$start, $end] = $this->periodoDe($stripeSub);
+        $nuevaId = $this->guardarSuscripcion($userId, (int) $plan->id, (string) $stripeSubscriptionId, $start, $end);
+
+        // La propia suscripción (fila creada antes por invoice.paid) no es "anterior"
+        $oldSubscriptions = array_values(array_filter($oldSubscriptions, static function ($s) use ($stripeSubscriptionId, $nuevaId) {
+            return (int) $s->id !== $nuevaId && (string) ($s->stripe_subscription_id ?? '') !== (string) $stripeSubscriptionId;
+        }));
+
         foreach ($oldSubscriptions as $oldSub) {
             // Si es una suscripción de Stripe diferente a la actual, cancelarla en Stripe
             if (!empty($oldSub->stripe_subscription_id) && $oldSub->stripe_subscription_id !== $stripeSubscriptionId) {
@@ -583,26 +609,7 @@ class Webhook extends Controller
             $subscriptionModel->whereIn('id', $oldSubIds)->set(['status' => ''])->update();
         }
 
-        // 4. Crear nueva suscripción (Recuperamos fechas reales de Stripe)
-        $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET_KEY'));
-        $stripeSub = $stripe->subscriptions->retrieve($stripeSubscriptionId);
-
-        $start = !empty($stripeSub->current_period_start) ? date('Y-m-d H:i:s', $stripeSub->current_period_start) : date('Y-m-d H:i:s');
-        $end   = !empty($stripeSub->current_period_end) ? date('Y-m-d H:i:s', $stripeSub->current_period_end) : date('Y-m-d H:i:s', strtotime('+1 month'));
-        if ($start === $end) {
-            $end = date('Y-m-d H:i:s', strtotime($start . ' +1 month'));
-        }
-
-        $subscriptionModel->insert([
-            'user_id'                => $userId,
-            'plan_id'                => $plan->id,
-            'stripe_subscription_id' => $stripeSubscriptionId,
-            'status'                 => 'active',
-            'current_period_start'   => $start,
-            'current_period_end'     => $end,
-            'created_at'             => date('Y-m-d H:i:s'),
-            'updated_at'             => date('Y-m-d H:i:s'),
-        ]);
+        // 4. La suscripción nueva ya está guardada arriba (guardarSuscripcion).
 
         // Enviar email de bienvenida a Solvencia Pro si corresponde
         if ($plan->slug === 'risk_pro') {
@@ -643,11 +650,24 @@ class Webhook extends Controller
         log_message('info', "[Webhook::stripe] Subscription created for user {$userId}");
     }
 
+    /** Ver App\Libraries\SuscripcionStripe (lo comparte la página de éxito del pago). */
+    private function periodoDe($stripeSub): array
+    {
+        return \App\Libraries\SuscripcionStripe::periodoDe($stripeSub);
+    }
+
+    private function guardarSuscripcion(int $userId, int $planId, string $stripeSubscriptionId, string $start, string $end): int
+    {
+        return \App\Libraries\SuscripcionStripe::guardar($userId, $planId, $stripeSubscriptionId, $start, $end);
+    }
+
     private function handleInvoicePaid($invoice)
     {
         // $invoice se reutiliza más abajo para la factura local: guardamos la de Stripe
         $stripeInvoiceRaw = $invoice;
-        $stripeSubscriptionId = $invoice->subscription ?? null;
+        // Según la versión de la API de Stripe, la suscripción viene en un sitio u otro
+        $stripeSubscriptionId = $invoice->subscription
+            ?? ($invoice->parent->subscription_details->subscription ?? null);
 
         if (!$stripeSubscriptionId) {
             // Pago único (ej. descarga de Excel)
@@ -664,7 +684,8 @@ class Webhook extends Controller
         }
 
         $subscriptionModel = new UsersuscriptionsModel();
-        $sub = $subscriptionModel->where('stripe_subscription_id', $stripeSubscriptionId)->first();
+        // La más reciente: es la que usa la API (ApiKeyFilter coge la de mayor id)
+        $sub = $subscriptionModel->where('stripe_subscription_id', $stripeSubscriptionId)->orderBy('id', 'DESC')->first();
 
         // FALLBACK: Si no existe localmente, puede que el webhook 'invoice.paid' llegara ANTES que 'checkout.session.completed'
         // Intentamos recuperar la suscripción de Stripe para guardarla nosotros ahora mismo.
@@ -682,23 +703,9 @@ class Webhook extends Controller
                     $plan = $planModel->where('slug', $planSlug)->first();
                     
                     if ($plan) {
-                        $start = !empty($stripeSub->current_period_start) ? date('Y-m-d H:i:s', $stripeSub->current_period_start) : date('Y-m-d H:i:s');
-                        $end   = !empty($stripeSub->current_period_end) ? date('Y-m-d H:i:s', $stripeSub->current_period_end) : date('Y-m-d H:i:s', strtotime('+1 month'));
-                        if ($start === $end) {
-                            $end = date('Y-m-d H:i:s', strtotime($start . ' +1 month'));
-                        }
-
-                        $subscriptionModel->insert([
-                            'user_id'                => $userId,
-                            'plan_id'                => $plan->id,
-                            'stripe_subscription_id' => $stripeSubscriptionId,
-                            'status'                 => 'active',
-                            'current_period_start'   => $start,
-                            'current_period_end'     => $end,
-                            'created_at'             => date('Y-m-d H:i:s'),
-                            'updated_at'             => date('Y-m-d H:i:s'),
-                        ]);
-                        $sub = $subscriptionModel->where('stripe_subscription_id', $stripeSubscriptionId)->first();
+                        [$start, $end] = $this->periodoDe($stripeSub);
+                        $this->guardarSuscripcion($userId, (int) $plan->id, (string) $stripeSubscriptionId, $start, $end);
+                        $sub = $subscriptionModel->where('stripe_subscription_id', $stripeSubscriptionId)->orderBy('id', 'DESC')->first();
                         log_message('info', "[Webhook::handleInvoicePaid] Suscripción recuperada y creada 'on-the-fly' para el usuario {$userId}");
                     }
                 }
@@ -712,19 +719,21 @@ class Webhook extends Controller
             $stripe = new \Stripe\StripeClient(env('STRIPE_SECRET_KEY'));
             $stripeSub = $stripe->subscriptions->retrieve($stripeSubscriptionId);
 
-            $start = !empty($stripeSub->current_period_start) ? date('Y-m-d H:i:s', $stripeSub->current_period_start) : date('Y-m-d H:i:s');
-            $end   = !empty($stripeSub->current_period_end) ? date('Y-m-d H:i:s', $stripeSub->current_period_end) : date('Y-m-d H:i:s', strtotime('+1 month'));
-            if ($start === $end) {
-                $end = date('Y-m-d H:i:s', strtotime($start . ' +1 month'));
-            }
+            [$start, $end] = $this->periodoDe($stripeSub);
 
-            // Actualizar fecha de fin usando los datos reales de Stripe
-            $subscriptionModel->update($sub->id, [
+            // Actualizar fecha de fin usando los datos reales de Stripe.
+            // Una baja programada sigue siendo una baja: un invoice.paid reenviado o
+            // tardío no debe volver a marcarla como activa.
+            $bajaProgramada = !empty($stripeSub->cancel_at_period_end) || !empty($stripeSub->cancel_at);
+            $cambiosSub = [
                 'current_period_start' => $start,
                 'current_period_end'   => $end,
-                'status'               => 'active',
                 'updated_at'           => date('Y-m-d H:i:s'),
-            ]);
+            ];
+            if (!$bajaProgramada) {
+                $cambiosSub['status'] = 'active';
+            }
+            $subscriptionModel->update($sub->id, $cambiosSub);
 
             // Extraer datos fiscales del objeto Invoice de Stripe
             $billingAddress = '';

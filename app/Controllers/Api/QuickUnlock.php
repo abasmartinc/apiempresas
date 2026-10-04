@@ -106,6 +106,14 @@ class QuickUnlock extends BaseController
                 'company' => 'N/A (Quick Unlock)'
             ]);
             $emailService->sendSetPasswordEmail($email, $token);
+            // Bienvenida de la API (clave y primera llamada): es un alta de API y solo
+            // recibía "pon tu contraseña".
+            $emailService->sendWelcomeEmail([
+                'user_id'       => $userId,
+                'name'          => explode('@', $email)[0],
+                'email'         => $email,
+                'signup_intent' => 'api',
+            ]);
         } catch (\Throwable $e) {
             log_message('error', '[QuickUnlock] Error enviando correos: ' . $e->getMessage());
         }

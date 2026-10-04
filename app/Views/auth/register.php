@@ -197,7 +197,7 @@
             </form>
 
             <div class="auth-form-footer" style="margin-top: 16px; margin-bottom: 0;">
-                ¿Ya tienes cuenta? <a href="<?=site_url() ?>enter">Inicia sesión</a>
+                ¿Ya tienes cuenta? <a href="<?=site_url() ?>enter<?= !empty($redirectUrl) ? '?redirect=' . urlencode((string) $redirectUrl) : '' ?>">Inicia sesión</a>
             </div>
         </div>
 
