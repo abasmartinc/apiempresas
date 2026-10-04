@@ -337,7 +337,10 @@ class Register extends BaseController
                 'signup_intent' => $data['signup_intent'] ?? null,
             ];
 
-            // En su propio try, por lo mismo que en quick_store: la cuenta ya existe.
+            // Los correos se envían DESPUÉS de responder (App\Libraries\Despues): antes el
+            // usuario esperaba en "Creando cuenta…" mientras salían por SMTP.
+            $cifAlta = (string) (session()->get('signup_cif') ?? '');
+            \App\Libraries\Despues::hacer(function () use ($userData, $data, $redirectUrl, $user_id, $cifAlta) {
             try {
                 // Notificación al Admin (papelo.amh@gmail.com)
                 $this->emailService->sendRegistrationAdminNotification($userData);
@@ -348,7 +351,7 @@ class Register extends BaseController
                     $this->emailService->sendRiskWelcomeEmail(
                         $userData,
                         (string)($redirectUrl ?? ''),
-                        (string)(session()->get('signup_cif') ?? '')
+                        $cifAlta
                     );
                 } elseif (($data['signup_intent'] ?? '') === 'api') {
                     $this->emailService->sendWelcomeEmail($userData);
@@ -356,6 +359,7 @@ class Register extends BaseController
             } catch (\Throwable $e) {
                 log_message('error', 'Registro: fallo enviando correos al usuario ' . $user_id . ': ' . $e->getMessage());
             }
+            });
 
             // 6) Auto-Login al usuario (RE-HABILITADO para mejorar conversión)
             $this->userModel->update($user_id, [
@@ -694,6 +698,9 @@ class Register extends BaseController
             // y la suscripción ya existen, así que un fallo mandando un correo no
             // puede acabar en "Error al crear la cuenta" con el usuario sin sesión
             // y la fila ya creada — que es justo lo que pasaba.
+            // Se envían DESPUÉS de responder (App\Libraries\Despues).
+            $cifAlta = (string) (session()->get('signup_cif') ?? $this->request->getPost('cif') ?? '');
+            \App\Libraries\Despues::hacer(function () use ($user_id, $data, $email, $token, $redirect, $intentPorDefecto, $cifAlta) {
             try {
                 $this->emailService->sendRegistrationAdminNotification([
                     'user_id' => $user_id,
@@ -712,7 +719,7 @@ class Register extends BaseController
                         'name'          => $data['name'],
                         'email'         => $email,
                         'signup_intent' => $data['signup_intent'],
-                    ], (string)$redirect, (string)(session()->get('signup_cif') ?? $this->request->getPost('cif') ?? ''));
+                    ], (string)$redirect, $cifAlta);
                 } elseif (($data['signup_intent'] ?? '') === 'api' && !$intentPorDefecto) {
                     // Igual que el registro normal: quien viene expresamente por la API
                     // recibe su bienvenida (API Key, primera llamada). Antes solo le
@@ -728,6 +735,7 @@ class Register extends BaseController
             } catch (\Throwable $e) {
                 log_message('error', 'Quick Register: fallo enviando correos al usuario ' . $user_id . ': ' . $e->getMessage());
             }
+            });
 
             try {
                 $this->logSignupOrigin((int)$user_id, $data['signup_intent'] ?? null);

@@ -492,7 +492,7 @@ class ApiKeyFilter implements FilterInterface
                 if ((int)$planId === 1) {
                     $usageRow = $db->table('api_usage_daily')->selectSum('requests_count')->where('user_id', (int)$row->user_id)->where('date >=', self::FREE_DESDE)->get()->getRow();
                 } else {
-                    $usageRow = $db->table('api_usage_daily')->selectSum('requests_count')->where('user_id', (int)$row->user_id)->where('plan_id', (int)$planId)->like('date', $currentMonth, 'after')->get()->getRow();
+                    $usageRow = $db->table('api_usage_daily')->selectSum('requests_count')->where('user_id', (int)$row->user_id)->where('plan_id', (int)$planId)->where('date >=', $currentMonth . '-01')->where('date <', date('Y-m-01', strtotime('first day of next month')))->get()->getRow();
                 }
                 $currentUsage = $usageRow ? (int)$usageRow->requests_count : 0;
                 cache()->save($cacheKey, $currentUsage, 30);
@@ -596,9 +596,9 @@ class ApiKeyFilter implements FilterInterface
             // Solo cuentan las respuestas 200, como el cupo: antes contaban también los
             // errores (que no se cobran) y quien probaba con CIF mal formados podía
             // quedarse bloqueado por IP sin haber gastado ninguna consulta.
-            if ((int)$planId === 1 && $walletBalance <= 0 && $db->tableExists('api_requests')) {
+            if ((int)$planId === 1 && $walletBalance <= 0) {
                 $ipAddress = $request->getIPAddress();
-                $subscriptionTable = $db->tableExists('user_subscriptions') ? 'user_subscriptions' : 'usersuscriptions';
+                $subscriptionTable = 'user_subscriptions';
                 // En IPv6 se compara la red (/64), no la dirección exacta: los equipos
                 // cambian de dirección dentro de su red y el límite no les afectaba.
                 $redIp   = self::redDeIp((string) $ipAddress);
@@ -729,7 +729,7 @@ class ApiKeyFilter implements FilterInterface
             $isSearch = (strpos($endpoint, 'api/v1/professional/search') !== false);
             $isEnterprise = ($meta['plan_slug'] === 'enterprise');
             
-            if ($db->tableExists('api_requests')) {
+            if (true) {   // la tabla existe siempre: se quita la comprobación en cada petición
                 if (!$isSearch && (!$isEnterprise || $statusCode !== 200)) {
                     $db->table('api_requests')->insert([
                         'user_id'         => (int)$meta['user_id'],
@@ -755,7 +755,7 @@ class ApiKeyFilter implements FilterInterface
                 $skipBilling = true;
             }
 
-            if ($db->tableExists('api_usage_daily') && !$skipBilling && ($meta['sub_cost'] > 0 || $meta['wallet_cost'] > 0)) {
+            if (!$skipBilling && ($meta['sub_cost'] > 0 || $meta['wallet_cost'] > 0)) {
                 $sqlDaily = "
                     INSERT INTO api_usage_daily (user_id, plan_id, date, requests_count, credits_used, created_at, updated_at)
                     VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -829,19 +829,29 @@ class ApiKeyFilter implements FilterInterface
     protected function checkThresholdNotification($db, int $userId)
     {
         try {
-            $thirtyDaysAgo = date('Y-m-d', strtotime('-30 days'));
-            $usage = $db->table('api_usage_daily')
-                ->selectSum('requests_count')
-                ->where('user_id', $userId)
-                ->where('date >=', $thirtyDaysAgo)
-                ->get()
-                ->getRow();
-
-            $total = $usage ? (int)$usage->requests_count : 0;
+            // El total de 30 días se guarda 10 minutos: antes se sumaba en cada petición
+            // del cliente que más consultas hace.
+            $claveTotal = "threshold_total_30d_{$userId}";
+            $total = cache()->get($claveTotal);
+            if ($total === null) {
+                $thirtyDaysAgo = date('Y-m-d', strtotime('-30 days'));
+                $usage = $db->table('api_usage_daily')
+                    ->selectSum('requests_count')
+                    ->where('user_id', $userId)
+                    ->where('date >=', $thirtyDaysAgo)
+                    ->get()
+                    ->getRow();
+                $total = $usage ? (int)$usage->requests_count : 0;
+                cache()->save($claveTotal, $total, 600);
+            }
+            $total = (int) $total;
 
             if ($total >= 42500) {
                 $cacheKey = "threshold_notif_sent_{$userId}";
                 if (cache()->get($cacheKey)) return;
+                // Se marca ANTES de enviar: con el correo caído se reintentaba el envío
+                // en cada petición del cliente. Si falla, se vuelve a intentar en una hora.
+                cache()->save($cacheKey, true, 3600);
 
                 $email = \Config\Services::email();
                 $email->setFrom('soporte@apiempresas.es', 'APIEmpresas Support');
@@ -858,6 +868,8 @@ class ApiKeyFilter implements FilterInterface
                 
                 if ($email->send()) {
                     cache()->save($cacheKey, true, 86400);
+                } else {
+                    log_message('error', '[ApiKeyFilter::checkThresholdNotification] No se pudo enviar el aviso de umbral del usuario ' . $userId);
                 }
             }
         } catch (\Throwable $e) {

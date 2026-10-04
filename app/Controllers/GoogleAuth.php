@@ -419,6 +419,9 @@ class GoogleAuth extends BaseController
             // Esto va DENTRO de la transacción: sin el try, una excepción mandando
             // un correo deja la transacción sin completar y el alta entera se
             // deshace. El correo es secundario; la cuenta no.
+            // Y se envían DESPUÉS de responder (App\Libraries\Despues): ya no retrasan
+            // la entrada ni mantienen la transacción abierta.
+            \App\Libraries\Despues::hacer(function () use ($user_id, $name, $email, $intent, $destino, $cifOrigen) {
             try {
                 $this->emailService->sendRegistrationAdminNotification([
                     'user_id' => $user_id,
@@ -448,6 +451,7 @@ class GoogleAuth extends BaseController
             } catch (\Throwable $e) {
                 log_message('error', 'GoogleAuth: fallo enviando correos al usuario ' . $user_id . ': ' . $e->getMessage());
             }
+            });
 
             $db->transComplete();
 

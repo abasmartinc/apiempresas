@@ -119,7 +119,9 @@ class UsageController extends BaseApiController
             // cualquier CIF pedido, también con error o al sandbox (gratis), y este
             // endpoint, que no gasta cupo, devolvía su ficha: se podían sacar fichas sin
             // pagar. Así solo se repite lo que el usuario ya ha pagado.
-            $recentRequests = $this->apiRequestsModel
+            // La cuenta del monitor de estado hace miles de consultas: su historial no
+            // se usa y agruparlo tardaba más de un segundo en cada comprobación.
+            $recentRequests = ((int) $userId === \App\Filters\ApiKeyFilter::MONITOR_USER_ID) ? [] : $this->apiRequestsModel
                 ->select('search_term, COUNT(*) as query_count, MAX(created_at) as last_query')
                 ->where('user_id', $userId)
                 ->where('status_code', 200)
@@ -127,6 +129,9 @@ class UsageController extends BaseApiController
                 ->notLike('endpoint', 'professional/search', 'both')
                 ->where('search_term IS NOT NULL')
                 ->where('search_term !=', '')
+                // Solo CIF: las búsquedas por nombre entraban aquí y salían como
+                // "Empresa no encontrada" (se buscaba el texto como si fuera un CIF).
+                ->where("search_term REGEXP '^([A-Za-z][0-9]{7}[A-Za-z0-9]|[0-9]{8}[A-Za-z])$'", null, false)
                 ->groupStart()
                     ->like('endpoint', 'companies', 'both')
                     ->orLike('endpoint', 'professional', 'both')

@@ -149,6 +149,17 @@ class EmailAutomationCommand extends BaseCommand
             return;
         }
 
+        // 1a. TRIGGER: reached_50_requests (una vez). Entre la 5.ª consulta y el aviso del
+        //     80 % no había nada, y quien llega al 80 % ya casi nunca compra (04-10-2026:
+        //     14 de 18 pagaron antes de gastar 50). Solo si sigue usando la API.
+        if ($totalRequests >= 50 && $lastRequestTime && (time() - strtotime($lastRequestTime)) < 14 * 86400
+            && $this->checkAndSend($user, 'reached_50_requests', 'email_sent_half_quota', [
+                'total'    => $totalRequests,
+                'empresas' => $this->empresasConsultadas($userId),
+            ])) {
+            return;
+        }
+
         // 1b. TRIGGER: first_request — primera consulta con éxito (antes se enviaba
         //     dentro de la propia petición a la API). Solo si aún no llega a 5: con
         //     más, el correo que toca es el de reached_5_requests.
@@ -765,6 +776,13 @@ class EmailAutomationCommand extends BaseCommand
                 break;
             case 'reached_5_requests':
                 $result = $this->emailService->sendReached5Requests($user);
+                break;
+            case 'reached_50_requests':
+                $result = $this->emailService->sendReached50Requests(
+                    $user,
+                    (int) ($extraParams['total'] ?? 50),
+                    $extraParams['empresas'] ?? []
+                );
                 break;
             case 'reached_80_requests':
                 $result = $this->emailService->sendReached80Requests($user);
@@ -1810,7 +1828,7 @@ class EmailAutomationCommand extends BaseCommand
         $conMotivo = in_array('cancellation_reason', $db->getFieldNames('user_subscriptions'), true);
 
         $filas = $db->table('user_subscriptions us')
-            ->select('us.user_id, us.plan_id, us.current_period_end, ap.name AS plan_name'
+            ->select('us.user_id, us.plan_id, us.current_period_end, ap.name AS plan_name, ap.slug AS plan_slug'
                 . ($conMotivo ? ', us.cancellation_reason' : ''))
             ->join('api_plans ap', 'ap.id = us.plan_id', 'left')
             ->where('us.status', 'canceled')
@@ -1854,7 +1872,7 @@ class EmailAutomationCommand extends BaseCommand
             CLI::write("  -> Enviando 'api_winback' a {$usuarios[$uid]['email']}...");
             $this->registrarEnvio($uid, 'api_winback', $this->emailService->sendApiWinback(
                 $usuarios[$uid] + ['user_id' => $uid],
-                ['name' => $f['plan_name'] ?? ''],
+                ['name' => $f['plan_name'] ?? '', 'slug' => $f['plan_slug'] ?? ''],
                 (string) ($f['cancellation_reason'] ?? '')
             ));
         }
@@ -1867,6 +1885,20 @@ class EmailAutomationCommand extends BaseCommand
      */
     protected function processApiCheckoutAbandoned(): void
     {
+        // Primer aviso: entre 1 y 48 h después del intento.
+        $this->pagosSinTerminar(1, 48, 'api_checkout_abandoned', false);
+        // Segundo y último: entre 72 y 120 h, solo a quien recibió el primero y sigue sin pagar.
+        $this->pagosSinTerminar(72, 120, 'api_checkout_abandoned_2', true);
+    }
+
+    /**
+     * @param int    $desdeH  horas mínimas desde el intento
+     * @param int    $hastaH  horas máximas desde el intento
+     * @param string $tipo    tipo de envío en user_email_automation
+     * @param bool   $segundo segundo aviso (más corto; exige haber recibido el primero)
+     */
+    protected function pagosSinTerminar(int $desdeH, int $hastaH, string $tipo, bool $segundo): void
+    {
         $db = \Config\Database::connect();
 
         $empezados = $db->table('tracking_events')
@@ -1878,8 +1910,8 @@ class EmailAutomationCommand extends BaseCommand
                 ->like('metadata', '"plan":"pro"')
                 ->orLike('metadata', '"plan":"business"')
             ->groupEnd()
-            ->where('created_at >=', date('Y-m-d H:i:s', strtotime('-48 hours')))
-            ->where('created_at <=', date('Y-m-d H:i:s', strtotime('-1 hour')))
+            ->where('created_at >=', date('Y-m-d H:i:s', strtotime('-' . $hastaH . ' hours')))
+            ->where('created_at <=', date('Y-m-d H:i:s', strtotime('-' . $desdeH . ' hours')))
             ->orderBy('created_at', 'DESC')
             ->get()->getResultArray();
 
@@ -1891,25 +1923,36 @@ class EmailAutomationCommand extends BaseCommand
             }
         }
         if (empty($porUsuario)) {
-            CLI::write('  - Sin pagos de la API sin terminar.', 'dark_gray');
+            CLI::write('  - Sin pagos de la API sin terminar' . ($segundo ? ' (segundo aviso).' : '.'), 'dark_gray');
             return;
         }
 
-        $conPlan = array_flip(array_map('intval', array_column($db->table('user_subscriptions')
-            ->select('user_id')
+        // Plan de pago vigente de cada usuario (el mayor, si hay varios)
+        $conPlan = [];
+        foreach ($db->table('user_subscriptions')
+            ->select('user_id, plan_id')
             ->whereIn('plan_id', [2, 3])
             ->groupStart()
                 ->where('status', 'active')
                 ->orGroupStart()->where('status', 'canceled')->where('current_period_end >', date('Y-m-d H:i:s'))->groupEnd()
             ->groupEnd()
-            ->get()->getResultArray(), 'user_id')));
+            ->get()->getResultArray() as $fp) {
+            $conPlan[(int) $fp['user_id']] = max((int) $fp['plan_id'], $conPlan[(int) $fp['user_id']] ?? 0);
+        }
 
         $usuarios = $this->usuariosElegibles(array_keys($porUsuario));
         $enviados = 0;
 
         foreach ($porUsuario as $uid => $intento) {
-            if (isset($conPlan[$uid]) || !isset($usuarios[$uid])) {
+            $meta = json_decode((string) $intento['metadata'], true) ?: [];
+            // Quien ya tiene plan no recibe nada, salvo el Pro que dejó a medias la
+            // subida a Business (antes se le excluía por "tener plan").
+            $subidaABusiness = ($conPlan[$uid] ?? 0) === 2 && ($meta['plan'] ?? '') === 'business';
+            if ((isset($conPlan[$uid]) && !$subidaABusiness) || !isset($usuarios[$uid])) {
                 continue;
+            }
+            if ($segundo && !$this->automationModel->wasSentRecently($uid, 'api_checkout_abandoned', 10)) {
+                continue;   // el segundo aviso solo sigue al primero
             }
 
             $completado = $db->table('tracking_events')
@@ -1924,25 +1967,25 @@ class EmailAutomationCommand extends BaseCommand
                 ->where('user_id', $uid)
                 ->where('created_at >', date('Y-m-d H:i:s', strtotime('-1 hour')))
                 ->countAllResults() > 0;
-            if ($completado || $reciente || $this->automationModel->wasSentRecently($uid, 'api_checkout_abandoned', 30)
+            if ($completado || $reciente || $this->automationModel->wasSentRecently($uid, $tipo, 30)
                 || $this->recibioHoyApi($uid)) {
                 continue;
             }
 
-            $meta = json_decode((string) $intento['metadata'], true) ?: [];
-            CLI::write("  -> Enviando 'api_checkout_abandoned' a {$usuarios[$uid]['email']}...");
+            CLI::write("  -> Enviando '{$tipo}' a {$usuarios[$uid]['email']}...");
             $res = $this->emailService->sendApiCheckoutAbandoned(
                 $usuarios[$uid] + ['user_id' => $uid],
                 (string) ($meta['plan'] ?? 'pro'),
-                (string) ($meta['period'] ?? 'monthly')
+                (string) ($meta['period'] ?? 'monthly'),
+                $segundo
             );
-            $this->registrarEnvio($uid, 'api_checkout_abandoned', $res);
+            $this->registrarEnvio($uid, $tipo, $res);
             if (!empty($res['success']) && empty($res['skipped'])) {
                 $enviados++;
             }
         }
 
-        CLI::write('  - Pagos sin terminar: ' . count($porUsuario) . ' usuario(s); correos enviados: ' . $enviados
+        CLI::write('  - Pagos sin terminar' . ($segundo ? ' (segundo aviso)' : '') . ': ' . count($porUsuario) . ' usuario(s); correos enviados: ' . $enviados
             . ' (el resto ya pagó, ya tenía plan, no admite correos o ya lo recibió).');
     }
 

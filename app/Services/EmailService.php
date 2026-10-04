@@ -1032,6 +1032,39 @@ class EmailService
     }
 
     /**
+     * TRIGGER: reached_50_requests. Mitad del cupo gratuito, con las empresas que el
+     * usuario ya ha consultado: es cuando todavía decide (quien paga, paga pronto).
+     */
+    public function sendReached50Requests(array $userData, int $total = 50, array $empresas = [])
+    {
+        $en     = $this->idioma($userData) === 'en';
+        $limite = $this->freeLimit();
+        $quedan = max(0, $limite - $total);
+        $lista  = $this->listaEmpresas($empresas, $en);
+
+        return $en
+            ? $this->sendApiAutomation(
+                $userData,
+                'You are halfway through your ' . $limite . ' free lookups',
+                'You have ' . $quedan . ' left and they do not renew. This is what Pro adds.',
+                'You have used ' . $total . ' of your ' . $limite . ' free lookups' . ($lista !== '' ? ', including ' . $lista : '') . '. You have <strong>' . $quedan . '</strong> left, and the free quota does not renew.<br><br>If the API is already part of your work, this is the moment to look at the <b>Pro plan</b>: the same call, with what the Free plan hides.' . $this->ventajasPro(true) . $this->precioPro(true) . ' Same API Key, same code.',
+                'See the Pro plan',
+                base_url('billing?plan=pro&period=monthly'),
+                'reached_50_requests',
+                'en'
+            )
+            : $this->sendApiAutomation(
+                $userData,
+                'Llevas la mitad de tus ' . $limite . ' consultas gratuitas',
+                'Te quedan ' . $quedan . ' y no se renuevan. Esto es lo que añade Pro.',
+                'Has usado ' . $total . ' de tus ' . $limite . ' consultas gratuitas' . ($lista !== '' ? ', entre ellas ' . $lista : '') . '. Te quedan <strong>' . $quedan . '</strong>, y el cupo gratuito no se renueva.<br><br>Si la API ya forma parte de tu trabajo, este es el momento de mirar el <b>Plan Pro</b>: la misma llamada, con lo que el plan Free te oculta.' . $this->ventajasPro() . $this->precioPro() . ' Misma API Key, mismo código.',
+                'Ver el Plan Pro',
+                base_url('billing?plan=pro&period=monthly'),
+                'reached_50_requests'
+            );
+    }
+
+    /**
      * TRIGGER: reached_80_requests
      */
     public function sendReached80Requests(array $userData)
@@ -1951,12 +1984,30 @@ class EmailService
      * Empezó a pagar Pro o Business de la API y no terminó (1-48 h). Comercial: con baja.
      * Resuelve las dudas típicas antes del pago y vuelve al checkout con plan y periodo.
      */
-    public function sendApiCheckoutAbandoned(array $userData, string $plan, string $period): array
+    public function sendApiCheckoutAbandoned(array $userData, string $plan, string $period, bool $segundo = false): array
     {
         $plan    = $plan === 'business' ? 'business' : 'pro';
         $period  = $period === 'annual' ? 'annual' : 'monthly';
         $nombre  = $plan === 'business' ? 'Business' : 'Pro';
         $li      = static fn (string $h) => '<li style="margin:0 0 6px;">' . $h . '</li>';
+
+        // Segundo y último aviso (3-5 días después): corto y de persona
+        if ($segundo) {
+            $contenido = $this->p('Hace unos días empezaste a activar el plan <strong>' . $nombre . '</strong> de la API y no llegaste a terminarlo. Sigue guardado con el plan y el periodo que elegiste.')
+                . $this->p('Si te frenó algo concreto (la forma de pago, la factura, una duda sobre los datos o el volumen), responde a este correo y lo vemos. Lo lee una persona.')
+                . $this->p('Y si lo que no te encaja es la cuota mensual, un <a href="' . site_url('crear-bono-api') . '" style="color:#2563eb;font-weight:700;">bono de créditos</a> se paga una vez y no caduca.')
+                . $this->p('<span style="font-size:14px;color:#64748b;">Es el último correo que te mandamos sobre esto.</span>');
+
+            return $this->sendApiAutomation(
+                $userData,
+                '¿Te ayudo a terminar la activación de tu plan ' . $nombre . '?',
+                'Sigue guardado. Si algo te frenó, responde y lo vemos.',
+                $contenido,
+                'Retomar la activación',
+                site_url('billing?plan=' . $plan . '&period=' . $period),
+                'api_checkout_abandoned_2'
+            );
+        }
 
         $contenido = $this->p('Empezaste a activar el plan <strong>' . $nombre . '</strong> de la API y el pago se quedó a medias. Lo tienes guardado: el botón te lleva al mismo punto, con el plan y el periodo que elegiste.')
             . $this->p('Por si alguna duda te frenó:')
@@ -2006,8 +2057,11 @@ class EmailService
             'preheader'   => 'Mismo código, misma clave. Y si no quieres cuota mensual, hay bonos de pago único.',
             'name'        => esc(trim((string) ($userData['name'] ?? '')) ?: explode('@', (string) $userData['email'])[0]),
             'content'     => $contenido,
-            'button_text' => 'Ver planes',
-            'button_url'  => site_url('billing'),
+            // Al plan que tenía, ya marcado (antes iba a la página de planes a secas)
+            'button_text' => in_array(($plan['slug'] ?? ''), ['pro', 'business'], true) ? 'Volver al plan ' . $nombre : 'Ver planes',
+            'button_url'  => in_array(($plan['slug'] ?? ''), ['pro', 'business'], true)
+                ? site_url('billing?plan=' . $plan['slug'] . '&period=monthly&source=email_winback')
+                : site_url('billing'),
         ], $userData['email'], ['papelo.amh@gmail.com'], [], (int) ($userData['user_id'] ?? $userData['id'] ?? 0));
     }
 
