@@ -192,6 +192,8 @@ class GithubAuth extends BaseController
                 'updated_at'        => date('Y-m-d H:i:s'),
             ];
 
+            // Usuario, suscripción y API Key se crean juntos o no se crea nada
+            \App\Libraries\SeguridadAlta::altaInicio();
             $userId = $this->userModel->insert($userData);
             $user = $this->userModel->find($userId);
 
@@ -217,6 +219,8 @@ class GithubAuth extends BaseController
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s'),
             ]);
+
+            \App\Libraries\SeguridadAlta::altaFin();
 
             \App\Libraries\Embudo::alta((int) $userId, 'github', $intent, (string) (session('github_redirect') ?? ''));
 

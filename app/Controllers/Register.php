@@ -58,6 +58,12 @@ class Register extends BaseController
             return redirect()->to(site_url(ltrim($redirectUrl, '/')));
         }
         $validation = session('validation') ?? \Config\Services::validation();
+        // Origen del botón que trae al usuario (home_hero, planes_free...): se guarda para
+        // el evento de alta, también si acaba entrando con Google, GitHub o LinkedIn.
+        $origenAlta = substr(preg_replace('/[^a-z0-9_\-]/i', '', (string) $this->request->getGet('source')), 0, 64);
+        if ($origenAlta !== '') {
+            session()->set('signup_source', $origenAlta);
+        }
         $redirectUrl = $this->request->getGet('redirect') ?? '';
         if ($redirectUrl === '' && $destinoPago !== null) {
             $redirectUrl = $destinoPago;
@@ -279,6 +285,9 @@ class Register extends BaseController
         ];
 
         try {
+            // Usuario, API Key y suscripción se crean juntos o no se crea nada
+            \App\Libraries\SeguridadAlta::altaInicio();
+
             // 1) Crear usuario
             $user_id = $this->userModel->insert($data);
             if ($user_id && $intentPorDefecto) {
@@ -286,6 +295,7 @@ class Register extends BaseController
             }
 
             if (!$user_id) {
+                \App\Libraries\SeguridadAlta::altaDeshacer();
                 return redirect()
                     ->back()
                     ->withInput()
@@ -313,6 +323,8 @@ class Register extends BaseController
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s'),
             ]);
+
+            \App\Libraries\SeguridadAlta::altaFin();
 
             \App\Libraries\Embudo::alta((int) $user_id, 'register', $data['signup_intent'] ?? null);
 
@@ -381,6 +393,7 @@ class Register extends BaseController
                 ->to($targetUrl)
                 ->with('success', lang('Messages.flash_56'));
         } catch (\Throwable $e) {
+            \App\Libraries\SeguridadAlta::altaDeshacer();
 
             // Log del error real para depuración
             log_message('error', 'Register store exception: ' . $e->getMessage());
@@ -479,6 +492,12 @@ class Register extends BaseController
             session()->set('signup_intent', $intent);
         }
         $this->recordarReferer();
+        // Origen del botón que trae al usuario (home_hero, planes_free...): se guarda para
+        // el evento de alta, también si acaba entrando con Google, GitHub o LinkedIn.
+        $origenAlta = substr(preg_replace('/[^a-z0-9_\-]/i', '', (string) $this->request->getGet('source')), 0, 64);
+        if ($origenAlta !== '') {
+            session()->set('signup_source', $origenAlta);
+        }
 
         $cif = trim((string)($this->request->getGet('cif') ?? ''));
         if ($cif !== '') {
@@ -640,6 +659,8 @@ class Register extends BaseController
         ];
 
         try {
+            // Usuario, API Key y suscripción se crean juntos o no se crea nada
+            \App\Libraries\SeguridadAlta::altaInicio();
             $user_id = $this->userModel->insert($data);
             if ($user_id && $intentPorDefecto) {
                 $this->logIntentPorDefecto((int) $user_id);
@@ -664,6 +685,8 @@ class Register extends BaseController
                 'created_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s'),
             ]);
+
+            \App\Libraries\SeguridadAlta::altaFin();
 
             \App\Libraries\Embudo::alta((int) $user_id, 'register_quick', $intent);
 
@@ -726,6 +749,7 @@ class Register extends BaseController
             return redirect()->to(site_url(ltrim($redirect, '/')));
 
         } catch (\Throwable $e) {
+            \App\Libraries\SeguridadAlta::altaDeshacer();
             log_message('error', 'Quick Register failed: ' . $e->getMessage());
             return redirect()->back()->with('error', lang('Messages.flash_60'));
         }

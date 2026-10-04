@@ -52,7 +52,12 @@ class QuickUnlock extends BaseController
         // New user registration flow
         $password = bin2hex(random_bytes(8));
         $token = bin2hex(random_bytes(32));
-        
+
+        // Usuario, suscripción y API Key se crean juntos o no se crea nada. Si falla,
+        // la respuesta sigue siendo JSON (antes salía una página de error que el
+        // formulario no sabía leer, con la cuenta creada a medias).
+        try {
+        \App\Libraries\SeguridadAlta::altaInicio();
         $userId = $userModel->insert([
             'name' => explode('@', $email)[0],
             'email' => $email,
@@ -95,6 +100,16 @@ class QuickUnlock extends BaseController
             'is_active' => 1,
             'created_at' => date('Y-m-d H:i:s'),
         ]);
+
+        \App\Libraries\SeguridadAlta::altaFin();
+        } catch (\Throwable $e) {
+            \App\Libraries\SeguridadAlta::altaDeshacer();
+            log_message('error', '[QuickUnlock] Alta fallida: ' . $e->getMessage());
+            return $this->response->setJSON([
+                'status'  => 'error',
+                'message' => 'No hemos podido crear tu cuenta. Inténtalo de nuevo en unos minutos.',
+            ]);
+        }
 
         \App\Libraries\Embudo::alta((int) $userId, 'quick_unlock', 'api');
 

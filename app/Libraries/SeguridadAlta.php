@@ -108,4 +108,41 @@ class SeguridadAlta
             return true;   // si el limitador falla, no se bloquea un alta real
         }
     }
+
+    /**
+     * Alta atómica: usuario, API Key y suscripción gratuita se crean juntos o no se crea
+     * nada. Antes, si fallaba la segunda inserción, quedaba el usuario creado sin clave
+     * y al reintentar se le decía "ya existe una cuenta".
+     *
+     *   SeguridadAlta::altaInicio();  ...inserciones...  SeguridadAlta::altaFin();
+     *
+     * altaFin() lanza una excepción si alguna inserción falló (también cuando la base
+     * de datos no lanza errores por sí misma).
+     */
+    public static function altaInicio(): void
+    {
+        \Config\Database::connect()->transBegin();
+    }
+
+    public static function altaFin(): void
+    {
+        $db = \Config\Database::connect();
+        if ($db->transStatus() === false) {
+            $db->transRollback();
+            throw new \RuntimeException('No se pudo completar el alta: se ha deshecho.');
+        }
+        $db->transCommit();
+    }
+
+    /** Deshace un alta a medias (para los catch). No falla si no hay nada abierto. */
+    public static function altaDeshacer(): void
+    {
+        try {
+            $db = \Config\Database::connect();
+            if ($db->transDepth > 0) {
+                $db->transRollback();
+            }
+        } catch (\Throwable $e) {
+        }
+    }
 }

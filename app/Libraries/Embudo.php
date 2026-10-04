@@ -39,11 +39,33 @@ class Embudo
                     $plan = $m[1];
                     break;
                 }
-                if (preg_match('/^[a-z_]+$/i', $cand)) {
+                // Solo nombres de plan: antes un redirect=dashboard se guardaba como plan
+                if (in_array(strtolower($cand), ['free', 'pro', 'business'], true)) {
                     $plan = $cand;
                     break;
                 }
             }
+
+            // Origen del botón que trajo al usuario (home_hero, api_kyb_pricing_pro...):
+            // el de un correo, el que guardó la página de alta o el que viaja en el
+            // destino de pago. Antes solo se miraba el de los correos y las altas
+            // gratuitas quedaban sin origen.
+            $origen = (string) (session('email_source') ?? '');
+            if ($origen === '') {
+                $origen = (string) (session('signup_source') ?? '');
+            }
+            if ($origen === '') {
+                foreach ([$destino, (string) ($req->getGetPost('redirect') ?? '')] as $cand) {
+                    if (preg_match('/(?:^|[?&])source=([a-z0-9_\-]+)/i', (string) $cand, $m)) {
+                        $origen = $m[1];
+                        break;
+                    }
+                }
+            }
+            if ($origen === '') {
+                $origen = (string) ($req->getGetPost('source') ?? '');
+            }
+            session()->remove('signup_source');
             (new \App\Models\TrackingEventModel())->insert([
                 'event_name'   => 'signup_completed',
                 'page'         => self::PAGE,
@@ -54,7 +76,7 @@ class Embudo
                 'metadata'     => json_encode([
                     'intent' => (string) ($intent ?? ''),
                     'plan'   => substr(strtolower($plan), 0, 20),
-                    'source' => substr(preg_replace('/[^a-z0-9_\-]/i', '', (string) (session('email_source') ?? '')), 0, 64),
+                    'source' => substr(preg_replace('/[^a-z0-9_\-]/i', '', $origen), 0, 64),
                 ]),
                 'created_at'   => date('Y-m-d H:i:s'),
             ]);
