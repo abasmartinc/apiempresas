@@ -90,6 +90,67 @@ class ApiKeyFilter implements FilterInterface
         ];
     }
 
+    /**
+     * Red a la que pertenece una IP, para los límites del plan gratuito.
+     * IPv4: la dirección tal cual. IPv6: los cuatro primeros grupos (la red /64) como
+     * prefijo de texto; si la dirección viene abreviada dentro de esos grupos, se
+     * compara entera.
+     *
+     * @return array{valor:string, prefijo:bool}
+     */
+    public static function redDeIp(string $ip): array
+    {
+        if (strpos($ip, ':') !== false) {
+            $grupos = explode(':', $ip);
+            $red    = array_slice($grupos, 0, 4);
+            if (count($red) === 4 && !in_array('', $red, true)) {
+                return ['valor' => implode(':', $red) . ':', 'prefijo' => true];
+            }
+        }
+        return ['valor' => $ip, 'prefijo' => false];
+    }
+
+    /**
+     * Cuentas que han hecho consultas correctas desde esta red y cuánto han gastado
+     * entre todas de su cupo gratuito (plan 1). Se guarda 60 s por red y usuario.
+     *
+     * @return array{cuentas:int, uso:int}
+     */
+    private static function usoCuentasVinculadas($db, array $redIp, int $userId): array
+    {
+        $clave = 'api_free_red_' . md5($redIp['valor']) . '_' . $userId;
+        $guardado = cache()->get($clave);
+        if (is_array($guardado)) {
+            return $guardado;
+        }
+
+        $res = ['cuentas' => 1, 'uso' => 0];
+        try {
+            $q = $db->table('api_requests r')->distinct()->select('r.user_id')
+                ->where('r.status_code', 200)
+                ->where('r.created_at >=', self::FREE_DESDE . ' 00:00:00');
+            if ($redIp['prefijo']) {
+                $q->like('r.ip_address', $redIp['valor'], 'after');
+            } else {
+                $q->where('r.ip_address', $redIp['valor']);
+            }
+            $ids = array_map('intval', array_column($q->limit(25)->get()->getResultArray(), 'user_id'));
+            $ids = array_values(array_unique(array_filter(array_merge($ids, [$userId]), static fn ($i) => $i > 0 && $i !== self::MONITOR_USER_ID)));
+
+            if (count($ids) >= 2) {
+                $fila = $db->table('api_usage_daily')->selectSum('requests_count')
+                    ->whereIn('user_id', $ids)->where('plan_id', 1)
+                    ->where('date >=', self::FREE_DESDE)->get()->getRow();
+                $res = ['cuentas' => count($ids), 'uso' => (int) ($fila->requests_count ?? 0)];
+            }
+        } catch (\Throwable $e) {
+            log_message('error', '[ApiKeyFilter::usoCuentasVinculadas] ' . $e->getMessage());
+        }
+
+        cache()->save($clave, $res, 60);
+        return $res;
+    }
+
     /** Usuario de la petición en curso, para registrar ganchos antes de apiMeta. */
     private static int $ganchoUserId = 0;
 
@@ -538,7 +599,16 @@ class ApiKeyFilter implements FilterInterface
             if ((int)$planId === 1 && $walletBalance <= 0 && $db->tableExists('api_requests')) {
                 $ipAddress = $request->getIPAddress();
                 $subscriptionTable = $db->tableExists('user_subscriptions') ? 'user_subscriptions' : 'usersuscriptions';
-                $ipUsage = $db->table('api_requests r')->join($subscriptionTable . ' us', 'us.user_id = r.user_id')->where('us.plan_id', 1)->where('us.status', 'active')->where('r.ip_address', $ipAddress)->where('r.status_code', 200)->where('r.created_at >=', self::FREE_DESDE . ' 00:00:00')->countAllResults();
+                // En IPv6 se compara la red (/64), no la dirección exacta: los equipos
+                // cambian de dirección dentro de su red y el límite no les afectaba.
+                $redIp   = self::redDeIp((string) $ipAddress);
+                $ipQuery = $db->table('api_requests r')->join($subscriptionTable . ' us', 'us.user_id = r.user_id')->where('us.plan_id', 1)->where('us.status', 'active')->where('r.status_code', 200)->where('r.created_at >=', self::FREE_DESDE . ' 00:00:00');
+                if ($redIp['prefijo']) {
+                    $ipQuery->like('r.ip_address', $redIp['valor'], 'after');
+                } else {
+                    $ipQuery->where('r.ip_address', $redIp['valor']);
+                }
+                $ipUsage = $ipQuery->countAllResults();
 
                 if ($ipUsage >= 100) {
                     $this->registrarRechazo($request, $row, 429, 'ip');
@@ -548,6 +618,21 @@ class ApiKeyFilter implements FilterInterface
                         'message' => 'Límite de seguridad por IP alcanzado. Actualiza tu plan.',
                         'upgrade_url' => site_url('billing'),
                     ] + self::enlacesCompra(1, 'api_429_ip'), 'IP_LIMIT_EXCEEDED', 'Límite de seguridad por IP alcanzado. Actualiza tu plan.');
+                }
+
+                // Cuentas gratuitas vinculadas: quien agota las 100 y abre otra cuenta
+                // desde la misma conexión. Si varias cuentas Free han usado esta red y
+                // entre todas ya han gastado el doble del cupo gratuito, no hay más.
+                $vinculadas = self::usoCuentasVinculadas($db, $redIp, (int) $row->user_id);
+                if ($vinculadas['cuentas'] >= 2 && $vinculadas['uso'] >= 2 * (int) $monthlyQuota) {
+                    $msgRed = 'Has alcanzado el límite de consultas gratuitas para tu red: varias cuentas gratuitas comparten esta conexión. Pasa al plan Pro para seguir consultando.';
+                    $this->registrarRechazo($request, $row, 429, 'ip');
+                    return $this->errorResponse(429, [
+                        'success' => false,
+                        'error'   => 'Quota Exceeded',
+                        'message' => $msgRed,
+                        'upgrade_url' => site_url('billing'),
+                    ] + self::enlacesCompra(1, 'api_429_cuentas'), 'IP_LIMIT_EXCEEDED', $msgRed);
                 }
             }
 
