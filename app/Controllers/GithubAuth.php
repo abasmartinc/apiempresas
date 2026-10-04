@@ -159,7 +159,9 @@ class GithubAuth extends BaseController
         if (!$user) {
             $user = $this->userModel->where('email', $email)->first();
             if ($user) {
-                // Vincular cuenta existente con GitHub
+                // Vincular cuenta existente con GitHub (si su correo no estaba
+                // verificado, la contraseña anterior deja de valer)
+                \App\Libraries\SeguridadAlta::alVincular($user, 'GitHub');
                 $this->userModel->update($user->id, [
                     'github_id' => $githubId,
                     'avatar'    => $user->avatar ?: $avatar
@@ -231,6 +233,11 @@ class GithubAuth extends BaseController
             } catch (\Exception $e) {
                 log_message('error', '[GithubAuth] Error enviando email bienvenida: ' . $e->getMessage());
             }
+        }
+
+        // Una cuenta desactivada no entra tampoco por GitHub
+        if (!\App\Libraries\SeguridadAlta::activa($user)) {
+            return redirect()->to(site_url('enter'))->with('error', 'Esta cuenta está desactivada. Escríbenos si crees que es un error.');
         }
 
         // Iniciar sesión con un identificador de sesión nuevo (evita fijación de sesión)

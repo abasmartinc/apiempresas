@@ -74,7 +74,11 @@ class LinkedinAuth extends BaseController
             return redirect()->to(site_url('enter'))->with('error', lang('Messages.flash_33'));
         }
 
-        if ($state !== session('linkedin_state')) {
+        // Sin `state` en la sesión no se acepta (antes pasaba si los dos venían vacíos),
+        // y se usa una sola vez.
+        $estadoEsperado = (string) (session('linkedin_state') ?? '');
+        session()->remove('linkedin_state');
+        if ($estadoEsperado === '' || !hash_equals($estadoEsperado, (string) $state)) {
             return redirect()->to(site_url('enter'))->with('error', lang('Messages.flash_34'));
         }
 
@@ -116,12 +120,17 @@ class LinkedinAuth extends BaseController
             if (!$email) {
                 throw new \Exception('No se pudo obtener el email de tu cuenta de LinkedIn.');
             }
+            // Con un correo sin verificar en LinkedIn no se une ni se crea cuenta
+            if (array_key_exists('email_verified', $linkedinUser) && !filter_var($linkedinUser['email_verified'], FILTER_VALIDATE_BOOLEAN)) {
+                return redirect()->to(site_url('enter'))->with('error', 'Tu correo de LinkedIn no está verificado. Verifícalo en LinkedIn o entra con otro método.');
+            }
 
             return $this->loginUser($linkedinId, $email, $name, $avatar);
 
         } catch (\Exception $e) {
             log_message('error', '[LinkedinAuth] Error en callback: ' . $e->getMessage());
-            return redirect()->to(site_url('enter'))->with('error', 'Error durante la autenticación con LinkedIn: ' . $e->getMessage());
+            // El detalle técnico queda en el log, no se le enseña al usuario
+            return redirect()->to(site_url('enter'))->with('error', 'No hemos podido completar el acceso con LinkedIn. Inténtalo de nuevo o entra con otro método.');
         }
     }
 
@@ -136,6 +145,8 @@ class LinkedinAuth extends BaseController
         if (!$user) {
             $user = $this->userModel->where('email', $email)->first();
             if ($user) {
+                // Si su correo no estaba verificado, la contraseña anterior deja de valer
+                \App\Libraries\SeguridadAlta::alVincular($user, 'LinkedIn');
                 $this->userModel->update($user->id, [
                     'linkedin_id' => $linkedinId,
                     'avatar'      => $user->avatar ?: $avatar
@@ -204,6 +215,11 @@ class LinkedinAuth extends BaseController
             } catch (\Exception $e) {
                 log_message('error', '[LinkedinAuth] Error enviando email: ' . $e->getMessage());
             }
+        }
+
+        // Una cuenta desactivada no entra tampoco por LinkedIn
+        if (!\App\Libraries\SeguridadAlta::activa($user)) {
+            return redirect()->to(site_url('enter'))->with('error', 'Esta cuenta está desactivada. Escríbenos si crees que es un error.');
         }
 
         // Iniciar sesión con un identificador de sesión nuevo (evita fijación de sesión)

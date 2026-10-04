@@ -1863,6 +1863,29 @@ class EmailService
     }
 
     /**
+     * Aviso de seguridad: la cuenta se ha unido a un acceso social (Google, GitHub o
+     * LinkedIn) y, como su correo no estaba verificado, la contraseña anterior ya no
+     * vale. Explica cómo entrar a partir de ahora. Plantilla genérica de servicio.
+     */
+    public function sendAccesoSocialVinculado(array $userData, string $via, bool $claveCambiada = false): array
+    {
+        $contenido = $this->p('Has entrado en tu cuenta de APIEmpresas con <strong>' . esc($via) . '</strong>. A partir de ahora ese es tu acceso: en la página de entrada, pulsa el botón de ' . esc($via) . '.')
+            . $this->p('Por seguridad, la contraseña que tenía esta cuenta ha dejado de valer, porque nunca llegamos a confirmar que este correo era tuyo. Tu cuenta, tu plan y tu historial siguen exactamente igual.')
+            . ($claveCambiada ? $this->p('También hemos generado una <strong>API Key nueva</strong>: la tienes en tu panel.') : '')
+            . $this->p('¿Prefieres entrar también con contraseña? Crea una nueva desde <a href="' . site_url('forgot-password') . '" style="color:#2563eb;font-weight:700;">¿Olvidaste la clave?</a>.')
+            . $this->p('<span style="font-size:14px;color:#64748b;">Si no has sido tú, responde a este correo y lo revisamos.</span>');
+
+        return $this->sendTemplateEmail('subscription_canceled', [
+            'subject'     => 'Ahora entras en APIEmpresas con ' . $via,
+            'preheader'   => 'Tu contraseña anterior ha dejado de valer. Tu cuenta sigue igual.',
+            'name'        => esc(trim((string) ($userData['name'] ?? '')) ?: explode('@', (string) $userData['email'])[0]),
+            'content'     => $contenido,
+            'button_text' => 'Ir a mi panel',
+            'button_url'  => site_url('dashboard'),
+        ], $userData['email'], [], [], (int) ($userData['user_id'] ?? $userData['id'] ?? 0));
+    }
+
+    /**
      * ¿Ha gastado ya las consultas gratuitas de por vida? Misma cuenta que ApiKeyFilter
      * (todo el uso desde FREE_DESDE, también el hecho con un plan de pago).
      */

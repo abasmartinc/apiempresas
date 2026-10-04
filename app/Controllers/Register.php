@@ -220,6 +220,13 @@ class Register extends BaseController
                 ->with('error', $msg);
         }
 
+        // Límite de altas nuevas por IP y hora: sin él se podían crear cuentas Free sin
+        // fin (100 consultas cada una) y mandar correos a direcciones ajenas.
+        if (!\App\Libraries\SeguridadAlta::permiteAlta((string) $this->request->getIPAddress(), 'registro')) {
+            $msg = $isEnglish ? 'Several accounts have been created from your connection recently. Please wait an hour or sign in.' : 'Se han creado varias cuentas desde tu conexión en poco tiempo. Espera una hora o entra con tu cuenta si ya tienes una.';
+            return redirect()->back()->withInput()->with('error', $msg);
+        }
+
         // Generar API key robusta (64 chars hex)
         $apiKey = bin2hex(random_bytes(32));
 
@@ -577,6 +584,11 @@ class Register extends BaseController
                 'intent'   => (string) ($this->request->getPost('intent') ?? ''),
                 'cif'      => (string) ($this->request->getPost('cif') ?? ''),
             ]);
+        }
+
+        // Límite de altas nuevas por IP y hora (ver Register::store)
+        if (!\App\Libraries\SeguridadAlta::permiteAlta((string) $this->request->getIPAddress(), 'registro_rapido')) {
+            return redirect()->back()->withInput()->with('error', 'Se han creado varias cuentas desde tu conexión en poco tiempo. Espera una hora o entra con tu cuenta si ya tienes una.');
         }
 
         // Create new user (Quick)

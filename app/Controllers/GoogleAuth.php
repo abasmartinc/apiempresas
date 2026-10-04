@@ -241,7 +241,9 @@ class GoogleAuth extends BaseController
                 $user = $this->userModel->where('email', $email)->first();
 
                 if ($user) {
-                    // Vincular cuenta existente
+                    // Vincular cuenta existente (si su correo no estaba verificado,
+                    // la contraseña anterior deja de valer)
+                    \App\Libraries\SeguridadAlta::alVincular($user, 'Google');
                     $this->userModel->update($user->id, [
                         'google_id' => $googleId,
                         'avatar'    => $picture,
@@ -263,6 +265,12 @@ class GoogleAuth extends BaseController
                     'last_login_at' => date('Y-m-d H:i:s'),
                     'updated_at' => date('Y-m-d H:i:s')
                 ]);
+            }
+
+            // Una cuenta desactivada no entra tampoco por Google (el acceso con
+            // contraseña ya lo comprobaba)
+            if (!\App\Libraries\SeguridadAlta::activa($user)) {
+                return redirect()->to(site_url('enter'))->with('error', 'Esta cuenta está desactivada. Escríbenos si crees que es un error.');
             }
 
             // 4. Iniciar sesión

@@ -117,6 +117,23 @@ class Login extends BaseController
 
         if (!$verifyOk) {
             log_message('error', "[Login DEBUG] Password verification failed for user: {$email}");
+
+            // La cuenta entra con Google, GitHub o LinkedIn: decirlo, en vez de un
+            // "contraseña incorrecta" que hace pensar que el acceso no funciona.
+            $vias = array_keys(array_filter([
+                'Google'   => !empty($user->google_id),
+                'GitHub'   => !empty($user->github_id),
+                'LinkedIn' => !empty($user->linkedin_id),
+            ]));
+            if (!empty($vias)) {
+                $lista    = implode(' o ', $vias);
+                $esIngles = strpos((string) ($this->request->getServer('HTTP_HOST') ?? ''), 'spaincompanyapi') !== false;
+                $aviso    = $esIngles
+                    ? 'This account signs in with ' . implode(' or ', $vias) . '. Use that button below, or create a password with "Forgot your password?".'
+                    : 'Esta cuenta entra con ' . $lista . '. Pulsa ese botón aquí debajo o crea una contraseña desde «¿Olvidaste la clave?».';
+                return redirect()->back()->withInput()->with('error', $aviso);
+            }
+
             return redirect()
                 ->back()
                 ->withInput()
