@@ -138,6 +138,15 @@ class CompanyModel extends Model
         if ($slug === '')
             return null;
 
+        // 05-10-2026: primero, la ficha cuyo slug guardado es EXACTAMENTE el pedido.
+        // La búsqueda por nombre parecido de abajo fallaba con fichas sin CIF: de 60
+        // abiertas al azar, 6 acababan en el buscador ("/pinudi") y 2 en OTRA sociedad
+        // de nombre parecido ("/agro-jon" abría Agro Jonquera S.L.).
+        $exacta = $this->porSlugGuardado($slug);
+        if ($exacta !== null) {
+            return $exacta;
+        }
+
         // Convertir slug a nombre: "serviraibe-sl" -> "serviraibe sl"
         $searchName = str_replace('-', ' ', $slug);
 
@@ -158,6 +167,84 @@ class CompanyModel extends Model
         }
 
         return null;
+    }
+
+    /**
+     * Ficha por su slug guardado (columna `slug`, con índice), sin búsquedas aproximadas.
+     *
+     *  1. Fichas cuyo slug guardado es el pedido Y cuyo nombre genera ese mismo slug.
+     *     (El slug guardado de muchas fichas con CIF no lleva la forma jurídica —"climapac"
+     *     para "CLIMAPAC SL"—; esas no cuentan aquí y siguen por la búsqueda de siempre.)
+     *  2. URL antigua de una ficha a la que después se le completó la forma jurídica:
+     *     "/paltorz" -> la ficha "PALTORZ SL" (slug "paltorz-sl"). Solo si hay UNA.
+     *
+     * Devuelve null si no hay una coincidencia clara; entonces decide getBestByName().
+     */
+    private function porSlugGuardado(string $slug): ?array
+    {
+        $largo = mb_strlen($slug, 'UTF-8');
+        if ($largo < 3 || $largo > 200) {
+            return null;
+        }
+
+        try {
+            $buscar = function (array $slugs): array {
+                return $this->db->table($this->table)
+                    ->select('id, company_name AS name, cif, slug')
+                    ->whereIn('slug', array_values(array_unique($slugs)))
+                    ->limit(20)
+                    ->get()->getResultArray();
+            };
+            $elegir = function (array $filas): ?int {
+                if (count($filas) === 1) {
+                    return (int) $filas[0]['id'];
+                }
+                // Varias con el mismo slug: solo si exactamente una tiene CIF válido.
+                $conCif = array_values(array_filter($filas, static fn ($f) => preg_match('/^[A-Z][0-9]{7}[A-Z0-9]$/i', trim((string) ($f['cif'] ?? '')))));
+                return count($conCif) === 1 ? (int) $conCif[0]['id'] : null;
+            };
+
+            // El flujo del BORME guarda el slug sin tildes ni eñes ("espana"); la URL las lleva.
+            $sinTildes = strtr($slug, ['á' => 'a', 'é' => 'e', 'í' => 'i', 'ó' => 'o', 'ú' => 'u', 'ü' => 'u',
+                                       'à' => 'a', 'è' => 'e', 'ò' => 'o', 'ï' => 'i', 'ñ' => 'n', 'ç' => 'c']);
+
+            // 1) Slug guardado = slug pedido, y el nombre genera ese slug.
+            $filas = array_values(array_filter(
+                $buscar([$slug, $sinTildes]),
+                fn ($f) => $this->generateSlug((string) $f['name']) === $slug
+            ));
+            $id = $filas ? $elegir($filas) : null;
+
+            // 2) El mismo nombre con la forma jurídica añadida después.
+            if ($id === null && !$filas) {
+                $formas = ['sl', 'sa', 'slu', 'sau', 'sll', 'slp', 'srl', 'sociedad-limitada', 'sociedad-anonima',
+                           'sociedad-limitada-unipersonal', 'sociedad-anonima-unipersonal',
+                           'sociedad-limitada-laboral', 'sociedad-limitada-profesional'];
+                $posibles = [];
+                foreach ($formas as $f) {
+                    $posibles[$slug . '-' . $f] = true;
+                    $posibles[$sinTildes . '-' . $f] = true;
+                }
+                $filas2 = array_values(array_filter(
+                    $buscar(array_keys($posibles)),
+                    function ($f) use ($slug, $formas) {
+                        $g = $this->generateSlug((string) $f['name']);
+                        foreach ($formas as $forma) {
+                            if ($g === $slug . '-' . $forma) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    }
+                ));
+                $id = $filas2 ? $elegir($filas2) : null;
+            }
+
+            return $id !== null ? $this->getById($id) : null;
+        } catch (\Throwable $e) {
+            log_message('error', '[CompanyModel::porSlugGuardado] ' . $e->getMessage());
+            return null;
+        }
     }
 
     /**
