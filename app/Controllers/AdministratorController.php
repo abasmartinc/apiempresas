@@ -43,7 +43,14 @@ class AdministratorController extends BaseController
         if ($isOptedOut) {
             return $this->response->setStatusCode(410)->setBody(view('errors/html/error_410', ['message' => 'Perfil eliminado por privacidad RGPD.']));
         }
-        $robots = 'index,follow';
+        // 08-10-2026: solo se indexa el perfil de quien tiene cargos en 2 o más empresas.
+        // Con una sola, la página repite lo que ya dice la ficha de esa empresa (poco contenido
+        // propio) y publica el nombre de una persona física sin necesidad. `follow` se mantiene
+        // para que Google siga llegando a la ficha de la empresa.
+        $robots = count($uniqueCompanies) >= 2 ? 'index,follow' : 'noindex,follow';
+        if ($robots === 'noindex,follow') {
+            $this->response->setHeader('X-Robots-Tag', 'noindex, follow');
+        }
 
         return view('administrator', [
             'adminName'   => $adminName,

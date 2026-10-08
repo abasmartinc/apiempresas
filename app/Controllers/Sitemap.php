@@ -304,7 +304,8 @@ class Sitemap extends Controller
             
             $xml .= '<url>' . PHP_EOL;
             $xml .= '  <loc>' . esc($url) . '</loc>' . PHP_EOL;
-            $xml .= '  <lastmod>' . date('Y-m-d') . '</lastmod>' . PHP_EOL;
+            // Sin lastmod (08-10-2026): la fecha de hoy en todas las URL no es un dato real.
+            // Este camino solo se usa si no existen los sitemaps pregenerados.
             $xml .= '  <changefreq>monthly</changefreq>' . PHP_EOL;
             $xml .= '  <priority>' . $priority . '</priority>' . PHP_EOL;
             $xml .= '</url>' . PHP_EOL;

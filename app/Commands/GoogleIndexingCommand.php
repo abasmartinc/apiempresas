@@ -13,6 +13,14 @@ class GoogleIndexingCommand extends BaseCommand
 
     public function run(array $params)
     {
+        // DESACTIVADO (08-10-2026). La API de indexación de Google solo admite páginas de
+        // ofertas de empleo (JobPosting) y de emisiones en directo (BroadcastEvent). Enviar
+        // fichas de empresa va contra sus condiciones y puede perjudicar a todo el dominio.
+        // Las fichas llegan a Google por el sitemap. Ver claude/seo-criterio-indexacion-fichas.md.
+        // Quitar también la tarea programada que lanza `php spark seo:indexing-api`.
+        CLI::write('seo:indexing-api está desactivado: la API de indexación de Google no admite fichas de empresa.', 'yellow');
+        return;
+
         $isDryRun = in_array('dry-run', $params);
         $limit = 200; // Google Indexing API daily limit per project
 

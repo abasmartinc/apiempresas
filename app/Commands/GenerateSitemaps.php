@@ -86,6 +86,7 @@ class GenerateSitemaps extends BaseCommand
             $companyIds = array_column($companies, 'id');
             $adminCounts = [];
             $bormeCounts = [];
+            $bormeUltima = [];
             
             if (!empty($companyIds)) {
                 $admins = $db->table('company_administrators')
@@ -98,18 +99,20 @@ class GenerateSitemaps extends BaseCommand
                 }
                 
                 $borme = $db->table('borme_posts')
-                            ->select('company_id, COUNT(id) as cnt')
+                            ->select('company_id, COUNT(id) as cnt, MAX(borme_date) as ultima')
                             ->whereIn('company_id', $companyIds)
                             ->groupBy('company_id')
                             ->get()->getResultArray();
                 foreach ($borme as $row) {
                     $bormeCounts[$row['company_id']] = $row['cnt'];
+                    $bormeUltima[$row['company_id']] = $row['ultima'];
                 }
             }
             
             foreach ($companies as &$companyRef) {
                 $companyRef['num_admins'] = $adminCounts[$companyRef['id']] ?? 0;
                 $companyRef['num_borme_posts'] = $bormeCounts[$companyRef['id']] ?? 0;
+                $companyRef['ultimo_borme'] = $bormeUltima[$companyRef['id']] ?? null;
             }
             unset($companyRef);
 
@@ -131,8 +134,13 @@ class GenerateSitemaps extends BaseCommand
                 $score = calculateCompanySeoScore($company);
                 $priority = ($score >= 7) ? '0.8' : '0.6';
                 
-                $urlEntry = '<url>' . PHP_EOL . '  <loc>' . esc($url) . '</loc>' . PHP_EOL . '  <lastmod>' . date('Y-m-d') . '</lastmod>' . PHP_EOL . '  <changefreq>monthly</changefreq>' . PHP_EOL . '  <priority>' . $priority . '</priority>' . PHP_EOL . '</url>' . PHP_EOL;
-                $urlEntryEn = '<url>' . PHP_EOL . '  <loc>' . esc($urlEn) . '</loc>' . PHP_EOL . '  <lastmod>' . date('Y-m-d') . '</lastmod>' . PHP_EOL . '  <changefreq>monthly</changefreq>' . PHP_EOL . '  <priority>' . $priority . '</priority>' . PHP_EOL . '</url>' . PHP_EOL;
+                // lastmod real (08-10-2026): fecha del último acto del BORME. Antes era la fecha
+                // de hoy en todas las URL, y Google acaba ignorando un lastmod que no es fiable.
+                // Sin actos, no se pone lastmod.
+                $lastModTag = !empty($company['ultimo_borme']) ? '  <lastmod>' . date('Y-m-d', strtotime($company['ultimo_borme'])) . '</lastmod>' . PHP_EOL : '';
+
+                $urlEntry = '<url>' . PHP_EOL . '  <loc>' . esc($url) . '</loc>' . PHP_EOL . $lastModTag . '  <changefreq>monthly</changefreq>' . PHP_EOL . '  <priority>' . $priority . '</priority>' . PHP_EOL . '</url>' . PHP_EOL;
+                $urlEntryEn = '<url>' . PHP_EOL . '  <loc>' . esc($urlEn) . '</loc>' . PHP_EOL . $lastModTag . '  <changefreq>monthly</changefreq>' . PHP_EOL . '  <priority>' . $priority . '</priority>' . PHP_EOL . '</url>' . PHP_EOL;
                 
                 $xmlContent .= $urlEntry;
                 $xmlContentEn .= $urlEntryEn;
@@ -231,6 +239,7 @@ class GenerateSitemaps extends BaseCommand
             $companyIds = array_column($aiCompanies, 'id');
             $adminCounts = [];
             $bormeCounts = [];
+            $bormeUltima = [];
             
             if (!empty($companyIds)) {
                 $admins = $db->table('company_administrators')
@@ -243,18 +252,20 @@ class GenerateSitemaps extends BaseCommand
                 }
                 
                 $borme = $db->table('borme_posts')
-                            ->select('company_id, COUNT(id) as cnt')
+                            ->select('company_id, COUNT(id) as cnt, MAX(borme_date) as ultima')
                             ->whereIn('company_id', $companyIds)
                             ->groupBy('company_id')
                             ->get()->getResultArray();
                 foreach ($borme as $row) {
                     $bormeCounts[$row['company_id']] = $row['cnt'];
+                    $bormeUltima[$row['company_id']] = $row['ultima'];
                 }
             }
             
             foreach ($aiCompanies as &$companyRef) {
                 $companyRef['num_admins'] = $adminCounts[$companyRef['id']] ?? 0;
                 $companyRef['num_borme_posts'] = $bormeCounts[$companyRef['id']] ?? 0;
+                $companyRef['ultimo_borme'] = $bormeUltima[$companyRef['id']] ?? null;
             }
             unset($companyRef);
 
@@ -267,9 +278,10 @@ class GenerateSitemaps extends BaseCommand
 
                 $url = company_url($company);
                 $priority = '1.0'; // High priority because it has AI text
-                $lastMod = !empty($company['updated_at']) ? date('Y-m-d', strtotime($company['updated_at'])) : date('Y-m-d');
+                // lastmod real (08-10-2026): último acto del BORME; sin actos, sin lastmod.
+                $lastModTag = !empty($company['ultimo_borme']) ? '  <lastmod>' . date('Y-m-d', strtotime($company['ultimo_borme'])) . '</lastmod>' . PHP_EOL : '';
                 
-                $urlEntry = '<url>' . PHP_EOL . '  <loc>' . esc($url) . '</loc>' . PHP_EOL . '  <lastmod>' . $lastMod . '</lastmod>' . PHP_EOL . '  <changefreq>weekly</changefreq>' . PHP_EOL . '  <priority>' . $priority . '</priority>' . PHP_EOL . '</url>' . PHP_EOL;
+                $urlEntry = '<url>' . PHP_EOL . '  <loc>' . esc($url) . '</loc>' . PHP_EOL . $lastModTag . '  <changefreq>weekly</changefreq>' . PHP_EOL . '  <priority>' . $priority . '</priority>' . PHP_EOL . '</url>' . PHP_EOL;
                 
                 $xmlAiContent .= $urlEntry;
                 $aiUrlCount++;
