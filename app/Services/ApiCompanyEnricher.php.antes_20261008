@@ -27,9 +27,6 @@ class ApiCompanyEnricher
 {
     /** Versión de las cachés de este servicio: subirla si cambia el cálculo. */
     private const CACHE_V = 'v1';
-    // Solo para la caché de administradores vigentes: positionKey se amplió el 08-10-2026 y la
-    // lista cacheada con la regla anterior no vale. Las demás cachés (CACHE_V) no cambian.
-    private const CACHE_ADMINS = 'v1b';
 
     // ------------------------------------------------------------------
     // Bajas por privacidad
@@ -480,7 +477,7 @@ class ApiCompanyEnricher
             if ($id <= 0) {
                 continue;
             }
-            $hit = cache()->get('api_admins_' . self::CACHE_ADMINS . '_' . $id);
+            $hit = cache()->get('api_admins_' . self::CACHE_V . '_' . $id);
             if (is_array($hit)) {
                 $out[$id] = $hit;
             } else {
@@ -524,7 +521,7 @@ class ApiCompanyEnricher
         foreach ($faltan as $id) {
             $vigentes = self::resolveCurrent($porEmpresa[$id]['nom'] ?? [], $porEmpresa[$id]['act'] ?? []);
             $out[$id] = $vigentes;
-            cache()->save('api_admins_' . self::CACHE_ADMINS . '_' . $id, $vigentes, 43200);
+            cache()->save('api_admins_' . self::CACHE_V . '_' . $id, $vigentes, 43200);
         }
 
         return $out;
@@ -726,23 +723,12 @@ class ApiCompanyEnricher
             'unic' => 'unico', 'uni' => 'unico',
             'miem' => 'miembro', 'com' => 'comision', 'ej' => 'ejecutiva', 'ejec' => 'ejecutiva',
             'mco' => 'mancomunado',
-            // 08-10-2026: abreviaturas que separaban el mismo cargo en dos ("Apo.Sol." y
-            // "APODERAD.SOL"): el cese escrito de una forma no cancelaba el nombramiento
-            // escrito de la otra. Igual que _MAPA en scripts/borme_diario/cargos.py.
-            'apoderad' => 'apoderado', 'apodera' => 'apoderado', 'mancomu' => 'mancomunado', 'man' => 'mancomunado',
-            'soli' => 'solidario', 'liquisoli' => 'liquidadorsolidario', 'liqsolid' => 'liquidadorsolidario',
-            'liqmanc' => 'liquidadormancomunado', 'liqunico' => 'liquidadorunico', 'vicepresiden' => 'vicepresidente',
-            'vicesecret' => 'vicesecretario', 'concur' => 'concursal', 'concurs' => 'concursal',
-            'mro' => 'miembro', 'coms' => 'comision',
         ];
         $out = [];
         foreach ($tokens as $t) {
             $out[] = $map[$t] ?? $t;
         }
-        $k = implode('', $out);
-        // Mismo cargo con las palabras en otro orden ("APOD.SOL/MAN" y "Apo.Man.Soli").
-        $alias = ['apoderadosolidariomancomunado' => 'apoderadomancomunadosolidario'];
-        return $alias[$k] ?? $k;
+        return implode('', $out);
     }
 
     // ------------------------------------------------------------------
