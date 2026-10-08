@@ -305,6 +305,9 @@ $routes->post('alerts/add', 'Alerts::add');
 // Leads
 $routes->post('leads/subscribe', 'Leads::subscribe');
 
+// Errores de JavaScript del navegador al registro propio (solo con sesion; ver App\Controllers\ErrorReports)
+$routes->post('errors/js', 'ErrorReports::js');
+
 // Admin Routes
 $routes->group('admin', ['filter' => 'admin'], function ($routes) {
     $routes->get('dashboard', 'Admin\Dashboard::index');
@@ -404,6 +407,12 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
 
     // Avisos de datos de la ficha ("¿Son correctos estos datos?")
     $routes->get('avisos-datos', 'Admin\DataFeedback::index');
+
+    // Registro de errores (error_issues / error_events): listado, detalle y gestion (acciones: POST + CSRF).
+    $routes->get('errores', 'Admin\ErrorTracking::index');
+    $routes->get('errores/(:num)', 'Admin\ErrorTracking::show/$1');
+    $routes->post('errores/bulk', 'Admin\ErrorTracking::bulk');
+    $routes->post('errores/(:num)/(resolve|ignore|reopen|note)', 'Admin\ErrorTracking::act/$1/$2');
 
     // Email Templates
     $routes->get('email-templates', 'Admin\EmailTemplates::index');

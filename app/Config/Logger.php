@@ -121,6 +121,15 @@ class Logger extends BaseConfig
         ],
 
         /*
+         * Registro de errores propio (error_issues / error_events, el mismo que abasmart; se gestiona en /admin/errores): los
+         * log_message de nivel error o mas grave. Va DESPUES del de ficheros, que sigue escribiendo igual.
+         * Ver App\Libraries\Errors\ErrorRecorder.
+         */
+        \App\Log\Handlers\ErrorTrackingHandler::class => [
+            'handles' => ['critical', 'alert', 'emergency', 'error'],
+        ],
+
+        /*
          * The ChromeLoggerHandler requires the use of the Chrome web browser
          * and the ChromeLogger extension. Uncomment this block to use it.
          */

@@ -1078,3 +1078,4 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 })();
 </script>
+<?= view('partials/error_reporter') ?>

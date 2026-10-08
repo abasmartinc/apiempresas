@@ -101,6 +101,8 @@ class Exceptions extends BaseConfig
      */
     public function handler(int $statusCode, Throwable $exception): ExceptionHandlerInterface
     {
-        return new ExceptionHandler($this);
+        // El de CodeIgniter, que ademas guarda el error en el registro propio (error_issues / error_events; se gestiona en
+        // /admin/errores). Ver App\Libraries\Errors\ErrorRecorder.
+        return new \App\Libraries\Errors\RecordingExceptionHandler($this);
     }
 }
