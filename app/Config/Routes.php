@@ -384,7 +384,10 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
     $routes->post('stripe-test/checkout', 'Admin\StripeTest::checkout');
 
     // Email Logs
-    $routes->get('email-logs', 'Admin\Dashboard::email_logs');
+    // Correos: comprobaciones de envio, KPIs, resultado por correo e historial (App\Libraries\CorreosSalud).
+    // Antes: Admin\Dashboard::email_logs (se deja el metodo, sin ruta).
+    $routes->get('email-logs', 'Admin\EmailHealth::index');
+    $routes->get('email-logs/(:num)/ver', 'Admin\EmailHealth::ver/$1');
 
     // Invoices
     $routes->get('invoices', 'Admin\Dashboard::invoices');
@@ -413,6 +416,9 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
     $routes->get('errores/(:num)', 'Admin\ErrorTracking::show/$1');
     $routes->post('errores/bulk', 'Admin\ErrorTracking::bulk');
     $routes->post('errores/(:num)/(resolve|ignore|reopen|note)', 'Admin\ErrorTracking::act/$1/$2');
+
+    // Crecimiento: altas API / Solvencia por mes, paso a pago, MRR y prevision (App\Libraries\Crecimiento)
+    $routes->get('crecimiento', 'Admin\Growth::index');
 
     // Email Templates
     $routes->get('email-templates', 'Admin\EmailTemplates::index');

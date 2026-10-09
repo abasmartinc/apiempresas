@@ -82,7 +82,10 @@ class EmailService
             $fila = [
                 'user_id'       => $userId,
                 'subject'       => $subject,
-                'message'       => substr($message, 0, 1000), // Evitar logs gigantes
+                // El correo entero (antes solo los 1.000 primeros caracteres: se quedaba en el <head> y en
+                // /admin/email-logs no se podia ver que se envio). Tope de 60 KB para caber en la columna TEXT
+                // (64 KB); un correo de los nuestros ocupa 10-20 KB. mb_strcut no corta una letra por la mitad.
+                'message'       => mb_strcut((string) $message, 0, 60000, 'UTF-8'),
                 'status'        => $status,
                 'error_message' => $error,
                 'tracking_code' => $trackingCode,

@@ -52,6 +52,24 @@ class ErrorTracking
     }
 
     /**
+     * Issues creados en las ultimas 24 h que siguen sin gestionar (abiertos o reabiertos), para el dashboard del admin.
+     * Nunca rompe la pagina (si las tablas no existen, 0).
+     */
+    public static function newCount(): int
+    {
+        try {
+            $row = \Config\Database::connect()->query(
+                "SELECT COUNT(*) AS n FROM error_issues WHERE status IN ('open', 'regressed') AND first_seen >= ?",
+                [date('Y-m-d H:i:s', strtotime('-24 hours'))]
+            )->getRow();
+
+            return (int) ($row->n ?? 0);
+        } catch (\Throwable $e) {
+            return 0;
+        }
+    }
+
+    /**
      * Issues que cumplen los filtros, los de actividad mas reciente primero.
      *
      * @param array{status?: string[], type?: string, group?: string, q?: string, from?: string, to?: string} $filters
