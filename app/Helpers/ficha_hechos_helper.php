@@ -265,9 +265,9 @@ if (!function_exists('ficha_historia_borme')) {
                 $res = preg_match('/Resultante Suscrito:\s*([\d\.,]+)\s*Euros/iu', $t, $m) ? ficha_euros($m[1]) : '';
                 $frases[] = 'Reduce capital' . ($res ? " hasta {$res}" : '');
             }
-            if (preg_match('/Declaraci[oó]n de unipersonalidad\.\s*Socio [úu]nico:\s*([^.]+)/u', $t, $m)) {
+            if (preg_match('/Declaraci[oó]n de unipersonalidad\.\s*Socio [úu]nico:\s*((?:[^.]|\.(?=[^\s]))+)/u', $t, $m)) {
                 $frases[] = 'Pasa a ser sociedad unipersonal, con ' . ficha_limpia_nombre(ficha_nombre_completo(trim($m[1]), [$p])) . ' como socio único';
-            } elseif (preg_match('/Cambio de identidad del socio [úu]nico:\s*([^.]+)/u', $t, $m)) {
+            } elseif (preg_match('/Cambio de identidad del socio [úu]nico:\s*((?:[^.]|\.(?=[^\s]))+)/u', $t, $m)) {
                 $frases[] = 'Su socio único pasa a ser ' . ficha_limpia_nombre(ficha_nombre_completo(trim($m[1]), [$p]));
             }
             if (preg_match('/P[eé]rdida del car[aá]cter de unipersonalidad/u', $t)) {
@@ -387,6 +387,26 @@ if (!function_exists('ficha_historia_borme')) {
         if (count($agrupados) < 2) {
             return [];
         }
+        if (count($agrupados) > $max) {
+            // En una empresa grande, decenas de "Nombra un apoderado" tapan lo importante.
+            // Se quitan primero esos hechos (solo apoderados) y se dice cuántos fueron.
+            $soloApod = static fn($h) => (bool) preg_match('/^Nombra (un apoderado|\d+ apoderados)$/u', $h['texto']);
+            $nApod = 0;
+            foreach ($agrupados as $h) {
+                if ($soloApod($h)) {
+                    $nApod += preg_match('/^Nombra (\d+)/u', $h['texto'], $m) ? (int) $m[1] : 1;
+                }
+            }
+            $resto = array_values(array_filter($agrupados, static fn($h) => !$soloApod($h)));
+            if (count($resto) >= 2) {
+                $agrupados = array_slice($resto, -($max - 1));
+                if ($nApod > 0) {
+                    $ult = end($agrupados);
+                    $agrupados[] = ['fecha' => $ult['fecha'], 'texto' => 'Además, en estos años ha nombrado ' . $nApod . ' apoderado' . ($nApod > 1 ? 's' : ''), 'adverso' => false];
+                }
+                return $agrupados;
+            }
+        }
         return array_slice($agrupados, -$max);
     }
 }
@@ -488,9 +508,9 @@ if (!function_exists('ficha_resumen_hechos')) {
             if (preg_match('/P[eé]rdida del car[aá]cter de unipersonalidad/u', $t)) {
                 break;  // lo más reciente es que dejó de ser unipersonal
             }
-            if (preg_match('/Cambio de identidad del socio [úu]nico:\s*([^.]+(?:\.[A-Z0-9]+)*(?:\s+S\.?L\.?U?|\s+S\.?A\.?U?)?)/u', $t, $m)
-                || preg_match('/Socio [úu]nico:\s*([^.]+(?:\.[A-Z0-9]+)*(?:\s+S\.?L\.?U?|\s+S\.?A\.?U?)?)/u', $t, $m)) {
-                $socio = ficha_limpia_nombre(ficha_nombre_completo(trim(preg_replace('/\.[A-Z0-9].*$/u', '', $m[1])), $bormePosts));
+            if (preg_match('/Cambio de identidad del socio [úu]nico:\s*((?:[^.]|\.(?=[^\s]))+)/u', $t, $m)
+                || preg_match('/Socio [úu]nico:\s*((?:[^.]|\.(?=[^\s]))+)/u', $t, $m)) {
+                $socio = ficha_limpia_nombre(ficha_nombre_completo(trim($m[1]), $bormePosts));
                 $desde = ficha_mes_anio($p['borme_date']);
                 break;
             }
