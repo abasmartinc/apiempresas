@@ -43,14 +43,12 @@ class AdministratorController extends BaseController
         if ($isOptedOut) {
             return $this->response->setStatusCode(410)->setBody(view('errors/html/error_410', ['message' => 'Perfil eliminado por privacidad RGPD.']));
         }
-        // 08-10-2026: solo se indexa el perfil de quien tiene cargos en 2 o más empresas.
-        // Con una sola, la página repite lo que ya dice la ficha de esa empresa (poco contenido
-        // propio) y publica el nombre de una persona física sin necesidad. `follow` se mantiene
-        // para que Google siga llegando a la ficha de la empresa.
-        $robots = count($uniqueCompanies) >= 2 ? 'index,follow' : 'noindex,follow';
-        if ($robots === 'noindex,follow') {
-            $this->response->setHeader('X-Robots-Tag', 'noindex, follow');
-        }
+        // 09-10-2026: se vuelven a indexar todos los perfiles. El 08-10 se puso noindex a los de
+        // una sola empresa, pero los datos de Search Console (3 meses) muestran que las páginas de
+        // administrador reciben clics con un CTR del 22 % (la gente busca a la persona por su
+        // nombre) y la mitad de las que más clics traían eran de una sola empresa. Las bajas por
+        // RGPD siguen funcionando igual (410, arriba).
+        $robots = 'index,follow';
 
         return view('administrator', [
             'adminName'   => $adminName,
