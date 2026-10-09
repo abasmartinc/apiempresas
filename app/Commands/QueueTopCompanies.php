@@ -23,13 +23,14 @@ use CodeIgniter\CLI\CLI;
  *   php spark seo:queue-top                 (encola)
  *   php spark seo:queue-top --prueba        (cuenta y enseña ejemplos, no escribe ni manda correo)
  *   php spark seo:queue-top --objetivo 12000
+ *   php spark seo:queue-top --cupo-nuevas 1500   (plazas reservadas cada día al nivel 2; por defecto 1500)
  */
 class QueueTopCompanies extends BaseCommand
 {
     protected $group       = 'SEO';
     protected $name        = 'seo:queue-top';
     protected $description = 'Rellena la cola de textos de IA por prioridad: visitadas, nuevas y con BORME reciente.';
-    protected $usage       = 'seo:queue-top [--prueba] [--objetivo N]';
+    protected $usage       = 'seo:queue-top [--prueba] [--objetivo N] [--cupo-nuevas N]';
 
     private const FILTRO_BASE = "
         (c.estado IS NULL OR TRIM(c.estado) = '' OR UPPER(TRIM(c.estado)) = 'ACTIVA')
@@ -47,6 +48,9 @@ class QueueTopCompanies extends BaseCommand
 
         $pendientes = (int) $db->table('seo_generation_queue')->where('status', 'pending')->countAllResults();
         $hueco      = max(0, $objetivo - $pendientes);
+        // Cupo reservado a las recién constituidas: sin él, las ~90.000 visitadas llenan la cola
+        // durante semanas y las nuevas (las de sitemap-empresas-nuevas) se quedan sin texto.
+        $cupoNuevas = max(0, (int) (CLI::getOption('cupo-nuevas') ?? 1500));
 
         CLI::write(($prueba ? 'PRUEBA (no escribe nada). ' : '') . "Pendientes en cola: {$pendientes}. Objetivo: {$objetivo}. Hueco: {$hueco}.", 'cyan');
 
@@ -64,8 +68,12 @@ class QueueTopCompanies extends BaseCommand
                 continue;
             }
             $t0  = microtime(true);
+            if ($nivel === 1 && $hueco - min($cupoNuevas, $hueco) <= 0) {
+                $resumen[$nivel] = 0;
+                continue;
+            }
             $ids = match ($nivel) {
-                1 => $this->nivel1($db, $hueco),
+                1 => $this->nivel1($db, max(0, $hueco - min($cupoNuevas, $hueco))),
                 2 => $this->nivel2($db, $hueco),
                 3 => $this->nivel3($db, $hueco),
             };
