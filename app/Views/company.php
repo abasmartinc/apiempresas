@@ -117,6 +117,12 @@
             $company[$iaCampo] = '';
         }
     }
+    // 09-10-2026: la frase corta de la IA tampoco con un estado adverso. Las antiguas son
+    // comerciales ("se posiciona como un referente…") y se enseñaban en la cabecera de
+    // empresas extinguidas o en concurso. El texto largo y las FAQ ya se ocultaban.
+    if (!empty($estadoReg['incidencia'])) {
+        $company['ai_pitch'] = '';
+    }
 
     // Sobrescribir con FAQs de IA si existen.
     // Salvo con un estado adverso: se generaron sin mirar el estado y hablan de la

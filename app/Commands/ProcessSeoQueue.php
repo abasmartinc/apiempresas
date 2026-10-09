@@ -85,7 +85,7 @@ class ProcessSeoQueue extends BaseCommand
 
             // 5. Obtener candidatos pendientes elegibles (attempts < 3)
             $query = $db->table('seo_generation_queue')
-                ->select('company_id, attempts')
+                ->select('company_id, attempts, regenerar')
                 ->where('status', 'pending')
                 ->where('attempts <', 3)
                 ->orderBy('requested_at', 'ASC')
@@ -136,7 +136,8 @@ class ProcessSeoQueue extends BaseCommand
                 }
 
                 // Si ya tiene texto por otra vía, lo borramos de la cola
-                if (!empty($company['ai_seo_text'])) {
+                $regenerar = !empty($item['regenerar']);
+                if (!empty($company['ai_seo_text']) && !$regenerar) {
                     CLI::write("Empresa ID {$companyId} ya tiene texto. Eliminando de la cola.", 'green');
                     $db->table('seo_generation_queue')->where('company_id', $companyId)->delete();
                     continue;
@@ -146,7 +147,7 @@ class ProcessSeoQueue extends BaseCommand
                 try {
                     $bormeModel = new BormePostsModel();
                     $bormePosts = $bormeModel->getByCompanyId($companyId);
-                    $seoData = getOrGenerateAiSeoData($company, $bormePosts);
+                    $seoData = getOrGenerateAiSeoData($company, $bormePosts, $regenerar);
 
                     if ($seoData && $seoData['status'] === 'generated') {
                         CLI::write("Texto generado con éxito para ID {$companyId}.", 'green');

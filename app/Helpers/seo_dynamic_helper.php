@@ -428,6 +428,15 @@ TXT;
     }
 }
 
+if (!function_exists('seo_ai_texto_roto')) {
+    /** Texto guardado que en realidad es la respuesta cruda de la IA o un mensaje de error. */
+    function seo_ai_texto_roto(string $t): bool
+    {
+        $t = ltrim($t);
+        return $t !== '' && ($t[0] === '{' || strpos($t, '"seo_text"') !== false || strpos($t, '```') === 0 || strpos($t, 'Hubo un error') !== false);
+    }
+}
+
 if (!function_exists('seo_ai_guardar')) {
     /**
      * Guarda en company_enrichment lo que devuelve seo_ai_generar (sobrescribe los 5 campos).
@@ -461,9 +470,11 @@ if (!function_exists('getOrGenerateAiSeoData')) {
      * Devuelve status 'cached' | 'generated' | 'skipped' (con 'motivo') | 'error' (con 'error'),
      * o null si no hay clave de OpenAI.
      */
-    function getOrGenerateAiSeoData(array $company, array $bormePosts = []): ?array
+    function getOrGenerateAiSeoData(array $company, array $bormePosts = [], bool $regenerar = false): ?array
     {
-        if (!empty($company['ai_seo_text'])) {
+        // $regenerar (09-10-2026): rehace un texto que ya existe. El antiguo solo se sustituye
+        // si el nuevo pasa la validación; si la IA falla, la ficha se queda con el que tenía.
+        if (!empty($company['ai_seo_text']) && !$regenerar) {
             $faqs = null;
             if (!empty($company['ai_faqs'])) {
                 $faqs = json_decode($company['ai_faqs'], true);
@@ -482,12 +493,19 @@ if (!function_exists('getOrGenerateAiSeoData')) {
         try {
             helper('company');
             $estado = company_estado_registral($company);
-            if (!empty($estado['incidencia'])) {
-                return ['status' => 'skipped', 'motivo' => 'estado adverso: ' . ($estado['etiqueta'] ?? '')];
-            }
-            $datos = seo_ai_datos($company, $bormePosts);
+            $datos  = empty($estado['incidencia']) ? seo_ai_datos($company, $bormePosts) : null;
             if ($datos === null) {
-                return ['status' => 'skipped', 'motivo' => 'sin objeto social ni CNAE'];
+                $motivo = !empty($estado['incidencia']) ? 'estado adverso: ' . ($estado['etiqueta'] ?? '') : 'sin objeto social ni CNAE';
+                // Un texto roto (la respuesta cruda de la IA guardada como texto) se borra aunque
+                // no se pueda generar otro: se estaba enseñando tal cual en la ficha.
+                if ($regenerar && seo_ai_texto_roto((string) ($company['ai_seo_text'] ?? ''))) {
+                    \Config\Database::connect()->table('company_enrichment')->where('company_id', $company['id'])->update([
+                        'ai_seo_text' => null, 'ai_faqs' => null, 'ai_tags' => null, 'ai_pitch' => null,
+                        'ai_borme_summary' => null, 'updated_at' => date('Y-m-d H:i:s'),
+                    ]);
+                    $motivo .= ' (texto roto borrado)';
+                }
+                return ['status' => 'skipped', 'motivo' => $motivo];
             }
 
             $r = seo_ai_generar($datos);
