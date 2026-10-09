@@ -5,153 +5,118 @@ namespace App\Commands;
 use CodeIgniter\CLI\BaseCommand;
 use CodeIgniter\CLI\CLI;
 
+/**
+ * Encolado diario de fichas para el texto de IA (cron, una vez al día).
+ *
+ * 09-10-2026: antes solo encolaba las 1.000 fichas más visitadas de 30 días. Ahora rellena la
+ * cola hasta un objetivo (por defecto 9.000 pendientes, lo que seo:process-queue saca en un
+ * día) y por este orden de prioridad:
+ *
+ *  1. Fichas con visitas en los últimos 90 días, de más a menos visitantes únicos.
+ *     Entran con requested_at de hace un día para que la cola (requested_at ASC) las haga antes.
+ *  2. Constituidas en los últimos 12 meses, de la más nueva a la más antigua.
+ *  3. Con algún anuncio en el BORME desde 2024, de las más nuevas (id) a las más antiguas.
+ *
+ * En todos: estado ACTIVA o sin estado, objeto social de más de 10 caracteres, sin texto de IA
+ * y que no estén ya en la cola (en ningún estado). No se filtra el grupo de control.
+ *
+ *   php spark seo:queue-top                 (encola)
+ *   php spark seo:queue-top --prueba        (cuenta y enseña ejemplos, no escribe ni manda correo)
+ *   php spark seo:queue-top --objetivo 12000
+ */
 class QueueTopCompanies extends BaseCommand
 {
     protected $group       = 'SEO';
     protected $name        = 'seo:queue-top';
-    protected $description = 'Encola las empresas más visitadas para generación de IA proactiva.';
+    protected $description = 'Rellena la cola de textos de IA por prioridad: visitadas, nuevas y con BORME reciente.';
+    protected $usage       = 'seo:queue-top [--prueba] [--objetivo N]';
+
+    private const FILTRO_BASE = "
+        (c.estado IS NULL OR TRIM(c.estado) = '' OR UPPER(TRIM(c.estado)) = 'ACTIVA')
+        AND CHAR_LENGTH(TRIM(COALESCE(c.objeto_social, ''))) > 10
+        AND NOT EXISTS (SELECT 1 FROM company_enrichment ce WHERE ce.company_id = c.id AND ce.ai_seo_text IS NOT NULL AND ce.ai_seo_text <> '')
+        AND NOT EXISTS (SELECT 1 FROM seo_generation_queue q WHERE q.company_id = c.id)
+    ";
 
     public function run(array $params)
     {
         $startTime = microtime(true);
-        $db = \Config\Database::connect();
-        
-        $limit = 1000; // Hard-cap: máximo 1000 empresas por ejecución
-        
-        CLI::write("Buscando las empresas con mayor tráfico único para encolar...", 'cyan');
+        $db        = \Config\Database::connect();
+        $prueba    = CLI::getOption('prueba') !== null;
+        $objetivo  = max(0, min(100000, (int) (CLI::getOption('objetivo') ?? 9000)));
 
-        // 1. Ranking por visitantes únicos en los últimos 30 días
-        $query = "
-            SELECT page, COUNT(DISTINCT anonymous_id) as unique_visitors
-            FROM tracking_events
-            WHERE event_name = 'page_view'
-              AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) 
-              AND page LIKE '%-%'
-            GROUP BY page
-            ORDER BY unique_visitors DESC
-            LIMIT 25000
-        ";
-        
-        $events = $db->query($query)->getResultArray();
+        $pendientes = (int) $db->table('seo_generation_queue')->where('status', 'pending')->countAllResults();
+        $hueco      = max(0, $objetivo - $pendientes);
 
-        // 2. Extraer CIFs únicos preservando el orden de tráfico
-        $cifVisitors = []; // cif => unique_visitors
-        foreach ($events as $event) {
-            $url = $event['page'];
-            $path = parse_url($url, PHP_URL_PATH);
-            if (!$path) continue;
-            
-            $segment = ltrim($path, '/');
-            
-            // Ficha de empresa CIF (primera letra + 7 dígitos + carácter)
-            if (preg_match('/^([a-zA-Z][0-9]{7}[a-zA-Z0-9])(-.*)?$/', $segment, $matches)) {
-                $cif = strtoupper($matches[1]);
-                if (!isset($cifVisitors[$cif])) {
-                    $cifVisitors[$cif] = (int)$event['unique_visitors'];
-                }
+        CLI::write(($prueba ? 'PRUEBA (no escribe nada). ' : '') . "Pendientes en cola: {$pendientes}. Objetivo: {$objetivo}. Hueco: {$hueco}.", 'cyan');
+
+        $resumen = [];
+        $vistos  = [];
+        $niveles = [
+            1 => 'Visitadas en 90 días',
+            2 => 'Constituidas en 12 meses',
+            3 => 'Con BORME desde 2024',
+        ];
+
+        foreach ($niveles as $nivel => $nombre) {
+            if ($hueco <= 0) {
+                $resumen[$nivel] = 0;
+                continue;
             }
+            $t0  = microtime(true);
+            $ids = match ($nivel) {
+                1 => $this->nivel1($db, $hueco),
+                2 => $this->nivel2($db, $hueco),
+                3 => $this->nivel3($db, $hueco),
+            };
+            if ($prueba) {
+                // En la prueba no se inserta nada: se quitan las que ya salieron en un nivel anterior.
+                $ids = array_values(array_diff($ids, $vistos));
+                $vistos = array_merge($vistos, $ids);
+            }
+            $seg = round(microtime(true) - $t0, 1);
+            CLI::write("Nivel {$nivel} ({$nombre}): " . count($ids) . " candidatas ({$seg} s)", 'yellow');
+
+            if ($prueba) {
+                $this->muestra($db, $ids);
+                $resumen[$nivel] = count($ids);
+                $hueco -= count($ids);   // en la prueba se simula el reparto
+                continue;
+            }
+
+            $n = $this->encolar($db, $ids, $nivel === 1 ? date('Y-m-d H:i:s', time() - 86400) : date('Y-m-d H:i:s'));
+            CLI::write("  Encoladas: {$n}", 'green');
+            $resumen[$nivel] = $n;
+            $hueco -= $n;
         }
 
-        $uniqueCifs = array_keys($cifVisitors);
-        CLI::write("Se han identificado " . count($uniqueCifs) . " CIFs únicos desde el tráfico.", 'yellow');
+        $queued  = array_sum($resumen);
+        $elapsed = round(microtime(true) - $startTime, 2);
+        CLI::write(($prueba ? 'Se encolarían ' : 'Encoladas ') . "{$queued} en total en {$elapsed}s.", 'cyan');
 
-        if (empty($uniqueCifs)) {
-            CLI::write("No se encontraron empresas candidatas.", 'yellow');
+        if ($prueba) {
             return;
         }
 
-        // 3. Consultar las empresas en lotes optimizados (WHERE IN)
-        $cifChunks = array_chunk($uniqueCifs, 500);
-        $companiesData = []; // cif => row
-
-        foreach ($cifChunks as $chunk) {
-            $builder = $db->table('companies c')
-                ->select('c.id, c.cif, c.company_name, c.estado, c.objeto_social, ce.ai_seo_text, q.company_id as in_queue_id')
-                ->join('company_enrichment ce', 'ce.company_id = c.id', 'left')
-                ->join('seo_generation_queue q', 'q.company_id = c.id', 'left')
-                ->whereIn('c.cif', $chunk);
-
-            $rows = $builder->get()->getResultArray();
-            foreach ($rows as $row) {
-                $cifKey = strtoupper(trim((string)$row['cif']));
-                $companiesData[$cifKey] = $row;
-            }
-        }
-
-        // 4. Filtrar y seleccionar las mejores candidatas en orden de visitantes
-        $toQueue = [];
-        $now = date('Y-m-d H:i:s');
-
-        foreach ($uniqueCifs as $cif) {
-            if (count($toQueue) >= $limit) {
-                break;
-            }
-
-            if (!isset($companiesData[$cif])) {
-                continue;
-            }
-
-            $company = $companiesData[$cif];
-
-            // Filtro 1: Exclusivamente empresa ACTIVA (case-insensitive)
-            $estado = strtoupper(trim((string)($company['estado'] ?? '')));
-            if ($estado !== 'ACTIVA') {
-                continue;
-            }
-
-            // Filtro 2: Objeto social útil (> 10 caracteres)
-            $objetoSocial = trim((string)($company['objeto_social'] ?? ''));
-            if (mb_strlen($objetoSocial) <= 10) {
-                continue;
-            }
-
-            // Filtro 3: AI Guard (no encolar si ya tiene texto IA)
-            $aiText = trim((string)($company['ai_seo_text'] ?? ''));
-            if ($aiText !== '') {
-                continue;
-            }
-
-            // Filtro 4: No encolar si ya está en la cola
-            if (!empty($company['in_queue_id'])) {
-                continue;
-            }
-
-            $toQueue[] = [
-                'company_id'   => (int)$company['id'],
-                'requested_at' => $now,
-                'status'       => 'pending',
-                'attempts'     => 0,
-            ];
-
-            CLI::write("Encolada: {$company['company_name']} ({$cif}) [Visitantes: {$cifVisitors[$cif]}]", 'green');
-        }
-
-        $queued = count($toQueue);
-
-        // 5. Inserción masiva en bloque
-        if ($queued > 0) {
-            $insertChunks = array_chunk($toQueue, 200);
-            foreach ($insertChunks as $insChunk) {
-                $db->table('seo_generation_queue')->ignore(true)->insertBatch($insChunk);
-            }
-        }
-
-        $elapsed = round(microtime(true) - $startTime, 2);
-        CLI::write("Proceso terminado en {$elapsed}s. Se han encolado {$queued} nuevas empresas.", 'yellow');
-
-        // 6. Envío de email de reporte
+        // Correo de reporte
         try {
-            $email = \Config\Services::email();
+            $email       = \Config\Services::email();
             $emailConfig = config('Email');
-            $fromEmail = !empty($emailConfig->fromEmail) ? $emailConfig->fromEmail : 'soporte@apiempresas.es';
-            $fromName  = !empty($emailConfig->fromName) ? $emailConfig->fromName : 'APIEmpresas.es';
-            
+            $fromEmail   = !empty($emailConfig->fromEmail) ? $emailConfig->fromEmail : 'soporte@apiempresas.es';
+            $fromName    = !empty($emailConfig->fromName) ? $emailConfig->fromName : 'APIEmpresas.es';
+
+            $lineas = '';
+            foreach ($niveles as $nivel => $nombre) {
+                $lineas .= "- Nivel {$nivel} ({$nombre}): {$resumen[$nivel]}\n";
+            }
+
             $email->setFrom($fromEmail, $fromName);
             $email->setTo('papelo.amh@gmail.com');
             $email->setSubject("Reporte Diario: Encolado SEO IA ({$queued} empresas)");
-            $email->setMessage("El comando seo:queue-top ha finalizado exitosamente.\n\n"
-                . "Resumen de ejecución:\n"
-                . "- Nuevas empresas encoladas: {$queued}\n"
+            $email->setMessage("El comando seo:queue-top ha finalizado.\n\n"
+                . "Pendientes en cola antes de encolar: {$pendientes} (objetivo {$objetivo})\n"
+                . "Nuevas empresas encoladas: {$queued}\n"
+                . $lineas
                 . "- Tiempo de ejecución: {$elapsed} segundos\n"
                 . "- Fecha y hora: " . date('Y-m-d H:i:s') . "\n\n"
                 . "Las empresas serán enriquecidas progresivamente por el worker seo:process-queue.\n\n"
@@ -168,5 +133,113 @@ class QueueTopCompanies extends BaseCommand
             CLI::error("Excepción al enviar email de reporte: " . $e->getMessage());
             log_message('error', '[QueueTopCompanies] Excepción email: ' . $e->getMessage());
         }
+    }
+
+    private function encolar($db, array $ids, string $cuando): int
+    {
+        if (!$ids) {
+            return 0;
+        }
+        $antes = (int) $db->table('seo_generation_queue')->countAllResults();
+        foreach (array_chunk($ids, 500) as $lote) {
+            $filas = array_map(static fn ($id) => [
+                'company_id' => (int) $id, 'requested_at' => $cuando, 'status' => 'pending', 'attempts' => 0,
+            ], $lote);
+            $db->table('seo_generation_queue')->ignore(true)->insertBatch($filas);
+        }
+        return (int) $db->table('seo_generation_queue')->countAllResults() - $antes;
+    }
+
+    private function muestra($db, array $ids): void
+    {
+        if (!$ids) {
+            return;
+        }
+        $rows = $db->table('companies')->select('id, cif, company_name, fecha_constitucion, estado')
+            ->whereIn('id', array_slice($ids, 0, 10))->get()->getResultArray();
+        foreach ($rows as $m) {
+            CLI::write("    {$m['cif']}  {$m['company_name']}  (" . ($m['fecha_constitucion'] ?: 's/f') . ', ' . ($m['estado'] ?: 'sin estado') . ')');
+        }
+    }
+
+    /** Fichas visitadas en 90 días, de más a menos visitantes únicos. */
+    private function nivel1($db, int $limit): array
+    {
+        $filas = $db->query("
+            SELECT page, COUNT(DISTINCT anonymous_id) AS v
+            FROM tracking_events
+            WHERE event_name = 'page_view' AND created_at >= DATE_SUB(NOW(), INTERVAL 90 DAY) AND page LIKE '%-%'
+            GROUP BY page ORDER BY v DESC LIMIT 300000
+        ")->getResultArray();
+
+        $cifs = [];
+        foreach ($filas as $f) {
+            $seg = ltrim((string) parse_url($f['page'], PHP_URL_PATH), '/');
+            if (preg_match('/^([A-Za-z]\d{7}[A-Za-z0-9])(-.*)?$/', $seg, $m)) {
+                $cifs[strtoupper($m[1])] = true;
+            }
+        }
+        CLI::write('  Fichas distintas con visitas en 90 días: ' . count($cifs));
+
+        $ids = [];
+        foreach (array_chunk(array_keys($cifs), 1000) as $lote) {   // en orden de visitas
+            $in   = implode(',', array_map([$db, 'escape'], $lote));
+            $rows = $db->query("SELECT c.id, c.cif FROM companies c WHERE c.cif IN ({$in}) AND " . self::FILTRO_BASE)->getResultArray();
+            $porCif = [];
+            foreach ($rows as $r) {
+                $porCif[strtoupper(trim((string) $r['cif']))] = (int) $r['id'];
+            }
+            foreach ($lote as $cif) {
+                if (isset($porCif[$cif])) {
+                    $ids[] = $porCif[$cif];
+                    if (count($ids) >= $limit) {
+                        return $ids;
+                    }
+                }
+            }
+        }
+        return $ids;
+    }
+
+    /** Constituidas en los últimos 12 meses, de la más nueva a la más antigua. */
+    private function nivel2($db, int $limit): array
+    {
+        $rows = $db->query("
+            SELECT c.id FROM companies c
+            WHERE c.fecha_constitucion >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
+              AND c.fecha_constitucion <= CURDATE()
+              AND " . self::FILTRO_BASE . "
+            ORDER BY c.fecha_constitucion DESC, c.id DESC
+            LIMIT " . (int) $limit
+        )->getResultArray();
+        return array_map('intval', array_column($rows, 'id'));
+    }
+
+    /**
+     * Con algún anuncio en el BORME desde 2024. Se recorre por tramos de id (de los más nuevos
+     * a los más antiguos) para no lanzar una consulta sobre toda la tabla de golpe.
+     */
+    private function nivel3($db, int $limit): array
+    {
+        $max   = (int) ($db->query('SELECT MAX(id) AS m FROM companies')->getRow()->m ?? 0);
+        $ids   = [];
+        $tramo = 50000;
+        for ($hasta = $max; $hasta > 0 && count($ids) < $limit; $hasta -= $tramo) {
+            $desde = max(1, $hasta - $tramo + 1);
+            $falta = $limit - count($ids);
+            $rows  = $db->query("
+                SELECT c.id FROM companies c
+                WHERE c.id BETWEEN {$desde} AND {$hasta}
+                  AND c.cif IS NOT NULL AND c.cif <> ''
+                  AND EXISTS (SELECT 1 FROM borme_posts b WHERE b.company_id = c.id AND b.borme_date >= '2024-01-01')
+                  AND " . self::FILTRO_BASE . "
+                ORDER BY c.id DESC
+                LIMIT {$falta}
+            ")->getResultArray();
+            foreach ($rows as $r) {
+                $ids[] = (int) $r['id'];
+            }
+        }
+        return $ids;
     }
 }

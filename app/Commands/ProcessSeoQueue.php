@@ -151,8 +151,16 @@ class ProcessSeoQueue extends BaseCommand
                     if ($seoData && $seoData['status'] === 'generated') {
                         CLI::write("Texto generado con éxito para ID {$companyId}.", 'green');
                         $db->table('seo_generation_queue')->where('company_id', $companyId)->delete();
+                    } elseif ($seoData && $seoData['status'] === 'skipped') {
+                        // 09-10-2026: estado adverso o sin objeto social ni CNAE. No es un fallo
+                        // que se arregle reintentando: se saca de la cola y no se llama a la IA.
+                        CLI::write("Omitida ID {$companyId} ({$seoData['motivo']}). Eliminando de la cola.", 'light_gray');
+                        $db->table('seo_generation_queue')->where('company_id', $companyId)->delete();
+                        continue;
                     } else {
-                        $errorMsg = 'Fallo al generar texto: respuesta no válida de IA';
+                        $errorMsg = !empty($seoData['error'])
+                            ? mb_substr('IA: ' . preg_replace('/[\r\n\t]+/', ' ', (string) $seoData['error']), 0, 250)
+                            : 'Fallo al generar texto: respuesta no válida de IA';
                         CLI::write("Fallo en ID {$companyId}. " . ($currentAttempts >= 3 ? "Marcando como failed." : "Devolviendo a pending."), 'red');
                         $this->handleFailure($db, $companyId, $currentAttempts, $errorMsg);
                     }
