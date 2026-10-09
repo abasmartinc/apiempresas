@@ -521,19 +521,27 @@ class Directory extends BaseController
         // que ahora enlazan todas las fichas del sector) se los llevaban sociedades extinguidas y
         // vacías que empiezan por "A". Solo aquí: son listados de pocos miles de empresas y la
         // ordenación es barata. Los de provincia entera siguen por nombre (usan el índice).
+        // Con esta ordenación MySQL no puede usar el índice: en los listados más grandes
+        // (Madrid · alquiler inmobiliario, ~44.000 empresas) la consulta tarda ~0,5-1 s más.
+        // Se guarda la página un día en la caché.
         $anioCuentas = (int) date('Y') - 3;
-        $companies = $builder
-            ->orderBy("CASE WHEN estado = 'ACTIVA' OR estado LIKE 'Reactivaci%' THEN 0"
-                . " WHEN estado IS NULL OR estado = '' THEN 1"
-                . " WHEN estado IN ('Concurso', 'INACTIVA', 'DISUELTA') OR estado LIKE 'Disoluci%' THEN 2"
-                . " ELSE 3 END", 'ASC', false)
-            ->orderBy("(ult_cuentas_anio IS NULL OR ult_cuentas_anio < {$anioCuentas})", 'ASC', false)
-            ->orderBy('(fecha_constitucion IS NULL)', 'ASC', false)
-            ->orderBy('company_name', 'ASC')
-            ->orderBy('id', 'ASC')
-            ->limit($perPage, $offset)
-            ->get()
-            ->getResultArray();
+        $listKey = 'prov_cnae_lista_v2_' . md5($provinceName . '|' . $cnaeCode . '|' . $page);
+        $companies = \Config\Services::cache()->get($listKey);
+        if (!is_array($companies)) {
+            $companies = $builder
+                ->orderBy("CASE WHEN estado = 'ACTIVA' OR estado LIKE 'Reactivaci%' THEN 0"
+                    . " WHEN estado IS NULL OR estado = '' THEN 1"
+                    . " WHEN estado IN ('Concurso', 'INACTIVA', 'DISUELTA') OR estado LIKE 'Disoluci%' THEN 2"
+                    . " ELSE 3 END", 'ASC', false)
+                ->orderBy("(ult_cuentas_anio IS NULL OR ult_cuentas_anio < {$anioCuentas})", 'ASC', false)
+                ->orderBy('(fecha_constitucion IS NULL)', 'ASC', false)
+                ->orderBy('company_name', 'ASC')
+                ->orderBy('id', 'ASC')
+                ->limit($perPage, $offset)
+                ->get()
+                ->getResultArray();
+            \Config\Services::cache()->save($listKey, $companies, 86400);
+        }
 
         if (empty($companies)) {
              if ($page > 1) {
