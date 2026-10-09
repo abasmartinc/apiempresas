@@ -214,7 +214,33 @@ class Directory extends BaseController
         $priceData = calculate_directory_price((int) $totalCompra);
         $dynamicPrice = $priceData['base_price'];
 
+        // Últimas constituidas en la provincia (09-10-2026). Search Console dice que muchas de
+        // las fichas que más clics traen son de empresas recién creadas; desde aquí (página
+        // indexable y enlazada desde todas las fichas de la provincia) Google las encuentra
+        // antes. Solo nombre, sector y fecha, y enlace al Radar para el listado completo con
+        // datos de contacto. Consulta por el índice (registro_mercantil, fecha_constitucion)
+        // con la provincia canónica, y 6 horas en caché.
+        $recientes = [];
+        if ($page === 1) {
+            $recKey = 'prov_recientes_v1_' . md5($provinceName);
+            $recientes = $cache->get($recKey);
+            if (!is_array($recientes)) {
+                $recientes = $this->companyModel->builder()
+                    ->select('id, cif, company_name as name, cnae_label, fecha_constitucion as founded')
+                    ->where('registro_mercantil', \App\Libraries\Provincias::canonica($provinceName) ?? $provinceName)
+                    ->where('fecha_constitucion IS NOT NULL', null, false)
+                    ->where('fecha_constitucion <=', date('Y-m-d'))
+                    ->groupStart()->where('estado IS NULL', null, false)->orWhere('estado', '')->orWhere('estado', 'ACTIVA')->groupEnd()
+                    ->orderBy('fecha_constitucion', 'DESC')
+                    ->limit(20)
+                    ->get()
+                    ->getResultArray();
+                $cache->save($recKey, $recientes, 21600);
+            }
+        }
+
         return view('directory/list', [
+            'recientes'       => $recientes,
             'items'           => $companies,
             'total_companies' => $totalCompanies,
             'total_formatted' => $totalFormatted,
@@ -226,10 +252,10 @@ class Directory extends BaseController
             // Cada página es su propia canónica: con noindex y canónica a la 1 a la vez
             // Google recibía dos señales que se contradicen.
             'canonical'       => $page > 1 ? "{$baseUrl}/{$page}" : $baseUrl,
-            'title'           => "{$totalFormatted} Empresas en {$provinceName} | Listado" . ($page > 1 ? " · Página {$page}" : ''),
+            'title'           => "Empresas en {$provinceName}: listado de {$totalFormatted} sociedades" . ($page > 1 ? " · Página {$page}" : ''),
             'excerptText'     => "Consulta el listado de {$totalFormatted} empresas registradas en {$provinceName}, con los datos publicados en el BORME.",
             'header'          => "Listado de empresas en {$provinceName}",
-            'meta_description'=> "Listado de {$totalFormatted} empresas en {$provinceName}. Busca por nombre, consulta CIF y accede a la ficha de cada sociedad.",
+            'meta_description'=> "{$totalFormatted} empresas de {$provinceName} con su CIF, sector y fecha de constitución, y las últimas sociedades creadas. Datos del BORME actualizados cada día.",
             'cross_links' => [
                 'type'     => 'cnae',
                 'title'    => "Principales sectores en {$provinceName}",

@@ -760,6 +760,26 @@
         </p>
         <?php endif; ?>
 
+        <?php if (!empty($recientes)): ?>
+        <!-- Últimas constituidas (09-10-2026): enlaza a las fichas nuevas, que son las más buscadas -->
+        <div class="sectors-section">
+            <h2>Últimas empresas constituidas<?= !empty($province_name) ? ' en ' . esc($province_name) : '' ?></h2>
+            <ul style="list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 6px 18px;">
+                <?php helper('company'); foreach ($recientes as $rc): ?>
+                    <li style="font-size: 0.9rem; line-height: 1.4; padding: 6px 0; border-bottom: 1px solid var(--dir-slate-200);">
+                        <a href="<?= esc(company_url($rc)) ?>" style="font-weight: 700; color: var(--dir-slate-900); text-decoration: none;"><?= esc($rc['name']) ?></a>
+                        <span style="display: block; color: var(--dir-slate-400); font-size: 0.8rem;">
+                            <?= !empty($rc['founded']) ? esc(date('d/m/Y', strtotime($rc['founded']))) : '' ?><?= !empty($rc['cnae_label']) ? ' · ' . esc(mb_strimwidth($rc['cnae_label'], 0, 60, '…')) : '' ?>
+                        </span>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+            <p style="margin-top: 12px; font-size: 0.9rem;">
+                <a href="<?= esc(site_url('empresas-nuevas' . (!empty($province_name) ? '/' . url_title(mb_strtolower($province_name), '-', true) : ''))) ?>" style="color: var(--dir-primary); font-weight: 700;">Ver todas las empresas nuevas<?= !empty($province_name) ? ' de ' . esc($province_name) : '' ?> →</a>
+            </p>
+        </div>
+        <?php endif; ?>
+
         <!-- Sectors cross-links -->
         <?php if (!empty($cross_links) && !empty($cross_links['items'])): ?>
         <div class="sectors-section">
