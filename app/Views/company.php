@@ -2176,8 +2176,15 @@
                         </h3>
 
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem;">
-                            <?php if ($secoProvStr): ?>
-                                <a href="<?= site_url('empresas/' . url_title($secoProvStr, '-', true)) ?>"
+                            <?php
+                            // 09-10-2026: estas tres tarjetas enlazaban a /empresas/<provincia>,
+                            // /empresas-nuevas-sector/<sector> y /empresas-<sector>-en-<provincia>,
+                            // páginas sin ninguna ficha enlazada (las dos últimas, con noindex y
+                            // "0 empresas"). Ahora van a los listados del directorio, que son
+                            // indexables y enlazan a 100 fichas cada uno.
+                            ?>
+                            <?php if ($secoProvStr && !empty($provinceUrl)): ?>
+                                <a href="<?= esc($provinceUrl) ?>"
                                    style="display: flex; flex-direction: column; padding: 1.5rem; background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; text-decoration: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 4px rgba(0,0,0,0.02);"
                                    onmouseover="this.style.boxShadow='0 12px 24px rgba(0,0,0,0.08)'; this.style.borderColor='var(--b2b-primary-light)'; this.style.transform='translateY(-4px)';"
                                    onmouseout="this.style.boxShadow='0 2px 4px rgba(0,0,0,0.02)'; this.style.borderColor='#e2e8f0'; this.style.transform='translateY(0)';">
@@ -2194,8 +2201,8 @@
                                 </a>
                             <?php endif; ?>
 
-                            <?php if ($seoCnae && $seoCnaeLabel): ?>
-                                <a href="<?= site_url('empresas-nuevas-sector/' . url_title($seoCnaeLabel, '-', true)) ?>"
+                            <?php if ($seoCnae && $seoCnaeLabel && !empty($cnaeUrl)): ?>
+                                <a href="<?= esc($cnaeUrl) ?>"
                                    style="display: flex; flex-direction: column; padding: 1.5rem; background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; text-decoration: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 4px rgba(0,0,0,0.02);"
                                    onmouseover="this.style.boxShadow='0 12px 24px rgba(0,0,0,0.08)'; this.style.borderColor='var(--b2b-primary-light)'; this.style.transform='translateY(-4px)';"
                                    onmouseout="this.style.boxShadow='0 2px 4px rgba(0,0,0,0.02)'; this.style.borderColor='#e2e8f0'; this.style.transform='translateY(0)';">
@@ -2212,8 +2219,8 @@
                                 </a>
                             <?php endif; ?>
 
-                            <?php if ($secoProvStr && $seoCnaeLabel): ?>
-                                <a href="<?= site_url('empresas-' . url_title($seoCnaeLabel, '-', true) . '-en-' . url_title($secoProvStr, '-', true)) ?>"
+                            <?php if ($secoProvStr && $seoCnaeLabel && !empty($provinceCnaeUrl)): ?>
+                                <a href="<?= esc($provinceCnaeUrl) ?>"
                                    style="display: flex; flex-direction: column; padding: 1.5rem; background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; text-decoration: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 4px rgba(0,0,0,0.02);"
                                    onmouseover="this.style.boxShadow='0 12px 24px rgba(0,0,0,0.08)'; this.style.borderColor='var(--b2b-primary-light)'; this.style.transform='translateY(-4px)';"
                                    onmouseout="this.style.boxShadow='0 2px 4px rgba(0,0,0,0.02)'; this.style.borderColor='#e2e8f0'; this.style.transform='translateY(0)';">

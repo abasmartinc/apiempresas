@@ -301,6 +301,15 @@
             transition: all 0.2s;
             white-space: nowrap;
         }
+        .pagination-btns { flex-wrap: wrap; justify-content: center; }
+        .page-nums { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
+        .page-num {
+            min-width: 32px; padding: 6px 8px; border: 1px solid var(--dir-slate-200); border-radius: 8px;
+            font-size: 0.8rem; font-weight: 700; color: var(--dir-slate-600); text-decoration: none;
+            text-align: center; background: #fff;
+        }
+        a.page-num:hover { border-color: var(--dir-primary); color: var(--dir-primary); }
+        .page-num.is-current { background: var(--dir-primary); border-color: var(--dir-primary); color: #fff; }
         .btn-page:hover {
             border-color: var(--dir-primary);
             color: var(--dir-primary);
@@ -707,7 +716,26 @@
                     </span>
                 <?php endif; ?>
 
-                <span class="page-counter"><?= esc($pagination['current']) ?> / <?= esc($pagination['total'] ?? '?') ?></span>
+                <?php
+                // 09-10-2026: enlace a cada página (son 20 como mucho). Antes solo había
+                // "Anterior / Siguiente" y la página 20 quedaba a 19 clics de la primera:
+                // Google rara vez llega tan hondo y las fichas de esas páginas no se descubrían.
+                $pTotal = (int) ($pagination['total'] ?? 0);
+                $pBase = $pagination['base'] ?? '';
+                ?>
+                <?php if ($pTotal > 1 && $pBase !== ''): ?>
+                    <span class="page-nums">
+                        <?php for ($p = 1; $p <= $pTotal; $p++): ?>
+                            <?php if ($p === (int) $pagination['current']): ?>
+                                <span class="page-num is-current" aria-current="page"><?= $p ?></span>
+                            <?php else: ?>
+                                <a class="page-num" href="<?= esc($p === 1 ? $pBase : $pBase . '/' . $p) ?>"><?= $p ?></a>
+                            <?php endif; ?>
+                        <?php endfor; ?>
+                    </span>
+                <?php else: ?>
+                    <span class="page-counter"><?= esc($pagination['current']) ?> / <?= esc($pagination['total'] ?? '?') ?></span>
+                <?php endif; ?>
 
                 <?php if ($pagination['next']): ?>
                     <a href="<?= esc($pagination['next']) ?>" class="btn-page" rel="next">

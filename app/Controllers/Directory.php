@@ -516,7 +516,21 @@ class Directory extends BaseController
             ->select('id, cif, company_name as name, cnae_label, fecha_constitucion as founded, registro_mercantil as province')
             ->where('cnae_code', $cnaeCode);
         \App\Services\BillingService::filtrarProvincia($builder, $provinceName);
-        $companies = $builder->orderBy('company_name', 'ASC')
+        // 09-10-2026: primero las empresas activas y con datos, luego el resto. Antes iba por
+        // orden alfabético y los primeros puestos (los que enlaza la página 1, indexable, y a la
+        // que ahora enlazan todas las fichas del sector) se los llevaban sociedades extinguidas y
+        // vacías que empiezan por "A". Solo aquí: son listados de pocos miles de empresas y la
+        // ordenación es barata. Los de provincia entera siguen por nombre (usan el índice).
+        $anioCuentas = (int) date('Y') - 3;
+        $companies = $builder
+            ->orderBy("CASE WHEN estado = 'ACTIVA' OR estado LIKE 'Reactivaci%' THEN 0"
+                . " WHEN estado IS NULL OR estado = '' THEN 1"
+                . " WHEN estado IN ('Concurso', 'INACTIVA', 'DISUELTA') OR estado LIKE 'Disoluci%' THEN 2"
+                . " ELSE 3 END", 'ASC', false)
+            ->orderBy("(ult_cuentas_anio IS NULL OR ult_cuentas_anio < {$anioCuentas})", 'ASC', false)
+            ->orderBy('(fecha_constitucion IS NULL)', 'ASC', false)
+            ->orderBy('company_name', 'ASC')
+            ->orderBy('id', 'ASC')
             ->limit($perPage, $offset)
             ->get()
             ->getResultArray();
