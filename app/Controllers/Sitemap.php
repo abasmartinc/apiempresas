@@ -620,19 +620,49 @@ class Sitemap extends Controller
      *   lo tiene enlazado, con fecha de constitución en ese plazo).
      * - Mismo filtro que el resto de sitemaps (shouldIndexCompany) y sin el grupo de control.
      * - lastmod = fecha de su último acto del BORME.
-     * - Se calcula al pedirlo y se guarda 6 horas en caché. Máximo 50.000 URL.
+     * - Se guarda en writable/sitemaps/ y se renueva cada 6 horas. Máximo 50.000 URL.
      */
     public function empresasNuevas()
     {
-        $cache = \Config\Services::cache();
-        $clave = 'sitemap_empresas_nuevas_v1';
-        $xml = $cache->get($clave);
-        if (!is_string($xml) || $xml === '') {
-            $xml = $this->generarEmpresasNuevas();
-            $cache->save($clave, $xml, 21600);
+        // Se guarda en un fichero y se sirve siempre el último generado, para que Google no
+        // espere los segundos que tarda la consulta. Si tiene más de 6 horas, se vuelve a
+        // generar DESPUÉS de enviar la respuesta (con PHP-FPM; sin él, al terminar la petición).
+        // Solo espera quien llega cuando aún no existe el fichero (la primera vez).
+        $fichero = WRITEPATH . 'sitemaps/sitemap-empresas-nuevas.xml';
+        $cerrojo = $fichero . '.lock';
+        if (!is_file($fichero)) {
+            $this->guardarEmpresasNuevas($fichero);
+        } elseif (time() - filemtime($fichero) > 21600
+            && (!is_file($cerrojo) || time() - filemtime($cerrojo) > 600)) {
+            @touch($cerrojo);
+            register_shutdown_function(function () use ($fichero, $cerrojo) {
+                if (function_exists('fastcgi_finish_request')) {
+                    fastcgi_finish_request();
+                }
+                try {
+                    $this->guardarEmpresasNuevas($fichero);
+                } finally {
+                    @unlink($cerrojo);
+                }
+            });
         }
 
-        return $this->response->setContentType('application/xml')->setBody($xml);
+        return $this->response->setContentType('application/xml')->setBody((string) @file_get_contents($fichero));
+    }
+
+    private function guardarEmpresasNuevas(string $fichero): void
+    {
+        @set_time_limit(300);
+        $xml = $this->generarEmpresasNuevas();
+        if (!is_dir(dirname($fichero))) {
+            @mkdir(dirname($fichero), 0755, true);
+        }
+        $tmp = $fichero . '.' . uniqid('tmp_', true);
+        if (file_put_contents($tmp, $xml, LOCK_EX) !== false) {
+            @rename($tmp, $fichero);
+        } else {
+            @unlink($tmp);
+        }
     }
 
     private function generarEmpresasNuevas(): string
