@@ -106,6 +106,11 @@ class Sitemap extends Controller
         }
 
         if (!$isEn) {
+            // 5a. Empresas constituidas en los últimos 90 días (09-10-2026): son las que más
+            // se buscan (Search Console) y en el sitemap general quedan perdidas entre 4 M.
+            $xml .= '<sitemap><loc>' . site_url('sitemap-empresas-nuevas.xml') . '</loc>'
+                . '<lastmod>' . date('c') . '</lastmod></sitemap>';
+
             // 5b. Grupo de control de los bloques de hechos (09-10-2026): 5 % de fichas sin
             // bloques, en sitemaps aparte para comparar su indexación en Search Console.
             $ctlPages = 0;
@@ -602,6 +607,98 @@ class Sitemap extends Controller
 
         $xml .= '</urlset>';
         return $this->response->setContentType('application/xml')->setBody($xml);
+    }
+
+    /**
+     * Empresas constituidas en los últimos 90 días (sitemap-empresas-nuevas.xml), 09-10-2026.
+     *
+     * Search Console (3 meses) dice que muchas de las fichas con más clics son de empresas recién
+     * creadas: alguien acaba de conocerlas y busca su nombre o su CIF. En el sitemap general
+     * están mezcladas con 4 millones de URLs; aquí Google las tiene juntas y las ve antes.
+     *
+     * - Nuevas = con un acto de "Constitución" en el BORME de los últimos 90 días (o, si no
+     *   lo tiene enlazado, con fecha de constitución en ese plazo).
+     * - Mismo filtro que el resto de sitemaps (shouldIndexCompany) y sin el grupo de control.
+     * - lastmod = fecha de su último acto del BORME.
+     * - Se calcula al pedirlo y se guarda 6 horas en caché. Máximo 50.000 URL.
+     */
+    public function empresasNuevas()
+    {
+        $cache = \Config\Services::cache();
+        $clave = 'sitemap_empresas_nuevas_v1';
+        $xml = $cache->get($clave);
+        if (!is_string($xml) || $xml === '') {
+            $xml = $this->generarEmpresasNuevas();
+            $cache->save($clave, $xml, 21600);
+        }
+
+        return $this->response->setContentType('application/xml')->setBody($xml);
+    }
+
+    private function generarEmpresasNuevas(): string
+    {
+        helper(['text', 'seo_dynamic', 'company', 'ficha_hechos']);
+        $db = \Config\Database::connect();
+        $desde = date('Y-m-d', strtotime('-90 days'));
+        $hoy = date('Y-m-d');
+
+        $ids = [];
+        $q = $db->query(
+            "SELECT DISTINCT company_id FROM borme_posts
+             WHERE borme_date >= ? AND company_id IS NOT NULL AND description LIKE 'Constituci%'",
+            [$desde]
+        );
+        foreach ($q->getResultArray() as $r) {
+            $ids[(int) $r['company_id']] = true;
+        }
+        $q = $db->query(
+            "SELECT id FROM companies WHERE fecha_constitucion >= ? AND fecha_constitucion <= ?",
+            [$desde, $hoy]
+        );
+        foreach ($q->getResultArray() as $r) {
+            $ids[(int) $r['id']] = true;
+        }
+        $ids = array_slice(array_keys($ids), 0, 60000);
+
+        $entradas = [];
+        foreach (array_chunk($ids, 5000) as $trozo) {
+            $lista = implode(',', array_map('intval', $trozo));
+            $filas = $db->query(
+                "SELECT c.id, c.cif, c.company_name AS name, c.cnae_code AS cnae, c.registro_mercantil AS province,
+                        c.objeto_social AS corporate_purpose, c.fecha_constitucion, e.ai_seo_text
+                 FROM companies c
+                 LEFT JOIN company_enrichment e ON e.company_id = c.id
+                 LEFT JOIN company_privacy_optouts o ON o.cif = c.cif COLLATE utf8mb4_general_ci
+                 WHERE c.id IN ({$lista}) AND o.cif IS NULL"
+            )->getResultArray();
+            $admins = [];
+            foreach ($db->query("SELECT company_id, COUNT(*) n FROM company_administrators WHERE company_id IN ({$lista}) GROUP BY company_id")->getResultArray() as $r) {
+                $admins[$r['company_id']] = (int) $r['n'];
+            }
+            $borme = [];
+            foreach ($db->query("SELECT company_id, COUNT(*) n, MAX(borme_date) ultima FROM borme_posts WHERE company_id IN ({$lista}) GROUP BY company_id")->getResultArray() as $r) {
+                $borme[$r['company_id']] = $r;
+            }
+            foreach ($filas as $c) {
+                $c['num_admins'] = $admins[$c['id']] ?? 0;
+                $c['num_borme_posts'] = (int) ($borme[$c['id']]['n'] ?? 0);
+                if (!shouldIndexCompany($c) || ficha_grupo_control($c)) {
+                    continue;
+                }
+                $fecha = $borme[$c['id']]['ultima'] ?? $c['fecha_constitucion'] ?? null;
+                $entradas[] = [company_url($c), $fecha ? date('Y-m-d', strtotime($fecha)) : null];
+            }
+        }
+
+        usort($entradas, static fn ($a, $b) => strcmp((string) $b[1], (string) $a[1]));
+        $entradas = array_slice($entradas, 0, 50000);
+
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL
+            . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . PHP_EOL;
+        foreach ($entradas as [$url, $fecha]) {
+            $xml .= '<url><loc>' . esc($url) . '</loc>' . ($fecha ? '<lastmod>' . $fecha . '</lastmod>' : '') . '</url>' . PHP_EOL;
+        }
+        return $xml . '</urlset>';
     }
 
     /**

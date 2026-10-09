@@ -462,6 +462,7 @@ $routes->match(['get', 'head'], 'sitemap-ai-ready-(:num).xml', 'Sitemap::aiReady
 $routes->match(['get', 'head'], 'sitemap-control-(:num).xml', 'Sitemap::control/$1');
 $routes->match(['get', 'head'], 'sitemap-indice-fichas.xml', 'Sitemap::indiceGrupo/fichas');
 $routes->match(['get', 'head'], 'sitemap-indice-control.xml', 'Sitemap::indiceGrupo/control');
+$routes->match(['get', 'head'], 'sitemap-empresas-nuevas.xml', 'Sitemap::empresasNuevas');
 
 // --- Export Routes ---
 $routes->get('excel/preview', 'RadarController::excel_preview');
