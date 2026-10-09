@@ -106,6 +106,21 @@ class Sitemap extends Controller
         }
 
         if (!$isEn) {
+            // 5b. Grupo de control de los bloques de hechos (09-10-2026): 5 % de fichas sin
+            // bloques, en sitemaps aparte para comparar su indexación en Search Console.
+            $ctlPages = 0;
+            if (file_exists(WRITEPATH . 'sitemaps/sitemap-control-count.txt')) {
+                $ctlPages = (int) file_get_contents(WRITEPATH . 'sitemaps/sitemap-control-count.txt');
+            }
+            for ($i = 1; $i <= $ctlPages; $i++) {
+                $ctlFile = WRITEPATH . 'sitemaps/sitemap-control-' . $i . '.xml';
+                $xml .= '<sitemap><loc>' . site_url("sitemap-control-{$i}.xml") . '</loc>';
+                if (file_exists($ctlFile)) {
+                    $xml .= '<lastmod>' . date('c', filemtime($ctlFile)) . '</lastmod>';
+                }
+                $xml .= '</sitemap>';
+            }
+
             // 6. Páginas de Holdings (40.000 por página)
             $holdingModel = new \App\Models\HoldingModel();
             // Better to just use a fast count. 134505 / 40000 = 4 pages
@@ -587,6 +602,47 @@ class Sitemap extends Controller
 
         $xml .= '</urlset>';
         return $this->response->setContentType('application/xml')->setBody($xml);
+    }
+
+    /**
+     * Índices para medir en Search Console (09-10-2026). Se dan de alta aparte, además de
+     * sitemap.xml, y el informe de páginas se filtra por cada uno:
+     *   sitemap-indice-fichas.xml   fichas CON bloques de hechos (sitemap-companies-N.xml)
+     *   sitemap-indice-control.xml  fichas SIN bloques, el grupo de control (sitemap-control-N.xml)
+     */
+    public function indiceGrupo($grupo = 'fichas')
+    {
+        $prefijo = $grupo === 'control' ? 'sitemap-control-' : 'sitemap-companies-';
+        $cuenta = WRITEPATH . 'sitemaps/' . $prefijo . 'count.txt';
+        $paginas = file_exists($cuenta) ? (int) file_get_contents($cuenta) : 0;
+
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>';
+        $xml .= '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+        for ($i = 1; $i <= $paginas; $i++) {
+            $fichero = WRITEPATH . 'sitemaps/' . $prefijo . $i . '.xml';
+            $xml .= '<sitemap><loc>' . site_url("{$prefijo}{$i}.xml") . '</loc>';
+            if (file_exists($fichero)) {
+                $xml .= '<lastmod>' . date('c', filemtime($fichero)) . '</lastmod>';
+            }
+            $xml .= '</sitemap>';
+        }
+        $xml .= '</sitemapindex>';
+
+        return $this->response->setContentType('application/xml')->setBody($xml);
+    }
+
+    /**
+     * Sub-sitemap del grupo de control (sitemap-control-X.xml): fichas sin bloques de hechos.
+     */
+    public function control($page = 1)
+    {
+        $page = (int) $page;
+        $staticFile = WRITEPATH . 'sitemaps/sitemap-control-' . $page . '.xml';
+        if ($page >= 1 && file_exists($staticFile)) {
+            return $this->response->setContentType('application/xml')->setBody(file_get_contents($staticFile));
+        }
+
+        return $this->response->setStatusCode(404);
     }
 
     /**

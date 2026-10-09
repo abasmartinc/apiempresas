@@ -41,7 +41,7 @@ class GenerateSitemaps extends BaseCommand
         ini_set('memory_limit', '-1');
         set_time_limit(0);
         
-        helper(['text', 'seo_dynamic', 'company']);
+        helper(['text', 'seo_dynamic', 'company', 'ficha_hechos']);
         
         CLI::write("Starting sitemap generation...", 'green');
         
@@ -66,6 +66,15 @@ class GenerateSitemaps extends BaseCommand
         
         $totalProcessed = 0;
         $totalIncluded = 0;
+
+        // Grupo de control (09-10-2026): el 5 % de fichas que NO lleva los bloques de hechos
+        // (ficha_grupo_control) va en sus propios sitemaps, sitemap-control-N.xml. Así Search
+        // Console da el % de indexadas de cada grupo por separado y se puede comparar.
+        // Solo afecta al sitemap en español (los bloques solo salen en la ficha en español).
+        $ctlIndex = 1;
+        $ctlCount = 0;
+        $totalCtl = 0;
+        $ctlContent = $xmlHeader;
 
         while (true) {
             $builder->select('companies.id, companies.cif, companies.company_name as name, companies.cnae_code as cnae, companies.registro_mercantil as province, companies.objeto_social as corporate_purpose, company_enrichment.ai_seo_text', false)
@@ -141,6 +150,22 @@ class GenerateSitemaps extends BaseCommand
 
                 $urlEntry = '<url>' . PHP_EOL . '  <loc>' . esc($url) . '</loc>' . PHP_EOL . $lastModTag . '  <changefreq>monthly</changefreq>' . PHP_EOL . '  <priority>' . $priority . '</priority>' . PHP_EOL . '</url>' . PHP_EOL;
                 $urlEntryEn = '<url>' . PHP_EOL . '  <loc>' . esc($urlEn) . '</loc>' . PHP_EOL . $lastModTag . '  <changefreq>monthly</changefreq>' . PHP_EOL . '  <priority>' . $priority . '</priority>' . PHP_EOL . '</url>' . PHP_EOL;
+
+                if (ficha_grupo_control($company)) {
+                    // En español va al sitemap del grupo de control; en inglés, como siempre.
+                    $xmlContentEn .= $urlEntryEn;
+                    $ctlContent .= $urlEntry;
+                    $ctlCount++;
+                    $totalCtl++;
+                    if ($ctlCount >= $urlsPerFile) {
+                        $this->writeSitemapAtomically($publicPath . "sitemap-control-{$ctlIndex}.xml", $ctlContent . '</urlset>');
+                        CLI::write("Generated control sitemap {$ctlIndex} with {$ctlCount} URLs.", 'yellow');
+                        $ctlIndex++;
+                        $ctlCount = 0;
+                        $ctlContent = $xmlHeader;
+                    }
+                    continue;
+                }
                 
                 $xmlContent .= $urlEntry;
                 $xmlContentEn .= $urlEntryEn;
@@ -183,6 +208,22 @@ class GenerateSitemaps extends BaseCommand
         }
 
         CLI::write("Done! Processed {$totalProcessed} total companies, included {$totalIncluded} in {$fileIndex} sitemap files.", 'green');
+
+        // Grupo de control: lo que quede, el recuento y los ficheros sobrantes
+        if ($ctlCount > 0) {
+            $this->writeSitemapAtomically($publicPath . "sitemap-control-{$ctlIndex}.xml", $ctlContent . '</urlset>');
+        } elseif ($ctlIndex > 1) {
+            $ctlIndex--;
+        } else {
+            $ctlIndex = 0;
+        }
+        file_put_contents($publicPath . 'sitemap-control-count.txt', $ctlIndex);
+        foreach (glob($publicPath . 'sitemap-control-*.xml') as $file) {
+            if (preg_match('/sitemap-control-(\d+)\.xml$/', $file, $m) && (int) $m[1] > $ctlIndex) {
+                @unlink($file);
+            }
+        }
+        CLI::write("Control group: {$totalCtl} companies in {$ctlIndex} sitemap files (sitemap-control-N.xml).", 'green');
         
         // Create an index file specifically for these just to keep track of the count
         // So that the main Sitemap Controller knows how many there are.
@@ -273,6 +314,10 @@ class GenerateSitemaps extends BaseCommand
                 $lastAiId = $company['id'];
 
                 if (!shouldIndexCompany($company)) {
+                    continue;
+                }
+                // El grupo de control solo va en sitemap-control-N.xml, para medirlo limpio.
+                if (ficha_grupo_control($company)) {
                     continue;
                 }
 
