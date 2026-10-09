@@ -182,6 +182,18 @@
         't_subs' => "Cuántas suscripciones de pago había activas el último día del mes (hoy, en el mes en curso).",
         't_mrr' => "MRR el último día del mes: la suma del precio mensual de las suscripciones activas en ese momento (las anuales, ÷ 12).",
         't_fact' => "Facturas pagadas de ese mes, sin IVA. Las devoluciones restan, por eso un mes puede salir en negativo.",
+        'bajas' => "Cada cliente que tenía un plan de pago (API o Solvencia) y lo canceló, el más reciente primero."
+            . "<br><br><strong>No cuentan como baja:</strong> los cambios de plan (cancelar Pro y contratar Business, o pasar de mensual a anual el mismo día): el cliente sigue pagando. Tampoco las filas repetidas que a veces guarda Stripe (la misma suscripción dos veces)."
+            . "<br><br><strong>Fecha:</strong> el día que canceló. Si canceló al final del periodo, aún pudo usar el plan hasta que se acabó lo pagado.",
+        'b_motivos' => "El motivo que eligió el cliente al cancelar <strong>desde tu web</strong> (Mi cuenta → Facturación → Cancelar), con su comentario si escribió uno."
+            . "<br><br><strong>Sin motivo (cancelada en Stripe):</strong> canceló desde el portal de Stripe (el enlace de las facturas) o Stripe la canceló solo porque la tarjeta no pagaba. En esos casos nadie le pregunta el motivo. Si es la mayoría, conviene que el enlace de cancelar de Stripe lleve a tu web, o escribirles para preguntar.",
+        'b_duro' => "Cuánto tiempo tuvo el plan: desde que lo contrató hasta que lo canceló.",
+        'b_pago' => "Lo que llegó a pagar en total (facturas pagadas, sin IVA) y cuántas facturas fueron. Es el dinero que dejó ese cliente.",
+        'b_uso' => "Cuándo usó el producto por última vez (en la API, su última petición; en Solvencia, el último informe que abrió), contado respecto al día de la baja."
+            . "<br><br>Es la mejor pista del motivo real: quien deja de usar el producto semanas antes de cancelar no se va por el precio, se va porque <strong>ya no lo necesita</strong> o no lo integró. Esos clientes se pueden detectar antes de que cancelen (ver 'Paga y no usa' en Correos).",
+        'b_hoy' => "Qué hace ahora: si ha vuelto a contratar un plan, si sigue usando el producto gratis después de la baja, o si no ha vuelto.",
+        'b_paron' => "Clientes que no usaban el producto desde hacía más de 14 días cuando cancelaron. Si es la mayoría, el problema no es el precio: es que dejan de usarlo. Ahí ayudan los avisos de 'paga y no usa' y escribirles cuando se paran.",
+        'b_mrr' => "La suma de lo que pagaba al mes cada cliente que se dio de baja (MRR perdido). Es lo que facturarías de más cada mes si no se hubieran ido.",
     ];
     $ayuda = fn (string $k) => '<button type="button" class="gr-help" aria-label="¿Qué significa?" data-help="' . esc($H[$k] ?? '', 'attr') . '">?</button>';
 ?>
@@ -490,6 +502,109 @@
             <p class="gr-note" style="margin-top:12px">Con ~<?= $n($altasApiProx) ?> altas de API al mes y la conversión actual (<?= $pct($mad['api']['pagan'], $mad['api']['altas']) ?>), salen unos <?= str_replace('.', ',', (string) round($altasApiProx * $convApi, 1)) ?> clientes de pago nuevos al mes a medio plazo.<?= $ayuda('nota_conv') ?></p>
         <?php endif; ?>
     </div>
+</div>
+
+<?php
+    // ================= Bajas de clientes de pago =================
+    $bajas = $d['bajas'] ?? [];
+    $duracion = function (int $dias): string {
+        if ($dias < 1) {
+            return 'el mismo día';
+        }
+        if ($dias < 45) {
+            return $dias . ' ' . ($dias === 1 ? 'día' : 'días');
+        }
+        $m = (int) round($dias / 30.4);
+
+        return $m . ' ' . ($m === 1 ? 'mes' : 'meses');
+    };
+    $nParon = 0;
+    $mrrPerdido = 0.0;
+    $diasLista = [];
+    foreach ($bajas as $b) {
+        $mrrPerdido += $b['mrr'];
+        $diasLista[] = $b['dias'];
+        if ($b['ultimo_uso'] === null || ($b['hasta'] - $b['ultimo_uso']) > 14 * 86400) {
+            $nParon++;
+        }
+    }
+    sort($diasLista);
+    $mediana = $diasLista ? $diasLista[(int) floor((count($diasLista) - 1) / 2)] : 0;
+    $maxMotivo = max(1, ...array_map(fn ($m) => $m['n'], $d['motivos'] ?: [['n' => 1]]));
+?>
+<div class="gr-box gr-card" id="bajas">
+    <div class="gr-card__top">
+        <h3>Bajas de clientes de pago<?= $ayuda('bajas') ?></h3>
+        <span class="gr-note" style="margin:0"><?= count($bajas) ?> desde el principio · sin cambios de plan</span>
+    </div>
+    <?php if (!$bajas): ?>
+        <p class="gr-muted" style="margin:6px 0 0">Ningún cliente de pago se ha dado de baja todavía.</p>
+    <?php else: ?>
+        <div class="gr-two" style="grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 22px; margin: 8px 0 16px;">
+            <div>
+                <h4 style="margin:0 0 10px;font-size:.82rem">Motivos<?= $ayuda('b_motivos') ?></h4>
+                <ul class="gr-plans">
+                    <?php foreach ($d['motivos'] as $m): ?>
+                        <li>
+                            <div class="row"><span><?= esc($m['label']) ?></span><strong><?= $m['n'] ?> <span class="gr-muted" style="font-weight:600">· <?= round($m['n'] / count($bajas) * 100) ?>%</span></strong></div>
+                            <div class="bar"><span style="width:<?= round($m['n'] / $maxMotivo * 100) ?>%;background:<?= $m['motivo'] === '' ? '#b4b2ab' : '#d03b3b' ?>"></span></div>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+            <div class="gr-kv" style="margin:0;padding:0;border:0;align-content:start">
+                <span>Bajas en total</span><strong><?= count($bajas) ?></strong>
+                <span>Ingresos mensuales perdidos (MRR)<?= $ayuda('b_mrr') ?></span><strong><?= $eur($mrrPerdido) ?>/mes</strong>
+                <span>Tiempo típico con el plan (mediana)</span><strong><?= esc($duracion($mediana)) ?></strong>
+                <span>Ya no usaban el producto al cancelar<?= $ayuda('b_paron') ?></span><strong><?= $nParon ?> de <?= count($bajas) ?> (<?= round($nParon / count($bajas) * 100) ?>%)</strong>
+                <span>Han vuelto a pagar</span><strong><?= count(array_filter($bajas, fn ($b) => $b['volvio'] !== null)) ?></strong>
+            </div>
+        </div>
+        <div class="gr-table-wrap">
+            <table class="gr-table ce-bajas" style="min-width:900px">
+                <thead>
+                    <tr>
+                        <th style="text-align:left">Baja</th>
+                        <th style="text-align:left">Cliente</th>
+                        <th style="text-align:left">Plan</th>
+                        <th>Duró<?= $ayuda('b_duro') ?></th>
+                        <th>Pagó<?= $ayuda('b_pago') ?></th>
+                        <th style="text-align:left">Motivo<?= $ayuda('b_motivos') ?></th>
+                        <th style="text-align:left">Último uso<?= $ayuda('b_uso') ?></th>
+                        <th style="text-align:left">Hoy<?= $ayuda('b_hoy') ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($bajas as $b):
+                    $antes = $b['ultimo_uso'] !== null ? (int) round(($b['hasta'] - $b['ultimo_uso']) / 86400) : null; ?>
+                    <tr>
+                        <td style="text-align:left"><?= date('d/m/Y', $b['hasta']) ?></td>
+                        <td style="text-align:left;white-space:normal"><a href="<?= site_url('admin/email-logs') ?>?user_id=<?= $b['user_id'] ?>#historial" title="Ver sus correos" style="color:#0f172a;font-weight:600;text-decoration:none"><?= esc($b['email']) ?></a><?php if ($b['nombre'] !== '' && $b['nombre'] !== explode('@', $b['email'])[0]): ?><br><span class="gr-muted"><?= esc($b['nombre']) ?></span><?php endif; ?></td>
+                        <td style="text-align:left"><span class="gr-dot" style="background:<?= $b['producto'] === 'risk' ? 'var(--risk)' : 'var(--api)' ?>"></span><?= esc($b['plan']) ?><?= $b['anual'] ? ' anual' : '' ?> <span class="gr-muted">· <?= $eur($b['mrr']) ?>/mes</span></td>
+                        <td><?= esc($duracion($b['dias'])) ?></td>
+                        <td><?= $eur($b['pagos']['total']) ?> <span class="gr-muted">(<?= $b['pagos']['n'] ?>)</span></td>
+                        <td style="text-align:left;white-space:normal;max-width:240px">
+                            <?php if ($b['motivo'] === ''): ?><span class="gr-muted"><?= esc($b['motivo_label']) ?></span>
+                            <?php else: ?><strong style="font-weight:700"><?= esc($b['motivo_label']) ?></strong><?php endif; ?>
+                            <?php if ($b['comentario'] !== ''): ?><br><em style="color:#52514e">“<?= esc($b['comentario']) ?>”</em><?php endif; ?>
+                        </td>
+                        <td style="text-align:left;white-space:normal">
+                            <?php if ($b['ultimo_uso'] === null): ?><span style="color:#b42f2f;font-weight:700">Nunca lo usó</span>
+                            <?php elseif ($antes > 14): ?><span style="color:#b45309;font-weight:700"><?= esc($duracion($antes)) ?> antes</span><br><span class="gr-muted"><?= date('d/m/Y', $b['ultimo_uso']) ?></span>
+                            <?php elseif ($antes >= 0): ?>Lo usaba hasta la baja<br><span class="gr-muted"><?= date('d/m/Y', $b['ultimo_uso']) ?></span>
+                            <?php else: ?>Lo usaba hasta la baja<?php endif; ?>
+                        </td>
+                        <td style="text-align:left;white-space:normal">
+                            <?php if ($b['volvio'] !== null): ?><span class="gr-chip gr-chip--up">Volvió · <?= esc($b['volvio']) ?></span>
+                            <?php elseif ($b['usa_despues']): ?>Sigue usándolo gratis<br><span class="gr-muted">última vez <?= date('d/m/Y', $b['ultimo_uso']) ?></span>
+                            <?php else: ?><span class="gr-muted">No ha vuelto</span><?php endif; ?>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    <?php endif; ?>
 </div>
 
 <div class="gr-box gr-card">

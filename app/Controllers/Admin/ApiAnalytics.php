@@ -104,12 +104,12 @@ class ApiAnalytics extends BaseController
         // -------------------------------------------------------------
         // 1. OBTENER LA COHORTE DE USUARIOS DE LA API
         // -------------------------------------------------------------
-        // Usuarios con signup_intent = 'api', no administradores, y excluyendo el usuario monitor interno (ID: 376)
+        // Usuarios con signup_intent = 'api', no administradores, y sin las cuentas internas (Config\UsuariosInternos: 229 y 376)
         $allCohortUsers = $db->table('users')
             ->select('id, name, email, company, created_at, last_login_at, is_active, unsuscribe')
             ->where('signup_intent', 'api')
             ->where('is_admin', 0)
-            ->where('id !=', 376)
+            ->whereNotIn('id', \Config\UsuariosInternos::IDS)
             ->orderBy('created_at', 'DESC')
             ->get()->getResultArray();
         $cohortUserIds = array_column($allCohortUsers, 'id');
@@ -164,7 +164,7 @@ class ApiAnalytics extends BaseController
                 ->where('user_subscriptions.status', 'active')
                 ->where('api_plans.price_monthly >', 0)
                 ->where('api_plans.product_type', 'api')
-                ->where('user_subscriptions.user_id !=', 376)
+                ->whereNotIn('user_subscriptions.user_id', \Config\UsuariosInternos::IDS)
                 ->whereIn('user_subscriptions.user_id', $cohortUserIds)
                 ->get()->getResultArray();
         }

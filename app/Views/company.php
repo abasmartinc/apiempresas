@@ -757,6 +757,50 @@
         </h2>
     </div>
 
+    <?php
+    // "En resumen" y "Su sitio en el sector" (09-10-2026): hechos de la empresa en frases.
+    // Ver app/Helpers/ficha_hechos_helper.php. No se pintan en el grupo de control (5 %).
+    $fichaResumen = $fichaResumen ?? [];
+    $fichaSector  = $fichaSector ?? null;
+    $sectorFrase  = '';
+    if (!empty($fichaSector) && !empty($fichaSector['sector'])) {
+        $sectorFrase = 'es una de las ' . number_format((int) $fichaSector['total'], 0, ',', '.')
+            . ' empresas de «' . $fichaSector['sector'] . '» registradas en ' . $fichaSector['provincia']
+            . ' (' . number_format((int) $fichaSector['activas'], 0, ',', '.') . ' activas)';
+        if (!empty($fichaSector['puesto']) && (int) $fichaSector['puesto'] <= (int) $fichaSector['total']) {
+            $sectorFrase .= ($fichaSector['puesto'] <= 3 ? ', y la ' : '; es la ')
+                . number_format((int) $fichaSector['puesto'], 0, ',', '.') . '.ª más antigua';
+        }
+        if (!empty($fichaSector['con_contratos'])) {
+            $sectorFrase .= '. ' . number_format((int) $fichaSector['con_contratos'], 0, ',', '.')
+                . ' de ellas tienen contratos con el sector público';
+        }
+    }
+    ?>
+    <?php if (!empty($fichaResumen) || $sectorFrase !== ''): ?>
+    <div class="ficha-hechos" style="margin:14px 24px 4px 24px; padding:14px 18px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px;">
+        <?php if (!empty($fichaResumen)): ?>
+            <h3 style="margin:0 0 8px 0; font-size:0.8rem; font-weight:800; color:#475569; text-transform:uppercase; letter-spacing:0.04em;">En resumen</h3>
+            <ul style="margin:0; padding-left:18px; color:#1e293b; font-size:0.95rem; line-height:1.6;">
+                <?php foreach ($fichaResumen as $frase): ?>
+                    <li><?= esc(rtrim($frase, '.')) ?>.</li>
+                <?php endforeach; ?>
+            </ul>
+        <?php endif; ?>
+        <?php if ($sectorFrase !== ''): ?>
+            <p style="margin:<?= !empty($fichaResumen) ? '10px' : '0' ?> 0 0 0; color:#334155; font-size:0.92rem; line-height:1.55;">
+                <strong>Su sitio en el sector:</strong>
+                <?php if (!empty($provinceCnaeUrl)): ?>
+                    <a href="<?= esc($provinceCnaeUrl) ?>" style="color:inherit;"><?= esc($sectorFrase) ?></a>.
+                <?php else: ?>
+                    <?= esc($sectorFrase) ?>.
+                <?php endif; ?>
+            </p>
+        <?php endif; ?>
+        <p style="margin:8px 0 0 0; color:#94a3b8; font-size:0.78rem;">Datos del BORME, de la Plataforma de Contratación del Sector Público y de la BDNS.</p>
+    </div>
+    <?php endif; ?>
+
     <!-- Texto SEO -->
     <div style="padding:8px 24px 18px 24px; line-height:1.65; color:#334155; font-size:0.98rem;">
         <?php if ($estadoReg['incidencia']): ?>
@@ -1516,12 +1560,23 @@
                                                 style="font-weight: 700; color: #1e293b; font-size: 1rem; line-height: 1.2; text-decoration: none; display: block;"
                                                 onmouseover="this.style.color='#2563eb'; this.style.textDecoration='underline'"
                                                 onmouseout="this.style.color='#1e293b'; this.style.textDecoration='none'">
-                                                <?= esc($admin['name']) ?>
+                                                <?= esc(function_exists('ficha_nombre_completo') ? ficha_nombre_completo((string) $admin['name'], $bormePosts ?? []) : $admin['name']) ?>
                                             </a>
                                             <div
                                                 style="color: #64748b; font-size: 0.85rem; margin-top: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.025em;">
                                                 <?= esc($admin['position']) ?>
                                             </div>
+                                            <?php
+                                            // Quién está detrás (09-10-2026): otras empresas de este administrador.
+                                            $red = ($fichaRed ?? [])[$admin['name']] ?? null;
+                                            ?>
+                                            <?php if (!empty($red['total'])): ?>
+                                                <?php // Solo el total y los enlaces: el estado de esas empresas (vinculaciones) es del dictamen. ?>
+                                                <div style="color:#475569; font-size:0.82rem; margin-top:6px; line-height:1.45;">
+                                                    También figura en <strong><?= (int) $red['total'] ?> empresa<?= $red['total'] > 1 ? 's' : '' ?> más</strong>:
+                                                    <?php foreach ($red['muestra'] as $i => $m): ?><?= $i ? ', ' : ' ' ?><?php if (!empty($m['url'])): ?><a href="<?= esc($m['url']) ?>" style="color:#2563eb;"><?= esc($m['name']) ?></a><?php else: ?><?= esc($m['name']) ?><?php endif; ?><?php endforeach; ?><?= $red['total'] > count($red['muestra']) ? '…' : '' ?>
+                                                </div>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
@@ -1740,8 +1795,34 @@
                              */
                             $verEvolucion    = count($bormePosts) >= 6 && count($bormeTimeline) >= 3;
                             $verDistribucion = $totalActs >= 4 && count($actCounts) >= 2;
-                            $verResumenIa    = !empty($company['ai_borme_summary']);
+                            // La historia escrita a partir de los actos sustituye al resumen de IA
+                            // cuando hay al menos 2 hechos legibles (09-10-2026).
+                            $fichaHistoria   = $fichaHistoria ?? [];
+                            $verResumenIa    = !empty($company['ai_borme_summary']) && empty($fichaHistoria);
                             ?>
+
+                            <?php if (!empty($fichaHistoria)): ?>
+                                <div class="ficha-historia" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:1.5rem; margin-bottom:1.5rem;">
+                                    <h3 style="margin:0 0 1rem 0; font-size:1.05rem; font-weight:800; color:#0f172a;">Historia de <?= esc($companyName) ?> en el BORME</h3>
+                                    <ol style="list-style:none; margin:0; padding:0; border-left:2px solid #e2e8f0;">
+                                        <?php foreach ($fichaHistoria as $h): ?>
+                                            <li style="position:relative; padding:0 0 0.9rem 1.1rem;">
+                                                <span style="position:absolute; left:-6px; top:6px; width:10px; height:10px; border-radius:50%; background:#3b82f6;"></span>
+                                                <time datetime="<?= esc($h['fecha']) ?>" style="display:block; font-size:0.8rem; font-weight:700; color:#64748b;"><?= esc(ficha_mes_anio($h['fecha'])) ?></time>
+                                                <span style="color:#1e293b; font-size:0.95rem; line-height:1.5;"><?= esc(rtrim($h['texto'], '.')) ?>.</span>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ol>
+                                    <?php if (array_filter($fichaHistoria, static fn($h) => !empty($h['adverso']))): ?>
+                                        <p style="margin:0.75rem 0 0 0; padding:10px 14px; background:#fffbeb; border:1px solid #fde68a; border-radius:10px; color:#78350f; font-size:0.9rem; line-height:1.5;">
+                                            ¿Qué supone esto si le vendes a crédito o vas a contratar con ella?
+                                            <a href="#perfil-de-riesgo" data-track-click="ficha_historia_dictamen" style="color:#92400e; font-weight:700;">Ver el dictamen</a>
+                                            · <a href="#perfil-de-riesgo" data-track-click="ficha_historia_aviso" style="color:#92400e; font-weight:700;">Avísame si cambia</a>
+                                        </p>
+                                    <?php endif; ?>
+                                    <p style="margin:0.5rem 0 0 0; color:#94a3b8; font-size:0.78rem;">Escrito a partir de los actos publicados en el BORME que aparecen más abajo.</p>
+                                </div>
+                            <?php endif; ?>
 
                             <?php if ($verResumenIa || $verEvolucion || $verDistribucion): ?>
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">

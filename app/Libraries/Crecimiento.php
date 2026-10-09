@@ -15,6 +15,10 @@ namespace App\Libraries;
  *                         habia a final de cada mes con created_at y canceled_at.
  *   - MRR:                precio mensual del plan; los anuales (periodo de ~1 ano) cuentan su precio anual / 12.
  *   - Facturado:          invoices pagadas (base sin IVA) por mes de la factura. Incluye devoluciones (importes negativos).
+ *   - Bajas:              suscripciones de pago canceladas. No cuentan como baja los cambios de plan (cancelar Pro y contratar
+ *                         Business o Pro anual el mismo dia): ni como baja ni como alta nueva. Las filas duplicadas (misma
+ *                         suscripcion guardada dos veces, mismo usuario, plan y minuto) cuentan una vez. El motivo solo existe
+ *                         si se cancelo desde la web (Billing); si se cancelo en Stripe (portal o impago) va vacio.
  *
  * La prevision NO es un modelo: media de los 3 ultimos meses completos + la mitad de la tendencia de los 6 ultimos, con un
  * margen de +- la variacion tipica. Para el mes en curso se mezcla el ritmo que lleva con esa media (cuanto mas avanzado
@@ -22,6 +26,7 @@ namespace App\Libraries;
  */
 class Crecimiento
 {
+    /** @deprecated Las cuentas que no cuentan estan en Config\UsuariosInternos (229 y 376). */
     public const MONITOR_USER_ID = 376;
     public const MESES = 12;              // meses que se ensenan (incluido el actual)
     public const MESES_PREVISION = 3;     // meses futuros que se estiman
@@ -30,6 +35,19 @@ class Crecimiento
     public const PRODUCTOS = [
         'api'  => ['intent' => 'api', 'label' => 'API'],
         'risk' => ['intent' => 'view_risk_profile', 'label' => 'Solvencia'],
+    ];
+
+    /** Motivos de baja, como en Billing::cancelSubscription. */
+    public const MOTIVOS = [
+        'too_expensive'     => 'Precio',
+        'missing_features'  => 'Faltan funcionalidades',
+        'low_usage'         => 'Poco uso',
+        'technical_issues'  => 'Problemas técnicos',
+        'switched_solution' => 'Usa otra solución',
+        'temporary_pause'   => 'Pausa temporal',
+        'other'             => 'Otro motivo',
+        'prefer_not_to_say' => 'Prefirió no responder',
+        ''                  => 'Sin motivo (cancelada en Stripe)',
     ];
 
     private const MESES_ES = [1 => 'ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
@@ -132,10 +150,10 @@ class Crecimiento
             $mov = ['nuevas' => ['api' => 0, 'risk' => 0], 'bajas' => ['api' => 0, 'risk' => 0],
                 'activas' => ['api' => 0, 'risk' => 0], 'mrr' => 0.0, 'mrr_prod' => ['api' => 0.0, 'risk' => 0.0]];
             foreach ($subs as $s) {
-                if ($s['desde'] >= $ini && $s['desde'] <= $fin) {
+                if ($s['desde'] >= $ini && $s['desde'] <= $fin && $s['viene_de'] === null) {
                     $mov['nuevas'][$s['producto']]++;
                 }
-                if ($s['hasta'] !== null && $s['hasta'] >= $ini && $s['hasta'] <= $fin) {
+                if ($s['hasta'] !== null && $s['hasta'] >= $ini && $s['hasta'] <= $fin && $s['cambio_a'] === null) {
                     $mov['bajas'][$s['producto']]++;
                 }
                 if ($s['desde'] <= $fin && ($s['hasta'] === null || $s['hasta'] > $fin)) {
@@ -209,6 +227,7 @@ class Crecimiento
         }
 
         $planes = $this->planesActivos($subs);
+        [$bajas, $motivos] = $this->bajas($subs);
 
         $datos = [
             'ahora' => date('Y-m-d H:i', $this->now),
@@ -228,6 +247,8 @@ class Crecimiento
             'mrr_hoy' => round($mrrHoy, 2),
             'planes' => $planes,
             'facturado_12m' => round(array_sum(array_map(fn ($m) => $porMes[$m]['facturado'], $meses)), 2),
+            'bajas' => $bajas,
+            'motivos' => $motivos,
         ];
         $datos['lectura'] = $this->lectura($datos);
 
@@ -243,7 +264,7 @@ class Crecimiento
             ->select('id, signup_intent, created_at')
             ->whereIn('signup_intent', $intents)
             ->where('is_admin', 0)
-            ->where('id !=', self::MONITOR_USER_ID)
+            ->whereNotIn('id', \Config\UsuariosInternos::IDS)
             ->where('created_at IS NOT NULL', null, false)
             ->where('created_at <=', date('Y-m-d H:i:s', $this->now))
             ->get()->getResultArray();
@@ -281,25 +302,40 @@ class Crecimiento
         return $out;
     }
 
-    /** Suscripciones de pago (API y Solvencia) con su periodo de vida y su MRR. */
+    /** Suscripciones de pago (API y Solvencia) con su periodo de vida, su MRR y, si terminaron, el motivo. */
     private function suscripciones(): array
     {
         $rows = $this->db->table('user_subscriptions us')
-            ->select('us.user_id, us.status, us.created_at, us.canceled_at, us.current_period_start, us.current_period_end,
+            ->select('us.id, us.user_id, us.plan_id, us.status, us.created_at, us.canceled_at, us.current_period_start, us.current_period_end,
+                us.cancellation_reason, us.cancellation_feedback, u.email, u.name AS user_name, u.signup_intent,
                 ap.slug, ap.name AS plan, ap.product_type, ap.price_monthly, ap.price_annual')
             ->join('api_plans ap', 'ap.id = us.plan_id')
             ->join('users u', 'u.id = us.user_id')
             ->where('u.is_admin', 0)
-            ->where('us.user_id !=', self::MONITOR_USER_ID)
+            ->whereNotIn('us.user_id', \Config\UsuariosInternos::IDS)
             ->where('ap.price_monthly >', 0)
             ->whereIn('ap.product_type', ['api', 'risk'])
-            ->whereIn('us.status', ['active', 'past_due', 'canceled'])
+            // Las filas antiguas con estado vacio y fecha de cancelacion son suscripciones canceladas
+            ->groupStart()
+                ->whereIn('us.status', ['active', 'past_due', 'canceled'])
+                ->orGroupStart()->where('us.status', '')->where('us.canceled_at IS NOT NULL', null, false)->groupEnd()
+            ->groupEnd()
+            ->orderBy('us.id', 'ASC')
             ->get()->getResultArray();
 
         $out = [];
         foreach ($rows as $r) {
             $desde = strtotime((string) $r['created_at']);
             if (!$desde) {
+                continue;
+            }
+            // Duplicados: la misma suscripcion guardada dos veces (mismo usuario, plan y minuto). Se queda una; si una trae motivo, esa.
+            $clave = $r['user_id'] . '|' . $r['plan_id'] . '|' . date('Y-m-d H:i', $desde);
+            if (isset($out[$clave])) {
+                if ($out[$clave]['motivo'] === '' && (string) $r['cancellation_reason'] !== '') {
+                    $out[$clave]['motivo'] = (string) $r['cancellation_reason'];
+                    $out[$clave]['comentario'] = trim((string) $r['cancellation_feedback']);
+                }
                 continue;
             }
             $hasta = null;
@@ -312,18 +348,105 @@ class Crecimiento
             $dias = ($r['current_period_start'] && $r['current_period_end'])
                 ? (strtotime($r['current_period_end']) - strtotime($r['current_period_start'])) / 86400 : 0;
             $anual = $dias >= 300 && $dias <= 400 && (float) $r['price_annual'] > 0;
-            $out[] = [
+            $out[$clave] = [
+                'id' => (int) $r['id'],
                 'user_id' => (int) $r['user_id'],
+                'email' => (string) $r['email'],
+                'nombre' => (string) $r['user_name'],
+                'intent' => (string) $r['signup_intent'],
                 'producto' => $r['product_type'] === 'risk' ? 'risk' : 'api',
                 'plan' => (string) $r['plan'],
                 'anual' => $anual,
                 'desde' => $desde,
                 'hasta' => $hasta,
                 'mrr' => $anual ? (float) $r['price_annual'] / 12 : (float) $r['price_monthly'],
+                'motivo' => (string) $r['cancellation_reason'],
+                'comentario' => trim((string) $r['cancellation_feedback']),
+                'cambio_a' => null,   // termino porque cambio a este plan (no es una baja)
+                'viene_de' => null,   // empezo como cambio desde este plan (no es una alta nueva)
             ];
+        }
+        $out = array_values($out);
+
+        // Cambios de plan: termina una y el mismo usuario empieza otra de pago en +-1 dia (Pro -> Business, mensual -> anual)
+        foreach ($out as $i => $a) {
+            if ($a['hasta'] === null) {
+                continue;
+            }
+            foreach ($out as $j => $b) {
+                if ($i !== $j && $b['user_id'] === $a['user_id'] && $b['viene_de'] === null && abs($b['desde'] - $a['hasta']) <= 86400 && $b['desde'] > $a['desde']) {
+                    $out[$i]['cambio_a'] = $b['plan'] . ($b['anual'] ? ' anual' : '');
+                    $out[$j]['viene_de'] = $a['plan'] . ($a['anual'] ? ' anual' : '');
+                    break;
+                }
+            }
         }
 
         return $out;
+    }
+
+    /**
+     * Bajas de clientes de pago (sin cambios de plan), la mas reciente primero, y el recuento por motivo.
+     *
+     * @return array{0: list<array<string, mixed>>, 1: list<array{motivo: string, label: string, n: int}>}
+     */
+    private function bajas(array $subs): array
+    {
+        $lista = array_values(array_filter($subs, fn ($s) => $s['hasta'] !== null && $s['hasta'] <= $this->now && $s['cambio_a'] === null));
+        if (!$lista) {
+            return [[], []];
+        }
+        $ids = array_values(array_unique(array_column($lista, 'user_id')));
+
+        // Lo que pago cada uno (facturas pagadas, sin IVA)
+        $pagos = [];
+        try {
+            foreach ($this->db->table('invoices')->select('user_id, COUNT(*) AS n, SUM(amount) AS total')->where('status', 'paid')->where('amount >', 0)
+                ->whereIn('user_id', $ids)->groupBy('user_id')->get()->getResultArray() as $r) {
+                $pagos[(int) $r['user_id']] = ['n' => (int) $r['n'], 'total' => (float) $r['total']];
+            }
+        } catch (\Throwable $e) {
+        }
+        // Ultimo uso despues de la baja: API (api_usage_daily) y Solvencia (user_events)
+        $usoApi = [];
+        $usoRisk = [];
+        try {
+            foreach ($this->db->table('api_usage_daily')->select('user_id, MAX(date) AS d')->where('requests_count >', 0)->whereIn('user_id', $ids)->groupBy('user_id')->get()->getResultArray() as $r) {
+                $usoApi[(int) $r['user_id']] = strtotime($r['d'] . ' 12:00:00');
+            }
+            foreach ($this->db->table('user_events')->select('user_id, MAX(created_at) AS d')->where('event_type', 'view_risk_profile')->whereIn('user_id', $ids)->groupBy('user_id')->get()->getResultArray() as $r) {
+                $usoRisk[(int) $r['user_id']] = strtotime($r['d']);
+            }
+        } catch (\Throwable $e) {
+        }
+
+        $motivos = [];
+        foreach ($lista as &$b) {
+            $uid = $b['user_id'];
+            $b['dias'] = max(0, (int) round(($b['hasta'] - $b['desde']) / 86400));
+            $b['pagos'] = $pagos[$uid] ?? ['n' => 0, 'total' => 0.0];
+            // Hoy: ha vuelto a pagar (otra suscripcion empezada despues y viva), o su ultimo uso del producto
+            $b['volvio'] = null;
+            foreach ($subs as $s) {
+                if ($s['user_id'] === $uid && $s['desde'] > $b['hasta'] && ($s['hasta'] === null || $s['hasta'] > $this->now)) {
+                    $b['volvio'] = $s['plan'] . ($s['anual'] ? ' anual' : '');
+                }
+            }
+            $uso = $b['producto'] === 'risk' ? ($usoRisk[$uid] ?? null) : ($usoApi[$uid] ?? null);
+            $b['ultimo_uso'] = $uso;
+            $b['usa_despues'] = $uso !== null && $uso > $b['hasta'];
+            $b['motivo_label'] = self::MOTIVOS[$b['motivo']] ?? $b['motivo'];
+            $motivos[$b['motivo']] = ($motivos[$b['motivo']] ?? 0) + 1;
+        }
+        unset($b);
+        usort($lista, fn ($a, $b) => $b['hasta'] <=> $a['hasta']);
+        arsort($motivos);
+        $resumen = [];
+        foreach ($motivos as $m => $n) {
+            $resumen[] = ['motivo' => (string) $m, 'label' => self::MOTIVOS[$m] ?? (string) $m, 'n' => $n];
+        }
+
+        return [$lista, $resumen];
     }
 
     /** @return array<string, float> base sin IVA por mes */

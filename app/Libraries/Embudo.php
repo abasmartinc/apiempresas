@@ -101,7 +101,7 @@ class Embudo
                 ->where('status_code', 200)
                 ->where('created_at >=', $desde)
                 ->where('user_id >', 0)
-                ->where('user_id <>', \App\Filters\ApiKeyFilter::MONITOR_USER_ID)
+                ->whereNotIn('user_id', \Config\UsuariosInternos::IDS)   // cuentas internas (Adrian y monitor)
                 ->notLike('endpoint', 'sandbox')   // el sandbox no es uso real
                 ->get()->getResultArray(), 'user_id'));
             if (empty($ids)) {

@@ -16,8 +16,8 @@ namespace App\Libraries;
  * Grupos de cada correo (por plantilla; los antiguos/manuales sin plantilla, por la intencion de alta del destinatario):
  *   api | risk (Solvencia) | cuenta (contrasena, facturas, cobros: transaccionales de cualquier producto) | interno (avisos al admin) | otros
  *
- * El usuario monitor (376, status_monitor@apiempresas.es: cuenta de pruebas) no sale en ninguna parte de la pagina: ni en las
- * comprobaciones, ni en los numeros, ni en el historial. Ver sinMonitor().
+ * Las cuentas internas (Config\UsuariosInternos: la de Adrian, 229, y el monitor, 376) no salen en ninguna parte de la pagina:
+ * ni en las comprobaciones, ni en los numeros, ni en el historial. Ver sinMonitor().
  */
 class CorreosSalud
 {
@@ -68,7 +68,7 @@ class CorreosSalud
     /** Condicion SQL para dejar fuera los correos del usuario monitor (los que no tienen usuario se quedan). */
     private static function sinMonitor(string $col = 'user_id'): string
     {
-        return '(' . $col . ' IS NULL OR ' . $col . ' <> ' . self::MONITOR_USER_ID . ')';
+        return \Config\UsuariosInternos::sinInternos($col);
     }
 
     public static function grupo(?string $slug, ?string $intent = null): string
@@ -250,7 +250,7 @@ class CorreosSalud
         $altas = $this->db->table('users')
             ->select('id, email, signup_intent, created_at')
             ->where('is_admin', 0)
-            ->where('id !=', self::MONITOR_USER_ID)
+            ->whereNotIn('id', \Config\UsuariosInternos::IDS)
             ->whereIn('signup_intent', ['api', 'view_risk_profile'])
             ->where('created_at >=', $this->fecha($hace7))
             ->where('created_at <=', $this->fecha($this->now - 900)) // 15 min de margen para que salga
@@ -277,7 +277,7 @@ class CorreosSalud
 
         // ---------- Bajas de correo ----------
         $bajas = $this->db->query("SELECT signup_intent, SUM(unsuscribe = 1) AS bajas, COUNT(*) AS n FROM users
-            WHERE is_admin = 0 AND id <> ? AND signup_intent IN ('api', 'view_risk_profile') GROUP BY signup_intent", [self::MONITOR_USER_ID])->getResultArray();
+            WHERE is_admin = 0 AND " . \Config\UsuariosInternos::sinInternos('id') . " AND signup_intent IN ('api', 'view_risk_profile') GROUP BY signup_intent")->getResultArray();
         $bajasMap = [];
         foreach ($bajas as $b) {
             $bajasMap[$b['signup_intent'] === 'api' ? 'api' : 'risk'] = ['bajas' => (int) $b['bajas'], 'n' => (int) $b['n']];

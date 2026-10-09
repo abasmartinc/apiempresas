@@ -485,6 +485,36 @@ class Company extends BaseController
         }
         // --- END RISK PROFILE LOGIC ---
 
+        // --- BLOQUES DE HECHOS (09-10-2026) ---
+        // "En resumen", historia del BORME, red de cada administrador y sitio en el sector.
+        // Ver app/Helpers/ficha_hechos_helper.php. Un 5 % de fichas (grupo de control) no los
+        // lleva, para medir en Search Console si ayudan a indexar. Si algo falla, la ficha se
+        // pinta como antes: estos bloques nunca deben tumbarla.
+        $fichaControl = false;
+        $fichaResumen = [];
+        $fichaHistoria = [];
+        $fichaRed = [];
+        $fichaSector = null;
+        if (!$isEn) {
+            try {
+                helper('ficha_hechos');
+                $fichaControl = ficha_grupo_control($company);
+                if (!$fichaControl) {
+                    $estadoRegFicha = company_estado_registral($company, $riskProfile);
+                    $fichaResumen   = ficha_resumen_hechos($company, $filteredAdmins, $bormePosts, $contracts, $subsidies,
+                                                           $holdingData, $estadoRegFicha, $riskProfile);
+                    $fichaHistoria  = ficha_historia_borme($bormePosts, 12, (string) ($company['founded'] ?? ''));
+                    $fichaRed       = ficha_red_administradores($filteredAdmins, (int) ($company['id'] ?? 0));
+                    $fichaSector    = ficha_contexto_sector($company);
+                }
+            } catch (\Throwable $e) {
+                log_message('error', 'Bloques de hechos de la ficha ' . ($company['id'] ?? '?') . ': ' . $e->getMessage());
+                $fichaResumen = $fichaHistoria = $fichaRed = [];
+                $fichaSector = null;
+            }
+        }
+        // --- FIN BLOQUES DE HECHOS ---
+
         return [
             'companyName'      => $name,
             'company'          => $company,
@@ -517,6 +547,11 @@ class Company extends BaseController
             'sectorName'       => $sectorName,
             'targetProv'       => $targetProv,
             'contracts'        => $contracts,
+            'fichaControl'     => $fichaControl,
+            'fichaResumen'     => $fichaResumen,
+            'fichaHistoria'    => $fichaHistoria,
+            'fichaRed'         => $fichaRed,
+            'fichaSector'      => $fichaSector,
             'subsidies'        => $subsidies,
             'countFormatted'   => $countFormatted,
             'holdingData'      => $holdingData,
