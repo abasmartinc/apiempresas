@@ -126,17 +126,7 @@ class Sitemap extends Controller
                 $xml .= '</sitemap>';
             }
 
-            // 6. Páginas de Holdings (40.000 por página)
-            $holdingModel = new \App\Models\HoldingModel();
-            // Better to just use a fast count. 134505 / 40000 = 4 pages
-            $holdingTotal = $holdingModel->countAllResults();
-            $holdingPages = ceil($holdingTotal / 40000);
-            
-            for ($i = 1; $i <= $holdingPages; $i++) {
-                $xml .= '<sitemap>';
-                $xml .= '<loc>' . site_url("sitemap-holdings-{$i}.xml") . '</loc>';
-                $xml .= '</sitemap>';
-            }
+            // 6. (Holdings) Retirado el 10-10-2026: las páginas de grupo responden 410 (ver Holding.php).
 
             // 7. Sitemap VIP de Empresas Enriquecidas con IA
             $aiPages = 0;
@@ -560,53 +550,11 @@ class Sitemap extends Controller
     }
     
     /**
-     * Sitemap dinámico para Holdings (paginado en bloques de 40.000)
+     * sitemap-holdings-N.xml: retirado el 10-10-2026 (ver Holding.php).
      */
     public function holdings($page = 1)
     {
-        $page = (int) $page;
-        if ($page < 1) {
-            return $this->response->setStatusCode(404);
-        }
-
-        $perPage = 40000;
-        $holdingModel = new \App\Models\HoldingModel();
-
-        // Verificación rápida del rango de páginas para evitar scans de DB
-        $holdingTotal = $holdingModel->countAllResults();
-        $holdingPages = ceil($holdingTotal / $perPage);
-        if ($holdingPages > 0 && $page > $holdingPages) {
-            return $this->response->setStatusCode(404);
-        }
-
-        $offset = ($page - 1) * $perPage;
-        
-        // Optimize query by selecting only what we need
-        $holdings = $holdingModel->select('slug, updated_at')
-                                 ->orderBy('id', 'ASC')
-                                 ->limit($perPage, $offset)
-                                 ->findAll();
-
-        if (empty($holdings)) {
-            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
-        }
-
-        $xml = '<?xml version="1.0" encoding="UTF-8"?>';
-        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
-
-        foreach ($holdings as $holding) {
-            $lastMod = !empty($holding['updated_at']) ? date('c', strtotime($holding['updated_at'])) : date('c');
-            
-            $xml .= '<url>';
-            $xml .= '<loc>' . site_url('grupos-empresariales/' . $holding['slug']) . '</loc>';
-            $xml .= '<lastmod>' . $lastMod . '</lastmod>';
-            $xml .= '<changefreq>monthly</changefreq>';
-            $xml .= '<priority>0.7</priority>';
-            $xml .= '</url>';
-        }
-
-        $xml .= '</urlset>';
-        return $this->response->setContentType('application/xml')->setBody($xml);
+        return $this->response->setStatusCode(410);
     }
 
     /**
