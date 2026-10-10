@@ -1905,6 +1905,119 @@
                                 </div>
                             <?php endif; ?>
 
+                            <?php
+                            // --- CAPITAL Y DOMICILIOS (10-10-2026) ---
+                            // Sale de los propios anuncios (ver ficha_evolucion_capital y
+                            // ficha_historial_domicilios). Como el resto de bloques de hechos, no va
+                            // en el grupo de control.
+                            $fichaCapital    = $fichaCapital ?? [];
+                            $fichaDomicilios = $fichaDomicilios ?? [];
+                            ?>
+                            <?php if (!empty($fichaCapital) || !empty($fichaDomicilios)): ?>
+                            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:1.5rem; margin-bottom:1.5rem;">
+                                <?php if (!empty($fichaCapital)):
+                                    /*
+                                     * 10-10-2026, v2: la primera versión escalaba un SVG fijo al ancho de la
+                                     * tarjeta (puntos enormes, línea gruesa, medio bloque vacío) y empezaba el eje
+                                     * en 0, así que los cambios ni se veían. Ahora: cifra actual y variación
+                                     * arriba, una línea de escalones fina a altura fija (los puntos son HTML, no se
+                                     * deforman), con el máximo y el mínimo como referencia, y la lista con la
+                                     * variación de cada paso.
+                                     */
+                                    $capVals = array_column($fichaCapital, 'importe');
+                                    $capMin  = min($capVals);
+                                    $capMax  = max($capVals);
+                                    $capIni  = $fichaCapital[0];
+                                    $capUlt  = end($fichaCapital);
+                                    $capVar  = $capIni['importe'] > 0 ? ($capUlt['importe'] - $capIni['importe']) / $capIni['importe'] * 100 : 0;
+                                    $capPct  = static fn(float $v): string => ($v > 0 ? '+' : ($v < 0 ? '−' : '')) . number_format(abs($v), abs($v) < 10 ? 1 : 0, ',', '.') . ' %';
+                                    $capVerGrafico = count($fichaCapital) >= 3 && $capMax > $capMin;
+                                    if ($capVerGrafico) {
+                                        $capT0 = strtotime($capIni['fecha']);
+                                        $capT1 = max(time(), strtotime($capUlt['fecha']) + 86400);
+                                        $capRango = $capMax - $capMin;
+                                        $capLo = $capMin - $capRango * 0.15;
+                                        $capHi = $capMax + $capRango * 0.15;
+                                        $capXp = static fn(string $f): float => 100 * (strtotime($f) - $capT0) / max(1, $capT1 - $capT0);
+                                        $capYp = static fn(float $v): float => 100 - 100 * ($v - $capLo) / max(1e-9, $capHi - $capLo);
+                                        $capPath = '';
+                                        foreach ($fichaCapital as $i => $pt) {
+                                            $x = round($capXp($pt['fecha']), 2); $y = round($capYp($pt['importe']), 2);
+                                            $capPath .= $i === 0 ? "M{$x} {$y}" : " H{$x} V{$y}";
+                                        }
+                                        $capPath .= ' H100';
+                                    }
+                                ?>
+                                <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:1.25rem 1.5rem;">
+                                    <h3 style="margin:0 0 0.75rem 0; font-size:1.05rem; font-weight:800; color:#0f172a;">Evolución del capital social</h3>
+                                    <div style="display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 12px; margin-bottom:0.25rem;">
+                                        <span style="font-size:1.5rem; font-weight:800; color:#0f172a; letter-spacing:-0.01em;"><?= esc($capUlt['texto']) ?></span>
+                                        <span style="font-size:0.9rem; color:#475569;">
+                                            <?= esc($capPct($capVar)) ?> desde <?= esc(ficha_mes_anio($capIni['fecha'])) ?>
+                                        </span>
+                                    </div>
+                                    <p style="margin:0 0 1rem 0; color:#64748b; font-size:0.82rem;">Último capital publicado en el BORME, en <?= esc(ficha_mes_anio($capUlt['fecha'])) ?>.</p>
+
+                                    <?php if ($capVerGrafico): ?>
+                                    <div style="display:flex; gap:10px; margin-bottom:1.75rem;">
+                                        <div style="position:relative; height:96px; font-size:0.72rem; color:#94a3b8; text-align:right; white-space:nowrap;">
+                                            <span style="visibility:hidden;"><?= esc(mb_strlen(ficha_euros($capMax)) >= mb_strlen(ficha_euros($capMin)) ? ficha_euros($capMax) : ficha_euros($capMin)) ?></span>
+                                            <span style="position:absolute; right:0; top:<?= round($capYp($capMax), 2) ?>%; transform:translateY(-50%);"><?= esc(ficha_euros($capMax)) ?></span>
+                                            <span style="position:absolute; right:0; top:<?= round($capYp($capMin), 2) ?>%; transform:translateY(-50%);"><?= esc(ficha_euros($capMin)) ?></span>
+                                        </div>
+                                        <div style="position:relative; flex:1; min-width:0; height:96px; border-left:1px solid #e2e8f0; border-bottom:1px solid #e2e8f0;" aria-hidden="true">
+                                            <svg viewBox="0 0 100 100" preserveAspectRatio="none" width="100%" height="100%" style="position:absolute; left:0; top:0; width:100%; height:100%; max-width:none; overflow:hidden; display:block;">
+                                                <path d="<?= $capPath ?>" fill="none" stroke="#2563eb" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
+                                            </svg>
+                                            <?php foreach ($fichaCapital as $pt): ?>
+                                                <span title="<?= esc(ficha_mes_anio($pt['fecha']) . ' · ' . $pt['tipo'] . ': ' . $pt['texto'], 'attr') ?>"
+                                                      style="position:absolute; left:<?= round($capXp($pt['fecha']), 2) ?>%; top:<?= round($capYp($pt['importe']), 2) ?>%; width:8px; height:8px; margin:-4px 0 0 -4px; border-radius:50%; background:#2563eb; box-shadow:0 0 0 2px #ffffff; cursor:default;"></span>
+                                            <?php endforeach; ?>
+                                            <span style="position:absolute; left:0; top:100%; margin-top:4px; font-size:0.72rem; color:#94a3b8;"><?= esc(substr($capIni['fecha'], 0, 4)) ?></span>
+                                            <span style="position:absolute; right:0; top:100%; margin-top:4px; font-size:0.72rem; color:#94a3b8;">hoy</span>
+                                        </div>
+                                    </div>
+                                    <?php endif; ?>
+
+                                    <table style="width:100%; border-collapse:collapse; font-size:0.88rem; color:#1e293b;">
+                                        <caption style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);">Capital social de <?= esc($companyName) ?> según el BORME</caption>
+                                        <tbody>
+                                        <?php $capPrev = null; $capFilas = []; foreach ($fichaCapital as $pt) { $pt['var'] = $capPrev ? ($pt['importe'] - $capPrev) / $capPrev * 100 : null; $capPrev = $pt['importe']; $capFilas[] = $pt; } ?>
+                                        <?php foreach (array_reverse($capFilas) as $pt): ?>
+                                            <tr style="border-top:1px solid #f1f5f9;">
+                                                <td style="padding:6px 8px 6px 0;"><time datetime="<?= esc($pt['fecha']) ?>" style="color:#64748b;"><?= esc(ficha_mes_anio($pt['fecha'])) ?></time> · <?= esc($pt['tipo']) ?></td>
+                                                <td style="padding:6px 0; text-align:right; font-weight:700; white-space:nowrap;"><?= esc($pt['texto']) ?></td>
+                                                <td style="padding:6px 0 6px 10px; text-align:right; color:#64748b; white-space:nowrap; width:4.5rem;"><?= $pt['var'] === null ? '' : esc($capPct($pt['var'])) ?></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <?php endif; ?>
+
+                                <?php if (!empty($fichaDomicilios)): ?>
+                                <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:1.5rem;">
+                                    <h3 style="margin:0 0 0.75rem 0; font-size:1.05rem; font-weight:800; color:#0f172a;">Domicilios que ha tenido</h3>
+                                    <ol style="list-style:none; margin:0; padding:0; border-left:2px solid #e2e8f0;">
+                                        <?php foreach ($fichaDomicilios as $i => $d): ?>
+                                            <li style="position:relative; padding:0 0 0.9rem 1.1rem;">
+                                                <span style="position:absolute; left:-6px; top:6px; width:10px; height:10px; border-radius:50%; background:<?= $i === 0 ? '#16a34a' : '#94a3b8' ?>;"></span>
+                                                <strong style="display:block; color:#0f172a; font-size:0.95rem;"><?= esc($d['municipio']) ?></strong>
+                                                <span style="display:block; color:#475569; font-size:0.88rem;"><?= esc($d['direccion']) ?></span>
+                                                <span style="display:block; color:#64748b; font-size:0.8rem;">
+                                                    <?= $d['hasta'] === ''
+                                                        ? 'Desde ' . esc(ficha_mes_anio($d['desde'])) . ' · el último publicado'
+                                                        : esc(ucfirst(ficha_mes_anio($d['desde']))) . ' – ' . esc(ficha_mes_anio($d['hasta'])) ?>
+                                                </span>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ol>
+                                </div>
+                                <?php endif; ?>
+                            </div>
+                            <p style="margin:-0.75rem 0 1.5rem 0; color:#94a3b8; font-size:0.78rem;">Según los anuncios publicados en el BORME (fecha de publicación de cada acto).</p>
+                            <?php endif; ?>
+
                             <?php if ($verResumenIa || $verEvolucion || $verDistribucion): ?>
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
                                 <?php if ($verResumenIa): ?>

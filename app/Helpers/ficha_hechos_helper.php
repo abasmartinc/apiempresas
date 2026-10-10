@@ -780,3 +780,122 @@ if (!function_exists('ficha_hechos_fiables')) {
         return $n;
     }
 }
+
+/*
+ * Evolución del capital y domicilios (10-10-2026).
+ *
+ * Dos hechos propios que casi ninguna web enseña y que ya están en el texto de los anuncios:
+ * el capital que resulta de cada constitución, ampliación o reducción ("Resultante Suscrito",
+ * legible en el 99 % de los casos), y la dirección de cada constitución o cambio de domicilio.
+ * Mismas reglas que el resto: solo lo que consta, con la fecha del anuncio, y nada si no se lee.
+ */
+
+if (!function_exists('ficha_importe')) {
+    /** "3.006,00" -> 3006.0; null si no es un importe razonable */
+    function ficha_importe(string $v): ?float
+    {
+        $v = trim(str_replace(['€', ' '], '', $v));
+        if (preg_match('/^\d{1,3}(\.\d{3})*(,\d+)?$/', $v)) {
+            $v = str_replace(['.', ','], ['', '.'], $v);
+        } elseif (preg_match('/^\d+(,\d+)?$/', $v)) {
+            $v = str_replace(',', '.', $v);
+        }
+        if (!is_numeric($v)) {
+            return null;
+        }
+        $n = (float) $v;
+        return ($n > 0 && $n < 1e11) ? $n : null;
+    }
+}
+
+if (!function_exists('ficha_evolucion_capital')) {
+    /**
+     * [['fecha' => 'YYYY-MM-DD', 'importe' => float, 'texto' => '3.000 €', 'tipo' => 'Constitución'|'Ampliación'|'Reducción'], ...]
+     * en orden cronológico. [] si hay menos de 2 importes (con uno solo no hay evolución).
+     */
+    function ficha_evolucion_capital(array $bormePosts, string $fundada = ''): array
+    {
+        $posts = ficha_posts_coherentes($bormePosts, $fundada);
+        usort($posts, static fn($a, $b) => strcmp((string) ($a['borme_date'] ?? ''), (string) ($b['borme_date'] ?? '')) ?: ((int) ($a['id'] ?? 0) <=> (int) ($b['id'] ?? 0)));
+        $puntos = [];
+        foreach ($posts as $p) {
+            $fecha = substr((string) ($p['borme_date'] ?? ''), 0, 10);
+            if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha)) {
+                continue;
+            }
+            $t = preg_replace('/\s+/', ' ', (string) ($p['description'] ?? ''));
+            $tipo = null;
+            $importe = null;
+            if (preg_match('/\bConstituci[oó]n\./u', $t) && preg_match('/\bCapital:\s*([\d\.,]+)\s*Euros/iu', $t, $m)) {
+                $tipo = 'Constitución';
+                $importe = ficha_importe($m[1]);
+            }
+            if (preg_match('/Ampliaci[oó]n de capital\.|Reducci[oó]n de capital\./u', $t)
+                && preg_match_all('/Resultante Suscrito:\s*([\d\.,]+)\s*Euros/iu', $t, $mm)) {
+                $amp = (bool) preg_match('/Ampliaci[oó]n de capital\./u', $t);
+                $red = (bool) preg_match('/Reducci[oó]n de capital\./u', $t);
+                $tipo = ($amp && $red) ? 'Reducción y ampliación' : ($amp ? 'Ampliación' : 'Reducción');
+                $importe = ficha_importe(end($mm[1]));   // el último resultante del anuncio es el final
+            }
+            if ($tipo === null || $importe === null) {
+                continue;
+            }
+            $ultimo = end($puntos);
+            if ($ultimo && $ultimo['fecha'] === $fecha && abs($ultimo['importe'] - $importe) < 0.01) {
+                continue;   // el mismo dato publicado dos veces
+            }
+            $puntos[] = ['fecha' => $fecha, 'importe' => $importe, 'texto' => ficha_euros($importe), 'tipo' => $tipo];
+        }
+        return count($puntos) >= 2 ? $puntos : [];
+    }
+}
+
+if (!function_exists('ficha_historial_domicilios')) {
+    /**
+     * Domicilios que ha tenido, del más reciente al más antiguo:
+     * [['desde' => 'YYYY-MM-DD', 'hasta' => 'YYYY-MM-DD'|'' (actual), 'direccion' => 'C/ Mayor 1', 'municipio' => 'Getafe'], ...]
+     * Sale de la constitución ("Domicilio: …") y de cada "Cambio de domicilio social. …". [] si no
+     * consta al menos un cambio (con un solo domicilio no hay historial).
+     */
+    function ficha_historial_domicilios(array $bormePosts, string $fundada = ''): array
+    {
+        $posts = ficha_posts_coherentes($bormePosts, $fundada);
+        usort($posts, static fn($a, $b) => strcmp((string) ($a['borme_date'] ?? ''), (string) ($b['borme_date'] ?? '')) ?: ((int) ($a['id'] ?? 0) <=> (int) ($b['id'] ?? 0)));
+        $lista = [];
+        foreach ($posts as $p) {
+            $fecha = substr((string) ($p['borme_date'] ?? ''), 0, 10);
+            if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha)) {
+                continue;
+            }
+            $t = preg_replace('/\s+/', ' ', (string) ($p['description'] ?? ''));
+            $dom = null;
+            if (preg_match('/Cambio de domicilio social\.\s*(.{3,160}?)\(([^()]{2,60})\)/u', $t, $m)) {
+                $dom = $m;
+            } elseif (preg_match('/\bConstituci[oó]n\./u', $t) && preg_match('/\bDomicilio:\s*(.{3,160}?)\(([^()]{2,60})\)/u', $t, $m)) {
+                $dom = $m;
+            }
+            if (!$dom) {
+                continue;
+            }
+            $direccion = trim($dom[1], " .,;:");
+            $municipio = trim($dom[2], " .,;:");
+            if ($direccion === '' || $municipio === '' || preg_match('/\d{2}\.\d{2}\.\d{2}/', $municipio)) {
+                continue;   // "(22.09.21)" es una fecha de inscripción, no un municipio
+            }
+            $titulo = static function (string $s): string {
+                $s = mb_convert_case(mb_strtolower($s, 'UTF-8'), MB_CASE_TITLE, 'UTF-8');
+                return preg_replace_callback('/\b(De|Del|La|Las|El|Los|Y|En|A)\b/u', static fn($x) => mb_strtolower($x[1], 'UTF-8'), $s);
+            };
+            $entrada = ['desde' => $fecha, 'hasta' => '', 'direccion' => $titulo($direccion), 'municipio' => $titulo($municipio)];
+            $ultimo = end($lista);
+            if ($ultimo && mb_strtolower($ultimo['direccion'] . $ultimo['municipio']) === mb_strtolower($entrada['direccion'] . $entrada['municipio'])) {
+                continue;   // mismo domicilio repetido
+            }
+            if ($lista) {
+                $lista[count($lista) - 1]['hasta'] = $fecha;
+            }
+            $lista[] = $entrada;
+        }
+        return count($lista) >= 2 ? array_reverse($lista) : [];
+    }
+}

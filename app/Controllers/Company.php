@@ -495,6 +495,8 @@ class Company extends BaseController
         $fichaHistoria = [];
         $fichaRed = [];
         $fichaSector = null;
+        $fichaCapital = [];      // evolución del capital (10-10-2026)
+        $fichaDomicilios = [];   // domicilios que ha tenido (10-10-2026)
         if (!$isEn) {
             try {
                 helper('ficha_hechos');
@@ -506,10 +508,12 @@ class Company extends BaseController
                     $fichaHistoria  = ficha_historia_borme($bormePosts, 12, (string) ($company['founded'] ?? ''));
                     $fichaRed       = ficha_red_administradores($filteredAdmins, (int) ($company['id'] ?? 0));
                     $fichaSector    = ficha_contexto_sector($company);
+                    $fichaCapital    = ficha_evolucion_capital($bormePosts, (string) ($company['founded'] ?? ''));
+                    $fichaDomicilios = ficha_historial_domicilios($bormePosts, (string) ($company['founded'] ?? ''));
                 }
             } catch (\Throwable $e) {
                 log_message('error', 'Bloques de hechos de la ficha ' . ($company['id'] ?? '?') . ': ' . $e->getMessage());
-                $fichaResumen = $fichaHistoria = $fichaRed = [];
+                $fichaResumen = $fichaHistoria = $fichaRed = $fichaCapital = $fichaDomicilios = [];
                 $fichaSector = null;
             }
         }
@@ -583,6 +587,8 @@ class Company extends BaseController
             'fichaRed'         => $fichaRed,
             'fichaSector'      => $fichaSector,
             'nombresAnteriores' => $nombresAnteriores,
+            'fichaCapital'     => $fichaCapital,
+            'fichaDomicilios'  => $fichaDomicilios,
             'subsidies'        => $subsidies,
             'countFormatted'   => $countFormatted,
             'holdingData'      => $holdingData,
