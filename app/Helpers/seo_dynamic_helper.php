@@ -199,12 +199,15 @@ if (!function_exists('seo_ai_datos')) {
         krsort($porFecha);
         $actos = [];
         foreach (array_slice($porFecha, 0, 8, true) as $fecha => $ts) {
-            $actos[] = seo_ai_fecha($fecha) . ': ' . implode(', ', array_keys($ts));
+            $tsF = array_values(array_filter(array_keys($ts), static fn ($t) => strcasecmp($t, 'Otros') !== 0));
+            $actos[] = seo_ai_fecha($fecha) . ': ' . ($tsF ? implode(', ', $tsF) : 'acto sin clasificar');
         }
         arsort($tipos);
         $resumenTipos = [];
-        foreach (array_slice($tipos, 0, 8, true) as $t => $nT) {
-            $resumenTipos[] = "{$t} ({$nT})";
+        foreach (array_slice($tipos, 0, 9, true) as $t => $nT) {
+            if (strcasecmp($t, 'Otros') !== 0) {
+                $resumenTipos[] = "{$t} ({$nT})";
+            }
         }
 
         return [
@@ -264,10 +267,15 @@ if (!function_exists('seo_ai_generar')) {
         if ($d['capital'] !== '')   $lineas[] = "Capital social: {$d['capital']}";
         $lineas[] = 'Actividad registrada (CNAE): ' . ($hayCnae ? $d['cnae'] : 'NO CONSTA');
         $lineas[] = 'Objeto social (estatutos): ' . ($hayObjeto ? $d['objeto'] : 'NO CONSTA');
-        if ($d['num_actos'] > 0) {
+        if ($d['num_actos'] === 1) {
+            $lineas[] = "Anuncios publicados en el BORME (en nuestros datos): uno solo, del {$d['ultimo_acto']}"
+                . ($d['actos'] ? ' (' . preg_replace('/^[^:]+:\s*/u', '', $d['actos'][0]) . ')' : '') . '.';
+        } elseif ($d['num_actos'] > 1) {
             $lineas[] = "Anuncios publicados en el BORME (en nuestros datos): " . number_format((int) $d['num_actos'], 0, ',', '.')
                 . ($d['primer_acto'] !== '' ? ", entre el {$d['primer_acto']} y el {$d['ultimo_acto']}. El primer anuncio de nuestros datos NO es la fecha de constitución" : '') . '.';
-            $lineas[] = 'Tipos de acto en todos esos anuncios (veces): ' . implode(', ', $d['tipos']);
+            if ($d['tipos']) {
+                $lineas[] = 'Tipos de acto en todos esos anuncios (veces): ' . implode(', ', $d['tipos']);
+            }
             $lineas[] = "Últimas fechas con anuncios:\n" . implode("\n", $d['actos']);
         } else {
             $lineas[] = 'Anuncios publicados en el BORME: ninguno en nuestros datos.';
@@ -305,7 +313,9 @@ Escribe en español de España, con tono informativo y neutro, como una ficha de
 
 REGLAS (obligatorias en todos los campos):
 - Usa solo los datos de arriba. Lo que pone NO CONSTA no lo menciones ni lo deduzcas de otro dato.
-- El objeto social es lo que la sociedad PUEDE hacer según sus estatutos, no prueba lo que hace hoy. Exprésalo como "su objeto social recoge…", "según sus estatutos, puede dedicarse a…" o "está registrada para…". Nunca "se dedica con éxito", "ofrece", "presta servicios a sus clientes".
+- El objeto social es lo que la sociedad PUEDE hacer según sus estatutos, no prueba lo que hace hoy. Exprésalo como "su objeto social recoge…", "según sus estatutos, puede dedicarse a…" o "está registrada para…". Nunca "se dedica", "ofrece", "presta servicios a sus clientes". Tampoco con el CNAE: "su actividad registrada es…", no "se dedica a…".
+- Resume el objeto social sin ampliarlo: no añadas explicaciones ni actividades que no estén escritas en él.
+- Si la actividad registrada (CNAE) no tiene nada que ver con el objeto social (p. ej. CNAE de construcción y objeto social de producción audiovisual), no menciones el CNAE en ningún campo.
 - No inventes servicios, productos, clientes, empleados, facturación, instalaciones, marcas, premios, valores, misión, años de experiencia ni ubicaciones.
 - Prohibido: líder, referente, compromiso, excelencia, calidad, innovador, soluciones integrales, amplia experiencia, trayectoria, de confianza, profesionales cualificados, a medida, servicio personalizado.
 - No digas si la empresa está activa, cerrada o en buena situación, ni valores su solvencia: no es un dato de arriba.
@@ -318,10 +328,10 @@ CAMPOS:
 1. "seo_text": dos párrafos (entre 80 y 140 palabras en total) separados por una línea en blanco (\\n\\n).
    - Párrafo 1: quién es: nombre, forma jurídica, domicilio, año de constitución, CIF {$p1Actividad}, solo con los datos que consten.
    - Párrafo 2: {$p2} Si hay anuncios del BORME, termina con una frase que diga cuántos constan en nuestros datos y la fecha del último, sin interpretarlos.
-2. "faqs": exactamente 3 objetos {"q": "...", "a": "..."}. Elige 3 de estas preguntas (u otras cuya respuesta ESTÉ en los datos): {$ejemplos}. Respuestas de una o dos frases, en texto plano, con el dato concreto.
+2. "faqs": exactamente 3 objetos {"q": "...", "a": "..."}. Elige 3 de estas preguntas (u otras cuya respuesta ESTÉ en los datos): {$ejemplos}. Respuestas de una o dos frases, en texto plano, con el dato concreto. A "¿A qué se dedica…?" se responde con "Según sus estatutos, puede dedicarse a…" o "Su actividad registrada es…".
 3. "seo_tags": de 3 a 6 etiquetas de actividad sacadas {$origenTags}, de 1 a 3 palabras, con mayúscula inicial, genéricas y reutilizables entre empresas (por ejemplo "Construcción", "Reformas de viviendas", "Promoción inmobiliaria"). Sin nombre de la empresa, sin lugares, sin marcas, sin adjetivos.
 4. "seo_pitch": una frase informativa de 80 a 150 caracteres con forma jurídica, municipio o provincia y actividad principal. Ejemplo: "{$pitchEj}" Sin adjetivos promocionales.
-5. "borme_summary": una o dos frases (máximo 40 palabras) que resuman los anuncios del BORME: cuántos hay, entre qué años y qué tipos de acto predominan según el recuento. Sin interpretarlos ni deducir causas o consecuencias (un cese no es "una crisis", un nombramiento no es "una reestructuración"). Si no hay anuncios, "".
+5. "borme_summary": una o dos frases (máximo 40 palabras) que resuman los anuncios del BORME: cuántos hay, entre qué años y qué tipos de acto predominan según el recuento. Sin interpretarlos ni deducir causas o consecuencias (un cese no es "una crisis", un nombramiento no es "una reestructuración"). Si hay un solo anuncio, dilo así ("Consta un único anuncio, del…"). No uses "Otros" como tipo de acto. Si no hay anuncios, "".
 
 Responde solo con el objeto JSON: {"seo_text": "...", "faqs": [{"q": "...", "a": "..."}], "seo_tags": ["..."], "seo_pitch": "...", "borme_summary": "..."}
 TXT;
