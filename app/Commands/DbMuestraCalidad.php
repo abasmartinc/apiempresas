@@ -40,7 +40,8 @@ class DbMuestraCalidad extends BaseCommand
         'company_administrators' => 'company_id',
         'company_enrichment'     => 'company_id',
         'company_radar_scores'   => 'company_id',
-        'company_holdings'       => 'company_id',
+        'company_previous_names' => 'company_id',
+        'company_lei'            => 'company_id',
     ];
 
     /** Tablas que cuelgan de la empresa por su CIF: tabla => columna */
@@ -171,23 +172,7 @@ class DbMuestraCalidad extends BaseCommand
             CLI::write("  {$tabla}: " . number_format($n, 0, ',', '.') . ' filas');
         }
 
-        // 6) Los grupos (holdings) a los que pertenecen las empresas de la muestra
-        if ($existe('holdings') && $existe('company_holdings')) {
-            $this->crearTabla('holdings');
-            $hold = [];
-            foreach (array_chunk(array_keys($ids), 400) as $lote) {
-                foreach ($this->db->query('SELECT DISTINCT holding_id FROM company_holdings WHERE company_id IN (' . implode(',', $lote) . ')')->getResultArray() as $h) {
-                    $hold[(int) $h['holding_id']] = true;
-                }
-                $this->descanso();
-            }
-            $n = 0;
-            foreach (array_chunk(array_keys($hold), 400) as $lote) {
-                $n += $this->insertar('holdings', $this->db->query('SELECT * FROM holdings WHERE id IN (' . implode(',', $lote) . ')')->getResultArray());
-                $this->descanso();
-            }
-            CLI::write('  holdings: ' . number_format($n, 0, ',', '.') . ' filas');
-        }
+        // 6) (Grupos de holdings: tablas borradas el 10-10-2026; el grupo es ahora company_lei, arriba.)
 
         gzwrite($this->gz, "SET FOREIGN_KEY_CHECKS=1;\n");
         gzclose($this->gz);

@@ -400,10 +400,6 @@ class Company extends BaseController
         // empresas). Lo que tienen de cierto, empresas que comparten administrador, ya lo cuenta
         // "Quién está detrás". GLEIF es lo que la empresa declara: su matriz directa y la última.
         // Va en todas las fichas (es un dato, como los nombres anteriores). Ver ficha_grupo_gleif().
-        $holdingData = null;
-        $holdingGraphData = null;
-        $holdingCompanies = [];
-        $totalHoldingCompaniesCount = 0;
         $grupoGleif = [];
         if (!$isEn) {
             try {
@@ -508,10 +504,6 @@ class Company extends BaseController
             'cnaeDescartado'   => $cnaeDescartado,
             'riskProfile'      => $riskProfile,
             'riskQuota'        => $riskQuota,
-            'holdingData'      => $holdingData ?? null,
-            'holdingCompanies' => $holdingCompanies ?? [],
-            'holdingGraphData' => $holdingGraphData ?? null,
-            'totalHoldingCompaniesCount' => $totalHoldingCompaniesCount ?? 0,
             'statusRaw'        => $statusRaw,
             'statusClass'      => $isActive ? 'company-status company-status--active' : 'company-status company-status--inactive',
             'companyCif'       => $cif, // Pasamos el cif limpio a la vista
@@ -544,9 +536,6 @@ class Company extends BaseController
             'fichaDomicilios'  => $fichaDomicilios,
             'subsidies'        => $subsidies,
             'countFormatted'   => $countFormatted,
-            'holdingData'      => $holdingData,
-            'holdingCompanies' => $holdingCompanies,
-            'holdingGraphData' => $holdingGraphData,
         ];
     }
 

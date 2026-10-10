@@ -203,13 +203,6 @@
                             <span>Explora el directorio B2B completo.</span>
                         </div>
                     </a>
-                    <a href="<?= site_url('listado-de-grupos-empresariales') ?>">
-                        <div class="nav-item-icon">🕸️</div>
-                        <div>
-                            <strong>Grupos y Holdings</strong>
-                            <span>Descubre 134.000 entramados societarios.</span>
-                        </div>
-                    </a>
                     <a href="<?= site_url('base-de-datos-de-empresas') ?>">
                         <div class="nav-item-icon">📊</div>
                         <div>
@@ -415,9 +408,6 @@
                     <div class="mobile-nav-label">Listados</div>
                     <a href="<?= site_url('listado-de-empresas') ?>" class="mobile-nav-link">
                         <span>Directorio Histórico</span>
-                    </a>
-                    <a href="<?= site_url('listado-de-grupos-empresariales') ?>" class="mobile-nav-link">
-                        <span>Grupos y Holdings</span>
                     </a>
                     <a href="<?= site_url('base-de-datos-de-empresas') ?>" class="mobile-nav-link">
                         <span>Descarga de Listados</span>
