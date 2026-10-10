@@ -530,10 +530,21 @@
                                         </a>
                                     <?php endif; ?>
                                     
-                                    <?php if (!empty($holdingData)): ?>
-                                    <a href="<?= site_url('grupos-empresariales/' . esc($holdingData['slug'])) ?>" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #f8fafc; padding: 4px 12px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; border: 1px solid #334155; letter-spacing: 0.5px; text-transform: uppercase; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 6px rgba(15, 23, 42, 0.2)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                                        Grupo <?= esc($holdingData['name']) ?> (<?= number_format($totalHoldingCompaniesCount ?? count($holdingCompanies), 0, ',', '.') ?>)
+                                    <?php
+                                    // Grupo empresarial de GLEIF (10-10-2026). Sustituye a la insignia de
+                                    // holdings, que no eran grupos empresariales.
+                                    $gB = $grupoGleif ?? [];
+                                    $gBTexto = '';
+                                    if (!empty($gB['matriz']['nombre'])) {
+                                        $gBTexto = 'Grupo ' . company_short_name($gB['matriz']['nombre'], 34);
+                                    } elseif (!empty($gB['filiales_total'])) {
+                                        $gBTexto = 'Matriz de ' . number_format($gB['filiales_total'], 0, ',', '.') . ' sociedad' . ($gB['filiales_total'] > 1 ? 'es' : '');
+                                    }
+                                    ?>
+                                    <?php if ($gBTexto !== ''): ?>
+                                    <a href="#grupo-empresarial" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #f8fafc; padding: 4px 12px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; border: 1px solid #334155; letter-spacing: 0.5px; text-transform: uppercase;">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                                        <?= esc($gBTexto) ?>
                                     </a>
                                     <?php endif; ?>
                                     
@@ -1074,6 +1085,46 @@
                                 </div>
                                 <?php endif; ?>
 
+                                <?php $gL = $grupoGleif ?? []; ?>
+                                <?php if (!empty($gL['lei'])):
+                                    // Código LEI de GLEIF (10-10-2026). "Caducado" = no se ha renovado:
+                                    // el código sigue siendo suyo. "Retirado" = suele ser por extinción o absorción.
+                                    $leiMes = function_exists('ficha_mes_anio') ? ficha_mes_anio($gL['renovacion']) : '';
+                                    if ($gL['estado'] === 'vigente') {
+                                        $leiEstado = 'Vigente' . ($leiMes !== '' ? ' · renovación en ' . $leiMes : '');
+                                        $leiColor = ['#f0fdf4', '#bbf7d0', '#166534'];
+                                    } elseif ($gL['estado'] === 'caducado') {
+                                        $leiEstado = 'Caducado' . ($leiMes !== '' ? ': sin renovar desde ' . $leiMes : '');
+                                        $leiColor = ['#f8fafc', '#e2e8f0', '#475569'];
+                                    } elseif ($gL['estado'] === 'retirado') {
+                                        $leiEstado = 'Retirado';
+                                        $leiColor = ['#f8fafc', '#e2e8f0', '#475569'];
+                                    } else {
+                                        $leiEstado = '';
+                                        $leiColor = ['#f8fafc', '#e2e8f0', '#475569'];
+                                    }
+                                ?>
+                                <div class="b2b-data-row">
+                                    <dt class="b2b-data-label">
+                                        <div>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                                stroke-linejoin="round"><use href="#icon-d557d894"></use></svg>
+                                        </div>
+                                        Código LEI
+                                    </dt>
+                                    <dd class="b2b-data-value" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                        <span style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.92rem; word-break: break-all;"><?= esc($gL['lei']) ?></span>
+                                        <?php if ($leiEstado !== ''): ?>
+                                        <span title="El LEI (Legal Entity Identifier) identifica a la sociedad en los mercados financieros. Se renueva cada año."
+                                              style="display: inline-block; padding: 2px 8px; background: <?= $leiColor[0] ?>; border: 1px solid <?= $leiColor[1] ?>; color: <?= $leiColor[2] ?>; font-size: 0.75rem; font-weight: 700; border-radius: 6px;"><?= esc($leiEstado) ?></span>
+                                        <?php endif; ?>
+                                        <a href="https://search.gleif.org/#/record/<?= esc($gL['lei'], 'url') ?>" target="_blank" rel="noopener nofollow"
+                                           style="color: #64748b; font-size: 0.78rem; text-decoration: underline;">ver en GLEIF</a>
+                                    </dd>
+                                </div>
+                                <?php endif; ?>
+
                                 <?php if (!empty($company['website_official'])): ?>
                                 <div class="b2b-data-row">
                                     <dt class="b2b-data-label">
@@ -1426,6 +1477,69 @@
                     <!-- END RISK PROFILE SECTION -->
 
 
+
+                    <?php
+                    // --- GRUPO EMPRESARIAL (GLEIF, 10-10-2026) ---
+                    // Lo que la propia sociedad declara a GLEIF: su matriz directa, la cabecera del
+                    // grupo y, con ellas, las otras sociedades del grupo que tienen ficha aquí. Si es
+                    // la matriz, las sociedades que dependen de ella. Ver ficha_grupo_gleif().
+                    $gG = $grupoGleif ?? [];
+                    $gGNombre = static function (?array $x): string {
+                        if (!$x) {
+                            return '';
+                        }
+                        $pais = ($x['pais'] ?? '') !== '' && $x['pais'] !== 'España' ? ' <span style="color:#64748b; font-weight:500;">(' . esc($x['pais']) . ')</span>' : '';
+                        $nom = esc($x['nombre']);
+                        return (!empty($x['url']) ? '<a href="' . esc($x['url']) . '" style="color:#1d4ed8; text-decoration:none; font-weight:700;">' . $nom . '</a>' : '<strong style="color:#0f172a;">' . $nom . '</strong>') . $pais;
+                    };
+                    ?>
+                    <?php if (!empty($gG) && (!empty($gG['matriz']) || !empty($gG['filiales']))): ?>
+                    <section id="grupo-empresarial" style="margin-top: 4rem;">
+                        <h2 class="no-after-line" style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin: 0 0 0.5rem 0;">Grupo empresarial</h2>
+                        <p style="color: #64748b; font-size: 0.95rem; margin: 0 0 1.5rem 0;">
+                            <?php if (!empty($gG['matriz'])): ?>
+                                <?= esc($companyName) ?> declara a GLEIF que pertenece a un grupo de sociedades que consolida sus cuentas.
+                            <?php else: ?>
+                                Otras sociedades declaran a GLEIF que <?= esc($companyName) ?> es su sociedad matriz.
+                            <?php endif; ?>
+                        </p>
+                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:1.5rem;">
+                            <?php if (!empty($gG['matriz'])): ?>
+                            <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:1.5rem;">
+                                <h3 style="margin:0 0 0.9rem 0; font-size:1.05rem; font-weight:800; color:#0f172a;">Sus matrices</h3>
+                                <dl style="margin:0;">
+                                    <?php if (!empty($gG['matriz_directa'])): ?>
+                                    <dt style="color:#64748b; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.04em;">Matriz directa</dt>
+                                    <dd style="margin:0.15rem 0 0.9rem 0; font-size:0.98rem;"><?= $gGNombre($gG['matriz_directa']) ?></dd>
+                                    <?php endif; ?>
+                                    <dt style="color:#64748b; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.04em;"><?= !empty($gG['matriz_directa']) ? 'Cabecera del grupo' : 'Matriz y cabecera del grupo' ?></dt>
+                                    <dd style="margin:0.15rem 0 0 0; font-size:0.98rem;"><?= $gGNombre($gG['matriz']) ?></dd>
+                                </dl>
+                            </div>
+                            <?php endif; ?>
+
+                            <?php foreach ([['hermanas', 'Otras sociedades del grupo'], ['filiales', 'Sociedades que dependen de ella']] as [$gK, $gT]): ?>
+                                <?php if (!empty($gG[$gK])): ?>
+                                <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:1.5rem;">
+                                    <h3 style="margin:0 0 0.9rem 0; font-size:1.05rem; font-weight:800; color:#0f172a;"><?= $gT ?> <span style="color:#64748b; font-weight:600; font-size:0.9rem;">(<?= number_format($gG[$gK . '_total'], 0, ',', '.') ?>)</span></h3>
+                                    <ul style="list-style:none; margin:0; padding:0; columns: 2 220px; column-gap: 1.5rem;">
+                                        <?php foreach ($gG[$gK] as $gS): ?>
+                                            <li style="break-inside: avoid; padding: 0 0 0.45rem 0; font-size: 0.9rem;"><a href="<?= esc($gS['url']) ?>" style="color:#1d4ed8; text-decoration:none;"><?= esc($gS['nombre']) ?></a></li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                    <?php if ($gG[$gK . '_total'] > count($gG[$gK])): ?>
+                                        <p style="margin:0.5rem 0 0 0; color:#64748b; font-size:0.82rem;">Y <?= number_format($gG[$gK . '_total'] - count($gG[$gK]), 0, ',', '.') ?> más.</p>
+                                    <?php endif; ?>
+                                </div>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        </div>
+                        <p style="margin:0.75rem 0 0 0; color:#94a3b8; font-size:0.78rem;">
+                            Fuente: GLEIF (Global Legal Entity Identifier Foundation), relaciones de consolidación contable declaradas por las propias sociedades<?= !empty($gG['fecha_fuente']) && function_exists('ficha_mes_anio') ? ', datos de ' . esc(ficha_mes_anio($gG['fecha_fuente'])) : '' ?>. Solo se enlazan las sociedades del grupo que tienen ficha en APIEmpresas.
+                        </p>
+                    </section>
+                    <?php endif; ?>
+                    <!-- FIN GRUPO EMPRESARIAL -->
 
                     <!-- SECCIÓN DE ADMINISTRADORES Y CARGOS -->
                     <?php if (!empty($administrators)): ?>
@@ -2012,6 +2126,9 @@
                                             </li>
                                         <?php endforeach; ?>
                                     </ol>
+                                    <?php if ((end($fichaDomicilios)['origen'] ?? '') === 'cambio'): ?>
+                                        <p style="margin:0; color:#94a3b8; font-size:0.78rem;">El domicilio anterior a <?= esc(ficha_mes_anio(end($fichaDomicilios)['desde'])) ?> no consta en los anuncios que tenemos.</p>
+                                    <?php endif; ?>
                                 </div>
                                 <?php endif; ?>
                             </div>

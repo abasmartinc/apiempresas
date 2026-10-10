@@ -393,78 +393,29 @@ class Company extends BaseController
         $ratingModel = new \App\Models\CompanyRatingModel();
         $ratingStats = $ratingModel->getRatingStats((int)$company['id']);
 
-        // --- HOLDINGS LOGIC ---
+        // --- GRUPO EMPRESARIAL Y LEI (GLEIF, 10-10-2026) ---
+        // Sustituye en la ficha a holdings/company_holdings: esos "grupos" (generar_holdings.py)
+        // juntaban empresas con algún cargo de nombre parecido y encadenado, y no son grupos
+        // empresariales (revisar_grupos.py: solo el 30 % tiene un administrador común a todas sus
+        // empresas). Lo que tienen de cierto, empresas que comparten administrador, ya lo cuenta
+        // "Quién está detrás". GLEIF es lo que la empresa declara: su matriz directa y la última.
+        // Va en todas las fichas (es un dato, como los nombres anteriores). Ver ficha_grupo_gleif().
         $holdingData = null;
         $holdingGraphData = null;
         $holdingCompanies = [];
-        
-        $holdingRow = $db->table('company_holdings')
-            ->select('holdings.id, holdings.name, holdings.slug')
-            ->join('holdings', 'holdings.id = company_holdings.holding_id')
-            ->where('company_holdings.company_id', $company['id'])
-            ->get()->getRowArray();
-            
-        if ($holdingRow) {
-            $holdingRow['name'] = preg_replace('/^grupo\s+/i', '', trim($holdingRow['name']));
-            $holdingData = $holdingRow;
-            $companyHoldingModel = new \App\Models\CompanyHoldingModel();
-            $holdingCompanies = $companyHoldingModel->getCompaniesByHolding($holdingRow['id'], 100);
-            $totalHoldingCompaniesCount = $companyHoldingModel->getTotalCompaniesByHolding($holdingRow['id']);
-            
-            // Build Graph Data for Vis.js
-            $nodes = [];
-            $edges = [];
-            
-            // Central Node (Holding)
-            $nodes[] = [
-                'id' => 'h_' . $holdingRow['id'],
-                'label' => $holdingRow['name'],
-                'shape' => 'box',
-                'color' => [
-                    'background' => '#1a202c',
-                    'border' => '#0f172a'
-                ],
-                'font' => ['color' => '#ffffff', 'size' => 16, 'face' => 'Inter', 'bold' => true],
-                'margin' => 12
-            ];
-            
-            foreach ($holdingCompanies as $hc) {
-                $isCurrent = ($hc['id'] == $company['id']);
-                $capital = (float)$hc['social_capital'];
-                
-                // Calcular tamaño dinámico (escala logarítmica para evitar nodos gigantes)
-                $nodeSize = 12; // Base
-                if ($capital > 0) {
-                    $nodeSize = 12 + (log10($capital) * 3);
-                    if ($nodeSize > 35) $nodeSize = 35; // Cap máximo
-                }
-                if ($isCurrent && $nodeSize < 22) $nodeSize = 22; // Resaltar el actual
-
-                $estado = esc($hc['status'] ?? 'Desconocido');
-                $provincia = esc(ucwords(strtolower($hc['province'] ?? '')));
-                $nodes[] = [
-                    'id' => 'c_' . $hc['id'],
-                    // Sin 'label' para evitar la bola de pelo de textos solapados
-                    'shape' => 'dot',
-                    'color' => $isCurrent ? '#4F46E5' : '#94a3b8', // Añil si es actual, gris azulado para hermanas
-                    'title' => "{$hc['name']}\nCIF: {$hc['cif']}\nProvincia: {$provincia}\nEstado: {$estado}",
-                    'size' => $nodeSize
-                ];
-                
-                $edges[] = [
-                    'from' => 'h_' . $holdingRow['id'],
-                    'to' => 'c_' . $hc['id'],
-                    'color' => '#cbd5e1',
-                    'length' => 150
-                ];
+        $totalHoldingCompaniesCount = 0;
+        $grupoGleif = [];
+        if (!$isEn) {
+            try {
+                helper('ficha_hechos');
+                $grupoGleif = ficha_grupo_gleif((int) ($company['id'] ?? 0));
+            } catch (\Throwable $e) {
+                // La tabla puede no existir todavía en algún entorno: la ficha sale sin el bloque.
+                log_message('error', 'GLEIF de la ficha ' . ($company['id'] ?? '?') . ': ' . $e->getMessage());
+                $grupoGleif = [];
             }
-            
-            $holdingGraphData = [
-                'nodes' => $nodes,
-                'edges' => $edges
-            ];
         }
-        // --- END HOLDINGS LOGIC ---
+        // --- FIN GRUPO EMPRESARIAL Y LEI ---
 
         // --- RISK PROFILE LOGIC ---
         // IMPORTANTE: aquí solo se LEE el estado de cuota. Renderizar la ficha nunca
@@ -504,7 +455,8 @@ class Company extends BaseController
                 if (!$fichaControl) {
                     $estadoRegFicha = company_estado_registral($company, $riskProfile);
                     $fichaResumen   = ficha_resumen_hechos($company, $filteredAdmins, $bormePosts, $contracts, $subsidies,
-                                                           $holdingData, $estadoRegFicha, $riskProfile);
+                                                           !empty($grupoGleif['frase']) ? $grupoGleif : null,
+                                                           $estadoRegFicha, $riskProfile);
                     $fichaHistoria  = ficha_historia_borme($bormePosts, 12, (string) ($company['founded'] ?? ''));
                     $fichaRed       = ficha_red_administradores($filteredAdmins, (int) ($company['id'] ?? 0));
                     $fichaSector    = ficha_contexto_sector($company);
@@ -587,6 +539,7 @@ class Company extends BaseController
             'fichaRed'         => $fichaRed,
             'fichaSector'      => $fichaSector,
             'nombresAnteriores' => $nombresAnteriores,
+            'grupoGleif'       => $grupoGleif,
             'fichaCapital'     => $fichaCapital,
             'fichaDomicilios'  => $fichaDomicilios,
             'subsidies'        => $subsidies,

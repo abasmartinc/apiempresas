@@ -562,9 +562,10 @@ if (!function_exists('ficha_resumen_hechos')) {
             }
         }
 
-        // 4. Grupo empresarial
-        if (!empty($holdingData['name'])) {
-            $frases[] = 'Forma parte del grupo ' . ficha_limpia_nombre((string) $holdingData['name']);
+        // 4. Grupo empresarial. Desde el 10-10-2026 solo el de GLEIF (ficha_grupo_gleif): llega con
+        // la frase hecha. Los "grupos" de company_holdings ya no se pasan (no son grupos).
+        if (!empty($holdingData['frase'])) {
+            $frases[] = (string) $holdingData['frase'];
             $hechos++;
         }
 
@@ -869,10 +870,13 @@ if (!function_exists('ficha_historial_domicilios')) {
             }
             $t = preg_replace('/\s+/', ' ', (string) ($p['description'] ?? ''));
             $dom = null;
+            $origen = '';
             if (preg_match('/Cambio de domicilio social\.\s*(.{3,160}?)\(([^()]{2,60})\)/u', $t, $m)) {
                 $dom = $m;
+                $origen = 'cambio';
             } elseif (preg_match('/\bConstituci[oó]n\./u', $t) && preg_match('/\bDomicilio:\s*(.{3,160}?)\(([^()]{2,60})\)/u', $t, $m)) {
                 $dom = $m;
+                $origen = 'constitucion';
             }
             if (!$dom) {
                 continue;
@@ -886,7 +890,7 @@ if (!function_exists('ficha_historial_domicilios')) {
                 $s = mb_convert_case(mb_strtolower($s, 'UTF-8'), MB_CASE_TITLE, 'UTF-8');
                 return preg_replace_callback('/\b(De|Del|La|Las|El|Los|Y|En|A)\b/u', static fn($x) => mb_strtolower($x[1], 'UTF-8'), $s);
             };
-            $entrada = ['desde' => $fecha, 'hasta' => '', 'direccion' => $titulo($direccion), 'municipio' => $titulo($municipio)];
+            $entrada = ['desde' => $fecha, 'hasta' => '', 'direccion' => $titulo($direccion), 'municipio' => $titulo($municipio), 'origen' => $origen];
             $ultimo = end($lista);
             if ($ultimo && mb_strtolower($ultimo['direccion'] . $ultimo['municipio']) === mb_strtolower($entrada['direccion'] . $entrada['municipio'])) {
                 continue;   // mismo domicilio repetido
@@ -896,6 +900,174 @@ if (!function_exists('ficha_historial_domicilios')) {
             }
             $lista[] = $entrada;
         }
-        return count($lista) >= 2 ? array_reverse($lista) : [];
+        // 10-10-2026: basta con un cambio de domicilio. Las empresas anteriores a nuestro BORME
+        // (hacia 2009) no tienen el anuncio de constitución, y con la regla de "dos domicilios"
+        // una que se había trasladado una vez no enseñaba nada. Solo con la constitución no hay
+        // historial. La vista avisa cuando el domicilio anterior al primer cambio no consta.
+        $hayCambio = (bool) array_filter($lista, static fn($d) => $d['origen'] === 'cambio');
+        return $hayCambio ? array_reverse($lista) : [];
+    }
+}
+
+/*
+ * Grupo empresarial y código LEI, de GLEIF (10-10-2026).
+ *
+ * company_lei la rellena calidad_datos/cargar_gleif.py con la Golden Copy de GLEIF (CC0): solo
+ * entidades con CIF válido que casan con UNA ficha y con el mismo nombre. La matriz directa y la
+ * última son las que la propia empresa declara a GLEIF (relaciones de consolidación contable).
+ * Sustituye en la ficha a los "grupos" de holdings/company_holdings, que se hicieron juntando
+ * empresas con algún cargo de nombre parecido y no son grupos empresariales.
+ */
+if (!function_exists('ficha_pais')) {
+    function ficha_pais(?string $codigo): string
+    {
+        static $paises = [
+            'ES' => 'España', 'DE' => 'Alemania', 'FR' => 'Francia', 'IT' => 'Italia', 'PT' => 'Portugal',
+            'GB' => 'Reino Unido', 'IE' => 'Irlanda', 'NL' => 'Países Bajos', 'BE' => 'Bélgica',
+            'LU' => 'Luxemburgo', 'CH' => 'Suiza', 'AT' => 'Austria', 'SE' => 'Suecia', 'NO' => 'Noruega',
+            'DK' => 'Dinamarca', 'FI' => 'Finlandia', 'PL' => 'Polonia', 'CZ' => 'Chequia', 'GR' => 'Grecia',
+            'US' => 'Estados Unidos', 'CA' => 'Canadá', 'MX' => 'México', 'BR' => 'Brasil', 'AR' => 'Argentina',
+            'CL' => 'Chile', 'CO' => 'Colombia', 'PE' => 'Perú', 'JP' => 'Japón', 'CN' => 'China',
+            'HK' => 'Hong Kong', 'KR' => 'Corea del Sur', 'IN' => 'India', 'SG' => 'Singapur',
+            'AU' => 'Australia', 'AE' => 'Emiratos Árabes Unidos', 'SA' => 'Arabia Saudí', 'QA' => 'Catar',
+            'IL' => 'Israel', 'TR' => 'Turquía', 'ZA' => 'Sudáfrica', 'MA' => 'Marruecos', 'JE' => 'Jersey',
+            'GG' => 'Guernsey', 'IM' => 'Isla de Man', 'KY' => 'Islas Caimán', 'BM' => 'Bermudas',
+            'VG' => 'Islas Vírgenes Británicas', 'MT' => 'Malta', 'CY' => 'Chipre', 'LI' => 'Liechtenstein',
+            'MC' => 'Mónaco', 'AD' => 'Andorra', 'HU' => 'Hungría', 'RO' => 'Rumanía', 'SK' => 'Eslovaquia',
+            'SI' => 'Eslovenia', 'HR' => 'Croacia', 'BG' => 'Bulgaria', 'EE' => 'Estonia', 'LV' => 'Letonia',
+            'LT' => 'Lituania', 'TW' => 'Taiwán', 'NZ' => 'Nueva Zelanda', 'UY' => 'Uruguay', 'VE' => 'Venezuela',
+        ];
+        $codigo = strtoupper(trim((string) $codigo));
+        return $paises[$codigo] ?? $codigo;
+    }
+}
+
+if (!function_exists('ficha_nombre_gleif')) {
+    /** Nombre de una sociedad tal como lo da GLEIF; en mayúsculas se pasa a caja de título. */
+    function ficha_nombre_gleif(?string $n): string
+    {
+        $n = trim(preg_replace('/\s+/u', ' ', (string) $n), " ,;");
+        if ($n === '' || preg_match('/\p{Ll}/u', $n)) {
+            return $n;   // ya viene en caja mixta ("Volkswagen AG"): se deja tal cual
+        }
+        $t = company_display_name($n, $n);
+        // Formas jurídicas extranjeras que la caja de título estropea ("Kion Group Ag")
+        $siglas = ['Ag' => 'AG', 'Se' => 'SE', 'Nv' => 'N.V.', 'Bv' => 'B.V.', 'Plc' => 'PLC', 'Llc' => 'LLC',
+                   'Lp' => 'L.P.', 'Gmbh' => 'GmbH', 'Kgaa' => 'KGaA', 'Kg' => 'KG', 'Spa' => 'S.p.A.', 'Sarl' => 'S.à r.l.',
+                   'Ab' => 'AB', 'Asa' => 'ASA', 'Oyj' => 'Oyj', 'Nv.' => 'N.V.', 'Sca' => 'SCA', 'Sicav' => 'SICAV'];
+        $pal = explode(' ', $t);
+        foreach ($pal as $i => $p) {
+            $limpio = rtrim($p, ',.');
+            if (isset($siglas[$limpio])) {
+                $pal[$i] = $siglas[$limpio] . (substr($p, -1) === ',' ? ',' : '');
+            }
+        }
+        return implode(' ', $pal);
+    }
+}
+
+if (!function_exists('ficha_grupo_gleif')) {
+    /**
+     * Datos de GLEIF de la ficha. Devuelve [] si no tiene LEI (o si la tabla no existe).
+     *  lei, estado (vigente|caducado|retirado|otro), renovacion, alta
+     *  matriz / matriz_directa: ['nombre', 'pais', 'url' (si es ficha nuestra)] o null
+     *  hermanas: sociedades con la misma matriz última (fichas nuestras), hermanas_total
+     *  filiales: fichas nuestras cuya matriz (directa o última) es esta, filiales_total
+     *  frase: una frase para "En resumen"
+     */
+    function ficha_grupo_gleif(int $companyId): array
+    {
+        if ($companyId <= 0) {
+            return [];
+        }
+        $db = \Config\Database::connect();
+        $l = $db->table('company_lei')->where('company_id', $companyId)->get()->getRowArray();
+        if (!$l) {
+            return [];
+        }
+        $estados = ['ISSUED' => 'vigente', 'LAPSED' => 'caducado', 'RETIRED' => 'retirado',
+                    'PENDING_TRANSFER' => 'vigente', 'PENDING_ARCHIVAL' => 'vigente'];
+        $out = [
+            'lei'        => (string) $l['lei'],
+            'estado'     => $estados[$l['registration_status']] ?? 'otro',
+            'renovacion' => (string) ($l['next_renewal_date'] ?? ''),
+            'alta'       => (string) ($l['initial_registration_date'] ?? ''),
+            'fecha_fuente' => (string) ($l['source_date'] ?? ''),
+            'matriz' => null, 'matriz_directa' => null,
+            'hermanas' => [], 'hermanas_total' => 0, 'filiales' => [], 'filiales_total' => 0, 'frase' => '',
+        ];
+
+        $fichaDe = static function ($id) use ($db): ?array {
+            $id = (int) $id;
+            if ($id <= 0) {
+                return null;
+            }
+            $c = $db->table('companies')->select('id, cif, company_name')->where('id', $id)->get()->getRowArray();
+            return $c ? ['nombre' => company_display_name((string) $c['company_name'], ''), 'url' => company_url($c)] : null;
+        };
+        foreach (['ultimate' => 'matriz', 'direct' => 'matriz_directa'] as $tipo => $clave) {
+            if (empty($l[$tipo . '_parent_lei'])) {
+                continue;
+            }
+            $ficha = $fichaDe($l[$tipo . '_parent_company_id'] ?? 0);
+            $out[$clave] = [
+                'lei'    => (string) $l[$tipo . '_parent_lei'],
+                'nombre' => $ficha['nombre'] ?? ficha_nombre_gleif($l[$tipo . '_parent_name'] ?? ''),
+                'pais'   => ficha_pais($l[$tipo . '_parent_country'] ?? ''),
+                'url'    => $ficha['url'] ?? null,
+            ];
+        }
+        // La directa solo se enseña si es otra sociedad distinta de la última
+        if ($out['matriz_directa'] && $out['matriz'] && $out['matriz_directa']['lei'] === $out['matriz']['lei']) {
+            $out['matriz_directa'] = null;
+        }
+
+        // Otras sociedades del mismo grupo con ficha (misma matriz última), sin la propia matriz.
+        // Un builder nuevo para el recuento y otro para la lista (no se reutiliza tras countAllResults).
+        if (!empty($l['ultimate_parent_lei'])) {
+            $sinMatriz = (int) ($l['ultimate_parent_company_id'] ?? 0);
+            $hermanas = static function () use ($db, $l, $companyId, $sinMatriz) {
+                $q = $db->table('company_lei l')->join('companies c', 'c.id = l.company_id')
+                    ->where('l.ultimate_parent_lei', $l['ultimate_parent_lei'])->where('l.company_id !=', $companyId);
+                if ($sinMatriz) {
+                    $q->where('l.company_id !=', $sinMatriz);
+                }
+                return $q;
+            };
+            $out['hermanas_total'] = (int) $hermanas()->countAllResults();
+            if ($out['hermanas_total'] > 0) {
+                foreach ($hermanas()->select('c.id, c.cif, c.company_name')->orderBy('c.company_name', 'ASC')->limit(24)->get()->getResultArray() as $c) {
+                    $out['hermanas'][] = ['nombre' => company_display_name((string) $c['company_name'], ''), 'url' => company_url($c)];
+                }
+            }
+        }
+
+        // Si es matriz: sus sociedades con ficha
+        $filiales = static function () use ($db, $companyId) {
+            return $db->table('company_lei l')->join('companies c', 'c.id = l.company_id')
+                ->groupStart()->where('l.ultimate_parent_company_id', $companyId)->orWhere('l.direct_parent_company_id', $companyId)->groupEnd()
+                ->where('l.company_id !=', $companyId);
+        };
+        $out['filiales_total'] = (int) $filiales()->countAllResults();
+        if ($out['filiales_total'] > 0) {
+            foreach ($filiales()->select('c.id, c.cif, c.company_name')->orderBy('c.company_name', 'ASC')->limit(30)->get()->getResultArray() as $c) {
+                $out['filiales'][] = ['nombre' => company_display_name((string) $c['company_name'], ''), 'url' => company_url($c)];
+            }
+        }
+
+        // Frase para "En resumen"
+        $m = $out['matriz'];
+        $d = $out['matriz_directa'];
+        $pais = static fn($x) => ($x['pais'] !== '' && $x['pais'] !== 'España') ? " ({$x['pais']})" : '';
+        if ($m && $d) {
+            $out['frase'] = "Su sociedad matriz es {$d['nombre']}{$pais($d)}, y la cabecera de su grupo, {$m['nombre']}{$pais($m)}";
+        } elseif ($m) {
+            $out['frase'] = "Pertenece al grupo encabezado por {$m['nombre']}{$pais($m)}";
+        } elseif ($out['filiales_total'] > 0) {
+            $n = $out['filiales_total'];
+            $out['frase'] = 'Es la sociedad matriz de ' . ($n === 1 ? 'otra sociedad española' : "{$n} sociedades españolas")
+                          . ' que tienen ficha en APIEmpresas';
+        }
+        return $out;
     }
 }
