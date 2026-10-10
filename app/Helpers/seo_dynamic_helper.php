@@ -62,6 +62,13 @@ if (!function_exists('shouldIndexCompany')) {
     }
 }
 
+if (!function_exists('seo_ai_sin_tildes')) {
+    function seo_ai_sin_tildes(string $s): string
+    {
+        return strtr(mb_strtolower($s, 'UTF-8'), ['á' => 'a', 'é' => 'e', 'í' => 'i', 'ó' => 'o', 'ú' => 'u', 'ü' => 'u']);
+    }
+}
+
 if (!function_exists('seo_ai_fecha')) {
     /** "2026-10-07" -> "7 de octubre de 2026". Si no es una fecha, la devuelve tal cual. */
     function seo_ai_fecha(string $f): string
@@ -179,6 +186,16 @@ if (!function_exists('seo_ai_datos')) {
                 }
             }
         }
+        // Anuncio de constitución del BORME (el más antiguo). Su fecha es la de PUBLICACIÓN, que
+        // puede caer en el año siguiente a la constitución (10-10-2026: "2005 (es 2004)").
+        $anuncioConst = '';
+        foreach ($porFecha as $fecha => $ts) {
+            foreach (array_keys($ts) as $t) {
+                if (stripos($t, 'constituci') === 0 && ($anuncioConst === '' || $fecha < $anuncioConst)) {
+                    $anuncioConst = $fecha;
+                }
+            }
+        }
         krsort($porFecha);
         $actos = [];
         foreach (array_slice($porFecha, 0, 8, true) as $fecha => $ts) {
@@ -203,6 +220,8 @@ if (!function_exists('seo_ai_datos')) {
             'actos'     => $actos,
             'tipos'     => $resumenTipos,
             'num_actos' => count($bormePosts),
+            'anuncio_constitucion' => $anuncioConst !== '' ? seo_ai_fecha($anuncioConst) : '',
+            'anio_anuncio_constitucion' => $anuncioConst !== '' ? substr($anuncioConst, 0, 4) : '',
             'primer_acto' => $fechas ? seo_ai_fecha($fechas[0]) : '',
             'ultimo_acto' => $fechas ? seo_ai_fecha(end($fechas)) : '',
         ];
@@ -239,6 +258,9 @@ if (!function_exists('seo_ai_generar')) {
             $lineas[] = 'Domicilio: ' . trim($d['municipio'] . ($d['municipio'] !== '' && $d['provincia'] !== '' && mb_strtolower($d['municipio']) !== mb_strtolower($d['provincia']) ? " ({$d['provincia']})" : ($d['municipio'] === '' ? $d['provincia'] : '')));
         }
         $lineas[] = 'Año de constitución: ' . ($d['anio'] !== '' ? $d['anio'] : 'NO CONSTA');
+        if (($d['anuncio_constitucion'] ?? '') !== '') {
+            $lineas[] = "Anuncio de constitución en el BORME: publicado el {$d['anuncio_constitucion']}. Es la fecha de PUBLICACIÓN, no la de constitución: si lo mencionas, escribe \"su constitución se publicó en el BORME el …\".";
+        }
         if ($d['capital'] !== '')   $lineas[] = "Capital social: {$d['capital']}";
         $lineas[] = 'Actividad registrada (CNAE): ' . ($hayCnae ? $d['cnae'] : 'NO CONSTA');
         $lineas[] = 'Objeto social (estatutos): ' . ($hayObjeto ? $d['objeto'] : 'NO CONSTA');
@@ -328,8 +350,14 @@ TXT;
         }
         $prohibidas = '/\b(l[ií]der(es)?|referentes?|excelencia|innovador[ae]?s?|soluciones integrales|amplia experiencia|trayectoria|de confianza|profesionales cualificados|servicio personalizado)\b/iu';
         $pitch = trim(strip_tags((string) ($j['seo_pitch'] ?? '')));
-        if (preg_match($prohibidas, strip_tags($texto) . ' ' . $pitch, $mm)) {
-            throw new \RuntimeException("Texto con lenguaje promocional: '{$mm[0]}'");
+        // Una palabra "prohibida" que ya está en los datos (p. ej. "LIDER" en el nombre o
+        // "de confianza" en el objeto social) no es lenguaje promocional de la IA.
+        if (preg_match_all($prohibidas, strip_tags($texto) . ' ' . $pitch, $mm)) {
+            foreach ($mm[0] as $w) {
+                if (mb_stripos(seo_ai_sin_tildes($datos), seo_ai_sin_tildes($w)) === false) {
+                    throw new \RuntimeException("Texto con lenguaje promocional: '{$w}'");
+                }
+            }
         }
         if (mb_strlen($pitch, 'UTF-8') > 160) {
             $pitch = rtrim(mb_substr($pitch, 0, 157, 'UTF-8')) . '…';
@@ -360,18 +388,27 @@ TXT;
                 throw new \RuntimeException("Año que no está en los datos: {$a}");
             }
         }
-        // Año de constitución: si no consta no se puede hablar de él (BBVA: "constituida en
-        // 2017", que era el primer anuncio); si consta, el año que acompaña tiene que ser ese.
+        // Año de constitución (BBVA: "constituida en 2017", que era el primer anuncio). Cada año
+        // que aparezca en la misma frase que "constitu/fundad/fundación" tiene que ser el año de
+        // constitución, o el de publicación del anuncio de constitución si la frase habla del
+        // BORME / de la publicación. Sin año de constitución, "constitución" sin año se admite
+        // (p. ej. "consta un anuncio de constitución").
+        // 10-10-2026: antes la ventana era "40 caracteres que no sean dígitos" y cruzaba frases y
+        // FAQ distintas; ahora se queda dentro de la frase y del campo.
         $sinBorme = strip_tags($texto) . ' ' . $pitch . ' ' . json_encode($j['faqs'] ?? [], JSON_UNESCAPED_UNICODE);
-        if ($d['anio'] === '') {
-            if (preg_match('/constitu|fundad|fundaci[oó]n/iu', $sinBorme, $mm)) {
-                throw new \RuntimeException("Habla de la constitución y el año no consta ('{$mm[0]}')");
-            }
-        } elseif (preg_match_all('/(?:constitu|fundad|fundaci)\w*\D{0,40}?\b(1[89]\d{2}|20\d{2})\b/iu', $sinBorme, $mm)) {
-            foreach ($mm[1] as $a) {
-                if ($a !== $d['anio']) {
-                    throw new \RuntimeException("Año de constitución equivocado: {$a} (es {$d['anio']})");
+        $anioAnuncio = (string) ($d['anio_anuncio_constitucion'] ?? '');
+        if (preg_match_all('/(?:constitu|fundad|fundaci)\w*([^.\d"]{0,60}?)\b(1[89]\d{2}|20\d{2})\b/iu', $sinBorme, $mm, PREG_SET_ORDER)) {
+            foreach ($mm as $m) {
+                $a = $m[2];
+                if ($d['anio'] !== '' && $a === $d['anio']) {
+                    continue;
                 }
+                if ($anioAnuncio !== '' && $a === $anioAnuncio && preg_match('/BORME|public|anuncio/iu', $m[0])) {
+                    continue;
+                }
+                throw new \RuntimeException($d['anio'] !== ''
+                    ? "Año de constitución equivocado: {$a} (es {$d['anio']}) en '{$m[0]}'"
+                    : "Habla de la constitución con un año y el año no consta: '{$m[0]}'");
             }
         }
         // Sin objeto social no puede citarlo (BBVA: "según sus estatutos, puede dedicarse a…
@@ -391,7 +428,7 @@ TXT;
         foreach ((array) ($j['faqs'] ?? []) as $f) {
             $q = trim(strip_tags((string) ($f['q'] ?? '')));
             $a = trim(strip_tags((string) ($f['a'] ?? '')));
-            if ($q !== '' && $a !== '' && !preg_match($prohibidas, $a)) {
+            if ($q !== '' && $a !== '' && !(preg_match($prohibidas, $a, $mw) && mb_stripos(seo_ai_sin_tildes($datos), seo_ai_sin_tildes($mw[0])) === false)) {
                 $faqs[] = ['q' => $q, 'a' => $a];
             }
         }
