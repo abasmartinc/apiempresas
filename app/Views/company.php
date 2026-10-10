@@ -64,8 +64,15 @@
                 ? "Ya no desarrolla actividad mercantil con normalidad, así que no conviene contratar con ella ni venderle a crédito. "
                 : "Antes de contratar con ella o venderle a crédito, conviene revisarlo con detalle. ")
             . "En esta ficha puede consultar su índice de estabilidad societaria y los actos publicados en el BORME.";
+    } elseif (($estadoReg['clave'] ?? '') === 'inactiva') {
+        // 10-10-2026: INACTIVA viene de fuentes públicas, no del Registro Mercantil.
+        $faqFiable = "**{$companyName}** (CIF **{$companyCif}**) {$estadoReg['frase']}. En el Registro Mercantil no consta su disolución, extinción ni concurso. "
+            . "Antes de contratar con ella o venderle a crédito, conviene comprobar que sigue operando. En esta ficha puede consultar su índice de estabilidad societaria y los actos publicados en el BORME.";
+    } elseif ($isActive) {
+        $faqFiable = "**{$companyName}** es una sociedad registrada en España con CIF **{$companyCif}**. Su estado actual es **activa**, según consta en el Registro Mercantil. Para valorar si es fiable como cliente o proveedor, consulte su índice de estabilidad societaria y los actos publicados en el BORME.";
     } else {
-        $faqFiable = "**{$companyName}** es una sociedad registrada en España con CIF **{$companyCif}**. Su estado actual es **{$statusRaw}**, según consta en el Registro Mercantil. Para valorar si es fiable como cliente o proveedor, consulte su índice de estabilidad societaria y los actos publicados en el BORME.";
+        // Sin estado conocido: no se afirma ninguno ("Su estado actual es ****" salía vacío).
+        $faqFiable = "**{$companyName}** es una sociedad registrada en España con CIF **{$companyCif}**. En el Registro Mercantil no consta su disolución, extinción ni concurso. Para valorar si es fiable como cliente o proveedor, consulte su índice de estabilidad societaria y los actos publicados en el BORME.";
     }
 
     if ($estadoReg['cerrada']) {
@@ -134,6 +141,38 @@
         }
     }
 
+    // --- NOMBRES ANTERIORES (10-10-2026) ---
+    // Ver Company::prepareViewData. Fecha = publicación del cambio en el BORME.
+    $nombresAnteriores = $nombresAnteriores ?? [];
+    $fechaLarga = static function (string $f): string {
+        if (!preg_match('/^(\d{4})-(\d{2})-(\d{2})/', $f, $m)) {
+            return '';
+        }
+        $meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+        return (int) $m[3] . ' de ' . ($meses[(int) $m[2] - 1] ?? '') . ' de ' . $m[1];
+    };
+    $mesAnio = static function (string $f): string {
+        if (!preg_match('/^(\d{4})-(\d{2})/', $f, $m)) {
+            return '';
+        }
+        $meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+        return ($meses[(int) $m[2] - 1] ?? '') . ' de ' . $m[1];
+    };
+    if (!empty($nombresAnteriores)) {
+        $mismoCif = preg_match('/^[A-Z]\d{7}[0-9A-J]$/', (string) ($companyCif ?? '')) ? ', con el mismo CIF' : '';
+        $partesFaq = [];
+        foreach ($nombresAnteriores as $na) {
+            $f = $fechaLarga($na['fecha']);
+            $partesFaq[] = "**{$na['nombre']}**" . ($f !== '' ? " (cambio publicado en el BORME el {$f})" : '');
+        }
+        $faqs[] = [
+            'q' => "¿Cómo se llamaba antes {$companyName}?",
+            'a' => count($partesFaq) === 1
+                ? "Antes se llamaba {$partesFaq[0]}. Es la misma sociedad{$mismoCif}; solo cambió su denominación social."
+                : 'Ha tenido estos nombres anteriores, del más reciente al más antiguo: ' . implode('; ', $partesFaq) . '. Es la misma sociedad' . $mismoCif . '; solo cambió su denominación social.',
+        ];
+    }
+
     // --- SCHEMA JSON-LD COMPLETO (@GRAPH) ---
     $organizationSchema = [
         '@type' => 'Organization',
@@ -170,6 +209,9 @@
             ]
         ]
     ];
+    if (!empty($nombresAnteriores)) {
+        $organizationSchema['alternateName'] = array_values(array_map(static fn ($na) => $na['nombre'], $nombresAnteriores));
+    }
 
     $addressData = [];
     if (!empty($company['address'])) $addressData['streetAddress'] = $company['address'];
@@ -465,7 +507,15 @@
                                             [$rcColor, $rcFondo, $rcBorde] = ['#1d4ed8', '#eff6ff', '#bfdbfe'];
                                             $rcTexto = 'Perfil de riesgo disponible';
                                         } elseif ($rcEventos === 0) {
-                                            $rcTexto = esc(ucfirst(mb_strtolower($rcNivel, 'UTF-8'))) . ' · sin incidencias en el BORME';
+                                            // 10-10-2026: el nivel ya es "Sin incidencias"; salía "Sin incidencias ·
+                                            // sin incidencias en el BORME". Y junto a un estado INACTIVA, el verde
+                                            // decía "todo bien": el BORME está limpio, pero la empresa no opera.
+                                            $rcTexto = mb_strtolower($rcNivel, 'UTF-8') === 'sin incidencias'
+                                                ? 'Sin incidencias en el BORME'
+                                                : esc(ucfirst(mb_strtolower($rcNivel, 'UTF-8'))) . ' · sin incidencias en el BORME';
+                                            if (($estadoReg['clave'] ?? '') === 'inactiva') {
+                                                [$rcColor, $rcFondo, $rcBorde] = [$estadoReg['color'], $estadoReg['fondo'], $estadoReg['borde']];
+                                            }
                                         } else {
                                             $rcTexto = esc(ucfirst(mb_strtolower($rcNivel, 'UTF-8'))) . ' · ' . $rcEventos
                                                 . ($rcEventos === 1 ? ' incidencia registrada' : ' incidencias registradas');
@@ -505,6 +555,17 @@
                                 <h1 style="font-size: 1.6rem; font-weight: 700; color: #0f172a; margin: 0 0 16px 0; line-height: 1.25; letter-spacing: -0.01em; text-wrap: balance;">
                                     <?= esc($company['name'] ?? '-') ?><?php if (!empty($companyCif) && $companyCif !== 'Desconocido' && $companyCif !== '-'): ?> - CIF <?= esc($companyCif) ?><?php endif; ?>
                                 </h1>
+
+                                <?php if (!empty($nombresAnteriores)): ?>
+                                <p style="margin: -10px 0 14px 0; color: #475569; font-size: 0.95rem; line-height: 1.45;">
+                                    <?php if (count($nombresAnteriores) === 1): $na = $nombresAnteriores[0]; $ma = $mesAnio($na['fecha']); ?>
+                                        Antes se llamaba <strong><?= esc($na['nombre']) ?></strong><?= $ma !== '' ? ' (cambió de nombre en ' . esc($ma) . ')' : '' ?>.
+                                    <?php else: ?>
+                                        Nombres anteriores:
+                                        <?php foreach ($nombresAnteriores as $i => $na): $ma = $mesAnio($na['fecha']); ?><?= $i ? ', ' : ' ' ?><strong><?= esc($na['nombre']) ?></strong><?= $ma !== '' ? ' (hasta ' . esc($ma) . ')' : '' ?><?php endforeach; ?>.
+                                    <?php endif; ?>
+                                </p>
+                                <?php endif; ?>
 
                                 <?php if (!empty(trim((string) ($company['company_notes'] ?? '')))): ?>
                                 <?php
@@ -580,7 +641,11 @@
                                                 <span style="position: relative; display: inline-flex; border-radius: 50%; height: 8px; width: 8px; background-color: #22c55e;"></span>
                                             </span>
                                         <?php endif; ?>
+                                        <?php if (($estadoReg['clave'] ?? '') === 'inactiva'): ?>
+                                        <span title="Figura como inactiva en fuentes públicas: sin actividad mercantil reciente. No es un acto del Registro Mercantil.">Inactiva</span>
+                                        <?php else: ?>
                                         <span><?= esc($statusRaw) ?></span>
+                                        <?php endif; ?>
                                     </div>
                                     <?php endif; ?>
 
@@ -839,65 +904,75 @@
         <?php else: ?>
             <div id="fallback-seo-text">
                 <?php
-                $companyIdForFallback = !empty($company['id']) ? (int)$company['id'] : rand(0, 9);
-                $fallbackIndex = $companyIdForFallback % 10;
-                $provText = !empty($provinceUrl) ? '<a href="' . esc($provinceUrl) . '" style="color:inherit;font-weight:700;">' . esc($companyProv) . '</a>' : '<strong>' . esc($companyProv) . '</strong>';
-                $cifText = (!empty($companyCif) && $companyCif !== 'Desconocido' && $companyCif !== '-') ? ' (CIF <strong>' . esc($companyCif) . '</strong>)' : '';
-                
-                // Extraer año de constitución
-                $foundedYear = '';
-                if (!empty($company['founded']) && $company['founded'] !== '0000-00-00' && $company['founded'] !== '-') {
-                    $foundedYear = substr(trim($company['founded']), 0, 4);
+                /*
+                 * 10-10-2026: aquí había diez plantillas que se repartían por id ("entidad
+                 * destacada", "Operando activamente", "manteniendo sus obligaciones societarias al
+                 * día", "cumpliendo con todas las normativas"...). Nada de eso sale de los datos, y
+                 * en una empresa inactiva o sin actos era falso. Ahora es un texto sobrio con lo que
+                 * consta, armado con los mismos datos que se le pasan a la IA (seo_ai_datos).
+                 */
+                $fbCif  = (!empty($companyCif) && $companyCif !== 'Desconocido' && $companyCif !== '-') ? ' (CIF <strong>' . esc($companyCif) . '</strong>)' : '';
+                $fbDat  = function_exists('seo_ai_datos') ? (seo_ai_datos($company, $bormePosts ?? []) ?? []) : [];
+                $fbForma = $fbDat['forma'] ?? '';
+                $fbLugar = '';
+                if (!empty($fbDat['municipio'])) {
+                    $fbLugar = esc($fbDat['municipio']);
+                    if (!empty($companyProv) && mb_strtolower($fbDat['municipio']) !== mb_strtolower((string) $companyProv)) {
+                        $fbLugar .= ' (' . (!empty($provinceUrl) ? '<a href="' . esc($provinceUrl) . '" style="color:inherit;">' . esc($companyProv) . '</a>' : esc($companyProv)) . ')';
+                    }
+                } elseif (!empty($companyProv) && $companyProv !== '-') {
+                    $fbLugar = !empty($provinceUrl) ? '<a href="' . esc($provinceUrl) . '" style="color:inherit;font-weight:700;">' . esc($companyProv) . '</a>' : esc($companyProv);
                 }
-                
-                // Extraer CNAE
-                $cnaeText = '';
-                if (!empty($company['cnae_label']) && strtolower(trim($company['cnae_label'])) !== 'desconocido') {
-                    $cnaeText = strtolower(trim($company['cnae_label']));
-                } elseif (!empty($sectorName) && !in_array(strtolower(trim($sectorName)), ['este sector', 'todos los sectores'], true)) {
-                    $cnaeText = strtolower(trim($sectorName));
+                $fbAnio = '';
+                $fbFund = trim((string) ($company['founded'] ?? ''));
+                if (preg_match('/^(\d{4})-\d{2}-\d{2}/', $fbFund, $fbM) && (int) $fbM[1] >= 1850 && (int) $fbM[1] <= (int) date('Y')) {
+                    $fbAnio = $fbM[1];
                 }
-                
-                // Estado registral
-                $isActive = (!empty($statusRaw) && strtoupper(trim($statusRaw)) === 'ACTIVA');
-                $statusPhrase = $isActive ? ' actualmente activa' : '';
-                
-                // Frases condicionales
-                $cnaePhrase = $cnaeText ? " dentro del sector de <strong>" . esc($cnaeText) . "</strong>" : " en su respectivo sector";
-                $yearPhrase = $foundedYear ? " desde el año " . esc($foundedYear) : "";
-                
-                switch ($fallbackIndex) {
-                    case 0: ?>
-                        <p>La empresa <strong><?= esc($companyName) ?></strong><?= $cifText ?> es una entidad destacada<?= $statusPhrase ?> con sede principal y domicilio social registrado en <?= $provText ?>. Su trayectoria mercantil<?= $yearPhrase ?><?= $cnaePhrase ?> la convierten en un agente económico relevante en su zona geográfica de operaciones, cumpliendo con todas las normativas exigidas para el desarrollo de su objeto social.</p>
-                        <?php break;
-                    case 1: ?>
-                        <p>Con instalaciones principales ubicadas en la provincia de <?= $provText ?>, <strong><?= esc($companyName) ?></strong><?= $cifText ?> desarrolla sus operaciones comerciales y empresariales<?= $cnaePhrase ?>. La información depositada en los registros oficiales subraya la evolución de esta sociedad mercantil<?= $yearPhrase ?>, perfilando su actividad como parte integral del desarrollo económico nacional.</p>
-                        <?php break;
-                    case 2: ?>
-                        <p>El perfil comercial de <strong><?= esc($companyName) ?></strong><?= $cifText ?> indica que la sociedad está establecida legalmente en <?= $provText ?>. A través de su estructura organizativa<?= $cnaePhrase ?>, la empresa participa dinámicamente en el mercado mercantil español<?= $yearPhrase ?>, manteniendo sus obligaciones societarias al día e impulsando su desarrollo corporativo.</p>
-                        <?php break;
-                    case 3: ?>
-                        <p>Operando activamente<?= $yearPhrase ?> desde su sede en <?= $provText ?>, <strong><?= esc($companyName) ?></strong><?= $cifText ?> se ha consolidado como un participante recurrente<?= $cnaePhrase ?>. Las métricas de su actividad y su información corporativa reflejan a una firma comprometida con su entorno comercial, generando valor a través de los servicios inherentes a su actividad principal.</p>
-                        <?php break;
-                    case 4: ?>
-                        <p>Registrada oficialmente en <?= $provText ?>, la organización <strong><?= esc($companyName) ?></strong><?= $cifText ?> ejerce sus funciones mercantiles<?= $statusPhrase ?> de acuerdo a sus estatutos corporativos. Su presencia continua en España<?= $yearPhrase ?><?= $cnaePhrase ?> demuestra su solidez, estableciendo relaciones comerciales sostenidas y garantizando el cumplimiento normativo.</p>
-                        <?php break;
-                    case 5: ?>
-                        <p>La información mercantil de <strong><?= esc($companyName) ?></strong><?= $cifText ?> confirma que su sede administrativa y fiscal se encuentra en <?= $provText ?>. Al analizar su actividad comercial<?= $cnaePhrase ?>, se evidencia que la sociedad mantiene un flujo de operaciones constante<?= $yearPhrase ?>, adaptándose a las exigencias regulatorias y manteniendo su estructura plenamente operativa.</p>
-                        <?php break;
-                    case 6: ?>
-                        <p>Como sociedad mercantil con domicilio en <?= $provText ?>, <strong><?= esc($companyName) ?></strong><?= $cifText ?> lleva a cabo diversas actividades empresariales que contribuyen al ecosistema corporativo local. Especializada<?= $cnaePhrase ?>, la empresa ha destinado sus recursos a la consecución de sus fines comerciales<?= $yearPhrase ?>, manteniendo la transparencia en sus registros oficiales.</p>
-                        <?php break;
-                    case 7: ?>
-                        <p>Establecida en el territorio de <?= $provText ?>, la firma <strong><?= esc($companyName) ?></strong><?= $cifText ?> mantiene sus registros vigentes y participa activamente en la dinamización de la economía española. Sus operaciones<?= $cnaePhrase ?> están avaladas por su correcto desempeño societario<?= $yearPhrase ?>, lo que le permite afianzarse en su nicho estratégico de mercado.</p>
-                        <?php break;
-                    case 8: ?>
-                        <p>Cumpliendo con los rigurosos requisitos de inscripción legal, <strong><?= esc($companyName) ?></strong><?= $cifText ?> opera desde su sede en <?= $provText ?> y fomenta su actividad corporativa a través de una sólida estructura. Sus procesos comerciales<?= $cnaePhrase ?>, desarrollados de forma continua<?= $yearPhrase ?>, la convierten en un exponente fundamental dentro de su categoría empresarial.</p>
-                        <?php break;
-                    case 9: ?>
-                        <p>Al estudiar el impacto empresarial de <strong><?= esc($companyName) ?></strong><?= $cifText ?>, destaca su sólida implantación en la provincia de <?= $provText ?> y su especialización funcional<?= $cnaePhrase ?>. La trazabilidad de su historia mercantil<?= $yearPhrase ?> refleja una evolución acorde a las exigencias actuales del entorno de los negocios en España, operando<?= $statusPhrase ?> con alto grado de consistencia.</p>
-                        <?php break;
-                } ?>
+                $fbEstado = '';
+                if (($estadoReg['clave'] ?? '') === 'activa') {
+                    $fbEstado = 'Consta como activa en el Registro Mercantil.';
+                } elseif (($estadoReg['clave'] ?? '') === 'inactiva') {
+                    $fbEstado = 'Figura como inactiva en fuentes públicas: no consta actividad mercantil reciente.';
+                }
+                $fbObjeto = trim((string) ($fbDat['objeto'] ?? ''));
+                $fbObjeto = rtrim($fbObjeto, " .;,");
+                if ($fbObjeto !== '' && $fbObjeto === mb_strtoupper($fbObjeto, 'UTF-8')) {
+                    // Los estatutos vienen en MAYÚSCULAS: se pasan a minúscula para leerlos.
+                    $fbObjeto = mb_strtoupper(mb_substr($fbObjeto, 0, 1, 'UTF-8'), 'UTF-8') . mb_strtolower(mb_substr($fbObjeto, 1, null, 'UTF-8'), 'UTF-8');
+                }
+                if (mb_strlen($fbObjeto, 'UTF-8') > 320) {
+                    $fbObjeto = rtrim(mb_substr($fbObjeto, 0, 320, 'UTF-8'), " ,;.") . '…';
+                }
+                $fbCnae = trim((string) ($fbDat['cnae'] ?? ''));
+                $fbCapital = trim((string) ($fbDat['capital'] ?? ''));
+                $fbCapital = trim((string) preg_replace('/\s*euros?\.?$/iu', ' €', $fbCapital));
+                $fbActos = (int) ($fbDat['num_actos'] ?? count($bormePosts ?? []));
+                $fbUltimo = (string) ($fbDat['ultimo_acto'] ?? '');
+                ?>
+                <p>
+                    <strong><?= esc($companyName) ?></strong><?= $fbCif ?> es una <?= esc($fbForma !== '' ? $fbForma : 'sociedad') ?><?= $fbLugar !== '' ? ' con domicilio social en ' . $fbLugar : '' ?><?= $fbAnio !== '' ? ', constituida en ' . esc($fbAnio) : '' ?>.
+                    <?= esc($fbEstado) ?>
+                    <?php if ($fbCapital !== ''): ?>Su capital social es de <?= esc($fbCapital) ?>.<?php endif; ?>
+                </p>
+                <?php if ($fbObjeto !== '' || $fbCnae !== ''): ?>
+                <p>
+                    <?php if ($fbObjeto !== ''): ?>
+                        Según sus estatutos, su objeto social es: «<?= esc($fbObjeto) ?>».
+                    <?php endif; ?>
+                    <?php if ($fbCnae !== ''): ?>
+                        Su actividad registrada (CNAE) es
+                        <?= !empty($cnaeUrl) ? '<a href="' . esc($cnaeUrl) . '" style="color:inherit;">' . esc(mb_strtolower($fbCnae, 'UTF-8')) . '</a>' : esc(mb_strtolower($fbCnae, 'UTF-8')) ?>.
+                    <?php endif; ?>
+                </p>
+                <?php endif; ?>
+                <p>
+                    <?php if ($fbActos > 0): ?>
+                        En el BORME <?= $fbActos === 1 ? 'consta un anuncio suyo' : 'constan ' . number_format($fbActos, 0, ',', '.') . ' anuncios suyos' ?><?= $fbUltimo !== '' ? ($fbActos === 1 ? ', del ' : '; el último, del ') . esc($fbUltimo) : '' ?>.
+                        En esta ficha puede <?= $fbActos === 1 ? 'consultarlo' : 'consultarlos' ?>, junto con sus administradores y su índice de estabilidad societaria.
+                    <?php else: ?>
+                        En nuestros datos no consta ningún anuncio suyo en el BORME. En esta ficha puede consultar sus datos registrales y su índice de estabilidad societaria.
+                    <?php endif; ?>
+                </p>
             </div>
         <?php endif; ?>
     </div>

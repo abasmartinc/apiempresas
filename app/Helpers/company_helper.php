@@ -564,6 +564,25 @@ if (!function_exists('company_estado_registral')) {
 
         $activa = strtoupper($statusRaw) === 'ACTIVA';
 
+        // INACTIVA (10-10-2026): viene de fuentes públicas (fichas web), no de un acto del
+        // Registro Mercantil. Quiere decir "sin actividad mercantil reciente", no disolución ni
+        // cierre. No es una incidencia registral (no oculta nada de la ficha), pero tampoco se
+        // puede presentar en verde ni decir que "consta en el Registro Mercantil".
+        if (strtoupper($statusRaw) === 'INACTIVA') {
+            return [
+                'clave'      => 'inactiva',
+                'etiqueta'   => 'Inactiva',
+                'titulo'     => 'Sin actividad reciente',
+                'frase'      => 'figura como inactiva en fuentes públicas: no consta actividad mercantil reciente',
+                'incidencia' => false,
+                'cerrada'    => false,
+                'definitiva' => false,
+                'color'      => '#475569',
+                'fondo'      => '#f8fafc',
+                'borde'      => '#e2e8f0',
+            ];
+        }
+
         return [
             'clave'      => $activa ? 'activa' : 'desconocido',
             'etiqueta'   => $statusRaw,

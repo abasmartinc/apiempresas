@@ -515,6 +515,36 @@ class Company extends BaseController
         }
         // --- FIN BLOQUES DE HECHOS ---
 
+        // --- NOMBRES ANTERIORES (10-10-2026) ---
+        // company_previous_names: el nombre que tenía la ficha antes de cada "Cambio de
+        // denominación social" del BORME (calidad_datos/aplicar_cambios_nombre.py y el paso 06 del
+        // flujo diario). Se enseña bajo el nombre, en una FAQ y como alternateName del JSON-LD,
+        // para que quien busque el nombre antiguo encuentre la ficha. Va en todas las fichas (también
+        // en el grupo de control de los bloques de hechos: es un dato, no uno de esos bloques).
+        $nombresAnteriores = [];
+        try {
+            $filasNombres = \Config\Database::connect()->table('company_previous_names')
+                ->select('name, changed_at')
+                ->where('company_id', (int) ($company['id'] ?? 0))
+                ->orderBy('changed_at', 'DESC')
+                ->limit(5)
+                ->get()->getResultArray();
+            $vistosNombres = [mb_strtolower($name, 'UTF-8') => true];
+            foreach ($filasNombres as $fn) {
+                $bonito = company_display_name((string) $fn['name'], '');
+                $claveN = mb_strtolower($bonito, 'UTF-8');
+                if ($bonito === '' || isset($vistosNombres[$claveN])) {
+                    continue;
+                }
+                $vistosNombres[$claveN] = true;
+                $nombresAnteriores[] = ['nombre' => $bonito, 'fecha' => (string) ($fn['changed_at'] ?? '')];
+            }
+        } catch (\Throwable $e) {
+            // La tabla puede no existir todavía en algún entorno: la ficha sale sin el bloque.
+            log_message('error', 'Nombres anteriores de la ficha ' . ($company['id'] ?? '?') . ': ' . $e->getMessage());
+            $nombresAnteriores = [];
+        }
+
         return [
             'companyName'      => $name,
             'company'          => $company,
@@ -552,6 +582,7 @@ class Company extends BaseController
             'fichaHistoria'    => $fichaHistoria,
             'fichaRed'         => $fichaRed,
             'fichaSector'      => $fichaSector,
+            'nombresAnteriores' => $nombresAnteriores,
             'subsidies'        => $subsidies,
             'countFormatted'   => $countFormatted,
             'holdingData'      => $holdingData,
