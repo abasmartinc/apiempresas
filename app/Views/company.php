@@ -1409,11 +1409,11 @@
                             </span>
                             <h2 id="api-strip-title" class="api-strip__title">Estos datos, en tu software</h2>
                             <p class="api-strip__text">
-                                Consulta <strong><?= esc($companyName) ?></strong> y cualquier empresa española por CIF con una sola llamada:
+                                Con nuestra <a href="<?= site_url() ?>" style="color: inherit; text-decoration: underline;">API de empresas</a> consultas <strong><?= esc($companyName) ?></strong> y cualquier empresa española por CIF con una sola llamada:
                                 datos registrales, actos del BORME y perfil de riesgo, en JSON.
                             </p>
                             <div class="api-strip__actions">
-                                <a class="api-strip__btn" href="<?= site_url('register') ?>" data-track-click="company_api" data-track-element="api_key">
+                                <a class="api-strip__btn" href="<?= site_url('register?intent=api&plan=free&source=ficha_api') ?>" data-track-click="company_api" data-track-element="api_key">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><use href="#icon-b6af18a8"></use></svg>
                                     Obtener API key gratis
                                 </a>

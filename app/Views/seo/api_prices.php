@@ -927,7 +927,9 @@
                     <h2 class="radar-title">Endpoints de la API para KYB</h2>
                     <p class="radar-subtitle" style="text-align: left; max-width: 800px; margin-left: 0;">
                         Los que más se usan en una verificación de empresa. El resto (scoring comercial, empresas
-                        recién constituidas, grafos societarios…) está en la documentación.
+                        recién constituidas, grafos societarios…) está en la documentación. Si buscas la
+                        <a href="<?= site_url() ?>">API de empresas</a> completa (búsqueda, enriquecimiento, BORME
+                        y riesgo), empieza por ahí.
                     </p>
                 </div>
 

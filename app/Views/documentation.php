@@ -433,9 +433,9 @@ Accept: application/json</code></pre>
                     <p>También se acepta la cabecera <code>Authorization: Bearer tu_api_key_aqui</code>.</p>
 
                     <h4>Entorno de pruebas (Sandbox)</h4>
-                    <p>Para probar tu integración sin gastar consultas, usa la misma API Key con la base <code>https://apiempresas.es/api/sandbox/v1</code> (mismas rutas que producción: <code>/companies</code>, <code>/companies/search</code>, <code>/companies/score</code>…). El Sandbox devuelve datos simulados y solo admite estos CIF:</p>
+                    <p>Para probar tu integración sin gastar consultas, usa la misma API Key con la base <code>https://apiempresas.es/api/sandbox/v1</code> (mismas rutas que producción: <code>/companies</code>, <code>/companies/search</code>, <code>/companies/score</code>…). El Sandbox no gasta consultas y solo admite estos CIF (en <code>/companies</code> devuelve los datos reales de esa empresa; en los demás endpoints, respuestas de ejemplo con la misma estructura):</p>
                     <ul>
-                        <li><code>A15075062</code>: empresa encontrada (datos de ejemplo de Inditex).</li>
+                        <li><code>A15075062</code>: empresa encontrada (Inditex).</li>
                         <li><code>B00000000</code>: empresa no encontrada (404).</li>
                     </ul>
                     <p>Cualquier otro CIF devuelve un error. El Sandbox responde siempre con los datos completos, sin los recortes del plan Free ni los límites de cupo: sirve para comprobar el formato de las respuestas, no lo que verás con tu plan.</p>

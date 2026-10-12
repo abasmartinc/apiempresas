@@ -2,7 +2,12 @@
 <html lang="es">
 
 <head>
-    <?= view('partials/head') ?>
+    <?php // Título y descripción propios de la home (12-10-2026): "API de empresas" es la búsqueda de la home;
+          // /api-empresas se queda con KYB. Los valores por defecto de head.php siguen para el resto de páginas. ?>
+    <?= view('partials/head', [
+        'title'       => 'API de empresas españolas para validar CIF | APIEmpresas',
+        'excerptText' => 'API de empresas españolas: valida CIF y razón social, comprueba si la empresa está activa y obtén administradores y actos del BORME. 100 consultas gratis, sin tarjeta.',
+    ]) ?>
     <!-- Fonts handled by partials/head -->
     <?php $cssV = static fn($f) => is_file(FCPATH . $f) ? filemtime(FCPATH . $f) : '1'; ?>
     <link rel="stylesheet" href="<?= base_url('public/css/home.css') ?>?v=<?= $cssV('public/css/home.css') ?>">
@@ -18,7 +23,7 @@
         <!-- 1. HERO PROFESIONAL -->
         <section class="hero container" data-track-section="hero">
             <h1 class="reveal">
-                API para validar CIF y empresas españolas
+                API de empresas españolas para validar CIF
                 <span class="gradient-text">con datos del Registro Mercantil y BORME</span>
             </h1>
             <p class="reveal delay-1">Integra en tu software los datos de cualquier empresa española: valida el CIF y la razón social, comprueba si está activa y obtén CNAE, domicilio, administradores y actos del BORME con una sola llamada REST.</p>
@@ -1115,10 +1120,10 @@
                         <?php
                         // Única fuente de las FAQ: se pintan aquí y en el JSON-LD de más abajo.
                         $homeFaqs = [
-                            ['¿Qué datos devuelve la API?', 'Devuelve la razón social oficial, el estado de actividad (activa, extinguida, etc.), la fecha de constitución, la provincia, y la actividad principal (CNAE) obtenida directamente del Registro Mercantil.'],
+                            ['¿Qué datos devuelve la API?', 'Devuelve la razón social, el estado (activa, extinguida, en concurso…), la fecha de constitución, la provincia y la actividad principal (CNAE). Con Pro, también administradores, domicilio completo y tramo de facturación.'],
                             ['¿Puedo probarla gratis?', 'Sí. Al registrarte obtienes el plan Free con ' . (int) $freeLimit . ' consultas gratuitas (no se renuevan) contra la API real, sin tarjeta y sin compromiso.'],
-                            ['¿La información es oficial?', 'Los datos proceden de fuentes públicas oficiales, como el BORME (Registro Mercantil) y la Plataforma de Contratación del Sector Público, y se actualizan de forma continua.'],
-                            ['¿Qué tipo de autenticación utiliza la API?', 'La API utiliza autenticación estándar mediante Bearer Token (API Key) en los encabezados HTTP. Al crear tu cuenta obtienes al instante tu API Key, lista para usar.'],
+                            ['¿La información es oficial?', 'Los datos proceden de fuentes públicas oficiales, como el BORME (Registro Mercantil) y la Plataforma de Contratación del Sector Público, y se actualizan cada día. El estado registral y el scoring los calculamos nosotros a partir de esas publicaciones: no son un certificado del Registro Mercantil.'],
+                            ['¿Qué tipo de autenticación utiliza la API?', 'Envías tu API Key en la cabecera X-API-KEY (también se acepta Authorization: Bearer). Al crear tu cuenta obtienes al instante tu API Key, lista para usar.'],
                             ['¿Cuánto se tarda en integrar?', 'Nuestra API REST está diseñada con estándares modernos y es extremadamente sencilla. Un desarrollador promedio puede completar la integración y validar su primera empresa en menos de una hora. Dispones de documentación detallada para guiarte.'],
                             ['¿Se puede integrar en cualquier lenguaje o plataforma?', 'Sí. Al ser una API REST estándar que devuelve respuestas en JSON, puedes consumirla desde cualquier lenguaje (PHP, Node.js, Python, Java, C#, Go) o integrarla en ERPs/CRMs como Salesforce, HubSpot o SAP, y en cualquier herramienta no-code que haga peticiones HTTP.'],
                         ];
