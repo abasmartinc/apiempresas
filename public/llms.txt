@@ -44,6 +44,14 @@ Datos importantes para no confundir:
 - SDK: `npm install apiempresas`, `pip install apiempresas`, `composer require apiempresas/apiempresas-php`.
 - Contacto: soporte@apiempresas.es
 
+## Herramientas y guías gratuitas (sin registro)
+
+- [Validar CIF online](https://apiempresas.es/validar-cif): dígito de control, tipo de entidad y si la empresa existe y está activa; también una lista de hasta 500 CIF.
+- [Cómo saber si una empresa está activa y quién es su administrador](https://apiempresas.es/como-saber-si-una-empresa-esta-activa): buscador por CIF o nombre y qué significa cada estado (activa, en concurso, disuelta, hoja registral cerrada, extinguida).
+- [Validar el NIF de los clientes antes de facturar](https://apiempresas.es/validar-nif-clientes-facturacion): qué datos del cliente exige la factura, error 2001 de Verifactu y fechas de Verifactu y de la factura electrónica obligatoria.
+- [Validar CIF en Excel y Google Sheets](https://apiempresas.es/validar-cif-excel): fórmula lista para copiar y plantilla .xlsx.
+- [Validar CIF en PHP, Python y JavaScript](https://apiempresas.es/validar-cif-php-python): función sin dependencias, regla para Laravel y consulta con los SDK.
+
 ## English
 
-APIEmpresas.es is a REST API for Spanish company data: lookup by CIF (tax ID), name search, KYB verification, directors, BORME (Spanish Commercial Registry gazette) filings, public contracts and risk profile. Free plan with 100 requests; Pro €19/month (3,000 requests), Business €49/month (10,000 requests), VAT not included. English documentation: https://apiempresas.es/documentation/en and https://spaincompanyapi.com
+APIEmpresas.es is a REST API for Spanish company data: lookup by CIF (tax ID), name search, KYB verification, directors, BORME (Spanish Commercial Registry gazette) filings, public contracts and risk profile. Free plan with 100 requests; Pro €19/month (3,000 requests), Business €49/month (10,000 requests), VAT not included. English site and documentation: https://spaincompanyapi.com and https://spaincompanyapi.com/docs

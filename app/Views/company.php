@@ -1399,6 +1399,9 @@
                         .api-strip__code .c-url{color:#e2e8f0}
                         .api-strip__code .c-dim{color:#64748b}
                         .api-strip__code pre{margin:6px 0 0;padding:0;background:transparent;border:0;color:#cbd5e1;white-space:pre;font:inherit}
+                        .api-strip__tools{margin:14px 0 0;font-size:.8rem;color:#64748b;line-height:1.7}
+                        .api-strip__tools a{color:#475569;font-weight:600;text-decoration:underline;text-decoration-color:#cbd5e1}
+                        .api-strip__tools a:hover{color:#2563eb}
                         @media (max-width:820px){.api-strip{grid-template-columns:1fr;padding:18px}}
                     </style>
                     <section id="api-dev-section" class="api-strip" aria-labelledby="api-strip-title">
@@ -1419,6 +1422,13 @@
                                 </a>
                                 <a class="api-strip__link" href="<?= site_url('documentation') ?>" data-track-click="company_api" data-track-element="docs">Ver documentación →</a>
                             </div>
+                            <?php // Herramientas gratuitas (12-10-2026): enlazado interno desde las fichas, que reciben casi todas las visitas de Google ?>
+                            <p class="api-strip__tools">Herramientas gratis:
+                                <a href="<?= site_url('validar-cif') ?>" data-track-click="company_tools" data-track-element="validar_cif">validar un CIF</a> ·
+                                <a href="<?= site_url('como-saber-si-una-empresa-esta-activa') ?>" data-track-click="company_tools" data-track-element="empresa_activa">saber si una empresa está activa</a> ·
+                                <a href="<?= site_url('validar-nif-clientes-facturacion') ?>" data-track-click="company_tools" data-track-element="nif_facturacion">comprobar el NIF antes de facturar</a> ·
+                                <a href="<?= site_url('validar-cif-excel') ?>" data-track-click="company_tools" data-track-element="cif_excel">validar CIF en Excel</a>
+                            </p>
                         </div>
                         <div class="api-strip__code" aria-label="Ejemplo de llamada a la API">
                             <div><span class="c-verb">GET</span> <span class="c-url">/api/v1/companies?cif=<?= esc($apiCif) ?></span></div>
