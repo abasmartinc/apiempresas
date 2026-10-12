@@ -289,7 +289,11 @@
                             <?= lang('Auth.quick_reg_terms') ?>
                         </label>
                     </div>
-                    <div style="display: flex; align-items: flex-start; gap: 6px;">
+                    <!-- Separada de la casilla obligatoria (12-10-2026): pegadas una a la otra,
+                         en Solvencia la marcaba el 73 % de las altas por email (con Google, sin
+                         casilla, se dan de baja 2 de 29). Se marcaba de corrido con la de
+                         condiciones. Sigue desmarcada por defecto y el texto dice qué implica. -->
+                    <div style="display: flex; align-items: flex-start; gap: 6px; margin-top: 12px; padding-top: 10px; border-top: 1px solid #e2e8f0;">
                         <input type="checkbox" id="no_marketing" name="no_marketing" value="1" style="margin-top: 3px;" />
                         <label for="no_marketing" style="line-height: 1.3; margin: 0;">
                             <?= lang('Auth.quick_reg_no_marketing') ?>
