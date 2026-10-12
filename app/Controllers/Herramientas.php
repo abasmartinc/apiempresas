@@ -15,4 +15,10 @@ class Herramientas extends BaseController
     {
         return view('herramientas/validar_cif');
     }
+
+    /** GET /como-saber-si-una-empresa-esta-activa — guía + buscador de estado y administradores */
+    public function empresaActiva()
+    {
+        return view('herramientas/empresa_activa');
+    }
 }
