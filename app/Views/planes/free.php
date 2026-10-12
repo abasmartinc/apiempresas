@@ -2,17 +2,17 @@
 <html lang="es">
 <head>
     <?= view('partials/head', [
-        'title' => 'API Registro Mercantil GRATIS: 100 consultas reales para probar | APIEmpresas',
-        'excerptText' => 'Prueba nuestra API de empresas gratis sin tarjeta de crédito. 100 consultas reales al Registro Mercantil para validar CIF y probar tu integración.'
+        'title' => 'Plan Free de la API: 100 consultas gratis, sin tarjeta | APIEmpresas',
+        'excerptText' => 'Prueba la API con 100 consultas gratis y sin tarjeta: datos básicos de cualquier empresa española por CIF, búsqueda por nombre y sandbox. Qué incluye, qué no y cuándo pasar a Pro.'
     ]) ?>
-    <link rel="stylesheet" href="<?= base_url('public/css/home.css') ?>?v=<?= time() ?>">
-    <link rel="stylesheet" href="<?= base_url('public/css/home-mobile.css') ?>?v=<?= time() ?>" media="screen and (max-width: 768px)">
+    <link rel="stylesheet" href="<?= base_url('public/css/home.css') ?>?v=<?= is_file(FCPATH . 'public/css/home.css') ? filemtime(FCPATH . 'public/css/home.css') : '1' ?>">
+    <link rel="stylesheet" href="<?= base_url('public/css/home-mobile.css') ?>?v=<?= is_file(FCPATH . 'public/css/home-mobile.css') ? filemtime(FCPATH . 'public/css/home-mobile.css') : '1' ?>" media="screen and (max-width: 768px)">
     <script type="application/ld+json">
     {
       "@context": "https://schema.org/",
       "@type": "Product",
-      "name": "API Registro Mercantil - Plan Free",
-      "description": "100 consultas gratuitas a datos reales del Registro Mercantil para que pruebes la integración y valides CIFs, sin tarjeta de crédito.",
+      "name": "APIEmpresas - Plan Free",
+      "description": "Prueba la API con 100 consultas gratis y sin tarjeta: datos básicos de cualquier empresa española por CIF, búsqueda por nombre y sandbox. Qué incluye, qué no y cuándo pasar a Pro.",
       "brand": {
         "@type": "Brand",
         "name": "APIEmpresas"
@@ -97,8 +97,8 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
                 Plan Free (Testing)
             </div>
-            <h1 class="plan-title">API Registro Mercantil <span>GRATIS</span></h1>
-            <p class="plan-subtitle">100 consultas gratuitas a datos reales del Registro Mercantil para que pruebes la integración y valides CIFs, sin tarjeta de crédito.</p>
+            <h1 class="plan-title">Plan Free: 100 consultas <span>gratis</span></h1>
+            <p class="plan-subtitle">Prueba la API con datos reales de cualquier empresa española: razón social, estado, CNAE y provincia por CIF, y búsqueda por nombre. Sin tarjeta y sin caducidad.</p>
         </div>
 
         <div class="plan-demo-wrapper">
@@ -215,7 +215,7 @@
         </style>
 
         <div class="endpoints-section">
-            <h3 class="endpoints-title">Endpoints incluidos en el Plan Free</h3>
+            <h2 class="endpoints-title">Qué incluye el plan Free</h2>
             <div class="endpoints-grid">
                 <div class="endpoint-card">
                     <div class="endpoint-route">GET /companies?cif=</div>
@@ -257,6 +257,33 @@
                 </a>
             </div>
         </div>
+
+        <!-- Preguntas frecuentes (12-10-2026): las dudas de quien está a punto de elegir plan -->
+        <div class="endpoints-section" style="text-align: left;">
+            <h2 class="endpoints-title">Preguntas frecuentes sobre el plan Free</h2>
+            <p style="color: #475569; margin: 0 0 8px;">Lo que conviene saber antes de empezar con la <a href="<?= site_url() ?>">API de empresas</a> en su versión gratuita.</p>
+                <details style="border-bottom: 1px solid #e2e8f0; padding: 16px 0;">
+                    <summary style="cursor: pointer; font-weight: 700; color: #0f172a; font-size: 1.05rem;">¿Hace falta tarjeta para el plan Free?</summary>
+                    <p style="margin: 10px 0 0; color: #475569; line-height: 1.6;">No. Creas la cuenta con tu correo y obtienes la API key al momento, sin tarjeta y sin compromiso.</p>
+                </details>
+                <details style="border-bottom: 1px solid #e2e8f0; padding: 16px 0;">
+                    <summary style="cursor: pointer; font-weight: 700; color: #0f172a; font-size: 1.05rem;">¿Las 100 consultas se renuevan cada mes?</summary>
+                    <p style="margin: 10px 0 0; color: #475569; line-height: 1.6;">No. Son 100 consultas en total para probar la integración; no caducan, pero tampoco se renuevan. Solo cuentan las respuestas correctas: los errores no gastan consultas.</p>
+                </details>
+                <details style="border-bottom: 1px solid #e2e8f0; padding: 16px 0;">
+                    <summary style="cursor: pointer; font-weight: 700; color: #0f172a; font-size: 1.05rem;">¿Qué datos salen recortados en el plan Free?</summary>
+                    <p style="margin: 10px 0 0; color: #475569; line-height: 1.6;">En Free ves la razón social, el estado, la fecha de constitución, la provincia y el CNAE. El domicilio completo, el objeto social entero, los administradores y el tramo de facturación son del plan Pro.</p>
+                </details>
+                <details style="border-bottom: 1px solid #e2e8f0; padding: 16px 0;">
+                    <summary style="cursor: pointer; font-weight: 700; color: #0f172a; font-size: 1.05rem;">¿Qué pasa cuando gasto las 100 consultas?</summary>
+                    <p style="margin: 10px 0 0; color: #475569; line-height: 1.6;">La API responde con un error 429 y los enlaces para seguir: el plan Pro (19 € al mes + IVA, 3.000 consultas) o un bono de pago único sin suscripción, desde 9 € + IVA por 1.000 créditos.</p>
+                </details>
+                <details style="border-bottom: 1px solid #e2e8f0; padding: 16px 0;">
+                    <summary style="cursor: pointer; font-weight: 700; color: #0f172a; font-size: 1.05rem;">¿Puedo probar sin gastar consultas?</summary>
+                    <p style="margin: 10px 0 0; color: #475569; line-height: 1.6;">Sí. El sandbox (<code>/api/sandbox/v1</code>) tiene los mismos endpoints y no gasta consultas, con los CIF de prueba A15075062 y B00000000.</p>
+                </details>
+        </div>
+        <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "¿Hace falta tarjeta para el plan Free?", "acceptedAnswer": {"@type": "Answer", "text": "No. Creas la cuenta con tu correo y obtienes la API key al momento, sin tarjeta y sin compromiso."}}, {"@type": "Question", "name": "¿Las 100 consultas se renuevan cada mes?", "acceptedAnswer": {"@type": "Answer", "text": "No. Son 100 consultas en total para probar la integración; no caducan, pero tampoco se renuevan. Solo cuentan las respuestas correctas: los errores no gastan consultas."}}, {"@type": "Question", "name": "¿Qué datos salen recortados en el plan Free?", "acceptedAnswer": {"@type": "Answer", "text": "En Free ves la razón social, el estado, la fecha de constitución, la provincia y el CNAE. El domicilio completo, el objeto social entero, los administradores y el tramo de facturación son del plan Pro."}}, {"@type": "Question", "name": "¿Qué pasa cuando gasto las 100 consultas?", "acceptedAnswer": {"@type": "Answer", "text": "La API responde con un error 429 y los enlaces para seguir: el plan Pro (19 € al mes + IVA, 3.000 consultas) o un bono de pago único sin suscripción, desde 9 € + IVA por 1.000 créditos."}}, {"@type": "Question", "name": "¿Puedo probar sin gastar consultas?", "acceptedAnswer": {"@type": "Answer", "text": "Sí. El sandbox (/api/sandbox/v1) tiene los mismos endpoints y no gasta consultas, con los CIF de prueba A15075062 y B00000000."}}]}</script>
 
         <div class="plan-card">
             <div class="plan-card-bg"></div>

@@ -2,17 +2,17 @@
 <html lang="es">
 <head>
     <?= view('partials/head', [
-        'title' => 'Infraestructura API de Datos Mercantiles para ERP | Plan Business',
-        'excerptText' => 'Plan Business de la API: 10.000 consultas al mes, perfil de riesgo, contratos públicos, vigilancia de 1.000 empresas con webhooks e IA comercial.'
+        'title' => 'Plan Business de la API: 10.000 consultas, riesgo y contratos públicos | APIEmpresas',
+        'excerptText' => 'Plan Business: 49 €/mes + IVA (470 €/año), 10.000 consultas al mes, perfil de riesgo, contratos públicos, segmentos de empresas, vigilancia de 1.000 empresas y webhooks. Sin permanencia.'
     ]) ?>
-    <link rel="stylesheet" href="<?= base_url('public/css/home.css') ?>?v=<?= time() ?>">
-    <link rel="stylesheet" href="<?= base_url('public/css/home-mobile.css') ?>?v=<?= time() ?>" media="screen and (max-width: 768px)">
+    <link rel="stylesheet" href="<?= base_url('public/css/home.css') ?>?v=<?= is_file(FCPATH . 'public/css/home.css') ? filemtime(FCPATH . 'public/css/home.css') : '1' ?>">
+    <link rel="stylesheet" href="<?= base_url('public/css/home-mobile.css') ?>?v=<?= is_file(FCPATH . 'public/css/home-mobile.css') ? filemtime(FCPATH . 'public/css/home-mobile.css') : '1' ?>" media="screen and (max-width: 768px)">
     <script type="application/ld+json">
     {
       "@context": "https://schema.org/",
       "@type": "Product",
-      "name": "Infraestructura API Enterprise - Plan Business",
-      "description": "Tarifas y planes para alto volumen. Conecta tu ERP al Registro Mercantil, evalúa el riesgo de tus clientes y recibe por webhook los cambios de hasta 1.000 empresas vigiladas.",
+      "name": "APIEmpresas - Plan Business",
+      "description": "Plan Business: 49 €/mes + IVA (470 €/año), 10.000 consultas al mes, perfil de riesgo, contratos públicos, segmentos de empresas, vigilancia de 1.000 empresas y webhooks. Sin permanencia.",
       "brand": {
         "@type": "Brand",
         "name": "APIEmpresas"
@@ -99,8 +99,8 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
                 Plan Business (Escala)
             </div>
-            <h1 class="plan-title">Infraestructura API <span>Enterprise</span></h1>
-            <p class="plan-subtitle">Tarifas y planes para alto volumen. Conecta tu ERP al Registro Mercantil, evalúa el riesgo de tus clientes y recibe por webhook los cambios de hasta 1.000 empresas vigiladas.</p>
+            <h1 class="plan-title">Plan Business: 49 €/mes<br><span>10.000 consultas, riesgo y contratos</span></h1>
+            <p class="plan-subtitle">Para integraciones con volumen: perfil de riesgo de tus clientes, contratos públicos adjudicados, segmentos de empresas y avisos por webhook de los cambios de hasta 1.000 empresas vigiladas.</p>
             <?= view('planes/_precio', ['plan' => 'business', 'source' => 'planes_business']) ?>
         </div>
 
@@ -225,7 +225,7 @@
         </style>
 
         <div class="endpoints-section">
-            <h3 class="endpoints-title">Endpoints incluidos en el Plan Business</h3>
+            <h2 class="endpoints-title">Qué incluye el plan Business</h2>
             <p class="endpoints-subtitle">Además de todos los endpoints de los planes Free y Pro, desbloqueas:</p>
             <div class="endpoints-grid">
                 <div class="endpoint-card">
@@ -276,6 +276,37 @@
                 </a>
             </div>
         </div>
+
+        <!-- Preguntas frecuentes (12-10-2026): las dudas de quien está a punto de elegir plan -->
+        <div class="endpoints-section" style="text-align: left;">
+            <h2 class="endpoints-title">Preguntas frecuentes sobre el plan Business</h2>
+            <p style="color: #475569; margin: 0 0 8px;">Precio, volumen y funciones del plan Business de la <a href="<?= site_url() ?>">API de empresas</a>.</p>
+                <details style="border-bottom: 1px solid #e2e8f0; padding: 16px 0;">
+                    <summary style="cursor: pointer; font-weight: 700; color: #0f172a; font-size: 1.05rem;">¿Cuánto cuesta el plan Business?</summary>
+                    <p style="margin: 10px 0 0; color: #475569; line-height: 1.6;">49 € al mes + IVA, o 470 € al año + IVA (ahorras 118 €). Incluye 10.000 consultas cada mes.</p>
+                </details>
+                <details style="border-bottom: 1px solid #e2e8f0; padding: 16px 0;">
+                    <summary style="cursor: pointer; font-weight: 700; color: #0f172a; font-size: 1.05rem;">¿Cuánto sale cada consulta?</summary>
+                    <p style="margin: 10px 0 0; color: #475569; line-height: 1.6;">Con las 10.000 consultas del mes, unos 0,5 céntimos por consulta. Solo cuentan las respuestas correctas: los errores no gastan consultas.</p>
+                </details>
+                <details style="border-bottom: 1px solid #e2e8f0; padding: 16px 0;">
+                    <summary style="cursor: pointer; font-weight: 700; color: #0f172a; font-size: 1.05rem;">¿Qué añade Business respecto a Pro?</summary>
+                    <p style="margin: 10px 0 0; color: #475569; line-height: 1.6;">El perfil de riesgo, los contratos públicos adjudicados, los segmentos de empresas (por sector, provincia o tamaño), la vigilancia de hasta 1.000 empresas con avisos por webhook y más volumen: 10.000 consultas al mes en lugar de 3.000.</p>
+                </details>
+                <details style="border-bottom: 1px solid #e2e8f0; padding: 16px 0;">
+                    <summary style="cursor: pointer; font-weight: 700; color: #0f172a; font-size: 1.05rem;">¿Y si necesito más de 10.000 consultas al mes?</summary>
+                    <p style="margin: 10px 0 0; color: #475569; line-height: 1.6;">Puedes cargar un bono de créditos que se usa cuando se acaba el cupo del mes, o escribirnos para un plan a medida.</p>
+                </details>
+                <details style="border-bottom: 1px solid #e2e8f0; padding: 16px 0;">
+                    <summary style="cursor: pointer; font-weight: 700; color: #0f172a; font-size: 1.05rem;">¿Hay permanencia?</summary>
+                    <p style="margin: 10px 0 0; color: #475569; line-height: 1.6;">No. Cancelas cuando quieras desde el panel y el plan sigue activo hasta el final del periodo que has pagado.</p>
+                </details>
+                <details style="border-bottom: 1px solid #e2e8f0; padding: 16px 0;">
+                    <summary style="cursor: pointer; font-weight: 700; color: #0f172a; font-size: 1.05rem;">¿Recibo factura con IVA?</summary>
+                    <p style="margin: 10px 0 0; color: #475569; line-height: 1.6;">Sí. Cada cobro genera su factura con IVA, que puedes descargar desde el panel.</p>
+                </details>
+        </div>
+        <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "¿Cuánto cuesta el plan Business?", "acceptedAnswer": {"@type": "Answer", "text": "49 € al mes + IVA, o 470 € al año + IVA (ahorras 118 €). Incluye 10.000 consultas cada mes."}}, {"@type": "Question", "name": "¿Cuánto sale cada consulta?", "acceptedAnswer": {"@type": "Answer", "text": "Con las 10.000 consultas del mes, unos 0,5 céntimos por consulta. Solo cuentan las respuestas correctas: los errores no gastan consultas."}}, {"@type": "Question", "name": "¿Qué añade Business respecto a Pro?", "acceptedAnswer": {"@type": "Answer", "text": "El perfil de riesgo, los contratos públicos adjudicados, los segmentos de empresas (por sector, provincia o tamaño), la vigilancia de hasta 1.000 empresas con avisos por webhook y más volumen: 10.000 consultas al mes en lugar de 3.000."}}, {"@type": "Question", "name": "¿Y si necesito más de 10.000 consultas al mes?", "acceptedAnswer": {"@type": "Answer", "text": "Puedes cargar un bono de créditos que se usa cuando se acaba el cupo del mes, o escribirnos para un plan a medida."}}, {"@type": "Question", "name": "¿Hay permanencia?", "acceptedAnswer": {"@type": "Answer", "text": "No. Cancelas cuando quieras desde el panel y el plan sigue activo hasta el final del periodo que has pagado."}}, {"@type": "Question", "name": "¿Recibo factura con IVA?", "acceptedAnswer": {"@type": "Answer", "text": "Sí. Cada cobro genera su factura con IVA, que puedes descargar desde el panel."}}]}</script>
 
         <div class="plan-card">
             <div class="plan-card-bg"></div>

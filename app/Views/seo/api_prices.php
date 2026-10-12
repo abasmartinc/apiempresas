@@ -606,7 +606,7 @@
                 <!-- Language switcher -->
                 <div class="lang-switcher">
                     <a href="<?= site_url('api-empresas') ?>" class="active" title="Versión en español">🇪🇸 ES</a>
-                    <a href="<?= site_url('spanish-company-api') ?>" class="inactive" title="English version">🇬🇧 EN</a>
+                    <a href="https://spaincompanyapi.com/spanish-company-data-api" class="inactive" title="English version">🇬🇧 EN</a>
                 </div>
 
                 <div class="api-hero-badge">

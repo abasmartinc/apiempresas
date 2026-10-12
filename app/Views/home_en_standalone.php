@@ -1,11 +1,15 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
 
 <head>
-    <?= view('partials/head', ['title' => 'Spanish Company Data API | spaincompanyapi.com']) ?>
+    <?= view('partials/head', [
+        'title'       => 'Spanish Company Data API: CIF Lookup, BORME & Directors | SpainCompanyAPI',
+        'excerptText' => 'REST API for Spanish company data: validate a CIF, check if a company is active, get directors and BORME filings. 100 free requests, no card required.',
+    ]) ?>
     <!-- Fonts handled by partials/head -->
-    <link rel="stylesheet" href="<?= base_url('public/css/home.css') ?>?v=<?= time() ?>">
-    <link rel="stylesheet" href="<?= base_url('public/css/home-mobile.css') ?>?v=<?= time() ?>" media="screen and (max-width: 768px)">
+    <?php $cssV = static fn($f) => is_file(FCPATH . $f) ? filemtime(FCPATH . $f) : '1'; // como la home española: time() impedía cachear el CSS ?>
+    <link rel="stylesheet" href="<?= base_url('public/css/home.css') ?>?v=<?= $cssV('public/css/home.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('public/css/home-mobile.css') ?>?v=<?= $cssV('public/css/home-mobile.css') ?>" media="screen and (max-width: 768px)">
 </head>
 
 <body>

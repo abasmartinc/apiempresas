@@ -35,6 +35,70 @@ $homeUrl = $siteUrl . '/';
 // Canonical: si no viene, usa URL actual sin querystring
 $canonicalUrl = $canonical ?? current_url();
 
+// Dos dominios con las mismas rutas (12-10-2026): apiempresas.es (español) y
+// spaincompanyapi.com (inglés). Solo algunas páginas están traducidas; el resto, servido
+// en el dominio inglés, es la misma página en español y su canonical tiene que ser la de
+// apiempresas.es. El hreflang solo se pone entre pares que existen de verdad (antes se
+// emparejaba cualquier ruta con la misma ruta en el otro dominio, existiera o no).
+$hostActual  = strtolower((string) service('request')->getServer('HTTP_HOST'));
+$enDominioEn = strpos($hostActual, 'spaincompanyapi') !== false;
+$aEs = static fn (string $u): string => str_replace(
+    ['spaincompanyapi.com', 'spaincompanyapi.test', 'spaincompanyapi.local'],
+    ['apiempresas.es', 'apiempresas.test', 'apiempresas.local'], $u);
+$aEn = static fn (string $u): string => str_replace(
+    ['apiempresas.es', 'apiempresas.test', 'apiempresas.local'],
+    ['spaincompanyapi.com', 'spaincompanyapi.test', 'spaincompanyapi.local'], $u);
+
+$partesCanon = parse_url($canonicalUrl);
+$baseCanon   = ($partesCanon['scheme'] ?? 'https') . '://' . ($partesCanon['host'] ?? '') . (isset($partesCanon['port']) ? ':' . $partesCanon['port'] : '');
+$rutaCanon   = '/' . trim((string) ($partesCanon['path'] ?? ''), '/');
+// En local la web vive en una subcarpeta: se compara la ruta relativa al sitio
+$prefijoSitio = rtrim((string) parse_url(site_url('/'), PHP_URL_PATH), '/');
+if ($prefijoSitio !== '' && strpos($rutaCanon, $prefijoSitio) === 0) {
+    $rutaCanon = '/' . trim(substr($rutaCanon, strlen($prefijoSitio)), '/');
+}
+
+// Ruta en español => ruta de su traducción en spaincompanyapi.com
+$paresIdioma = [
+    '/'               => '/',
+    '/documentation'  => '/docs',
+    '/api-empresas'   => '/spanish-company-data-api',
+    '/crear-bono-api' => '/buy-api-credits',
+];
+$esFicha    = (bool) preg_match('#^/[A-Z][0-9]{7}[0-9A-Z]-#', $rutaCanon);
+$hreflangEs = null;
+$hreflangEn = null;
+$parUrl = static fn (string $ruta): string => $baseCanon . $prefijoSitio . ($ruta === '/' ? '/' : $ruta);
+
+if (!empty($hreflang_es) && !empty($hreflang_en)) {
+    // La vista indica el par
+    $hreflangEs = $aEs((string) $hreflang_es);
+    $hreflangEn = $aEn((string) $hreflang_en);
+} elseif ($enDominioEn) {
+    $rutaEs = array_search($rutaCanon, $paresIdioma, true);
+    if ($rutaEs !== false) {
+        $hreflangEs = $aEs($parUrl((string) $rutaEs));
+        $hreflangEn = $canonicalUrl;
+    } elseif ($esFicha) {
+        $hreflangEs = $aEs($canonicalUrl);
+        $hreflangEn = $canonicalUrl;
+    } elseif (!in_array($rutaCanon, ['/enter', '/register'], true)) {
+        // Página sin traducir servida en el dominio inglés: la buena es la española
+        $canonicalUrl = $aEs($canonicalUrl);
+    }
+} else {
+    if (isset($paresIdioma[$rutaCanon])) {
+        $hreflangEs = $canonicalUrl;
+        $hreflangEn = $aEn($parUrl($paresIdioma[$rutaCanon]));
+    } elseif ($esFicha) {
+        $hreflangEs = $canonicalUrl;
+        $hreflangEn = $aEn($canonicalUrl);
+    } elseif (in_array($rutaCanon, $paresIdioma, true) && $rutaCanon !== '/') {
+        // Página en inglés servida en el dominio español (p. ej. /buy-api-credits)
+        $canonicalUrl = $aEn($canonicalUrl);
+    }
+}
+
 // Assets
 $logoUrl = $logoUrl ?? ($siteUrl . '/logo.png');
 $ogImage = $ogImage ?? ($siteUrl . '/public/img/og/apiempresas-og.png'); // ideal 1200x630 real
@@ -74,16 +138,12 @@ $googlebot = $googlebot ?? ($robots . ',max-snippet:-1,max-image-preview:large,m
 <link rel="next" href="<?= esc($nextUrl) ?>" />
 <?php endif; ?>
 
-<!-- Hreflang cruzado internacional (ES / EN) -->
-<?php
-// Construimos las URLs para ambos dominios basándonos en la canónica actual
-$esUrl = str_replace(['spaincompanyapi.com', 'spaincompanyapi.local'], ['apiempresas.es', 'apiempresas.local'], $canonicalUrl);
-$enUrl = str_replace(['apiempresas.es', 'apiempresas.local'], ['spaincompanyapi.com', 'spaincompanyapi.local'], $canonicalUrl);
-?>
-<link rel="alternate" href="<?= esc($esUrl) ?>" hreflang="es" />
-<link rel="alternate" href="<?= esc($esUrl) ?>" hreflang="es-ES" />
-<link rel="alternate" href="<?= esc($enUrl) ?>" hreflang="en" />
-<link rel="alternate" href="<?= esc($esUrl) ?>" hreflang="x-default" />
+<?php if ($hreflangEs && $hreflangEn): ?>
+<!-- Hreflang ES / EN: solo entre páginas traducidas -->
+<link rel="alternate" href="<?= esc($hreflangEs) ?>" hreflang="es" />
+<link rel="alternate" href="<?= esc($hreflangEn) ?>" hreflang="en" />
+<link rel="alternate" href="<?= esc($hreflangEs) ?>" hreflang="x-default" />
+<?php endif; ?>
 
 <!-- Open Graph -->
 <meta property="og:site_name" content="<?= esc($siteName) ?>" />

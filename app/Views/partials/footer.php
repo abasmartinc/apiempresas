@@ -21,6 +21,7 @@
                 <ul class="foot-links">
                     <li><a href="<?=site_url('listado-de-empresas') ?>">Directorio Histórico</a></li>
                     <li><a href="<?=site_url('search_company') ?>">Buscador de Empresas</a></li>
+                    <li><a href="<?=site_url('validar-cif') ?>">Validar CIF gratis</a></li>
                     <li><a href="<?=site_url('perfil-de-riesgo') ?>">Perfil de Riesgo B2B</a></li>
                     <li><a href="<?=site_url('base-de-datos-de-empresas') ?>">Descargas de BBDD</a></li>
                     <li><a href="https://alertaempresas.es/" target="_blank">Portal AlertaEmpresas</a></li>

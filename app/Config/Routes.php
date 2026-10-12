@@ -155,7 +155,14 @@ $routes->get('consumption', 'Usage::index');
 $routes->get('consumption/request/(:any)', 'Usage::getRequestDetails/$1');
 $routes->get('consumption/logs_ajax', 'Usage::getLogsAjax');
 $routes->get('api-empresas', 'ApiPrices::index');
-$routes->get('spanish-company-api', 'ApiPrices::english'); // English version
+// Páginas en inglés antiguas de apiempresas.es: su sitio es spaincompanyapi.com (12-10-2026).
+// Redirección permanente para no tener la misma página en los dos dominios.
+$alIngles = static function (string $ruta) {
+    $host = strtolower((string) ($_SERVER['HTTP_HOST'] ?? ''));
+    $base = (strpos($host, '.test') !== false || strpos($host, '.local') !== false) ? 'http://spaincompanyapi.test' : 'https://spaincompanyapi.com';
+    return static fn () => redirect()->to($base . '/' . ltrim($ruta, '/'), 301);
+};
+$routes->get('spanish-company-api', $alIngles('spanish-company-data-api'));
 $routes->get('crear-bono-api', 'ApiPrices::customBonusWizard');
 $routes->get('buy-api-credits', 'ApiPrices::customBonusWizardEn');
 $routes->match(['get', 'post'], 'billing/checkout_bonus', 'Billing::checkout_bonus');
@@ -276,8 +283,8 @@ $routes->cli('swagger:generate', 'App\Commands\GenerateSwaggerCommand::run');
 $routes->get('api/docs', 'Api\Docs::index');
 $routes->get('api/docs/openapi.json', 'Api\Docs::json');
 $routes->get('documentation', 'Documentation::index');
-$routes->get('documentation/en', 'Documentation::english'); // English version
-$routes->get('api-docs', 'Documentation::english');          // SEO alias
+$routes->get('documentation/en', $alIngles('docs'));
+$routes->get('api-docs', $alIngles('docs'));
 $routes->get('docs/errors/(:any)', 'Documentation::error/$1');
 // Guía en PDF: el correo de bienvenida la enlazó un tiempo sin /public (29-09-2026)
 $routes->addRedirect('docs/guia-api-apiempresas.pdf', 'public/docs/guia-api-apiempresas.pdf', 301);
@@ -622,6 +629,8 @@ $routes->addRedirect('company-suggestions', '/', 301);
 
 // Herramienta de Perfil de Riesgo y Solvencia Corporativa
 $routes->get('perfil-de-riesgo', 'RiskProfileController::index');
+// Validador gratuito de CIF (12-10-2026)
+$routes->get('validar-cif', 'Herramientas::validarCif');
 $routes->post('perfil-de-riesgo', 'RiskProfileController::index');
 $routes->get('api/perfil-de-riesgo/lookup', 'RiskProfileController::ajaxLookup');
 

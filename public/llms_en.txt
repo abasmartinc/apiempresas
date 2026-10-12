@@ -1,0 +1,45 @@
+# SpainCompanyAPI (APIEmpresas.es)
+
+> REST API for Spanish company data: lookup by CIF (Spanish tax ID), name search, KYB verification, directors, BORME filings (Spain's Commercial Registry gazette), public contracts and risk profile. Over 4.7 million Spanish companies and 9.5 million BORME filings, updated daily. Free plan with 100 requests, no card required.
+
+SpainCompanyAPI is the English site of APIEmpresas.es, a Spanish service that turns the publications of the BORME (Boletín Oficial del Registro Mercantil) and the Spanish Public Procurement Platform into a JSON API. It is used for B2B customer onboarding (KYB), validating CIFs in forms and ERPs, enriching CRMs and monitoring changes in Spanish companies.
+
+Good to know:
+
+- Registry status (active, dissolved, insolvency…), scoring and risk profile are computed by APIEmpresas from official publications. They are not a certificate from the Spanish Commercial Registry.
+- Not covered: ultimate beneficial owners, sanctions/PEP lists, sole traders (autónomos).
+- Authentication with the `X-API-KEY` header (`Authorization: Bearer` also accepted). Base URL: `https://apiempresas.es/api/v1`.
+
+## Pricing (VAT not included)
+
+- Free: 100 requests in total (not renewed), no card. Some fields are truncated (address, directors, financial data).
+- Pro: €19/month or €182/year. 3,000 requests per month, full data.
+- Business: €49/month or €470/year. 10,000 requests per month, plus public contracts, risk profile and webhooks.
+- One-off credit packs, no subscription, no expiry: 1,000 credits for €9; custom packs from 10,000 credits for €49 up to 1,000,000.
+- No lock-in. Card payment via Stripe, invoice with VAT.
+
+## Main endpoints
+
+- `GET /companies?cif=` — company by CIF: legal name, status, incorporation date, province, CNAE activity code, address; directors with `admin=true` (Pro).
+- `GET /companies/search?q=` — search by name.
+- `POST /companies/batch` — up to 100 CIFs per request (Pro and Business).
+- `GET /companies/verify` — KYB verification in one call (Pro).
+- `POST /companies/reconcile` — company name to CIF (Pro).
+- `GET /companies/borme` — BORME filing history (Pro).
+- `GET /companies/contracts` — awarded public contracts (Business).
+- `GET /companies/risk-profile` — risk profile (Business).
+- `/watchlist` and `/webhooks` — company monitoring and change alerts.
+- Free sandbox: `https://apiempresas.es/api/sandbox/v1` (test CIFs A15075062 and B00000000).
+- Rate limits: 2 requests/s on Free, 20 on paid plans.
+
+## Links
+
+- [API documentation](https://spaincompanyapi.com/docs): all endpoints, errors and examples.
+- [OpenAPI specification](https://apiempresas.es/public/swagger.json)
+- [Spanish company data API: plans and KYB use cases](https://spaincompanyapi.com/spanish-company-data-api)
+- [Credit packs](https://spaincompanyapi.com/buy-api-credits)
+- [Create a free account and API key](https://spaincompanyapi.com/register)
+- [Service status](https://status.apiempresas.es)
+- SDKs: `npm install apiempresas`, `pip install apiempresas`, `composer require apiempresas/apiempresas-php`.
+- Contact: soporte@apiempresas.es
+- Spanish site: https://apiempresas.es

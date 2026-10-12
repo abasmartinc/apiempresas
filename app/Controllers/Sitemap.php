@@ -19,7 +19,9 @@ class Sitemap extends Controller
     public function llms()
     {
         // En producción index.php puede estar en la raíz del proyecto (FCPATH) y no en public/
-        $ruta = is_file(FCPATH . 'llms.txt') ? FCPATH . 'llms.txt' : ROOTPATH . 'public/llms.txt';
+        // Versión inglesa en spaincompanyapi.com
+        $fichero = strpos(strtolower((string) $this->request->getServer('HTTP_HOST')), 'spaincompanyapi') !== false ? 'llms_en.txt' : 'llms.txt';
+        $ruta = is_file(FCPATH . $fichero) ? FCPATH . $fichero : ROOTPATH . 'public/' . $fichero;
         if (!is_file($ruta)) {
             return $this->response->setStatusCode(404)->setContentType('text/plain; charset=UTF-8')->setBody('Not found');
         }
@@ -186,6 +188,7 @@ class Sitemap extends Controller
                 ['loc' => site_url('/'), 'priority' => '1.0', 'freq' => 'daily'],
                 ['loc' => site_url('docs'), 'priority' => '0.9', 'freq' => 'weekly'],
                 ['loc' => site_url('spanish-company-data-api'), 'priority' => '0.8', 'freq' => 'monthly'],
+                ['loc' => site_url('buy-api-credits'), 'priority' => '0.6', 'freq' => 'monthly'],
                 ['loc' => site_url('enter'), 'priority' => '0.5', 'freq' => 'monthly'],
                 ['loc' => site_url('register'), 'priority' => '0.5', 'freq' => 'monthly'],
             ];
@@ -196,10 +199,19 @@ class Sitemap extends Controller
                 ['loc' => site_url('leads-empresas-nuevas'), 'priority' => '0.8', 'freq' => 'monthly'],
                 ['loc' => site_url('contact'), 'priority' => '0.5', 'freq' => 'monthly'],
                 ['loc' => site_url('documentation'), 'priority' => '0.9', 'freq' => 'weekly'],
-                ['loc' => site_url('search_company'), 'priority' => '0.9', 'freq' => 'daily'],
+                // search_company fuera: es noindex (12-10-2026)
                 ['loc' => site_url('blog'), 'priority' => '0.8', 'freq' => 'daily'],
                 ['loc' => site_url('empresas-nuevas'), 'priority' => '1.0', 'freq' => 'daily'],
                 ['loc' => site_url('listado-de-grupos-empresariales'), 'priority' => '1.0', 'freq' => 'daily'],
+                // Páginas de la API que faltaban (12-10-2026): no estaban en ningún sitemap
+                ['loc' => site_url('api-empresas'), 'priority' => '0.9', 'freq' => 'weekly'],
+                ['loc' => site_url('validar-cif'), 'priority' => '0.8', 'freq' => 'monthly'],
+                ['loc' => site_url('planes/free'), 'priority' => '0.7', 'freq' => 'monthly'],
+                ['loc' => site_url('planes/pro'), 'priority' => '0.7', 'freq' => 'monthly'],
+                ['loc' => site_url('planes/business'), 'priority' => '0.7', 'freq' => 'monthly'],
+                ['loc' => site_url('crear-bono-api'), 'priority' => '0.6', 'freq' => 'monthly'],
+                ['loc' => site_url('plugin-wordpress-buscador-empresas'), 'priority' => '0.6', 'freq' => 'monthly'],
+                ['loc' => site_url('integraciones/google-sheets'), 'priority' => '0.6', 'freq' => 'monthly'],
             ];
         }
 

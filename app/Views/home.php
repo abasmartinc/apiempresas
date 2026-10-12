@@ -150,6 +150,7 @@
                 <?php endif; ?>
 
 
+                <p style="text-align: center; margin: 14px 0 0; font-size: 0.9rem; color: #64748b;">¿Solo quieres comprobar si un CIF está bien escrito o validar una lista? Usa el <a href="<?= site_url('validar-cif') ?>">validador de CIF gratis</a>.</p>
                 <div id="resultado_container" style="display:none; margin-top: 24px;">
                     <div id="resultado"></div>
                 </div>

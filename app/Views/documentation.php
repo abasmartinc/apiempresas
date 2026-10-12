@@ -20,7 +20,7 @@
                     <!-- Selector de idioma / Language switcher -->
                     <div style="display: flex; gap: 8px; margin-bottom: 16px;">
                         <a href="<?= site_url('documentation') ?>" style="flex:1; text-align:center; padding: 6px 10px; border-radius: 8px; border: 2px solid #2563eb; background: #eff6ff; font-size: 0.8rem; font-weight: 800; color: #2563eb; text-decoration: none;" title="Versión en español">🇪🇸 ES</a>
-                        <a href="<?= site_url('documentation/en') ?>" style="flex:1; text-align:center; padding: 6px 10px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 0.8rem; font-weight: 600; color: #64748b; text-decoration: none; transition: all 0.2s;" title="English version">🇬🇧 EN</a>
+                        <a href="https://spaincompanyapi.com/docs" style="flex:1; text-align:center; padding: 6px 10px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 0.8rem; font-weight: 600; color: #64748b; text-decoration: none; transition: all 0.2s;" title="English version">🇬🇧 EN</a>
                     </div>
 
                     <ul class="docs-nav">

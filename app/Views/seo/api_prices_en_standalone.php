@@ -584,7 +584,7 @@
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
                         Try the API for free
                     </a>
-                    <a href="<?= site_url('documentation/en') ?>" class="api-hero-btn-ghost">
+                    <a href="<?= site_url('docs') ?>" class="api-hero-btn-ghost">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                         View documentation
                     </a>
@@ -651,7 +651,7 @@
                                 style="border: 2px solid #e2e8f0; padding: 14px 32px; border-radius: 16px; font-size: 1rem;">
                                 Look up a CIF online
                             </a>
-                            <a href="<?= site_url('documentation/en') ?>"
+                            <a href="<?= site_url('docs') ?>"
                                 style="font-weight: 800; color: #2563eb; text-decoration: none; display: flex; align-items: center; gap: 8px; font-size: 1.05rem;">
                                 Technical integration guide →
                             </a>
@@ -1187,7 +1187,7 @@ getCompany(<span style="color:#98c379;">'B12345678'</span>);</code></pre>
                 </div>
 
                 <div style="display: flex; justify-content: center; gap: 32px; margin-top: 48px; flex-wrap: wrap;">
-                    <a href="<?= site_url('documentation/en') ?>" style="display: inline-flex; align-items: center; gap: 8px; color: #2563eb; font-weight: 800; text-decoration: none; font-size: 1rem;">
+                    <a href="<?= site_url('docs') ?>" style="display: inline-flex; align-items: center; gap: 8px; color: #2563eb; font-weight: 800; text-decoration: none; font-size: 1rem;">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
                         Full API documentation →
                     </a>
