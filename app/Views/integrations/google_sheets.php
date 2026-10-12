@@ -1,7 +1,10 @@
 <!doctype html>
 <html lang="es">
 <head>
-    <?= view('partials/head', ['title' => $title ?? 'Integración Google Sheets']) ?>
+    <?= view('partials/head', [
+        'title'       => $title ?? 'Integración Google Sheets',
+        'excerptText' => 'Consulta empresas por CIF desde Google Sheets: razón social, estado, provincia, CNAE y fecha de constitución con la función APIEMPRESAS. Plantilla gratis y 100 consultas sin tarjeta.',
+    ]) ?>
     <link rel="stylesheet" href="<?= base_url('public/css/home.css') ?>?v=<?= time() ?>">
     <link rel="stylesheet" href="<?= base_url('public/css/home-mobile.css') ?>?v=<?= time() ?>" media="screen and (max-width: 768px)">
 </head>
@@ -240,10 +243,10 @@
         <div class="gs-hero">
             <div class="gs-badge-top">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-                +3.000 equipos B2B ya lo usan
+                Gratis con tu cuenta · 100 consultas sin tarjeta
             </div>
-            <h1 class="gs-title">Automatiza tu prospección B2B<br>directamente en <span>Google Sheets</span></h1>
-            <p class="gs-subtitle">Conecta tu hoja de cálculo a la API oficial. Mete un CIF y observa cómo se rellena el teléfono, empresa y facturación al instante. Sin picar código, sin buscar en Google.</p>
+            <h1 class="gs-title">Datos de empresas por CIF<br>directamente en <span>Google Sheets</span></h1>
+            <p class="gs-subtitle">Conecta tu hoja de cálculo a la API de empresas. Escribe un CIF y la hoja se rellena con la razón social, el estado, la provincia y la actividad de la empresa, con datos del Registro Mercantil y el BORME. Sin programar: copias la plantilla o pegas un script.</p>
         </div>
 
         <!-- AHA Moment Animation -->
@@ -261,30 +264,30 @@
                         <th>CIF Empresa</th>
                         <th>Razón Social</th>
                         <th>Provincia</th>
-                        <th>Facturación</th>
+                        <th>Estado</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>1</td>
-                        <td class="gs-cell-cif">A15075062</td>
-                        <td><span class="gs-anim-text delay-1" style="font-weight:700;">INDITEX SA</span></td>
-                        <td><span class="gs-anim-text delay-2">A Coruña</span></td>
-                        <td><span class="gs-anim-text delay-3" style="color:#059669; font-weight:600;">35.947.000.000 €</span></td>
-                    </tr>
-                    <tr>
                         <td>2</td>
-                        <td class="gs-cell-cif">B14714489</td>
-                        <td><span class="gs-anim-text delay-1" style="font-weight:700;">ARJONA MATAS SL</span></td>
-                        <td><span class="gs-anim-text delay-2">Córdoba</span></td>
-                        <td><span class="gs-anim-text delay-3" style="color:#059669; font-weight:600;">1.473.600 €</span></td>
+                        <td class="gs-cell-cif">A15075062</td>
+                        <td><span class="gs-anim-text delay-1" style="font-weight:700;">INDUSTRIA DE DISEÑO TEXTIL, S.A.</span></td>
+                        <td><span class="gs-anim-text delay-2">A Coruña</span></td>
+                        <td><span class="gs-anim-text delay-3" style="color:#059669; font-weight:600;">ACTIVA</span></td>
                     </tr>
                     <tr>
                         <td>3</td>
+                        <td class="gs-cell-cif">B14714489</td>
+                        <td><span class="gs-anim-text delay-1" style="font-weight:700;">ARJONA MATAS SL</span></td>
+                        <td><span class="gs-anim-text delay-2">Córdoba</span></td>
+                        <td><span class="gs-anim-text delay-3" style="color:#059669; font-weight:600;">ACTIVA</span></td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
                         <td><div style="width: 120px; height: 16px; background: #e2e8f0; border-radius: 4px;"></div></td>
                         <td class="gs-cell-formula">=APIEMPRESAS(B4; "name")</td>
                         <td class="gs-cell-formula">=APIEMPRESAS(B4; "province")</td>
-                        <td class="gs-cell-formula">=APIEMPRESAS(B4; "capital_social_raw")</td>
+                        <td class="gs-cell-formula">=APIEMPRESAS(B4; "status")</td>
                     </tr>
                 </tbody>
             </table>
@@ -296,22 +299,22 @@
                 <div class="gs-feature-icon">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                 </div>
-                <h3>Para SDRs y Ventas</h3>
-                <p>Crea listas de prospección hiper-segmentadas sin tener que investigar empresa por empresa manualmente.</p>
+                <h3>Para ventas y administración</h3>
+                <p>Completa la razón social, la provincia y la actividad de una lista de empresas sin buscarlas una a una.</p>
             </div>
             <div class="gs-feature-card">
                 <div class="gs-feature-icon">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
                 </div>
-                <h3>Enriquecer Bases Antiguas</h3>
-                <p>¿Tienes un Excel antiguo con CIFs? Pega la fórmula y actualiza todos los datos, teléfonos y estados (Activa/Extinguida).</p>
+                <h3>Limpiar bases antiguas</h3>
+                <p>¿Tienes una lista antigua de clientes o proveedores con su CIF? Súbela a Google Sheets, pega la fórmula y comprueba cuáles siguen activas y cuáles están extinguidas o en concurso.</p>
             </div>
             <div class="gs-feature-card">
                 <div class="gs-feature-icon">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
                 </div>
-                <h3>Lead Scoring</h3>
-                <p>Cruza los datos de facturación con tus leads entrantes para priorizar a los clientes más grandes primero.</p>
+                <h3>Validar antes de dar de alta</h3>
+                <p>Comprueba que el CIF que te dan corresponde a una empresa que existe y está activa antes de crearla en tu ERP o tu CRM. Si solo quieres comprobar el formato, usa la <a href="<?= site_url('validar-cif-excel') ?>">fórmula para validar CIF</a>, que no gasta consultas.</p>
             </div>
         </div>
 
@@ -322,12 +325,12 @@
                     <span class="gs-step-number blue">1</span>
                     La forma rápida: Usa nuestra Plantilla
                 </h2>
-                <p class="gs-desc">Cero configuraciones. Hemos preparado un Google Sheets profesional que <strong>ya tiene el motor de IA instalado</strong>. Haz una copia, pega tu API Key y empieza a usarlo.</p>
+                <p class="gs-desc">Cero configuraciones. Hemos preparado un Google Sheets que <strong>ya tiene la función APIEMPRESAS instalada</strong>. Haz una copia, pega tu API Key y empieza a usarlo.</p>
                 
                 <div class="gs-template-box">
                     <div>
                         <h3 class="gs-template-title">Plantilla Prospección B2B 2026</h3>
-                        <p class="gs-template-desc">Tablero preconfigurado con fórmulas avanzadas de enriquecimiento masivo.</p>
+                        <p class="gs-template-desc">Hoja de ejemplo con las fórmulas ya puestas: pega tus CIF y tu API Key.</p>
                     </div>
                     <a href="https://docs.google.com/spreadsheets/d/1ke9ErUQktrusqx1rVWx1WTJ5p6qNItGd4H7mUtXUipY/copy" target="_blank" class="gs-btn-primary" onclick="if(window.trackEvent) trackEvent('gsheets_template_download');">Descargar Plantilla Gratis</a>
                 </div>
@@ -340,9 +343,9 @@
             <div class="gs-card-body">
                 <h2 class="gs-step-title">
                     <span class="gs-step-number green">2</span>
-                    La forma pro: Instálalo en tu propio Excel
+                    La forma pro: instálalo en tu propia hoja de Google Sheets
                 </h2>
-                <p class="gs-desc">Integra la API directamente en tus hojas de trabajo actuales en menos de 1 minuto copiando un pequeño script.</p>
+                <p class="gs-desc">Añade la función a cualquier hoja de Google Sheets que ya uses copiando un pequeño script. Cada celda con la fórmula gasta una consulta de tu plan.</p>
 
                 <div class="gs-steps-list">
                     
@@ -449,7 +452,7 @@ function APIEMPRESAS(cif, campo) {
                     <div class="gs-substep">
                         <div class="gs-substep-letter">C</div>
                         <div class="gs-substep-content">
-                            <h4>Haz tu primera consulta mágica</h4>
+                            <h4>Haz tu primera consulta</h4>
                             <p>Haz clic en el icono de guardar (disquete) y vuelve a tu hoja de cálculo. Escribe esta fórmula en cualquier celda:</p>
                             <div class="gs-formula-box">=APIEMPRESAS("A15075062"; "name")</div>
                             <p style="font-size: 1rem; color: #64748b; margin-top: 4px;">Recuerda poner el nombre del campo <strong>siempre entre comillas</strong>. <br>Campos disponibles: <code style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px; color: #334155; font-weight:700;">name, cnae, cnae_label, founded, capital_social_raw, province, municipality, status</code>.</p>

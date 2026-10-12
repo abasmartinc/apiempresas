@@ -632,6 +632,7 @@ $routes->get('perfil-de-riesgo', 'RiskProfileController::index');
 // Validador gratuito de CIF (12-10-2026)
 $routes->get('validar-cif', 'Herramientas::validarCif');
 $routes->get('como-saber-si-una-empresa-esta-activa', 'Herramientas::empresaActiva');
+$routes->get('validar-cif-excel', 'Herramientas::validarCifExcel');
 $routes->post('perfil-de-riesgo', 'RiskProfileController::index');
 $routes->get('api/perfil-de-riesgo/lookup', 'RiskProfileController::ajaxLookup');
 

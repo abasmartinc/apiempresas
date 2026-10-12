@@ -21,7 +21,7 @@ class IntegrationsController extends BaseController
     public function googleSheets()
     {
         $data = [
-            'title' => 'Integración con Google Sheets - APIEmpresas',
+            'title' => 'Datos de empresas por CIF en Google Sheets: función APIEMPRESAS | APIEmpresas',
             'api_key' => null,
             'is_logged_in' => session('logged_in')
         ];

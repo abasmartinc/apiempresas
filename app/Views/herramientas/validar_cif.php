@@ -142,7 +142,7 @@ $registro = site_url('register?intent=api&plan=free&source=validar_cif');
     <!-- 2. Varios a la vez (solo formato, en el navegador) -->
     <section class="vc-card">
         <h2>Validar varios CIF a la vez</h2>
-        <p style="margin-top:0;">Pega una lista (uno por línea, o separados por comas). Se comprueba el formato y el dígito de control de cada uno, sin enviarlos a ningún sitio. Hasta 500.</p>
+        <p style="margin-top:0;">Pega una lista (uno por línea, o separados por comas). Se comprueba el formato y el dígito de control de cada uno, sin enviarlos a ningún sitio. Hasta 500. Si tu lista está en una hoja de cálculo, usa la <a href="<?= site_url('validar-cif-excel') ?>">fórmula para validar CIF en Excel y Google Sheets</a>.</p>
         <textarea id="vc-lista" placeholder="A46103834&#10;B12345678&#10;..."></textarea>
         <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
             <button class="vc-btn" type="button" id="vc-lote-go">Validar lista</button>

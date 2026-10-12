@@ -21,4 +21,10 @@ class Herramientas extends BaseController
     {
         return view('herramientas/empresa_activa');
     }
+
+    /** GET /validar-cif-excel — tutorial: fórmula para validar CIF en Excel y Google Sheets */
+    public function validarCifExcel()
+    {
+        return view('herramientas/validar_cif_excel');
+    }
 }
