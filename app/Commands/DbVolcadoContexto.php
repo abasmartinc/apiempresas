@@ -10,6 +10,9 @@ use CodeIgniter\CLI\CLI;
  *
  *   php spark db:volcado
  *   php spark db:volcado --max 100000      filas por tabla grande (por defecto 50.000)
+ *   php spark db:volcado --solo tracking_events,users --max 2000000
+ *                                          solo esas tablas, en writable/contexto/volcado_solo.sql.gz
+ *                                          (no pisa el volcado completo)
  *
  * Usa la conexión del .env (la que tenga activa: producción o local) y escribe
  * writable/contexto/volcado.sql.gz con la estructura de TODAS las tablas y sus datos:
@@ -27,7 +30,7 @@ class DbVolcadoContexto extends BaseCommand
     protected $group       = 'Database';
     protected $name        = 'db:volcado';
     protected $description = 'Copia de solo lectura de la BD (estructura + datos, sin secretos) en writable/contexto/volcado.sql.gz';
-    protected $usage       = 'db:volcado [--max 50000]';
+    protected $usage       = 'db:volcado [--max 50000] [--solo tabla1,tabla2]';
 
     /**
      * Columnas que nunca salen en la copia, por nombre. Ojo: no vale "cualquier *_hash":
@@ -51,7 +54,9 @@ class DbVolcadoContexto extends BaseCommand
         if (!is_dir($baseDir)) {
             mkdir($baseDir, 0775, true);
         }
-        $ruta = $baseDir . DIRECTORY_SEPARATOR . 'volcado.sql.gz';
+        // --solo: solo las tablas pedidas y en otro fichero, para no pisar el volcado completo
+        $solo = array_values(array_filter(array_map('trim', explode(',', (string) (CLI::getOption('solo') ?? '')))));
+        $ruta = $baseDir . DIRECTORY_SEPARATOR . ($solo ? 'volcado_solo.sql.gz' : 'volcado.sql.gz');
         $gz   = gzopen($ruta, 'wb6');
         if (!$gz) {
             CLI::error('No se puede escribir ' . $ruta);
@@ -63,6 +68,14 @@ class DbVolcadoContexto extends BaseCommand
             . "SET NAMES utf8mb4;\nSET FOREIGN_KEY_CHECKS=0;\nSET SQL_MODE='NO_AUTO_VALUE_ON_ZERO';\n\n");
 
         $tablas = $db->query("SHOW FULL TABLES WHERE Table_type = 'BASE TABLE'")->getResultArray();
+        if ($solo) {
+            $tablas = array_values(array_filter($tablas, static fn ($f) => in_array((string) array_values($f)[0], $solo, true)));
+            if (!$tablas) {
+                CLI::error('Ninguna de esas tablas existe: ' . implode(', ', $solo));
+                gzclose($gz);
+                return;
+            }
+        }
         $total  = count($tablas);
 
         foreach ($tablas as $i => $fila) {

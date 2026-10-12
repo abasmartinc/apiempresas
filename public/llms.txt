@@ -1,0 +1,49 @@
+# APIEmpresas.es
+
+> API REST de datos de empresas españolas: consulta por CIF, búsqueda por nombre, verificación KYB, administradores, actos del BORME, contratos públicos y perfil de riesgo. Más de 4,7 millones de empresas y 9,5 millones de actos del BORME, actualizados cada día. Plan gratuito con 100 consultas, sin tarjeta.
+
+APIEmpresas.es es un servicio español que convierte las publicaciones del Boletín Oficial del Registro Mercantil (BORME) y de la Plataforma de Contratación del Sector Público en una API JSON. Se usa para dar de alta clientes B2B (KYB), validar CIF en formularios y ERP, enriquecer CRM y vigilar cambios en empresas.
+
+Datos importantes para no confundir:
+
+- El estado registral (activa, extinguida, en concurso…), el scoring y el perfil de riesgo los calcula APIEmpresas a partir de las publicaciones oficiales. No son un certificado del Registro Mercantil.
+- No cubre titular real, listas de sanciones ni PEP, ni empresarios individuales (autónomos).
+- Autenticación con la cabecera `X-API-KEY` (también `Authorization: Bearer`). Base: `https://apiempresas.es/api/v1`.
+
+## Precios (IVA no incluido)
+
+- Free: 100 consultas en total (no se renuevan), sin tarjeta. Algunos campos salen recortados (domicilio, administradores, datos financieros).
+- Pro: 19 €/mes o 182 €/año. 3.000 consultas al mes, datos completos.
+- Business: 49 €/mes o 470 €/año. 10.000 consultas al mes, más contratos públicos, perfil de riesgo y webhooks.
+- Bonos de pago único, sin suscripción y sin caducidad: 1.000 créditos por 9 €; a medida desde 10.000 créditos por 49 € hasta 1.000.000.
+- Sin permanencia. Pago con tarjeta mediante Stripe y factura con IVA.
+
+## Endpoints principales
+
+- `GET /companies?cif=` — ficha de una empresa por CIF: razón social, estado, fecha de constitución, provincia, CNAE, domicilio; administradores con `admin=true` (Pro).
+- `GET /companies/search?q=` — búsqueda por nombre.
+- `POST /companies/batch` — hasta 100 CIF por petición (Pro y Business).
+- `GET /companies/verify` — verificación KYB en una llamada (Pro).
+- `POST /companies/reconcile` — de nombre a CIF (Pro).
+- `GET /companies/borme` — historial de actos del BORME (Pro).
+- `GET /companies/contracts` — contratos públicos adjudicados (Business).
+- `GET /companies/risk-profile` — perfil de riesgo (Business).
+- `/watchlist` y `/webhooks` — vigilancia de empresas y avisos de cambios.
+- Sandbox sin coste: `https://apiempresas.es/api/sandbox/v1` (CIF de prueba A15075062 y B00000000).
+- Límites de velocidad: 2 peticiones/s en Free y 20 en los planes de pago.
+
+## Enlaces
+
+- [Documentación de la API](https://apiempresas.es/documentation): todos los endpoints, errores y ejemplos.
+- [Especificación OpenAPI](https://apiempresas.es/swagger.json)
+- [Precios y planes](https://apiempresas.es/#precios)
+- [API KYB para verificar empresas](https://apiempresas.es/api-empresas): flujo de alta de clientes, qué cubre y qué no.
+- [Bonos de créditos](https://apiempresas.es/crear-bono-api)
+- [Crear cuenta y API key gratis](https://apiempresas.es/register?intent=api&plan=free)
+- [Estado del servicio](https://status.apiempresas.es)
+- SDK: `npm install apiempresas`, `pip install apiempresas`, `composer require apiempresas/apiempresas-php`.
+- Contacto: soporte@apiempresas.es
+
+## English
+
+APIEmpresas.es is a REST API for Spanish company data: lookup by CIF (tax ID), name search, KYB verification, directors, BORME (Spanish Commercial Registry gazette) filings, public contracts and risk profile. Free plan with 100 requests; Pro €19/month (3,000 requests), Business €49/month (10,000 requests), VAT not included. English documentation: https://apiempresas.es/documentation/en and https://spaincompanyapi.com
