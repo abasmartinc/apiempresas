@@ -23,6 +23,7 @@
                     <li><a href="<?=site_url('search_company') ?>">Buscador de Empresas</a></li>
                     <li><a href="<?=site_url('validar-cif') ?>">Validar CIF gratis</a></li>
                     <li><a href="<?=site_url('validar-cif-excel') ?>">Validar CIF en Excel</a></li>
+                    <li><a href="<?=site_url('validar-cif-php-python') ?>">Validar CIF en PHP y Python</a></li>
                     <li><a href="<?=site_url('validar-nif-clientes-facturacion') ?>">NIF de clientes y Verifactu</a></li>
                     <li><a href="<?=site_url('como-saber-si-una-empresa-esta-activa') ?>">Saber si una empresa está activa</a></li>
                     <li><a href="<?=site_url('perfil-de-riesgo') ?>">Perfil de Riesgo B2B</a></li>

@@ -33,4 +33,10 @@ class Herramientas extends BaseController
     {
         return view('herramientas/nif_facturacion');
     }
+
+    /** GET /validar-cif-php-python — tutorial para desarrolladores: función de validación y consulta con la API */
+    public function validarCifCodigo()
+    {
+        return view('herramientas/validar_cif_codigo');
+    }
 }

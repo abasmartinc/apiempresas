@@ -223,7 +223,7 @@ in
         <h2>¿Listas de miles de CIF?</h2>
         <p>La API consulta hasta 100 CIF por petición y te devuelve razón social, estado, provincia, CNAE y, en Pro, administradores y domicilio. Empiezas con 100 consultas gratis, sin tarjeta.</p>
         <a class="cx-btn" href="<?= $registro ?>" data-track-click="cif_excel" data-track-element="cta_api">Obtener API key gratis</a>
-        <div class="cx-links"><a href="<?= site_url() ?>">API de empresas</a> · <a href="<?= site_url('documentation') ?>">Documentación</a></div>
+        <div class="cx-links"><a href="<?= site_url() ?>">API de empresas</a> · <a href="<?= site_url('documentation') ?>">Documentación</a> · <a href="<?= site_url('validar-cif-php-python') ?>">Validar CIF en PHP, Python o JavaScript</a></div>
     </section>
 
     <section class="cx-card">
