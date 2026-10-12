@@ -444,6 +444,9 @@ $routes->post('api/chat/assistant', 'Api\ChatAssistantController::handle');
 
 // Robots.txt dinámico por dominio
 $routes->match(['get', 'head'], 'robots.txt', 'Sitemap::robots');
+// llms.txt para asistentes de IA (12-10-2026). La raíz web es la del proyecto y public/ se
+// sirve en /public/, así que el fichero no saldría en /llms.txt sin esta ruta.
+$routes->match(['get', 'head'], 'llms.txt', 'Sitemap::llms');
 
 // Sitemap (Soporte GET y HEAD)
 $routes->match(['get', 'head'], 'sitemap.xml', 'Sitemap::index');

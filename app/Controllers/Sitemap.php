@@ -12,6 +12,24 @@ class Sitemap extends Controller
     /**
      * Entrega dinámica de robots.txt según el hostname de la petición
      */
+    /**
+     * /llms.txt: resumen de la API para asistentes de IA. El texto vive en public/llms.txt
+     * (se edita ahí); esta ruta solo lo sirve en la raíz del dominio.
+     */
+    public function llms()
+    {
+        // En producción index.php puede estar en la raíz del proyecto (FCPATH) y no en public/
+        $ruta = is_file(FCPATH . 'llms.txt') ? FCPATH . 'llms.txt' : ROOTPATH . 'public/llms.txt';
+        if (!is_file($ruta)) {
+            return $this->response->setStatusCode(404)->setContentType('text/plain; charset=UTF-8')->setBody('Not found');
+        }
+
+        return $this->response
+            ->setContentType('text/plain; charset=UTF-8')
+            ->setHeader('Cache-Control', 'public, max-age=86400')
+            ->setBody((string) file_get_contents($ruta));
+    }
+
     public function robots()
     {
         $rawHost = (string) $this->request->getServer('HTTP_HOST');
