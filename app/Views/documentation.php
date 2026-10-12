@@ -397,7 +397,7 @@
                                 </li>
                                 <li style="display: flex; gap: 16px; align-items: flex-start;">
                                     <code style="background: #fffbeb; color: #d97706; padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; border: 1px solid #fde68a; font-weight: 700; min-width: 90px; text-align: center;">C11111111</code>
-                                    <span style="color: #334155; font-size: 0.95rem; line-height: 1.5; padding-top: 4px;">Simula un error HTTP 404 indicando que la empresa está encolada asíncronamente para extracción profunda.</span>
+                                    <span style="color: #334155; font-size: 0.95rem; line-height: 1.5; padding-top: 4px;">También devuelve 404 de "empresa no encontrada" (igual que B00000000).</span>
                                 </li>
                             </ul>
 

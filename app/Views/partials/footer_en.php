@@ -42,8 +42,16 @@
                     </div>
                 </div>
                 <p class="foot-desc">
-                    Official data from BORME, AEAT, INE and VIES. Regulatory compliance and traceability for KYB/KYC processes and B2B billing.
+                    Spanish company data from the BORME (Commercial Registry gazette) and the Public Procurement Platform, updated daily. For KYB/KYC, onboarding and B2B invoicing.
                 </p>
+                <nav class="foot-legal-row" aria-label="Developer links" style="margin-bottom: 8px;">
+                    <a href="<?= site_url('docs') ?>" class="minor">API docs</a> ·
+                    <a href="<?= site_url('spanish-company-data-api') ?>" class="minor">KYB API</a> ·
+                    <a href="<?= site_url('buy-api-credits') ?>" class="minor">Credit packs</a> ·
+                    <a href="https://apiempresas.es/public/swagger.json" class="minor">OpenAPI</a> ·
+                    <a href="https://status.apiempresas.es" class="minor" rel="noopener">Status</a> ·
+                    <a href="https://apiempresas.es/" class="minor" hreflang="es" lang="es">Versión en español</a>
+                </nav>
                 <div class="foot-legal-row">
                     <a href="#" class="minor" data-modal-target="modalPrivacy">Privacy Policy</a> · 
                     <a href="#" class="minor" data-modal-target="modalTerms">Terms of Service</a>
@@ -72,7 +80,7 @@
                                 <polyline points="22 4 12 14.01 9 11.01"></polyline>
                             </svg>
                         </div>
-                        <span>Official Sources (BORME)</span>
+                        <span>Source: BORME, updated daily</span>
                     </div>
                 </div>
             </div>

@@ -106,7 +106,8 @@ class Home extends BaseController
 
         return view('home_en_standalone', [
             'socialProofText' => $socialProofText,
-            'freeLimit' => $freeLimit
+            'freeLimit' => $freeLimit,
+            'homeStats' => $this->getHomeStats(),
         ]);
     }
 

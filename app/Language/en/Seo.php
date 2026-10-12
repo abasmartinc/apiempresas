@@ -2,6 +2,6 @@
 
 return [
     'siteName' => 'SpainCompanyAPI.com',
-    'defaultTitle' => 'Validate VAT numbers and verify companies in Spain | SpainCompanyAPI.com',
-    'defaultDesc'  => 'Validate VAT numbers and corporate data with official sources (BOE/BORME, AEAT, INE, and VIES). Web search and REST API for KYB/KYC, invoicing, and scoring.',
+    'defaultTitle' => 'Spanish Company Data API: CIF lookup and KYB | SpainCompanyAPI',
+    'defaultDesc'  => 'REST API for Spanish company data: validate a CIF, check if a company is active, get directors and BORME filings. For KYB, onboarding and invoicing.',
 ];

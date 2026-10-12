@@ -105,10 +105,15 @@ $ogImage = $ogImage ?? ($siteUrl . '/public/img/og/apiempresas-og.png'); // idea
 
 // URLs reales del sitio
 $urlSearch        = $siteUrl . '/search_company';
-$urlDocs          = $siteUrl . '/documentation';
+$urlDocs          = $siteUrl . ($enDominioEn ? '/docs' : '/documentation');
 $urlBlog          = $siteUrl . '/blog';
 $urlPricingAnchor = $siteUrl . '/#precios';
 $urlFaqsAnchor    = $siteUrl . '/#faqs';
+
+// Cadenas dentro del JSON-LD: json_encode en vez de esc() (esc metía &amp; en el JSON).
+$jsonStr = static fn ($v): string => json_encode((string) $v, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG);
+// El otro dominio de la misma organización (sameAs)
+$otroDominio = $enDominioEn ? $aEs($homeUrl) : $aEn($homeUrl);
 
 // SearchAction: URL shareable (GET)
 $searchTarget = $urlSearch . '?q={search_term_string}';
@@ -209,7 +214,8 @@ $googlebot = $googlebot ?? ($robots . ',max-snippet:-1,max-image-preview:large,m
         "@type": "ImageObject",
         "@id": "<?= esc($homeUrl) ?>#logo",
         "url": "<?= esc($logoUrl) ?>"
-      }
+      },
+      "sameAs": ["<?= esc($otroDominio) ?>"]
     },
     {
       "@type": "WebSite",
@@ -217,19 +223,19 @@ $googlebot = $googlebot ?? ($robots . ',max-snippet:-1,max-image-preview:large,m
       "url": "<?= esc($homeUrl) ?>",
       "name": "<?= esc($siteName) ?>",
       "publisher": { "@id": "<?= esc($homeUrl) ?>#org" },
-      "inLanguage": "<?= esc($lang) ?>",
+      "inLanguage": "<?= esc($lang) ?>"<?php if (!$enDominioEn): ?>,
       "potentialAction": {
         "@type": "SearchAction",
         "target": "<?= esc($searchTarget) ?>",
         "query-input": "required name=search_term_string"
-      }
+      }<?php endif; ?>
     },
     {
       "@type": "WebPage",
       "@id": "<?= esc($canonicalUrl) ?>#webpage",
       "url": "<?= esc($canonicalUrl) ?>",
-      "name": "<?= esc($seoTitle) ?>",
-      "description": "<?= esc($seoDesc) ?>",
+      "name": <?= $jsonStr($seoTitle) ?>,
+      "description": <?= $jsonStr($seoDesc) ?>,
       "isPartOf": { "@id": "<?= esc($homeUrl) ?>#website" },
       "inLanguage": "<?= esc($lang) ?>",
       "primaryImageOfPage": {
@@ -251,7 +257,7 @@ $googlebot = $googlebot ?? ($robots . ',max-snippet:-1,max-image-preview:large,m
       "url": "<?= esc($homeUrl) ?>",
       "applicationCategory": "BusinessApplication",
       "operatingSystem": "Web",
-      "description": "<?= esc($defaultDesc) ?>",
+      "description": <?= $jsonStr($defaultDesc) ?>,
       "publisher": { "@id": "<?= esc($homeUrl) ?>#org" },
       "image": "<?= esc($ogImage) ?>",
       "offers": [
@@ -260,21 +266,25 @@ $googlebot = $googlebot ?? ($robots . ',max-snippet:-1,max-image-preview:large,m
         { "@type": "Offer", "name": "Business",      "price": "49", "priceCurrency": "EUR", "category": "Subscription", "url": "<?= esc($urlPricingAnchor) ?>" }
       ],
       "hasPart": [
+<?php if ($enDominioEn): ?>
+        { "@type": "WebPage", "@id": "<?= esc($urlDocs) ?>#webpage",   "url": "<?= esc($urlDocs) ?>",   "name": "API documentation | <?= esc($siteName) ?>" }
+<?php else: ?>
         { "@type": "WebPage", "@id": "<?= esc($urlSearch) ?>#webpage", "url": "<?= esc($urlSearch) ?>", "name": "Buscador | <?= esc($siteName) ?>" },
         { "@type": "WebPage", "@id": "<?= esc($urlDocs) ?>#webpage",   "url": "<?= esc($urlDocs) ?>",   "name": "Documentación API | <?= esc($siteName) ?>" },
         { "@type": "Blog",    "@id": "<?= esc($urlBlog) ?>#blog",      "url": "<?= esc($urlBlog) ?>",   "name": "Blog | <?= esc($siteName) ?>" }
+<?php endif; ?>
       ]
     },
     {
       "@type": "Service",
-      "name": "API de Verificación y Validación de Empresas en España",
+      "name": "<?= $enDominioEn ? 'Spanish Company Verification and Data API' : 'API de Verificación y Validación de Empresas en España' ?>",
       "serviceType": "B2B Data Verification",
       "provider": { "@id": "<?= esc($homeUrl) ?>#org" },
       "areaServed": {
         "@type": "Country",
-        "name": "España"
+        "name": "<?= $enDominioEn ? 'Spain' : 'España' ?>"
       },
-      "description": "<?= esc($defaultDesc) ?>"
+      "description": <?= $jsonStr($defaultDesc) ?>
     }<?php endif; ?>
   ]
 }
@@ -298,7 +308,7 @@ if ($isHome):
       "itemListElement": [{
         "@type": "ListItem",
         "position": 1,
-        "name": "Inicio",
+        "name": "<?= $enDominioEn ? 'Home' : 'Inicio' ?>",
         "item": "<?= site_url() ?>"
       }]
     }

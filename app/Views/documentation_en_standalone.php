@@ -385,7 +385,7 @@
                             <ul style="margin: 0 0 32px 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px;">
                                 <li style="display: flex; gap: 16px; align-items: flex-start;">
                                     <code style="background: #f1f5f9; color: #0f172a; padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; border: 1px solid #cbd5e1; font-weight: 700; min-width: 90px; text-align: center;">A15075062</code>
-                                    <span style="color: #334155; font-size: 0.95rem; line-height: 1.5; padding-top: 4px;">Simulates a successful lookup (returns real Inditex data).</span>
+                                    <span style="color: #334155; font-size: 0.95rem; line-height: 1.5; padding-top: 4px;">Successful lookup (returns sample data for Inditex).</span>
                                 </li>
                                 <li style="display: flex; gap: 16px; align-items: flex-start;">
                                     <code style="background: #fef2f2; color: #dc2626; padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; border: 1px solid #fecaca; font-weight: 700; min-width: 90px; text-align: center;">B00000000</code>
@@ -393,7 +393,7 @@
                                 </li>
                                 <li style="display: flex; gap: 16px; align-items: flex-start;">
                                     <code style="background: #fffbeb; color: #d97706; padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; border: 1px solid #fde68a; font-weight: 700; min-width: 90px; text-align: center;">C11111111</code>
-                                    <span style="color: #334155; font-size: 0.95rem; line-height: 1.5; padding-top: 4px;">Simulates an HTTP 404 indicating the company is asynchronously queued for deep extraction.</span>
+                                    <span style="color: #334155; font-size: 0.95rem; line-height: 1.5; padding-top: 4px;">Also returns 404 "company not found" (same as B00000000).</span>
                                 </li>
                             </ul>
 
@@ -401,7 +401,7 @@
                             <ul style="margin: 0; padding-left: 20px; color: #334155; font-size: 0.95rem; line-height: 1.7; display: flex; flex-direction: column; gap: 10px;">
                                 <li><strong>Search (/search):</strong> Send any text in <code>q=</code>. Always returns Inditex data so you can validate list parsing in your frontend.</li>
                                 <li><strong>Batch (/batch):</strong> Send a JSON with magic CIFs (e.g. <code>{"cifs": ["A15075062", "B00000000"]}</code>) to test how your code handles partial responses.</li>
-                                <li><strong>Premium Endpoints (/score, /insights):</strong> Call any of them using <code>A15075062</code> to receive its simulated data structure and validate the integration.</li>
+                                <li><strong>Premium Endpoints (/score, /insights):</strong> Call any of them with <code>A15075062</code> to get a sample response with the same structure as production and validate your integration.</li>
                             </ul>
                         </div>
                     </div>
@@ -426,6 +426,17 @@
 Host: spaincompanyapi.com
 X-API-KEY: your_api_key_here
 Accept: application/json</code></pre>
+                    <p>The <code>Authorization: Bearer your_api_key_here</code> header is also accepted.</p>
+
+                    <h4>Test environment (Sandbox)</h4>
+                    <p>To test your integration without using requests, use the same API key with the base URL <code>https://spaincompanyapi.com/api/sandbox/v1</code> (same paths as production: <code>/companies</code>, <code>/companies/search</code>, <code>/companies/score</code>…). The Sandbox does not use requests and only accepts these CIFs (on <code>/companies</code> it returns that company's data; on the other endpoints, sample responses with the same structure):</p>
+                    <ul>
+                        <li><code>A15075062</code>: company found (Inditex).</li>
+                        <li><code>B00000000</code>: company not found (404).</li>
+                    </ul>
+                    <p>Any other CIF returns an error. The Sandbox always answers with the full data, without the Free plan truncation or quota limits: use it to check the response format, not what you will see on your plan.</p>
+                    <p>Every successful Sandbox response adds a <code>sandbox</code> block: <code>plan_required</code> (minimum plan for the endpoint), <code>production_url</code> (the same request in production, ready to copy), <code>cost</code> (always 0) and, on <code>/companies</code>, <code>/companies/search</code> and <code>/companies/batch</code>, <code>fields_by_plan</code> with the fields that only come complete on Pro.</p>
+                    <p><code>/companies/verify</code>, <code>/companies/contracts</code>, <code>/companies/filter</code>, <code>POST /companies/reconcile</code> (<code>"Inditex"</code> gives <code>match</code>, a name containing <code>"Ejemplo"</code> gives <code>ambiguous</code> and anything else <code>no_match</code>) and monitoring (<code>/watchlist</code> and <code>/watchlist/events</code>, nothing is saved: it answers as if you were already watching A15075062) are also in the Sandbox.</p>
                 </section>
 
                 <!-- LOOKUP BY CIF -->

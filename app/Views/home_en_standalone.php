@@ -18,20 +18,103 @@
 
     <main>
 
-        <!-- 1. HERO PROFESIONAL -->
+        <!-- 1. HERO -->
         <section class="hero container" data-track-section="hero">
             <h1 class="reveal">
-                Spanish Company Data API for 
-                <span class="gradient-text">CIF Validation & B2B Data</span>
+                Spanish Company Data API:
+                <span class="gradient-text">CIF lookup, directors and BORME filings</span>
             </h1>
-            <p class="reveal delay-1">Access official data of Spanish companies and integrate business intelligence based on the Mercantile Registry and BORME. Perfect for KYC, KYB, and B2B workflows.</p>
-            
+            <p class="reveal delay-1">Look up any Spanish company by its CIF (tax ID) or name and get its legal name, status, incorporation date, CNAE activity code, registered address, directors and BORME filings in a single REST call. Built for KYB, customer onboarding and ERP or CRM integrations.</p>
+
             <div class="hero-btns reveal delay-3">
-                <a href="#buscar" class="btn-ae btn-ae-primary">Validate CIF Free</a>
-                <a href="<?= site_url('docs') ?>" class="btn-ae btn-ae-outline" data-cta="radar_home" data-source="home_hero">View API Docs</a>
+                <a href="<?= site_url('register?intent=api&plan=free&source=en_home_hero') ?>" class="btn-ae btn-ae-primary" data-track-event="hero_cta_click" data-track-metadata='{"cta_text": "Get a free API key", "plan": "free", "source_block": "hero", "page_type": "home_en"}'>Get a free API key</a>
+                <a href="#buscar" class="btn-ae btn-ae-outline" data-track-event="hero_cta_click" data-track-metadata='{"cta_text": "Try it live", "source_block": "hero", "page_type": "home_en"}'>Try it live</a>
             </div>
-            
-            <span class="trust-tag reveal delay-3">Official Business Data · Mercantile Registry · BORME</span>
+
+            <span class="trust-tag reveal delay-3"><?= (int) $freeLimit ?> free requests · No card required · Data from the BORME (Commercial Registry gazette)</span>
+
+            <?php
+            // Real figures (App\Libraries\PublicStats, 12 h cache), rounded down so "over" is always true.
+            $fmtOver = static function (int $n, string $what): string {
+                if ($n >= 1000000) {
+                    $m = floor($n / 100000) / 10;
+                    return '<strong>Over ' . number_format($m, $m == floor($m) ? 0 : 1, '.', ',') . ' million</strong> ' . esc($what);
+                }
+                if ($n >= 1000) {
+                    return '<strong>Over ' . number_format(floor($n / 1000) * 1000, 0, '.', ',') . '</strong> ' . esc($what);
+                }
+                return '<strong>' . $n . '</strong> ' . esc($what);
+            };
+            $hs = $homeStats ?? [];
+            ?>
+            <?php if (!empty($hs['companies']) && !empty($hs['acts'])): ?>
+            <ul class="hero-stats reveal delay-3" aria-label="Database coverage">
+                <li><?= $fmtOver((int) $hs['companies'], 'Spanish companies') ?></li>
+                <li><?= $fmtOver((int) $hs['acts'], 'BORME filings') ?></li>
+                <?php if (!empty($hs['last_borme'])): ?>
+                <li>Latest BORME processed: <strong><?= date('j M Y', strtotime($hs['last_borme'])) ?></strong></li>
+                <?php endif; ?>
+            </ul>
+            <style>
+                .hero-stats { list-style: none; padding: 0; margin: 22px auto 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 28px; font-size: 0.92rem; color: var(--ae-slate); }
+                .hero-stats li { position: relative; }
+                .hero-stats li + li::before { content: "·"; position: absolute; left: -17px; color: #94a3b8; }
+                .hero-stats strong { color: var(--ae-dark); font-weight: 800; }
+                @media (max-width: 640px) { .hero-stats { flex-direction: column; align-items: center; gap: 6px; } .hero-stats li + li::before { display: none; } }
+            </style>
+            <?php endif; ?>
+
+            <!-- First call: copyable example (same header and base URL as the docs) -->
+            <div class="hero-curl reveal delay-3" data-track-section="hero_curl">
+                <div class="code-editor-window">
+                    <div class="editor-header">
+                        <div class="dots">
+                            <div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div>
+                        </div>
+                        <div class="tab">Your first call</div>
+                        <button type="button" class="hero-curl-copy" id="heroCurlCopy" aria-label="Copy the curl request">Copy</button>
+                    </div>
+                    <div class="editor-body">
+<pre><code id="heroCurlCode"><span class="hc-cmd">curl</span> <span class="hc-str">"https://apiempresas.es/api/v1/companies?cif=A46103834"</span> \
+  <span class="hc-flag">-H</span> <span class="hc-str">"X-API-KEY: YOUR_API_KEY"</span></code></pre>
+<pre class="hc-res"><code><span class="hc-muted"># Response (shortened)</span>
+{ <span class="hc-key">"success"</span>: <span class="hc-bool">true</span>, <span class="hc-key">"data"</span>: { <span class="hc-key">"cif"</span>: <span class="hc-val">"A46103834"</span>, <span class="hc-key">"name"</span>: <span class="hc-val">"MERCADONA SA"</span>, <span class="hc-key">"status"</span>: <span class="hc-val">"Activa"</span>, … } }</code></pre>
+                    </div>
+                </div>
+                <div class="hero-sdks" aria-label="Install an SDK">
+                    <span class="hero-sdks-label">Or install an SDK:</span>
+                    <code>npm install apiempresas</code>
+                    <code>pip install apiempresas</code>
+                    <code>composer require apiempresas/apiempresas-php</code>
+                </div>
+                <p class="hero-curl-note">Sign up for free, then replace <code>A46103834</code> with any CIF and <code>YOUR_API_KEY</code> with your key. <a href="<?= site_url('docs#sdks') ?>">See PHP, Node.js and Python examples →</a></p>
+            </div>
+            <style>
+                .hero-curl { max-width: 760px; margin: 40px auto 0; text-align: left; }
+                .hero-curl .code-editor-window:hover { transform: none; }
+                .hero-curl .editor-body { padding: 18px 22px; font-size: 0.9rem; }
+                .hero-curl pre { margin: 0; white-space: pre; }
+                .hero-curl .hc-res { margin-top: 14px; padding-top: 14px; border-top: 1px dashed rgba(255,255,255,0.12); white-space: pre-wrap; word-break: break-word; }
+                .hero-curl .hc-cmd { color: #82AAFF; font-weight: 700; }
+                .hero-curl .hc-flag { color: #C792EA; }
+                .hero-curl .hc-str, .hero-curl .hc-val { color: #C3E88D; }
+                .hero-curl .hc-key { color: #F07178; }
+                .hero-curl .hc-bool { color: #FFCB6B; }
+                .hero-curl .hc-muted { color: #64748B; }
+                .hero-curl code { color: #E2E8F0; font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace; }
+                .hero-curl-copy { margin-left: auto; background: rgba(255,255,255,0.08); color: #E2E8F0; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 4px 12px; font-size: 0.8rem; font-weight: 700; cursor: pointer; }
+                .hero-curl-copy:hover { background: rgba(255,255,255,0.16); }
+                .hero-sdks { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; margin-top: 14px; }
+                .hero-sdks-label { font-size: 0.85rem; font-weight: 700; color: var(--ae-slate); }
+                .hero-sdks code { background: #0f172a; color: #C3E88D; padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace; user-select: all; }
+                .hero-curl-note { font-size: 0.9rem !important; margin: 14px 0 0 !important; max-width: none !important; text-align: center; color: var(--ae-slate); }
+                .hero-curl-note code { background: #eef2ff; color: #1e3a8a; padding: 1px 6px; border-radius: 6px; font-size: 0.85em; }
+                .hero-curl-note a { color: var(--ae-blue); font-weight: 700; text-decoration: none; }
+                @media (max-width: 768px) {
+                    .hero-curl .editor-header .tab { display: none; }
+                    .hero-curl .editor-body { font-size: 0.78rem; padding: 14px; }
+                }
+            </style>
         </section>
 
         <!-- 2. BLOQUE DE BÚSQUEDA -->
@@ -40,15 +123,15 @@
                 <div style="text-align: center;">
                     <div class="badge-intro">
                         <div class="dot-live"></div>
-                        Official Database Access
+                        Live demo
                     </div>
                 </div>
-                <h2>CIF Validator & <span class="highlight">Official Search</span></h2>
-                <p class="subtitle">Validate data in seconds with direct connection to the Mercantile Registry and BORME.</p>
+                <h2>Try the API: <span class="highlight">look up a Spanish company</span></h2>
+                <p class="subtitle">Search by CIF or company name and see the same data the API returns, built from the BORME and other Spanish public sources.</p>
                 
                 <div class="search-form-wrapper">
                     <div class="search-form">
-                        <input type="text" id="q" class="search-input" placeholder="Ex: B12345678 or Company Name" aria-label="Buscador de empresas">
+                        <input type="text" id="q" class="search-input" placeholder="Ex: B12345678 or Company Name" aria-label="Company search">
                         <button id="btnBuscar" class="btn-ae btn-ae-primary" style="height: 72px; padding: 0 48px; border-radius: 14px; font-size: 1.15rem;">Validate Company Now</button>
                     </div>
                 </div>
@@ -72,19 +155,19 @@
                         <div class="benefit-icon">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
                         </div>
-                        <span>Fast CIF Validation</span>
+                        <span>CIF check digit validation</span>
                     </div>
                     <div class="benefit-tag">
                         <div class="benefit-icon">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
                         </div>
-                        <span>Real-time querying</span>
+                        <span>Updated with every BORME</span>
                     </div>
                     <div class="benefit-tag">
                         <div class="benefit-icon">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
                         </div>
-                        <span>Data for prospecting</span>
+                        <span>Directors and filings</span>
                     </div>
                 </div>
                 <p style="text-align: center; font-size: 1rem; color: var(--ae-slate); margin-top: 16px; font-weight: 600;">Looking for API documentation? <a href="<?= site_url('docs') ?>" style="color: var(--ae-blue); font-weight: 800; text-decoration: none; border-bottom: 2px solid rgba(37, 99, 235, 0.2); transition: all 0.2s;" onmouseover="this.style.borderColor='var(--ae-blue)'" onmouseout="this.style.borderColor='rgba(37, 99, 235, 0.2)'" data-cta="radar_home" data-source="home_search">View Docs.</a></p>
@@ -94,30 +177,25 @@
         <!-- INTEGRATIONS STRIP -->
         <section class="integrations-strip">
             <div class="container">
-                <h3 class="integrations-title">Connect with your favorite tools</h3>
+                <h3 class="integrations-title">Use it from your tools</h3>
                 <div class="integrations-grid">
                     <!-- Zapier -->
-                    <div class="integration-item" title="Connect with Zapier">
+                    <div class="integration-item" title="Zapier: coming soon" style="opacity: .55;">
                         <svg viewBox="0 0 24 24" fill="#FF4F00"><path d="M19.141 12l3.418-3.418c.319-.319.319-.838 0-1.157L19.141 4c-.319-.319-.838-.319-1.157 0L14.566 7.418l1.157 1.157L18 6.314l2.121 2.121-2.121 2.121 2.121 2.121 2.121-2.121-2.121-2.121 1.157-1.157c-.159 0-3.417 3.418-3.417 3.418zM4.859 12L1.441 8.582c-.319-.319-.319-.838 0-1.157L4.859 4c.319-.319.838-.319 1.157 0l3.418 3.418-1.157 1.157L6 6.314 3.879 8.435 6 10.556 3.879 12.677 1.758 10.556l2.121-2.121L4.859 12zm14.282 3.418l-3.418 3.418-1.157-1.157L18 17.686l2.121-2.121-2.121-2.121-2.121 2.121 2.121 2.121-2.121-2.121-1.157 1.157c.159 0 3.417-3.418 3.417-3.418zM4.859 15.418L1.441 18.836c-.319.319-.319.838 0 1.157L4.859 23.412c.319.319.838.319 1.157 0l3.418-3.418-1.157-1.157L6 21.123 3.879 19 6 16.877l-2.121-2.121 1.157-1.157c.159 0 3.417 3.418 3.417 3.418z"/></svg>
-                        <span>Zapier</span>
+                        <span>Zapier <small>(coming soon)</small></span>
                     </div>
                     <!-- Make -->
-                    <div class="integration-item" title="Connect with Make">
+                    <div class="integration-item" title="Make: coming soon" style="opacity: .55;">
                         <svg viewBox="0 0 24 24" fill="#6435c9"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8zm-3-9h6v2H9z"/></svg>
-                        <span>Make</span>
+                        <span>Make <small>(coming soon)</small></span>
                     </div>
                     <!-- Google Sheets -->
-                    <div class="integration-item" title="Connect with Google Sheets">
+                    <div class="integration-item" title="Google Sheets add-on">
                         <svg viewBox="0 0 24 24" fill="#0F9D58"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
                         <span>Google Sheets</span>
                     </div>
-                    <!-- Excel -->
-                    <div class="integration-item" title="Export to Excel">
-                        <svg viewBox="0 0 24 24" fill="#1D6F42"><path d="M15.8 2H13v3h3V2zm-4 0H9v3h2.8V2zM5.2 2H2v3h3.2V2zm16.8 4h-2.8v3H22V6zm-4 0H13v3h3.8V6zm-4 0H9v3h2.8V6zM5.2 6H2v3h3.2V6zM22 10h-2.8v3H22v-3zm-4 0H13v3h3.8v-3zm-4 0H9v3h2.8v-3zM5.2 10H2v3h3.2v-3zm16.8 4h-2.8v3H22v-3zm-4 0H13v3h3.8v-3zm-4 0H9v3h2.8v-3zM5.2 14H2v3h3.2v-3zm16.8 4h-2.8v3H22v-3zm-4 0H13v3h3.8v-3zm-4 0H9v3h2.8v-3zM5.2 18H2v3h3.2v-3z"/></svg>
-                        <span>Microsoft Excel</span>
-                    </div>
                     <!-- WordPress -->
-                    <div class="integration-item" title="WordPress Plugin">
+                    <div class="integration-item" title="WordPress plugin">
                         <svg viewBox="0 0 24 24" fill="#21759b"><path d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2zm0 1.5c-4.694 0-8.5 3.806-8.5 8.5 0 .543.053 1.074.154 1.59l4.58-12.564c-.015-.008-.03-.017-.045-.026a8.411 8.411 0 0 0-4.689 2.5zm6.541 12.39c.094-.43.14-.858.14-1.283 0-1.13-.207-2.144-.622-3.042l-2.482 7.027c1.32-.716 2.427-1.631 3.32-2.702l-.356-.1zM12 12.75l-2.484 7.042c.8.21 1.637.333 2.484.333 1.103 0 2.158-.205 3.13-.578l-3.13-6.797zm-5.116-.252l2.64 7.37c-1.393-.572-2.584-1.464-3.5-2.613l.86-4.757z"/></svg>
                         <span>WordPress</span>
                     </div>
@@ -125,47 +203,300 @@
             </div>
         </section>
 
-        <!-- 3. BLOQUE DE AUTORIDAD -->
+        <!-- 3. USE CASES -->
         <section class="band">
             <div class="container">
                 <div class="band-header" style="margin-left: auto; margin-right: auto; text-align: center;">
                     <div class="pro-badge pro-badge-blue reveal" style="margin-left: auto; margin-right: auto;">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
-                        Complete Solutions
+                        Use cases
                     </div>
-                    <h2 class="reveal delay-1">Business data to <span class="gradient-text">validate, integrate, and sell better</span></h2>
-                    <p class="reveal delay-2">Access accurate information to improve your customer validation processes or empower your sales teams with fresh data.</p>
+                    <h2 class="reveal delay-1">What teams use the <span class="gradient-text">Spanish company API</span> for</h2>
+                    <p class="reveal delay-2">Three processes where Commercial Registry and BORME data save manual work and errors from the first call.</p>
                 </div>
 
                 <div class="grid-3">
-                    <div class="feature-card card-blue reveal delay-1">
-                        <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 20px;">
-                            <div class="icon-box" style="margin-bottom: 0;">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    <div class="feature-card use-case card-blue reveal delay-1">
+                        <div class="use-case-header">
+                            <div class="use-case-header-top">
+                                <div class="use-case-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><polyline points="16 11 18 13 22 9"></polyline></svg>
+                                </div>
+                                <span class="use-case-badge">
+                                    <span class="use-case-badge-dot"></span>
+                                    B2B onboarding
+                                </span>
                             </div>
-                            <h3 style="margin-bottom: 0; font-size: 1.2rem; font-weight: 850;">Validation and Querying</h3>
+                            <h3 class="use-case-title">KYB for Spanish customers and suppliers</h3>
                         </div>
-                        <p>Verify the existence of companies, check CIFs, and access basic registry data with total speed.</p>
+                        <p>When a Spanish business signs up or you add a new supplier, check with its CIF that the company exists and is active before you approve it.</p>
+                        <ul class="use-case-list">
+                            <li>CIF, legal name and registry status</li>
+                            <li>Current directors, to check who is signing</li>
+                            <li>Registered address and CNAE code to complete the record</li>
+                        </ul>
+                        <div class="use-case-foot">
+                            <span class="use-case-plan">From the Free plan</span>
+                            <a href="<?= site_url('spanish-company-data-api') ?>" data-track-event="use_case_click" data-track-metadata='{"use_case": "KYB", "page_type": "home_en"}'>See the KYB API →</a>
+                        </div>
                     </div>
-                    <div class="feature-card card-teal reveal delay-2">
-                        <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 20px;">
-                            <div class="icon-box" style="margin-bottom: 0;">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="22" y1="12" x2="18" y2="12"></line><line x1="6" y1="12" x2="2" y2="12"></line><line x1="12" y1="6" x2="12" y2="2"></line><line x1="12" y1="22" x2="12" y2="18"></line></svg>
+                    <div class="feature-card use-case card-teal reveal delay-2">
+                        <div class="use-case-header">
+                            <div class="use-case-header-top">
+                                <div class="use-case-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="13" y2="17"></line></svg>
+                                </div>
+                                <span class="use-case-badge">
+                                    <span class="use-case-badge-dot"></span>
+                                    ERP automation
+                                </span>
                             </div>
-                            <h3 style="margin-bottom: 0; font-size: 1.2rem; font-weight: 850;">Automated Workflows</h3>
+                            <h3 class="use-case-title">Invoicing and ERP</h3>
                         </div>
-                        <p>Streamline your KYC/KYB processes by verifying company existence and registry details instantly.</p>
+                        <p>Avoid invoices with wrong tax details: fill in the legal name and address from the CIF or the company name.</p>
+                        <ul class="use-case-list">
+                            <li>Autocomplete by CIF or company name</li>
+                            <li>Clean your customer base in batches (100 CIFs per request)</li>
+                            <li>SDKs for PHP, Node.js and Python</li>
+                        </ul>
+                        <div class="use-case-foot">
+                            <span class="use-case-plan">Batches from the Pro plan</span>
+                            <a href="<?= site_url('docs#endpoint-search') ?>" data-track-event="use_case_click" data-track-metadata='{"use_case": "Invoicing and ERP", "page_type": "home_en"}'>See name search →</a>
+                        </div>
                     </div>
-                    <div class="feature-card card-indigo reveal delay-3">
-                        <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 20px;">
-                            <div class="icon-box" style="margin-bottom: 0;">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                    <div class="feature-card use-case card-indigo reveal delay-3">
+                        <div class="use-case-header">
+                            <div class="use-case-header-top">
+                                <div class="use-case-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                                </div>
+                                <span class="use-case-badge">
+                                    <span class="use-case-badge-dot"></span>
+                                    Due diligence
+                                </span>
                             </div>
-                            <h3 style="margin-bottom: 0; font-size: 1.2rem; font-weight: 850;">API Integration</h3>
+                            <h3 class="use-case-title">Counterparty risk</h3>
                         </div>
-                        <p>Automate your internal workflows by connecting your CRM or ERP directly to our official database.</p>
+                        <p>Before you extend credit or sign with a Spanish supplier, check its legal situation and its history in the BORME.</p>
+                        <ul class="use-case-list">
+                            <li>Published dissolutions, insolvencies and closures</li>
+                            <li>BORME history and director changes</li>
+                            <li>Risk and solvency profile (0-100)</li>
+                        </ul>
+                        <div class="use-case-foot">
+                            <span class="use-case-plan">Risk profile on Business</span>
+                            <a href="<?= site_url('docs#endpoint-risk-profile') ?>" data-track-event="use_case_click" data-track-metadata='{"use_case": "Counterparty risk", "page_type": "home_en"}'>See the risk profile →</a>
+                        </div>
                     </div>
                 </div>
+                <style>
+                    .use-case {
+                        display: flex;
+                        flex-direction: column;
+                        position: relative;
+                        overflow: hidden;
+                    }
+                    .use-case.card-blue {
+                        background: radial-gradient(circle at 18% 12%, rgba(37, 99, 235, 0.05) 0%, transparent 60%), #ffffff;
+                    }
+                    .use-case.card-teal {
+                        background: radial-gradient(circle at 18% 12%, rgba(16, 185, 129, 0.05) 0%, transparent 60%), #ffffff;
+                    }
+                    .use-case.card-indigo {
+                        background: radial-gradient(circle at 18% 12%, rgba(99, 102, 241, 0.05) 0%, transparent 60%), #ffffff;
+                    }
+                    .use-case::after {
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        left: 28px;
+                        right: 28px;
+                        height: 3px;
+                        border-radius: 0 0 3px 3px;
+                        opacity: 0;
+                        transform: scaleX(0.6);
+                        transition: opacity 0.35s ease, transform 0.35s ease;
+                        pointer-events: none;
+                    }
+                    .use-case.card-blue::after { background: linear-gradient(90deg, #2563EB, #60A5FA); }
+                    .use-case.card-teal::after { background: linear-gradient(90deg, #059669, #34D399); }
+                    .use-case.card-indigo::after { background: linear-gradient(90deg, #4F46E5, #818CF8); }
+                    .use-case:hover::after {
+                        opacity: 1;
+                        transform: scaleX(1);
+                    }
+
+                    /* Cabecera de la card */
+                    .use-case-header {
+                        margin-bottom: 16px;
+                    }
+                    .use-case-header-top {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        gap: 12px;
+                    }
+                    .use-case-icon {
+                        width: 52px;
+                        height: 52px;
+                        border-radius: 14px;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+                        flex-shrink: 0;
+                    }
+                    .card-blue .use-case-icon {
+                        background: linear-gradient(135deg, rgba(37, 99, 235, 0.12) 0%, rgba(59, 130, 246, 0.05) 100%);
+                        border: 1px solid rgba(37, 99, 235, 0.2);
+                        box-shadow: 0 6px 14px -3px rgba(37, 99, 235, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+                        color: #2563EB;
+                    }
+                    .card-teal .use-case-icon {
+                        background: linear-gradient(135deg, rgba(5, 150, 105, 0.12) 0%, rgba(16, 185, 129, 0.05) 100%);
+                        border: 1px solid rgba(5, 150, 105, 0.2);
+                        box-shadow: 0 6px 14px -3px rgba(5, 150, 105, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+                        color: #059669;
+                    }
+                    .card-indigo .use-case-icon {
+                        background: linear-gradient(135deg, rgba(79, 70, 229, 0.12) 0%, rgba(99, 102, 241, 0.05) 100%);
+                        border: 1px solid rgba(79, 70, 229, 0.2);
+                        box-shadow: 0 6px 14px -3px rgba(79, 70, 229, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+                        color: #4F46E5;
+                    }
+
+                    .use-case.card-blue:hover .use-case-icon {
+                        background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+                        color: #ffffff;
+                        border-color: #2563EB;
+                        transform: translateY(-2px) scale(1.04);
+                        box-shadow: 0 10px 22px -3px rgba(37, 99, 235, 0.38);
+                    }
+                    .use-case.card-teal:hover .use-case-icon {
+                        background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+                        color: #ffffff;
+                        border-color: #059669;
+                        transform: translateY(-2px) scale(1.04);
+                        box-shadow: 0 10px 22px -3px rgba(5, 150, 105, 0.38);
+                    }
+                    .use-case.card-indigo:hover .use-case-icon {
+                        background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+                        color: #ffffff;
+                        border-color: #4F46E5;
+                        transform: translateY(-2px) scale(1.04);
+                        box-shadow: 0 10px 22px -3px rgba(79, 70, 229, 0.38);
+                    }
+
+                    /* Badge píldora superior */
+                    .use-case-badge {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 6px;
+                        font-size: 0.72rem;
+                        font-weight: 750;
+                        text-transform: uppercase;
+                        letter-spacing: 0.05em;
+                        padding: 5px 11px;
+                        border-radius: 9999px;
+                        white-space: nowrap;
+                    }
+                    .card-blue .use-case-badge {
+                        background: rgba(37, 99, 235, 0.08);
+                        color: #1D4ED8;
+                        border: 1px solid rgba(37, 99, 235, 0.16);
+                    }
+                    .card-teal .use-case-badge {
+                        background: rgba(5, 150, 105, 0.08);
+                        color: #047857;
+                        border: 1px solid rgba(5, 150, 105, 0.16);
+                    }
+                    .card-indigo .use-case-badge {
+                        background: rgba(79, 70, 229, 0.08);
+                        color: #4338CA;
+                        border: 1px solid rgba(79, 70, 229, 0.16);
+                    }
+                    .use-case-badge-dot {
+                        width: 6px;
+                        height: 6px;
+                        border-radius: 50%;
+                        background: currentColor;
+                    }
+
+                    /* Título de la card */
+                    .use-case-title {
+                        font-size: 1.28rem;
+                        font-weight: 850;
+                        color: var(--ae-dark, #0F172A);
+                        letter-spacing: -0.02em;
+                        line-height: 1.3;
+                        margin: 18px 0 0 0;
+                    }
+
+                    .use-case > p {
+                        margin: 0 0 14px 0;
+                        color: var(--ae-slate, #64748B);
+                        font-size: 0.98rem;
+                        line-height: 1.6;
+                    }
+                    .use-case-list {
+                        list-style: none;
+                        padding: 0;
+                        margin: 4px 0 20px;
+                        display: grid;
+                        gap: 8px;
+                    }
+                    .use-case-list li {
+                        position: relative;
+                        padding-left: 22px;
+                        font-size: 0.95rem;
+                        color: var(--ae-slate, #64748B);
+                        line-height: 1.45;
+                    }
+                    .use-case-list li::before {
+                        content: "";
+                        position: absolute;
+                        left: 4px;
+                        top: 0.55em;
+                        width: 8px;
+                        height: 8px;
+                        border-radius: 50%;
+                        opacity: .8;
+                    }
+                    .card-blue .use-case-list li::before { background: #2563EB; }
+                    .card-teal .use-case-list li::before { background: #059669; }
+                    .card-indigo .use-case-list li::before { background: #4F46E5; }
+
+                    .use-case-foot {
+                        margin-top: auto;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        gap: 12px;
+                        flex-wrap: wrap;
+                        padding-top: 16px;
+                        border-top: 1px solid rgba(15,23,42,0.08);
+                    }
+                    .use-case-plan {
+                        font-size: 0.78rem;
+                        font-weight: 800;
+                        text-transform: uppercase;
+                        letter-spacing: .04em;
+                        color: #64748B;
+                    }
+                    .use-case-foot a {
+                        font-weight: 800;
+                        font-size: 0.92rem;
+                        text-decoration: none;
+                        transition: opacity 0.2s ease;
+                    }
+                    .card-blue .use-case-foot a { color: #2563EB; }
+                    .card-teal .use-case-foot a { color: #059669; }
+                    .card-indigo .use-case-foot a { color: #4F46E5; }
+                    .use-case-foot a:hover {
+                        text-decoration: underline;
+                        opacity: 0.85;
+                    }
+                </style>
             </div>
         </section>
 
@@ -175,34 +506,34 @@
                 <div class="product-info">
                     <div class="pro-badge pro-badge-green reveal">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
-                        For Developers
+                        For developers
                     </div>
-                    <h2 class="reveal delay-1">Company API to validate, <span class="gradient-text">query and integrate data</span></h2>
-                    <p class="reveal delay-1">Incorporate official business information directly into your registration processes, forms or internal applications.</p>
+                    <h2 class="reveal delay-1">A REST API with data from the <span class="gradient-text">Commercial Registry and the BORME</span></h2>
+                    <p class="reveal delay-1">Bring the data of any Spanish company into your sign-up flows, forms or internal tools with a single call. JSON responses, standard HTTP status codes and an OpenAPI specification.</p>
                     <ul class="path-list reveal delay-2" style="margin-bottom: 48px;">
                         <li style="color: var(--ae-dark); border-bottom: none; padding: 6px 0;">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                            Automatic real-time CIF validation
+                            Real-time CIF and company validation
                         </li>
                         <li style="color: var(--ae-dark); border-bottom: none; padding: 6px 0;">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                            Strategic information on new companies
+                            BORME history, directors and public contracts
                         </li>
                         <li style="color: var(--ae-dark); border-bottom: none; padding: 6px 0;">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                            Easy integration via JSON / REST
+                            SDKs for PHP, Node.js and Python, plus an <a href="https://apiempresas.es/public/swagger.json" style="color: inherit;">OpenAPI spec</a>
                         </li>
                     </ul>
-                    <a href="<?= site_url('spanish-company-data-api') ?>" class="btn-ae btn-ae-primary reveal delay-3" style="background: #10B981; border-color: #10B981; box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);">Explore API</a>
+                    <a href="<?= site_url('docs') ?>" class="btn-ae btn-ae-primary reveal delay-3" style="background: #10B981; border-color: #10B981; box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);">Read the API docs</a>
                 </div>
-                <div class="product-visual reveal delay-2" role="img" aria-label="Ejemplo de integración de API REST con respuesta en formato JSON">
+                <div class="product-visual reveal delay-2" role="img" aria-label="Example REST API response in JSON">
                     
                     <div class="api-mockup-wrapper">
                         <div class="api-glow"></div>
                         
                         <div class="floating-badge-api">
                             <span class="pulse-dot"></span>
-                            200 OK — 45ms
+                            200 OK
                         </div>
 
                         <div class="code-editor-window">
@@ -210,7 +541,7 @@
                                 <div class="dots">
                                     <div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div>
                                 </div>
-                                <div class="tab">GET /api/v1/companies?cif=B12345678</div>
+                                <div class="tab" style="white-space: nowrap;">GET /companies?cif=B12345678&amp;admin=true</div>
                             </div>
                             <div class="editor-body">
 <pre style="margin: 0;"><code><span class="token punctuation">{</span>
@@ -221,7 +552,10 @@
     <span class="token property">"status"</span><span class="token punctuation">:</span> <span class="token string">"ACTIVA"</span><span class="token punctuation">,</span>
     <span class="token property">"province"</span><span class="token punctuation">:</span> <span class="token string">"MADRID"</span><span class="token punctuation">,</span>
     <span class="token property">"cnae"</span><span class="token punctuation">:</span> <span class="token string">"6201"</span><span class="token punctuation">,</span>
-    <span class="token property">"cnae_label"</span><span class="token punctuation">:</span> <span class="token string">"Actividades de programación informática"</span>
+    <span class="token property">"cnae_label"</span><span class="token punctuation">:</span> <span class="token string">"Actividades de programación informática"</span><span class="token punctuation">,</span>
+    <span class="token property">"administrators"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
+      <span class="token punctuation">{</span> <span class="token property">"name"</span><span class="token punctuation">:</span> <span class="token string">"JUAN PÉREZ GARCÍA"</span><span class="token punctuation">,</span> <span class="token property">"position"</span><span class="token punctuation">:</span> <span class="token string">"Administrador Único"</span> <span class="token punctuation">}</span>
+    <span class="token punctuation">]</span>
   <span class="token punctuation">}</span>
 <span class="token punctuation">}</span></code></pre>
                             </div>
@@ -234,22 +568,105 @@
 
 
 
+        <!-- 4b. HOW IT WORKS, SOURCES AND COVERAGE -->
+        <section class="band band-light how-it-works" data-track-section="how_it_works">
+            <div class="container">
+                <div class="band-header" style="margin-left: auto; margin-right: auto; text-align: center;">
+                    <h2 class="reveal">How to start with the <span class="gradient-text">Spanish company data API</span></h2>
+                    <p class="reveal delay-1">Three steps from sign-up to your first response.</p>
+                </div>
+                <ol class="hiw-steps">
+                    <li class="hiw-step reveal delay-1">
+                        <span class="hiw-num">1</span>
+                        <h3>Create a free account</h3>
+                        <p>No card. You get <?= (int) $freeLimit ?> requests to test with real data.</p>
+                        <a href="<?= site_url('register?intent=api&plan=free&source=en_home_how') ?>" data-track-event="how_cta_click" data-track-metadata='{"step": 1, "page_type": "home_en"}'>Create account →</a>
+                    </li>
+                    <li class="hiw-step reveal delay-2">
+                        <span class="hiw-num">2</span>
+                        <h3>Copy your API key</h3>
+                        <p>It is in your dashboard right after sign-up. Send it in the <code>X-API-KEY</code> header of each request (<code>Authorization: Bearer</code> also works).</p>
+                    </li>
+                    <li class="hiw-step reveal delay-3">
+                        <span class="hiw-num">3</span>
+                        <h3>Make your first call</h3>
+                        <p>With <code>curl</code> or the SDKs for PHP, Node.js and Python. Responses come back as JSON.</p>
+                        <a href="<?= site_url('docs') ?>" data-track-event="how_cta_click" data-track-metadata='{"step": 3, "page_type": "home_en"}'>Read the docs →</a>
+                    </li>
+                </ol>
+
+                <div class="hiw-sources reveal">
+                    <h3>Where the data comes from</h3>
+                    <div class="hiw-sources-grid">
+                        <div>
+                            <strong>BORME (Boletín Oficial del Registro Mercantil)</strong>
+                            <p>The official gazette of Spain's Commercial Registry: incorporations, director appointments and resignations, changes of address, purpose or capital, dissolutions, insolvencies and closures. We process every issue, every day.</p>
+                        </div>
+                        <div>
+                            <strong>Spanish Public Procurement Platform</strong>
+                            <p>Public contracts awarded to each company: contracting authority, amounts and dates.</p>
+                        </div>
+                        <div>
+                            <strong>Data computed by SpainCompanyAPI</strong>
+                            <p>Registry status, scoring and risk profile are calculated from those publications. They are not an official certificate from the Commercial Registry.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hiw-sources reveal">
+                    <h3>Coverage and limits</h3>
+                    <div class="hiw-sources-grid">
+                        <div>
+                            <strong>What a CIF is</strong>
+                            <p>The CIF (now officially the NIF of a legal entity) is a Spanish company's tax ID: a letter for the legal form, seven digits and a check character, for example <code>A46103834</code>. The API checks the format and returns the company behind it.</p>
+                        </div>
+                        <div>
+                            <strong>Covered</strong>
+                            <p>Companies registered in Spain's Commercial Registry (S.L., S.A., cooperatives and other entities with BORME filings): identity, status, directors and filing history. On Pro, the EU VAT number is also checked in VIES.</p>
+                        </div>
+                        <div>
+                            <strong>Not covered</strong>
+                            <p>Ultimate beneficial owners (UBO), sanctions or PEP screening, sole traders (autónomos) and full annual accounts. Pair the API with a screening provider if your process needs them.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <style>
+                .how-it-works .hiw-steps { list-style: none; padding: 0; margin: 40px 0 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+                .how-it-works .hiw-step { background: #fff; border: 1px solid var(--ae-border); border-radius: 20px; padding: 28px; position: relative; }
+                .how-it-works .hiw-num { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: var(--ae-blue); color: #fff; font-weight: 900; margin-bottom: 14px; }
+                .how-it-works .hiw-step h3 { font-size: 1.15rem; font-weight: 850; margin: 0 0 8px; }
+                .how-it-works .hiw-step p { color: var(--ae-slate); font-size: 0.95rem; margin: 0 0 12px; }
+                .how-it-works .hiw-step a { color: var(--ae-blue); font-weight: 800; text-decoration: none; font-size: 0.92rem; }
+                .how-it-works code { background: #eef2ff; color: #1e3a8a; padding: 1px 6px; border-radius: 6px; font-size: 0.85em; }
+                .how-it-works .hiw-sources { margin-top: 48px; background: #fff; border: 1px solid var(--ae-border); border-radius: 20px; padding: 28px 32px; }
+                .how-it-works .hiw-sources h3 { font-size: 1.2rem; font-weight: 850; margin: 0 0 18px; }
+                .how-it-works .hiw-sources-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+                .how-it-works .hiw-sources-grid strong { display: block; color: var(--ae-dark); margin-bottom: 6px; font-size: 0.98rem; }
+                .how-it-works .hiw-sources-grid p { color: var(--ae-slate); font-size: 0.92rem; margin: 0; line-height: 1.5; }
+                @media (max-width: 900px) {
+                    .how-it-works .hiw-steps, .how-it-works .hiw-sources-grid { grid-template-columns: 1fr; }
+                    .how-it-works .hiw-sources { padding: 22px; }
+                }
+            </style>
+        </section>
+
         <!-- 8. PRICING -->
         <section id="precios" class="band band-light" data-track-section="pricing_cta">
             <div class="container">
                 <div class="band-header" style="text-align: left; max-width: 800px;">
-                    <h2 class="reveal delay-1">Transparent plans for any volume</h2>
+                    <h2 class="reveal delay-1">Spanish company API pricing</h2>
                     <div style="width: 60px; height: 4px; background: linear-gradient(90deg, #4f46e5, #4b9a69); margin-top: 16px; margin-bottom: 24px;"></div>
-                    <p class="reveal delay-2" style="font-size: 1.1rem; color: var(--ae-slate);">Start validating CIFs and company names in the Sandbox. When moving to production, scale to Pro/Business with usage control and traceability. No commitments, no hidden costs.<br><br></p>
+                    <p class="reveal delay-2" style="font-size: 1.1rem; color: var(--ae-slate);">Test for free with real data and move to Pro or Business when you go live. Prices in euros, VAT not included. No lock-in: cancel any time.<br><br></p>
                 </div>
                 
                 <!-- TOGGLE ANUAL / MENSUAL -->
                 <div style="display: flex; justify-content: flex-start; align-items: center; margin-bottom: 40px; margin-top: 24px; gap: 12px;">
-                    <span style="font-size: 0.95rem; font-weight: 600; color: #94a3b8; transition: all 0.3s;" id="labelMonthlyHome">Monthly</span>
+                    <span style="font-size: 0.95rem; font-weight: 800; color: #2563eb; transition: all 0.3s;" id="labelMonthlyHome">Monthly</span>
                     <button type="button" id="billingToggleHome" style="width: 56px; height: 32px; background: #0f172a; border-radius: 99px; position: relative; cursor: pointer; border: none; padding: 4px; transition: background 0.3s;" onclick="togglePricingHome()">
-                        <div id="toggleKnobHome" style="width: 24px; height: 24px; background: white; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); transform: translateX(24px);"></div>
+                        <div id="toggleKnobHome" style="width: 24px; height: 24px; background: white; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); transform: translateX(0px);"></div>
                     </button>
-                    <span style="font-size: 0.95rem; font-weight: 800; color: #2563eb; display: flex; align-items: center; gap: 8px; transition: all 0.3s;" id="labelAnnualHome">Annual <span style="background: #dcfce7; color: #166534; font-size: 10px; padding: 4px 8px; border-radius: 99px; letter-spacing: 0.05em; font-weight: 800;">SAVE 20%</span></span>
+                    <span style="font-size: 0.95rem; font-weight: 600; color: #94a3b8; display: flex; align-items: center; gap: 8px; transition: all 0.3s;" id="labelAnnualHome">Annual <span style="background: #dcfce7; color: #166534; font-size: 10px; padding: 4px 8px; border-radius: 99px; letter-spacing: 0.05em; font-weight: 800;">SAVE 20%</span></span>
                 </div>
 
                 <div class="tier-grid" style="margin-top: 16px;">
@@ -269,7 +686,7 @@
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Free segment counts: how many companies by sector, area and size</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> No credit card required</li>
                         </ul>
-                        <a href="<?= site_url('register?plan=free') ?>" class="btn-tier" data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Start for free", "plan": "free", "source_block": "pricing_cta", "page_type": "home"}'>Start for free</a>
+                        <a href="<?= site_url('register?intent=api&plan=free&source=en_home_pricing') ?>" class="btn-tier" data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Start for free", "plan": "free", "source_block": "pricing_cta", "page_type": "home"}'>Start for free</a>
                     </div>
                     
                     <!-- PRO -->
@@ -278,7 +695,7 @@
                         <h3>Pro</h3>
                         <div class="tier-subtitle">To automate validations</div>
                         <div class="tier-desc">The ideal option for SaaS, ERPs and products that require validation in production.</div>
-                        <div class="price"><b id="priceProHome" data-monthly="19" data-annual="15.17" style="font-weight: inherit;">15.17</b>€<span>/mo</span></div>
+                        <div class="price"><b id="priceProHome" data-monthly="19" data-annual="15.17" style="font-weight: inherit;">19</b>€<span>/mo</span></div>
                         <ul class="tier-features">
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> 3,000 requests per month</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Full data, with address and current directors (with appointment date)</li>
@@ -292,7 +709,7 @@
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Newly incorporated companies (today, 7 or 30 days): up to 100 per request, filterable by CNAE and phone</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Priority email support</li>
                         </ul>
-                        <a href="<?= site_url('register?plan=pro') ?>" class="btn-tier" data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Start with Pro", "plan": "pro", "source_block": "pricing_cta", "page_type": "home"}'>Start with Pro</a>
+                        <a href="<?= site_url('register?intent=api&plan=pro&source=en_home_pricing') ?>" class="btn-tier" data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Start with Pro", "plan": "pro", "source_block": "pricing_cta", "page_type": "home"}'>Start with Pro</a>
                     </div>
                     
                     <!-- BUSINESS -->
@@ -301,7 +718,7 @@
                         <h3>Business</h3>
                         <div class="tier-subtitle">For teams and high volume</div>
                         <div class="tier-desc">Designed for platforms with higher load, critical processes and high availability needs.</div>
-                        <div class="price"><b id="priceBizHome" data-monthly="49" data-annual="39.17" style="font-weight: inherit;">39.17</b>€<span>/mo</span></div>
+                        <div class="price"><b id="priceBizHome" data-monthly="49" data-annual="39.17" style="font-weight: inherit;">49</b>€<span>/mo</span></div>
                         <ul class="tier-features">
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> 10,000 requests per month</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Risk and solvency profile</li>
@@ -314,7 +731,7 @@
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Newly incorporated companies (today, 7 or 30 days): up to 1,000 per request</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Priority email support</li>
                         </ul>
-                        <a href="<?= site_url('register?plan=business') ?>" class="btn-tier" data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Start with Business", "plan": "business", "source_block": "pricing_cta", "page_type": "home"}'>Start with Business</a>
+                        <a href="<?= site_url('register?intent=api&plan=business&source=en_home_pricing') ?>" class="btn-tier" data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Start with Business", "plan": "business", "source_block": "pricing_cta", "page_type": "home"}'>Start with Business</a>
                     </div>
                 </div>
 
@@ -329,9 +746,9 @@
                     <div style="position: absolute; bottom: -30%; right: -10%; width: 50%; height: 160%; background: radial-gradient(circle, rgba(16,185,129,0.08) 0%, transparent 60%); pointer-events: none;"></div>
 
                     <div style="position: relative; z-index: 1;">
-                        <div style="display: inline-block; background: #ffffff; color: #2563eb; font-size: 0.8rem; font-weight: 800; padding: 6px 16px; border-radius: 99px; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 16px; box-shadow: 0 4px 6px -1px rgba(37,99,235,0.1); border: 1px solid rgba(59,130,246,0.1);">New Custom Plan</div>
+                        <div style="display: inline-block; background: #ffffff; color: #2563eb; font-size: 0.8rem; font-weight: 800; padding: 6px 16px; border-radius: 99px; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 16px; box-shadow: 0 4px 6px -1px rgba(37,99,235,0.1); border: 1px solid rgba(59,130,246,0.1);">No subscription</div>
                         <h3 style="color: #0f172a; font-size: 2.1rem; font-weight: 900; margin: 0 0 12px; letter-spacing: -0.03em;">Prefer to pay only for what you use?</h3>
-                        <p style="color: #475569; font-size: 1.15rem; max-width: 600px; margin: 0 auto 32px; line-height: 1.6;">Design your own <strong style="color: #0f172a;">Prepaid Credit Bonus</strong>. Pay once, use it at your own pace and get automatic volume discounts.</p>
+                        <p style="color: #475569; font-size: 1.15rem; max-width: 600px; margin: 0 auto 32px; line-height: 1.6;">Buy <strong style="color: #0f172a;">prepaid credits</strong> with no subscription and no expiry: 1,000 credits for €9, or build a custom pack from 10,000 credits with volume discounts.</p>
                         
                         <a href="<?= site_url('buy-api-credits') ?>" style="display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #fff; padding: 18px 40px; border-radius: 16px; font-weight: 800; font-size: 1.1rem; text-decoration: none; box-shadow: 0 10px 25px rgba(37,99,235,0.4); transition: all 0.3s ease; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -345,7 +762,7 @@
                                 <line x1="8" y1="9" x2="8" y2="15"></line>
                                 <line x1="16" y1="17" x2="16" y2="23"></line>
                             </svg>
-                            Create my Custom Bonus
+                            See credit packs
                         </a>
                     </div>
                 </div>
@@ -370,7 +787,7 @@
                                     <div class="cap-col-feature">
                                         <div class="cap-feature-name">Validation and Enrichment</div>
                                         <div class="cap-feature-endpoint">GET /api/v1/companies</div>
-                                        <div class="cap-feature-desc">Validate the existence of a company and obtain its official data (CNAE, Address, Capital).</div>
+                                        <div class="cap-feature-desc">Check that a company exists and get its registry data (CNAE, address, capital).</div>
                                         <button type="button" onclick="event.preventDefault(); showJsonPreview('get_companies')" class="btn-json-preview">View JSON Response</button>
                                     </div>
                                 </td>
@@ -539,7 +956,7 @@
                                     <div class="cap-col-feature">
                                         <div class="cap-feature-name">Corporate Risk Profile</div>
                                         <div class="cap-feature-endpoint">GET /api/v1/companies/risk-profile</div>
-                                        <div class="cap-feature-desc">Algorithmic risk scoring, annual accounts filing compliance and official distress alerts.</div>
+                                        <div class="cap-feature-desc">Algorithmic risk score, annual accounts filing compliance and distress events published in the BORME.</div>
                                         <button type="button" onclick="event.preventDefault(); showJsonPreview('get_risk_profile')" class="btn-json-preview">View JSON Response</button>
                                     </div>
                                 </td>
@@ -611,108 +1028,55 @@
                     
                     <!-- Left Column: Intro -->
                     <div style="position: sticky; top: 120px;">
-                        <span class="tag reveal" style="background: rgba(37,99,235,0.1); color: var(--ae-blue); border: none; font-weight: 800; padding: 6px 16px; border-radius: 100px; display: inline-block; margin-bottom: 8px;">Technical Support</span>
-                        <h2 class="reveal delay-1" style="font-size: 3rem; font-weight: 950; margin-top: 16px; margin-bottom: 24px; text-align: left; line-height: 1.1; letter-spacing: -0.03em;">We answer <span class="gradient-text" style="display: inline-block; padding-bottom: 4px;">your questions</span></h2>
-                        <p class="reveal delay-2" style="color: var(--ae-slate); font-size: 1.15rem; line-height: 1.6; margin-bottom: 32px; font-weight: 500;">If you can't find the answer you're looking for, our team of experts is available to help you integrate the API.</p>
-                        
-                        <!-- Avatar group & trust -->
-                        <div class="reveal delay-2" style="display: flex; align-items: center; gap: 16px; margin-bottom: 32px; padding: 12px 20px; background: #ffffff; border-radius: 16px; border: 1px solid var(--ae-border); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); max-width: max-content;">
-                            <div style="display: flex;">
-                                <div style="width: 40px; height: 40px; border-radius: 50%; border: 3px solid #ffffff; background: linear-gradient(135deg, #fca5a5, #ef4444); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 0.85rem; z-index: 3; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">ES</div>
-                                <div style="width: 40px; height: 40px; border-radius: 50%; border: 3px solid #ffffff; background: linear-gradient(135deg, #93c5fd, #3b82f6); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 0.85rem; margin-left: -12px; z-index: 2; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">AG</div>
-                                <div style="width: 40px; height: 40px; border-radius: 50%; border: 3px solid #ffffff; background: linear-gradient(135deg, #6ee7b7, #10b981); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 0.85rem; margin-left: -12px; z-index: 1; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">MJ</div>
-                            </div>
-                            <div>
-                                <div style="font-weight: 800; color: var(--ae-dark); font-size: 0.95rem;">Support in Spain</div>
-                                <div style="color: var(--ae-slate); font-size: 0.8rem; font-weight: 500;">Response time &lt; 2h</div>
+                        <span class="tag reveal" style="background: rgba(37,99,235,0.1); color: var(--ae-blue); border: none; font-weight: 800; padding: 6px 16px; border-radius: 100px; display: inline-block; margin-bottom: 8px;">FAQ</span>
+                        <h2 class="reveal delay-1" style="font-size: 3rem; font-weight: 950; margin-top: 16px; margin-bottom: 24px; text-align: left; line-height: 1.1; letter-spacing: -0.03em;">Questions about the <span class="gradient-text" style="display: inline-block; padding-bottom: 4px;">Spanish company API</span></h2>
+                        <p class="reveal delay-2" style="color: var(--ae-slate); font-size: 1.15rem; line-height: 1.6; margin-bottom: 32px; font-weight: 500;">If your question is not here, write to us. The developer who builds the API answers, in English or Spanish, and can help you with the integration.</p>
+
+                        <div class="reveal delay-2" style="display: grid; gap: 12px; margin-bottom: 32px; max-width: 420px;">
+                            <div style="display: flex; align-items: center; gap: 14px; padding: 12px 18px; background: #ffffff; border-radius: 16px; border: 1px solid var(--ae-border); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);">
+                                <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(37,99,235,0.1); color: var(--ae-blue); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                                </div>
+                                <div>
+                                    <div style="font-weight: 800; color: var(--ae-dark); font-size: 0.95rem;">Direct support from the developer</div>
+                                    <div style="color: var(--ae-slate); font-size: 0.8rem; font-weight: 500;">Based in Spain · Reply in under 2 h on business days</div>
+                                </div>
                             </div>
                         </div>
 
                         <a href="mailto:soporte@apiempresas.es" class="btn-ae reveal delay-3" style="background: linear-gradient(135deg, var(--ae-blue), var(--ae-teal)); color: #ffffff; border-radius: 14px; box-shadow: 0 10px 20px -5px rgba(37,99,235,0.4); padding: 16px 32px; font-size: 1.05rem; display: inline-flex; align-items: center; gap: 12px; transition: all 0.4s ease; border: none; font-weight: 700;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 15px 30px -5px rgba(37, 99, 235, 0.5)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 20px -5px rgba(37,99,235,0.4)';">
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                            Contact team
+                            Email support
                         </a>
                     </div>
 
                     <!-- Right Column: Accordion -->
                     <div class="faq-accordion" style="width: 100%; margin: 0;">
-                        <!-- Q1 -->
-                        <div class="faq-item reveal delay-1">
+                        <?php
+                        // Single source for the FAQ: rendered here and in the FAQPage JSON-LD at the bottom.
+                        $homeFaqs = [
+                            ['What data does the Spanish company API return?', 'Legal name, status (active, dissolved, in insolvency…), incorporation date, province and main activity (CNAE code). On the Pro plan you also get current directors, the full registered address, revenue band and the BORME filing history.'],
+                            ['What is a CIF and how do I validate it?', 'The CIF (now officially the NIF of a legal entity) is the tax ID of a Spanish company: a letter for the legal form, seven digits and a check character, for example A46103834. The API checks the check digit and tells you whether a company with that CIF exists and whether it is active.'],
+                            ['Can I try it for free?', 'Yes. The Free plan gives you ' . (int) $freeLimit . ' requests against the live API (one-time, not renewed), with no card and no commitment. There is also a sandbox that does not use requests, for testing the response format.'],
+                            ['Is the data official?', 'The data comes from official public sources: the BORME (the gazette of the Spanish Commercial Registry) and the Spanish Public Procurement Platform, updated every day. Registry status and scores are calculated by us from those publications, so they are not an official Commercial Registry certificate.'],
+                            ['How do I authenticate?', 'Send your API key in the X-API-KEY header (Authorization: Bearer is also accepted). The base URL is https://apiempresas.es/api/v1. You get your key in the dashboard as soon as you sign up.'],
+                            ['Can it check EU VAT numbers in VIES?', 'Yes. The KYB verification endpoint (Pro) checks in one call that the company exists and is active, that the name matches, that the signer is a current director and that the VAT number is registered in VIES.'],
+                            ['What does it not cover?', 'Ultimate beneficial owners (UBO), sanctions and PEP screening, sole traders (autónomos) and full annual accounts. If your compliance process needs them, combine the API with a screening provider.'],
+                            ['How do pricing and invoicing work?', 'Plans are billed in euros, VAT not included: Pro at €19/month (3,000 requests) and Business at €49/month (10,000 requests), with a yearly option. You can also buy credits without a subscription. Payment is by card through Stripe and you get an invoice for every payment. No lock-in.'],
+                        ];
+                        foreach ($homeFaqs as $i => [$q, $a]): ?>
+                        <div class="faq-item reveal delay-<?= min(3, intdiv($i, 2) + 1) ?>">
                             <div class="faq-header">
-                                <h3>What data does the API return?</h3>
+                                <h3><?= esc($q) ?></h3>
                                 <div class="faq-icon"></div>
                             </div>
                             <div class="faq-content">
                                 <div class="faq-body">
-                                    It returns the official company name, activity status, incorporation date, province, and main activity (CNAE) obtained directly from the Mercantile Registry.
+                                    <?= esc($a) ?>
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- Q2 -->
-                        <div class="faq-item reveal delay-1">
-                            <div class="faq-header">
-                                <h3>Can I try it for free?</h3>
-                                <div class="faq-icon"></div>
-                            </div>
-                            <div class="faq-content">
-                                <div class="faq-body">
-                                    Yes, by registering you get a Free plan with <?= $freeLimit ?> free requests with no expiration date so you can test in our Sandbox environment or in production without any commitment.
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Q3 -->
-                        <div class="faq-item reveal delay-2">
-                            <div class="faq-header">
-                                <h3>Is the information official?</h3>
-                                <div class="faq-icon"></div>
-                            </div>
-                            <div class="faq-content">
-                                <div class="faq-body">
-                                    Absolutely. All our data comes from official State sources, such as the Central Mercantile Registry and the BORME, ensuring its validity and constant updating.
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Q4 -->
-                        <div class="faq-item reveal delay-2">
-                            <div class="faq-header">
-                                <h3>What is the difference between the API and Radar?</h3>
-                                <div class="faq-icon"></div>
-                            </div>
-                            <div class="faq-content">
-                                <div class="faq-body">
-                                    The API is a technical service (JSON endpoints) designed for developers to integrate data directly into their own software (CRM, ERP, registration processes).
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Q5 -->
-                        <div class="faq-item reveal delay-3">
-                            <div class="faq-header">
-                                <h3>How long does it take to integrate?</h3>
-                                <div class="faq-icon"></div>
-                            </div>
-                            <div class="faq-content">
-                                <div class="faq-body">
-                                    Our REST API is designed with modern standards and is extremely simple. An average developer can complete the integration and validate their first company in less than an hour. Detailed documentation is available to guide you.
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Q6 -->
-                        <div class="faq-item reveal delay-3">
-                            <div class="faq-header">
-                                <h3>Is it useful for B2B prospecting?</h3>
-                                <div class="faq-icon"></div>
-                            </div>
-                            <div class="faq-content">
-                                <div class="faq-body">
-                                    Yes. Through the API you can identify the incorporation date of any Spanish company based on its BORME publication.
-                                </div>
-                            </div>
-                        </div>
+                        <?php endforeach; ?>
 
                     </div>
                 </div>
@@ -729,14 +1093,13 @@
                     
                     <!-- Content -->
                     <div style="position: relative; z-index: 1;">
-                        <h2 style="font-size: 2.8rem; font-weight: 950; margin-bottom: 24px; color: #ffffff; letter-spacing: -0.02em; line-height: 1.1;">Start validating companies or finding new customers today</h2>
-                        <p style="font-size: 1.25rem; margin-bottom: 48px; color: #E2E8F0; max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.6;">Query business data and integrate it into your system securely and instantly.</p>
+                        <h2 style="font-size: 2.8rem; font-weight: 950; margin-bottom: 24px; color: #ffffff; letter-spacing: -0.02em; line-height: 1.1;">Start validating Spanish companies today</h2>
+                        <p style="font-size: 1.25rem; margin-bottom: 48px; color: #E2E8F0; max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.6;">Look up Spanish companies from the Commercial Registry and the BORME, automate CIF checks and start with <?= (int) $freeLimit ?> free requests, no card required.</p>
                         
                         <div style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;">
-                            <a href="#buscar" class="btn-ae" style="background: #ffffff; color: #0F172A; padding: 18px 32px; font-size: 1.1rem; border: none; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); font-weight: 800;">Validate CIF Free</a>
-                            <a href="<?= site_url('register') ?>" class="btn-ae" style="background: #12b48a; color: #ffffff; padding: 18px 32px; font-size: 1.1rem; border: none; box-shadow: 0 10px 20px rgba(18, 180, 138, 0.3); font-weight: 800;" 
-                               data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Get Started", "plan": "radar", "source_block": "final_cta", "page_type": "home"}'>
-                               Get Started
+                            <a href="<?= site_url('register?intent=api&plan=free&source=en_home_final') ?>" class="btn-ae" style="background: #ffffff; color: #0F172A; padding: 18px 32px; font-size: 1.1rem; border: none; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); font-weight: 800;" data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Get a free API key", "plan": "free", "source_block": "final_cta", "page_type": "home_en"}'>Get a free API key</a>
+                            <a href="<?= site_url('docs') ?>" class="btn-ae" style="background: #12b48a; color: #ffffff; padding: 18px 32px; font-size: 1.1rem; border: none; box-shadow: 0 10px 20px rgba(18, 180, 138, 0.3); font-weight: 800;">
+                               Read the API docs
                             </a>
                         </div>
                     </div>
@@ -747,7 +1110,6 @@
     </main>
 
     <?= view('partials/footer_en') ?>
-    <?= view('partials/review_modal') ?>
 
     <!-- JSON PREVIEW MODAL -->
     <div id="json-modal" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.4); z-index:9999; backdrop-filter:blur(4px); align-items:center; justify-content:center; padding:20px;">
@@ -1123,8 +1485,30 @@
             });
         });
 
-        // Pricing Toggle Home
-        let isAnnualHome = true;
+        // Copy the hero curl
+        (function () {
+            var btn = document.getElementById('heroCurlCopy');
+            if (!btn) return;
+            btn.addEventListener('click', function () {
+                var text = 'curl "https://apiempresas.es/api/v1/companies?cif=A46103834" \\\n  -H "X-API-KEY: YOUR_API_KEY"';
+                var done = function () {
+                    btn.textContent = 'Copied';
+                    setTimeout(function () { btn.textContent = 'Copy'; }, 2000);
+                };
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).then(done).catch(function () {});
+                } else {
+                    var ta = document.createElement('textarea');
+                    ta.value = text; document.body.appendChild(ta); ta.select();
+                    try { document.execCommand('copy'); done(); } catch (e) {}
+                    document.body.removeChild(ta);
+                }
+                if (window.trackEvent) window.trackEvent('hero_curl_copy', { source_block: 'hero', page_type: 'home_en' }, 'heroCurlCopy');
+            });
+        })();
+
+        // Pricing Toggle Home (starts on monthly, like the Spanish home)
+        let isAnnualHome = false;
         function togglePricingHome() {
             isAnnualHome = !isAnnualHome;
             const knob = document.getElementById('toggleKnobHome');
@@ -1152,7 +1536,25 @@
                 pricePro.textContent = pricePro.dataset.monthly;
                 priceBiz.textContent = priceBiz.dataset.monthly;
             }
+
+            // Paid sign-up links carry the billing period the visitor is looking at
+            document.querySelectorAll('a[href*="register?intent=api&plan=pro"], a[href*="register?intent=api&plan=business"]').forEach(function (a) {
+                var u = new URL(a.href, window.location.origin);
+                u.searchParams.set('period', isAnnualHome ? 'annual' : 'monthly');
+                a.href = u.toString();
+            });
         }
+    </script>
+    <script type="application/ld+json">
+    <?= json_encode([
+        '@context'   => 'https://schema.org',
+        '@type'      => 'FAQPage',
+        'mainEntity' => array_map(static fn($f) => [
+            '@type'          => 'Question',
+            'name'           => $f[0],
+            'acceptedAnswer' => ['@type' => 'Answer', 'text' => $f[1]],
+        ], $homeFaqs),
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) ?>
     </script>
 </body>
 </html>

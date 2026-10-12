@@ -3,8 +3,8 @@
 
 <head>
     <?= view('partials/head', [
-        'title' => 'Create your Custom API Credits Bonus | APIEmpresas.es',
-        'excerptText' => 'Buy a credit package with no monthly subscription and use them at your own pace with no expiration date. Automatic volume discounts.',
+        'title' => 'Buy API Credits for Spanish Company Data, No Subscription | SpainCompanyAPI',
+        'excerptText' => 'Prepaid credits for the Spanish company data API: 1,000 credits for €9 or custom packs from 10,000 credits with volume discounts. No subscription, no expiry.',
         'canonical' => site_url('buy-api-credits'),
         'robots' => 'index,follow',
     ]) ?>
@@ -481,8 +481,8 @@
         <div class="container" style="max-width:900px; margin:0 auto; padding:0 2rem;">
             <div class="api-hero-badge">One-time Payment · No expiration</div>
             <h1 class="api-hero-title">
-                Create your own Bonus<br>
-                <span>Custom Prepaid Credits</span>
+                Buy API credits<br>
+                <span>No subscription, no expiry</span>
             </h1>
             <p class="api-hero-sub">
                 Pay only for what you consume. Ideal for one-off projects, data migrations, or integrations without a monthly commitment. Credits never expire.
@@ -490,8 +490,30 @@
         </div>
     </header>
 
+    <?php
+    // Where the visitor came from (API 429, dashboard notice, email...). Sent with both forms to attribute the purchase.
+    $bonoSource = substr(preg_replace('/[^a-z0-9_\-]/i', '', (string) (service('request')->getGet('source') ?? '')), 0, 64);
+    $inicioCreditos = \App\Services\BillingService::BONO_INICIO_CREDITOS;
+    $inicioEuros    = \App\Services\BillingService::BONO_INICIO_EUROS;
+    ?>
     <!-- WIZARD -->
     <div class="container">
+        <!-- STARTER PACK (12-10-2026): for whoever runs out of the 100 free requests and needs a few more.
+             Custom packs start at 10,000 credits (€49). -->
+        <div style="max-width: 760px; margin: 0 auto 20px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 18px 22px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; box-shadow: 0 4px 16px -6px rgba(15, 23, 42, 0.08);">
+            <div style="flex: 1; min-width: 240px;">
+                <div style="font-size: 0.74rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.3px; color: #2563eb; margin-bottom: 4px;">Only need a few requests?</div>
+                <div style="font-size: 1.05rem; font-weight: 800; color: #0f172a;">Starter pack: <?= number_format($inicioCreditos, 0, '.', ',') ?> credits for €<?= number_format($inicioEuros, 0, '.', ',') ?> + VAT</div>
+                <div style="font-size: 0.85rem; color: #64748b; margin-top: 2px;">One-off payment, no subscription, no expiry. Up to <?= number_format($inicioCreditos, 0, '.', ',') ?> basic lookups or <?= number_format(intdiv($inicioCreditos, 3), 0, '.', ',') ?> advanced calls.</div>
+            </div>
+            <form action="<?= site_url('billing/checkout_bonus') ?>" method="POST" style="margin: 0;">
+                <?= csrf_field() ?>
+                <input type="hidden" name="credits" value="<?= $inicioCreditos ?>">
+                <input type="hidden" name="source" value="<?= esc($bonoSource !== '' ? $bonoSource : 'bono_page_inicio_en', 'attr') ?>">
+                <button type="submit" style="white-space: nowrap; background: #0f172a; color: #ffffff; border: none; border-radius: 10px; padding: 11px 20px; font-weight: 800; font-size: 0.9rem; cursor: pointer;">Buy for €<?= number_format($inicioEuros, 0, '.', ',') ?></button>
+            </form>
+        </div>
+
         <div class="wizard-container">
             
             <div class="credits-display">
@@ -531,7 +553,7 @@
                     <div class="stat-card-desc">Generic endpoints (1 credit)</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-card-title">Advanced Calls (IA/Pro)</div>
+                    <div class="stat-card-title">Advanced Calls (AI/Pro)</div>
                     <div class="stat-card-value" id="advancedCallsOutput">16.666</div>
                     <div class="stat-card-desc">Complex endpoints (3 credits)</div>
                 </div>
@@ -540,6 +562,7 @@
             <form action="<?= site_url('billing/checkout_bonus') ?>" method="POST" id="bonusForm">
                 <?= csrf_field() ?>
                 <input type="hidden" name="credits" id="inputCredits" value="50000">
+                <input type="hidden" name="source" value="<?= esc($bonoSource, 'attr') ?>">
                 <button type="submit" class="buy-btn">
                     Buy Bonus Now
                 </button>
@@ -592,9 +615,9 @@
                     <div>
                         <div style="color: #2563eb; font-weight: 800; font-size: 1.1rem; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                            Official Sources
+                            Public sources
                         </div>
-                        <p style="color: #64748b; font-size: 0.95rem; margin: 0; line-height: 1.6;">All data comes from the Central Mercantile Register and the BORME. Updated daily first thing in the morning for maximum reliability.</p>
+                        <p style="color: #64748b; font-size: 0.95rem; margin: 0; line-height: 1.6;">Data from the BORME (the Commercial Registry gazette) and the Spanish Public Procurement Platform, processed every morning. Status and scores are computed by us from those publications.</p>
                     </div>
                     <div>
                         <div style="color: #2563eb; font-weight: 800; font-size: 1.1rem; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
