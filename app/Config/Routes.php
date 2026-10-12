@@ -633,6 +633,7 @@ $routes->get('perfil-de-riesgo', 'RiskProfileController::index');
 $routes->get('validar-cif', 'Herramientas::validarCif');
 $routes->get('como-saber-si-una-empresa-esta-activa', 'Herramientas::empresaActiva');
 $routes->get('validar-cif-excel', 'Herramientas::validarCifExcel');
+$routes->get('validar-nif-clientes-facturacion', 'Herramientas::nifFacturacion');
 $routes->post('perfil-de-riesgo', 'RiskProfileController::index');
 $routes->get('api/perfil-de-riesgo/lookup', 'RiskProfileController::ajaxLookup');
 

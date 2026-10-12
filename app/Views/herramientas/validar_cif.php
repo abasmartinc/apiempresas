@@ -168,7 +168,7 @@ $registro = site_url('register?intent=api&plan=free&source=validar_cif');
             <li>Si el control va en letra, es la que ocupa esa posición en <code>JABCDEFGHI</code> (0 = J, 1 = A, 2 = B…).</li>
         </ol>
         <p>Las sociedades anónimas y limitadas (A, B) y las comunidades (E, H) llevan control numérico; las entidades públicas, extranjeras y religiosas (N, P, Q, R, S, W), letra; el resto puede llevar cualquiera de los dos.</p>
-        <p>Un CIF bien formado no garantiza que la empresa exista: para eso hay que consultarlo, como hace este validador o la <a href="<?= site_url() ?>">API de empresas</a> desde tu software. Si quieres saber además si sigue activa y quién la administra, mira <a href="<?= site_url('como-saber-si-una-empresa-esta-activa') ?>">cómo saber si una empresa está activa</a>.</p>
+        <p>Un CIF bien formado no garantiza que la empresa exista: para eso hay que consultarlo, como hace este validador o la <a href="<?= site_url() ?>">API de empresas</a> desde tu software. Si quieres saber además si sigue activa y quién la administra, mira <a href="<?= site_url('como-saber-si-una-empresa-esta-activa') ?>">cómo saber si una empresa está activa</a>. Si lo compruebas para facturar, mira <a href="<?= site_url('validar-nif-clientes-facturacion') ?>">qué datos del cliente exige la factura y qué comprueba Verifactu</a>.</p>
     </section>
 
     <section class="vc-card">

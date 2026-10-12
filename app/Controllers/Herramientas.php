@@ -27,4 +27,10 @@ class Herramientas extends BaseController
     {
         return view('herramientas/validar_cif_excel');
     }
+
+    /** GET /validar-nif-clientes-facturacion — guía: comprobar el NIF del cliente antes de facturar (Verifactu) */
+    public function nifFacturacion()
+    {
+        return view('herramientas/nif_facturacion');
+    }
 }

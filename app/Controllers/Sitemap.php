@@ -208,6 +208,7 @@ class Sitemap extends Controller
                 ['loc' => site_url('validar-cif'), 'priority' => '0.8', 'freq' => 'monthly'],
                 ['loc' => site_url('como-saber-si-una-empresa-esta-activa'), 'priority' => '0.8', 'freq' => 'monthly'],
                 ['loc' => site_url('validar-cif-excel'), 'priority' => '0.7', 'freq' => 'monthly'],
+                ['loc' => site_url('validar-nif-clientes-facturacion'), 'priority' => '0.7', 'freq' => 'monthly'],
                 ['loc' => site_url('planes/free'), 'priority' => '0.7', 'freq' => 'monthly'],
                 ['loc' => site_url('planes/pro'), 'priority' => '0.7', 'freq' => 'monthly'],
                 ['loc' => site_url('planes/business'), 'priority' => '0.7', 'freq' => 'monthly'],
