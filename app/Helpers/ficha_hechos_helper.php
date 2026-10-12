@@ -1071,3 +1071,59 @@ if (!function_exists('ficha_grupo_gleif')) {
         return $out;
     }
 }
+
+/*
+ * Tamaño de la empresa (12-10-2026). Ver claude/ted-tamano-empresa-oct-2026.md.
+ *
+ * En España el número de empleados no está en abierto (solo en las cuentas anuales, de pago). Dos
+ * fuentes públicas lo dan para una parte de las empresas:
+ *   - company_employee_ranges (calidad_datos/cargar_kit_digital.py): el tramo de plantilla que la
+ *     empresa acreditó al recibir el Kit Digital o el Kit Consulting de Red.es, que se conceden por
+ *     segmentos de empleados (concesiones publicadas en la BDNS). Es un dato de esa fecha.
+ *   - company_procurement_size (calidad_datos/cargar_ted_tamano.py): "gran empresa" según los
+ *     anuncios de adjudicación de TED (UE), solo con regla estricta (≥ 5 anuncios, ≥ 90 % iguales).
+ *     "Gran empresa" es "no pyme" en la definición europea: 250 empleados o más, o facturación y
+ *     balance por encima de los límites de pyme. No es un número de empleados.
+ * Si hay las dos, vale el Kit Digital (lo declara la propia empresa). Si no hay ninguna, [].
+ *  texto:   "De 3 a 9 empleados" / "Gran empresa"
+ *  detalle: de dónde sale y de cuándo
+ *  fuente:  'kit_digital' | 'kit_consulting' | 'ted'
+ *  min/max: tramo (solo Kit)
+ */
+if (!function_exists('ficha_tamano_empresa')) {
+    function ficha_tamano_empresa(int $companyId): array
+    {
+        if ($companyId <= 0) {
+            return [];
+        }
+        $db = \Config\Database::connect();
+        $r = $db->table('company_employee_ranges')->where('company_id', $companyId)->get()->getRowArray();
+        if ($r) {
+            $min = (int) $r['employees_min'];
+            $max = (int) $r['employees_max'];
+            $texto = $min === 0 ? "Hasta {$max} empleados" : "De {$min} a {$max} empleados";
+            $programa = $r['source'] === 'kit_consulting' ? 'Kit Consulting' : 'Kit Digital';
+            $mes = ficha_mes_anio($r['grant_date'] ?? '');
+            return [
+                'texto'   => $texto,
+                'detalle' => "Tramo que acreditó al recibir el {$programa} de Red.es" . ($mes !== '' ? " ({$mes})" : ''),
+                'fuente'  => (string) $r['source'],
+                'min'     => $min,
+                'max'     => $max,
+            ];
+        }
+        $t = $db->table('company_procurement_size')->where('company_id', $companyId)->get()->getRowArray();
+        if ($t && $t['size_code'] === 'large') {
+            $n = (int) $t['notices_same_size'];
+            $mes = ficha_mes_anio($t['last_publication_date'] ?? '');
+            return [
+                'texto'   => 'Gran empresa',
+                'detalle' => "No pyme, según {$n} adjudicaciones publicadas en TED (UE)" . ($mes !== '' ? ", la última en {$mes}" : ''),
+                'fuente'  => 'ted',
+                'min'     => null,
+                'max'     => null,
+            ];
+        }
+        return [];
+    }
+}

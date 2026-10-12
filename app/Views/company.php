@@ -1263,6 +1263,31 @@
                                     </div>
                                 <?php endif; ?>
 
+                                <?php $tE = $tamanoEmpresa ?? []; ?>
+                                <?php if (!empty($tE['texto'])):
+                                    // Tamaño (12-10-2026): tramo del Kit Digital o "Gran empresa" de TED.
+                                    // Ver ficha_tamano_empresa(). Es un dato fechado: se dice de dónde y de cuándo.
+                                    $tEInfo = $tE['fuente'] === 'ted'
+                                        ? 'Clasificación que dan los órganos de contratación al publicar la adjudicación en TED, el diario de contratos públicos de la UE. Gran empresa = no pyme según la definición europea (250 empleados o más, o facturación y balance por encima de los límites de pyme).'
+                                        : 'Red.es concede el Kit Digital y el Kit Consulting por segmentos según el número de empleados. Es el tramo que la empresa acreditó al pedir la ayuda, en esa fecha; la plantilla actual puede ser otra. Fuente: Base de Datos Nacional de Subvenciones (BDNS).';
+                                ?>
+                                <div class="b2b-data-row">
+                                    <dt class="b2b-data-label">
+                                        <div>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                                stroke-linejoin="round"><use href="#icon-6ba5abb4"></use></svg>
+                                        </div>
+                                        <?= $tE['fuente'] === 'ted' ? 'Tamaño' : 'Empleados' ?>
+                                    </dt>
+                                    <dd class="b2b-data-value" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                        <span><?= esc($tE['texto']) ?></span>
+                                        <span title="<?= esc($tEInfo, 'attr') ?>"
+                                              style="color: #64748b; font-size: 0.78rem; cursor: help; border-bottom: 1px dotted #94a3b8;"><?= esc($tE['detalle']) ?> ⓘ</span>
+                                    </dd>
+                                </div>
+                                <?php endif; ?>
+
                                 <?php $constVal = trim($company['incorporation_date'] ?? $company['founded'] ?? $company['fecha_constitucion'] ?? ''); ?>
                                 <?php if (!empty($constVal) && $constVal !== '-'): ?>
                                 <div class="b2b-data-row">

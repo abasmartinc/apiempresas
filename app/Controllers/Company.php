@@ -413,6 +413,19 @@ class Company extends BaseController
         }
         // --- FIN GRUPO EMPRESARIAL Y LEI ---
 
+        // --- TAMAÑO DE LA EMPRESA (Kit Digital / TED, 12-10-2026). Ver ficha_tamano_empresa(). ---
+        $tamanoEmpresa = [];
+        if (!$isEn) {
+            try {
+                helper('ficha_hechos');
+                $tamanoEmpresa = ficha_tamano_empresa((int) ($company['id'] ?? 0));
+            } catch (\Throwable $e) {
+                // Si las tablas no existen en algún entorno, la ficha sale sin la línea.
+                log_message('error', 'Tamaño de la ficha ' . ($company['id'] ?? '?') . ': ' . $e->getMessage());
+                $tamanoEmpresa = [];
+            }
+        }
+
         // --- RISK PROFILE LOGIC ---
         // IMPORTANTE: aquí solo se LEE el estado de cuota. Renderizar la ficha nunca
         // debe consumir una consulta: el gasto ocurre en Company::ajaxUnlockRisk(),
@@ -532,6 +545,7 @@ class Company extends BaseController
             'fichaSector'      => $fichaSector,
             'nombresAnteriores' => $nombresAnteriores,
             'grupoGleif'       => $grupoGleif,
+            'tamanoEmpresa'    => $tamanoEmpresa,
             'fichaCapital'     => $fichaCapital,
             'fichaDomicilios'  => $fichaDomicilios,
             'subsidies'        => $subsidies,
