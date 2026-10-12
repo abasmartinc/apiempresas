@@ -123,7 +123,8 @@ $registro = site_url('register?intent=api&plan=free&source=guia_empresa_activa')
         .ea-cta { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #fff; border-radius: 20px; padding: 36px 28px; text-align: center; margin-bottom: 28px; }
         .ea-cta h2 { color: #fff; }
         .ea-cta p { color: #cbd5e1; max-width: 620px; margin: 0 auto 22px; }
-        .ea-cta a.ea-btn { display: inline-block; text-decoration: none; }
+        .ea-cta a.ea-btn { display: inline-block; text-decoration: none; color: #fff; }
+        .ea-cta a.ea-btn:hover { color: #fff; }
         .ea-cta .ea-cta-links { margin-top: 16px; font-size: .92rem; }
         .ea-cta .ea-cta-links a { color: #93c5fd; font-weight: 700; }
         .ea-fuentes { font-size: .88rem; color: #64748b; }
