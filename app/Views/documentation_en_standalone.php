@@ -1652,7 +1652,7 @@ $ok = hash_equals(hash_hmac('sha256', $t . '.' . $body, $secret), $v1) && abs(ti
                                 <span style="background: #e0e7ff; color: #4338ca; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">Official</span>
                             </div>
                             <p style="color:#475569; font-size:0.95rem; margin-bottom: 10px;">Install via Composer:</p>
-                            <pre style="background: #0f172a; padding: 10px 15px; border-radius: 8px; margin: 0;"><code class="language-bash" style="color: #e2e8f0;">composer require apiempresas/php</code></pre>
+                            <pre style="background: #0f172a; padding: 10px 15px; border-radius: 8px; margin: 0;"><code class="language-bash" style="color: #e2e8f0;">composer require apiempresas/apiempresas-php</code></pre>
                             <p style="color:#475569; font-size:0.95rem; margin-top:15px; margin-bottom: 10px;">Usage example:</p>
                             <pre style="background: #0f172a; padding: 15px; border-radius: 8px; margin: 0;"><code class="language-php" style="color: #e2e8f0;">require_once 'vendor/autoload.php';
 
