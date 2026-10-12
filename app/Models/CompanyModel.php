@@ -68,7 +68,10 @@ class CompanyModel extends Model
         'companies.estado             AS status',
     ];
 
-    public function getByCif(string $cif, bool $forApi = false): ?array
+    /**
+     * $tambienDuplicadas: solo para la URL de la ficha (Company::handleCifUrl). Ver previousCifRows().
+     */
+    public function getByCif(string $cif, bool $forApi = false, bool $tambienDuplicadas = false): ?array
     {
         $cif = strtoupper(trim($cif));
         if ($cif === '')
@@ -91,7 +94,92 @@ class CompanyModel extends Model
             return $result;
         }
 
+        // CIF anterior (12-10-2026): si el CIF no es el de ninguna ficha pero es el CIF que una
+        // sociedad tuvo antes (al transformarse SA <-> SL Hacienda le cambia la letra y conserva el
+        // número), se devuelve esa sociedad con su CIF actual y la marca previous_cif_match.
+        // Quien llame debe usar $result['cif'] (el actual) para todo lo demás.
+        $prev = $this->previousCifRows([$cif], !$tambienDuplicadas);
+        if (!empty($prev[$cif])) {
+            $p = $prev[$cif];
+            $builder = $this->asArray()
+                ->select(implode(', ', $forApi ? $this->apiSelectFields : $this->selectFields))
+                ->join('cnae_2009_2025', 'cnae_2009_2025.cnae_2009 = companies.cnae_code', 'left');
+            if (!$forApi) {
+                $builder->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'left');
+            }
+            $result = $builder->where('companies.id', (int) $p['company_id'])->limit(1)->get()->getRowArray() ?: null;
+            if ($result) {
+                $result['previous_cif_match'] = self::previousCifMatch($cif, $result, $p);
+                return $result;
+            }
+        }
+
         return null;
+    }
+
+    /**
+     * Filas de company_previous_cifs de esos CIF, por CIF. [] si la tabla no existe todavía.
+     * La rellena calidad_datos/fusionar_cif_misma_cifra.py al juntar dos fichas de la misma sociedad
+     * (misma hoja registral) cuyos CIF solo se diferencian en la letra:
+     *   reason 'transformacion': consta en el BORME la transformación (de la forma de la letra vieja a
+     *                            la de la nueva). Es de verdad su CIF anterior: se usa en la API, el
+     *                            buscador y la ficha.
+     *   reason 'duplicada':      misma sociedad, pero no consta que ese CIF fuera suyo (puede ser una
+     *                            letra mal puesta y ser el CIF de otra sociedad). Solo sirve para que la
+     *                            URL vieja de la ficha redirija; nunca para responder por ese CIF.
+     */
+    public function previousCifRows(array $cifs, bool $soloTransformacion = true): array
+    {
+        $cifs = array_values(array_unique(array_filter(array_map(static fn($c) => strtoupper(trim((string) $c)), $cifs))));
+        if (!$cifs) {
+            return [];
+        }
+        try {
+            $b = $this->db->table('company_previous_cifs')->select('cif, company_id, changed_at, reason')
+                ->whereIn('cif', $cifs);
+            if ($soloTransformacion) {
+                $b->where('reason', 'transformacion');
+            }
+            $q = $b->get();
+            if (!$q) {
+                return [];
+            }
+            $out = [];
+            foreach ($q->getResultArray() as $r) {
+                $out[strtoupper((string) $r['cif'])] = $r;
+            }
+            return $out;
+        } catch (\Throwable $e) {
+            return [];
+        }
+    }
+
+    /** CIF anteriores de una ficha (solo 'transformacion'), del más reciente al más antiguo. */
+    public function previousCifsOf(int $companyId): array
+    {
+        if ($companyId <= 0) {
+            return [];
+        }
+        try {
+            $q = $this->db->table('company_previous_cifs')->select('cif, changed_at, reason')
+                ->where('company_id', $companyId)->where('reason', 'transformacion')
+                ->orderBy('changed_at', 'DESC')->get();
+            return $q ? $q->getResultArray() : [];
+        } catch (\Throwable $e) {
+            return [];
+        }
+    }
+
+    /** Lo que se añade a la respuesta cuando se ha encontrado la empresa por un CIF anterior. */
+    public static function previousCifMatch(string $queried, array $company, array $prev): array
+    {
+        $actual = (string) ($company['cif'] ?? '');
+        return [
+            'queried_cif' => $queried,
+            'current_cif' => $actual,
+            'changed_at'  => $prev['changed_at'] ?? null,
+            'message'     => "El CIF consultado ({$queried}) es el CIF anterior de esta sociedad. Su CIF actual es {$actual}.",
+        ];
     }
 
     public function getByCifs(array $cifs, bool $forApi = false): array
@@ -105,15 +193,50 @@ class CompanyModel extends Model
         $builder = $this->asArray()
             ->select(implode(', ', $forApi ? $this->apiSelectFields : $this->selectFields))
             ->join('cnae_2009_2025', 'cnae_2009_2025.cnae_2009 = companies.cnae_code', 'left');
-            
+
         if (!$forApi) {
             $builder->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'left');
         }
 
-        return $builder->whereIn('companies.cif', $cifs)
+        $rows = $builder->whereIn('companies.cif', $cifs)
             ->limit(100)
             ->get()
             ->getResultArray();
+
+        // CIF anteriores (12-10-2026): los CIF pedidos que no son de ninguna ficha pero son el CIF
+        // anterior de una sociedad. Si esa sociedad ya sale (se pidieron los dos CIF), no se repite.
+        $encontrados = [];
+        $ids = [];
+        foreach ($rows as $r) {
+            $encontrados[strtoupper((string) $r['cif'])] = true;
+            $ids[(int) $r['id']] = true;
+        }
+        $faltan = array_values(array_filter($cifs, static fn($c) => !isset($encontrados[strtoupper((string) $c)])));
+        $prev = $faltan ? $this->previousCifRows($faltan) : [];
+        if ($prev) {
+            $porId = [];
+            foreach ($prev as $c => $p) {
+                if (!isset($ids[(int) $p['company_id']])) {
+                    $porId[(int) $p['company_id']] = $c;
+                }
+            }
+            if ($porId) {
+                $builder = $this->asArray()
+                    ->select(implode(', ', $forApi ? $this->apiSelectFields : $this->selectFields))
+                    ->join('cnae_2009_2025', 'cnae_2009_2025.cnae_2009 = companies.cnae_code', 'left');
+                if (!$forApi) {
+                    $builder->join('company_enrichment', 'company_enrichment.company_id = companies.id', 'left');
+                }
+                foreach ($builder->whereIn('companies.id', array_keys($porId))->get()->getResultArray() as $r) {
+                    $c = $porId[(int) $r['id']] ?? null;
+                    if ($c !== null && count($rows) < 100) {
+                        $r['previous_cif_match'] = self::previousCifMatch($c, $r, $prev[$c]);
+                        $rows[] = $r;
+                    }
+                }
+            }
+        }
+        return $rows;
     }
 
     public function getById(int $id): ?array

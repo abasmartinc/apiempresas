@@ -490,10 +490,33 @@
         </div>
     </header>
 
+    <?php
+    // Origen del enlace que trajo hasta aquí (429 de la API, aviso del panel, correo...).
+    // Viaja en los dos formularios para atribuir la compra.
+    $bonoSource = substr(preg_replace('/[^a-z0-9_\-]/i', '', (string) (service('request')->getGet('source') ?? '')), 0, 64);
+    $inicioCreditos = \App\Services\BillingService::BONO_INICIO_CREDITOS;
+    $inicioEuros    = \App\Services\BillingService::BONO_INICIO_EUROS;
+    ?>
     <!-- WIZARD -->
     <div class="container">
+        <!-- BONO DE INICIO (12-10-2026): para quien agota las 100 consultas gratis y
+             necesita pocas más. El bono a medida empieza en 10.000 (49 €). -->
+        <div style="max-width: 760px; margin: 0 auto 20px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 18px 22px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; box-shadow: 0 4px 16px -6px rgba(15, 23, 42, 0.08);">
+            <div style="flex: 1; min-width: 240px;">
+                <div style="font-size: 0.74rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.3px; color: #2563eb; margin-bottom: 4px;">¿Necesitas pocas consultas?</div>
+                <div style="font-size: 1.05rem; font-weight: 800; color: #0f172a;">Bono de inicio: <?= number_format($inicioCreditos, 0, ',', '.') ?> créditos por <?= number_format($inicioEuros, 0, ',', '.') ?> € + IVA</div>
+                <div style="font-size: 0.85rem; color: #64748b; margin-top: 2px;">Pago único, sin suscripción y sin caducidad. Hasta <?= number_format($inicioCreditos, 0, ',', '.') ?> búsquedas básicas o <?= number_format(intdiv($inicioCreditos, 3), 0, ',', '.') ?> llamadas avanzadas.</div>
+            </div>
+            <form action="<?= site_url('billing/checkout_bonus') ?>" method="POST" style="margin: 0;">
+                <?= csrf_field() ?>
+                <input type="hidden" name="credits" value="<?= $inicioCreditos ?>">
+                <input type="hidden" name="source" value="<?= esc($bonoSource !== '' ? $bonoSource : 'bono_page_inicio', 'attr') ?>">
+                <button type="submit" style="white-space: nowrap; background: #0f172a; color: #ffffff; border: none; border-radius: 10px; padding: 11px 20px; font-weight: 800; font-size: 0.9rem; cursor: pointer;">Comprar por <?= number_format($inicioEuros, 0, ',', '.') ?> €</button>
+            </form>
+        </div>
+
         <div class="wizard-container">
-            
+
             <div class="credits-display">
                 <div class="credits-number" id="creditsOutput">50.000</div>
                 <div class="credits-label">Créditos de la API</div>
@@ -540,6 +563,7 @@
             <form action="<?= site_url('billing/checkout_bonus') ?>" method="POST" id="bonusForm">
                 <?= csrf_field() ?>
                 <input type="hidden" name="credits" id="inputCredits" value="50000">
+                <input type="hidden" name="source" value="<?= esc($bonoSource, 'attr') ?>">
                 <button type="submit" class="buy-btn">
                     Comprar Bono Ahora
                 </button>

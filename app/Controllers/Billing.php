@@ -844,8 +844,10 @@ class Billing extends BaseController
         $userId = (int) session('user_id');
         $credits = (int) ($postData['credits'] ?? 0);
 
-        // Validar mínimo de créditos - redirigir explícitamente a la página del bono (nunca al dashboard)
-        if ($credits < 10000) {
+        // Validar mínimo de créditos - redirigir explícitamente a la página del bono (nunca al dashboard).
+        // Excepción: el bono de inicio, solo en su cantidad exacta.
+        $esBonoInicio = $credits === \App\Services\BillingService::BONO_INICIO_CREDITOS;
+        if ($credits < 10000 && !$esBonoInicio) {
             return redirect()->to(site_url('crear-bono-api'))->with('error', lang('Messages.flash_10'));
         }
         // Tope: calculateBonusPrice() cobra 1.499 € por cualquier cantidad desde 1.000.000,
@@ -857,6 +859,20 @@ class Billing extends BaseController
 
         // Lógica de Precios (Igual a la de Javascript por seguridad) delegada a BillingService
         $price = $this->billingService->calculateBonusPrice($credits);
+
+        // Atribución, igual que en checkout(): de qué enlace sale la recarga (el 429 de
+        // la API, el aviso del panel, la página del bono...). Antes el bono no llevaba
+        // origen y no se podía saber qué lo vendía.
+        $source = substr(preg_replace('/[^a-z0-9_\-]/i', '', (string) ($postData['source'] ?? '')), 0, 64);
+        if ($source === '' && session('email_source')) {
+            $source = (string) session('email_source');
+        }
+        session()->set('checkout_source', $source);
+        $this->logCheckoutEvent('checkout_started', $source, [
+            'plan'    => 'custom_bonus',
+            'credits' => $credits,
+            'period'  => 'single',
+        ]);
 
         if (env('BILLING_MODE') === 'simulator') {
             $simulator = new \App\Libraries\BillingSimulator();
@@ -878,7 +894,7 @@ class Billing extends BaseController
             $successUrl = site_url('billing/success') . '?session_id={CHECKOUT_SESSION_ID}';
             $cancelUrl = site_url('crear-bono-api');
             $lineItem = $this->billingService->buildSinglePaymentLineItem(
-                'Bono ' . number_format($credits, 0, ',', '.') . ' Créditos API',
+                ($esBonoInicio ? 'Bono de inicio: ' : 'Bono ') . number_format($credits, 0, ',', '.') . ' Créditos API',
                 'Paquete prepago de créditos universales sin caducidad.',
                 $price,
                 $this->stripeService->getTaxRateId()
@@ -888,6 +904,7 @@ class Billing extends BaseController
                 'user_id' => (string) $userId,
                 'plan' => 'custom_bonus',
                 'credits' => (string) $credits,
+                'source' => $source,
             ];
 
             $sessionParams = [

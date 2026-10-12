@@ -244,6 +244,13 @@ class CompanyRiskProfileController extends BaseApiController
             );
         }
 
+        // CIF anterior (12-10-2026): consultado el CIF que la sociedad tenía antes de transformarse,
+        // se responde con su CIF actual y se avisa en previous_cif_match. Ver CompanyModel::getByCif().
+        $previo = $company['previous_cif_match'] ?? null;
+        if ($previo && !empty($company['cif'])) {
+            $cif = strtoupper((string) $company['cif']);
+        }
+
         // 4. Query company_risk_profiles (Parameterized query builder)
         try {
             $db = \Config\Database::connect();
@@ -280,6 +287,9 @@ class CompanyRiskProfileController extends BaseApiController
             }
 
             $dto = $this->buildRiskProfileDto($cif, $company, $riskRow, $profileData);
+            if ($previo) {
+                $dto['previous_cif_match'] = $previo;
+            }
 
             return $this->respond(
                 [

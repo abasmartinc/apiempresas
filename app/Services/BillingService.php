@@ -4,6 +4,16 @@ namespace App\Services;
 
 class BillingService
 {
+    /**
+     * Bono de inicio (12-10-2026): un escalón entre las 100 consultas gratis y Pro.
+     * De las altas de abr–ago, 22 agotaron el Free y solo 3 pagaron: el siguiente
+     * paso era 19 €/mes o un bono de 49 €. Se vende solo en esta cantidad exacta
+     * (no entra en la escala de los bonos a medida). Más caro por crédito que Pro
+     * (9 € / 1.000 frente a 19 € / 3.000) para no canibalizarlo.
+     */
+    public const BONO_INICIO_CREDITOS = 1000;
+    public const BONO_INICIO_EUROS    = 9.0;
+
     public function getDirectoryPricingDetails(int $totalCount): array
     {
         if (!function_exists('calculate_directory_price')) {
@@ -25,6 +35,10 @@ class BillingService
      */
     public function calculateBonusPrice(int $credits): float
     {
+        if ($credits === self::BONO_INICIO_CREDITOS) {
+            return self::BONO_INICIO_EUROS;
+        }
+
         $price = 49;
         $tiers = [
             ['qty' => 10000, 'price' => 49],

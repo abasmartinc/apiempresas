@@ -17,8 +17,9 @@ return [
     '80_percent_cta'   => 'Prevent service interruption',
     
     '100_percent_title' => 'You have used your free queries',
-    '100_percent_desc'  => 'Your key returns a 429 error until you activate a plan. Pro: 3,000 queries a month with full data. No subscription: a prepaid pack.',
+    '100_percent_desc'  => 'Your key returns a 429 error until you activate a plan. Pro: 3,000 queries a month with full data. No subscription: 1,000 credits for €9 + VAT.',
     '100_percent_cta'   => 'Activate Pro',
+    '100_percent_cta2'  => 'or 1,000 credits for €9',
 
     'default_cta'      => 'Activate Pro Plan',
     'activate_radar'   => 'View Pro plan',

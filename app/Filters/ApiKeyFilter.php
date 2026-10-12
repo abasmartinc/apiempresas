@@ -82,12 +82,20 @@ class ApiKeyFilter implements FilterInterface
         // Siempre en mensual: casi nadie compra anual de primeras (11 de 12 Pro pagan
         // mensual) y a un Pro que agota el cupo se le enseñaban 470 € de golpe.
         $periodo = 'monthly';
-        return [
+        $enlaces = [
             'checkout_url' => $siguiente !== null
                 ? site_url('billing?plan=' . $siguiente . '&period=' . $periodo . '&source=' . $source)
                 : null,
             'recharge_url' => site_url('crear-bono-api?source=' . $source),
         ];
+        // Free: compra directa del bono de inicio (1.000 créditos, pago único). Campo
+        // nuevo, los de siempre no cambian. El enlace funciona por GET: si no hay sesión
+        // en el navegador, pasa por el registro/acceso y vuelve al pago.
+        if ($planId === 1) {
+            $enlaces['starter_url'] = site_url('billing/checkout_bonus?credits='
+                . \App\Services\BillingService::BONO_INICIO_CREDITOS . '&source=' . $source);
+        }
+        return $enlaces;
     }
 
     /**
@@ -521,7 +529,9 @@ class ApiKeyFilter implements FilterInterface
 
                 if ($walletCost > $walletBalance) {
                     $errorMsg = ((int)$planId === 1)
-                        ? 'Has consumido las ' . $monthlyQuota . ' consultas gratuitas garantizadas y no tienes saldo suficiente en el monedero. Recarga créditos o actualiza a un plan de pago.'
+                        ? 'Has consumido las ' . $monthlyQuota . ' consultas gratuitas garantizadas y no tienes saldo suficiente en el monedero. Recarga créditos (bono de inicio: '
+                            . number_format(\App\Services\BillingService::BONO_INICIO_CREDITOS, 0, ',', '.') . ' créditos por '
+                            . number_format(\App\Services\BillingService::BONO_INICIO_EUROS, 0, ',', '.') . ' € + IVA, sin suscripción) o actualiza a un plan de pago.'
                         : 'Has superado el límite de consultas de tu plan (' . $monthlyQuota . ') y no tienes saldo suficiente en el monedero. Recarga créditos para continuar.';
 
                     // Dos casos del Free en los que el mensaje de "has consumido las 100

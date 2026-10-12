@@ -76,6 +76,13 @@ class CompanyVerifyController extends BaseApiController
             ], ResponseInterface::HTTP_NOT_FOUND);
         }
 
+        // CIF anterior (12-10-2026): si se ha consultado el CIF que la sociedad tenía antes de
+        // transformarse, todas las comprobaciones se hacen con el CIF actual y se avisa.
+        $previo = $company['previous_cif_match'] ?? null;
+        if ($previo && !empty($company['cif'])) {
+            $cif = strtoupper((string) $company['cif']);
+        }
+
         $c = ApiCompanyEnricher::enrich([$company], true)[0];
         $companyId = (int) ($c['id'] ?? 0);
 
@@ -163,6 +170,11 @@ class CompanyVerifyController extends BaseApiController
             if ($preview !== null) {
                 $data['business_preview'] = $preview;
             }
+        }
+        if ($previo) {
+            $data['previous_cif_match'] = $previo;
+            $d['flags'][] = ['code' => 'PREVIOUS_CIF', 'severity' => 'medium',
+                             'message' => 'El CIF consultado (' . $previo['queried_cif'] . ') es el anterior de la sociedad; su CIF actual es ' . $cif . '.'];
         }
         $data['flags'] = $d['flags'];
         $data['decision_hint'] = $d['decision_hint'];

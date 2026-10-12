@@ -10,7 +10,7 @@ return [
     'flash_7' => 'The selected plan does not exist.',
     'flash_8' => 'Annual pricing is not configured for this plan.',
     'flash_9' => 'Invalid plan price.',
-    'flash_10' => 'The minimum amount of credits is 10,000.',
+    'flash_10' => 'The minimum amount of credits is 10,000 (or the 1,000-credit starter pack).',
     'flash_11' => 'Recharge simulation completed.',
     'flash_12' => 'Recharge simulation error.',
     'flash_13' => 'You must log in to continue.',

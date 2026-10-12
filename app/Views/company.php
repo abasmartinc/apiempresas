@@ -1085,6 +1085,36 @@
                                 </div>
                                 <?php endif; ?>
 
+                                <?php if (!empty($cifsAnteriores)):
+                                    // CIF anteriores (12-10-2026): al transformarse (SA <-> SL) Hacienda cambia la
+                                    // letra del CIF. La URL y la API con el CIF anterior llevan a esta ficha.
+                                    $cifsAntTxt = [];
+                                    foreach ($cifsAnteriores as $cA) {
+                                        $cuando = (!empty($cA['changed_at']) && function_exists('ficha_mes_anio')) ? ficha_mes_anio($cA['changed_at']) : '';
+                                        $cifsAntTxt[] = [(string) $cA['cif'], $cuando];
+                                    }
+                                ?>
+                                <div class="b2b-data-row">
+                                    <dt class="b2b-data-label">
+                                        <div>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                                stroke-linejoin="round"><use href="#icon-d557d894"></use></svg>
+                                        </div>
+                                        <?= count($cifsAntTxt) > 1 ? 'CIF anteriores' : 'CIF anterior' ?>
+                                    </dt>
+                                    <dd class="b2b-data-value" style="display: flex; flex-direction: column; gap: 4px;">
+                                        <?php foreach ($cifsAntTxt as [$cA, $cuando]): ?>
+                                        <span>
+                                            <span style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace;"><?= esc($cA) ?></span>
+                                            <span title="Al cambiar de forma jurídica (por ejemplo, de sociedad anónima a limitada), Hacienda cambia la letra del CIF. Es la misma sociedad."
+                                                  style="color: #64748b; font-size: 0.78rem; cursor: help; border-bottom: 1px dotted #94a3b8;"><?= $cuando !== '' ? 'hasta ' . esc($cuando) . ', ' : '' ?>antes de cambiar de forma jurídica ⓘ</span>
+                                        </span>
+                                        <?php endforeach; ?>
+                                    </dd>
+                                </div>
+                                <?php endif; ?>
+
                                 <?php $gL = $grupoGleif ?? []; ?>
                                 <?php if (!empty($gL['lei'])):
                                     // Código LEI de GLEIF (10-10-2026). "Caducado" = no se ha renovado:

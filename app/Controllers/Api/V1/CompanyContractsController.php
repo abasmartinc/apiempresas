@@ -250,6 +250,13 @@ class CompanyContractsController extends BaseApiController
             );
         }
 
+        // CIF anterior (12-10-2026): consultado el CIF que la sociedad tenía antes de transformarse,
+        // se responde con su CIF actual y se avisa en previous_cif_match. Ver CompanyModel::getByCif().
+        $previo = $company['previous_cif_match'] ?? null;
+        if ($previo && !empty($company['cif'])) {
+            $cif = strtoupper((string) $company['cif']);
+        }
+
         // 4. Pagination parameters (Strict numeric validation & clamp)
         $rawPage = $this->request->getGet('page');
         $page = (is_numeric($rawPage) && (int) $rawPage >= 1) ? (int) $rawPage : 1;
@@ -317,6 +324,7 @@ class CompanyContractsController extends BaseApiController
                             'currency'        => 'EUR',
                         ],
                         'contracts'    => $contracts,
+                    ] + ($previo ? ['previous_cif_match' => $previo] : []) + [
                         'pagination'   => [
                             'total'       => $totalContracts,
                             'page'        => $page,

@@ -176,6 +176,13 @@ class CompanyBormeController extends BaseApiController
             );
         }
 
+        // CIF anterior (12-10-2026): consultado el CIF que la sociedad tenía antes de transformarse,
+        // se responde con su CIF actual y se avisa en previous_cif_match. Ver CompanyModel::getByCif().
+        $previo = $company['previous_cif_match'] ?? null;
+        if ($previo && !empty($company['cif'])) {
+            $cif = strtoupper((string) $company['cif']);
+        }
+
         $companyId = $company['id'];
         $bormePostsRaw = $this->bormeModel->getByCompanyId($companyId);
         
@@ -196,7 +203,7 @@ class CompanyBormeController extends BaseApiController
                     'cif' => $company['cif'],
                     'company_name' => $company['name'],
                     'events' => $events
-                ]
+                ] + ($previo ? ['previous_cif_match' => $previo] : [])
             ],
             ResponseInterface::HTTP_OK
         );

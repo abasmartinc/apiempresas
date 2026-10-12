@@ -17,8 +17,9 @@ return [
     '80_percent_cta'   => 'Evitar corte de servicio',
     
     '100_percent_title' => 'Has usado tus consultas gratuitas',
-    '100_percent_desc'  => 'Tu clave devuelve error 429 hasta que actives un plan. Pro: 3.000 consultas al mes con todos los datos. Sin suscripción: un bono.',
+    '100_percent_desc'  => 'Tu clave devuelve error 429 hasta que actives un plan. Pro: 3.000 consultas al mes con todos los datos. Sin suscripción: bono de 1.000 créditos por 9 € + IVA.',
     '100_percent_cta'   => 'Activar Pro',
+    '100_percent_cta2'  => 'o bono de 1.000 por 9 €',
 
     'default_cta'      => 'Activar Plan Pro',
     'activate_radar'   => 'Ver plan Pro',

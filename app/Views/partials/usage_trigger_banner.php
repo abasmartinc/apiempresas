@@ -10,7 +10,10 @@
             </div>
         </div>
         
-        <div style="display: flex; align-items: center; gap: 16px;">
+        <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: flex-end;">
+            <!-- Segunda salida, solo en el aviso del 100 %: el bono de inicio para quien
+                 necesita pocas consultas más y no quiere suscripción (12-10-2026). -->
+            <a id="usage-trigger-cta2" href="#" style="display: none; white-space: nowrap; font-weight: 700; font-size: 0.85rem; text-decoration: underline; color: inherit;"></a>
             <a id="usage-trigger-cta" href="<?= site_url('billing?plan=pro&period=monthly&source=usage_banner') ?>" class="btn" style="white-space: nowrap; font-weight: 800; padding: 10px 24px; border-radius: 12px; font-size: 0.9rem; transition: all 0.2s ease; border: none;">
                 <?= lang('UsageTrigger.activate_radar') ?>
             </a>
@@ -77,6 +80,8 @@ document.addEventListener('DOMContentLoaded', function() {
             ctaText: '#ffffff',
             ctaLabel: '<?= lang('UsageTrigger.100_percent_cta') ?>',
             href: '<?= site_url('billing?plan=pro&period=monthly&source=usage_banner_100') ?>',
+            cta2Label: '<?= lang('UsageTrigger.100_percent_cta2') ?>',
+            cta2Href: '<?= site_url('billing/checkout_bonus?credits=' . \App\Services\BillingService::BONO_INICIO_CREDITOS . '&source=usage_banner_100_bono') ?>',
             // Estado, no aviso de una vez: no se marca como visto en user_trigger_events
             persistente: true
         },
@@ -121,7 +126,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 cta.textContent = config.ctaLabel || '<?= lang('UsageTrigger.default_cta') ?>';
                 // Cada aviso con su origen, para saber cuál vende
                 cta.href = config.href || '<?= site_url('billing?plan=pro&period=monthly&source=usage_banner_') ?>' + data.trigger;
-                
+
+                const cta2 = document.getElementById('usage-trigger-cta2');
+                if (cta2 && config.cta2Href) {
+                    cta2.textContent = config.cta2Label;
+                    cta2.href = config.cta2Href;
+                    cta2.style.display = 'inline';
+                    cta2.addEventListener('click', () => {
+                        if (window.trackEvent) trackEvent('usage_banner_clicked', { trigger: data.trigger, opcion: 'bono_inicio' });
+                    });
+                }
+
                 // Mostrar banner
                 container.style.display = 'block';
 

@@ -426,6 +426,9 @@ class Company extends BaseController
             }
         }
 
+        // --- CIF ANTERIORES (12-10-2026): los que tuvo la sociedad antes de transformarse. ---
+        $cifsAnteriores = $this->companyModel->previousCifsOf((int) ($company['id'] ?? 0));
+
         // --- RISK PROFILE LOGIC ---
         // IMPORTANTE: aquí solo se LEE el estado de cuota. Renderizar la ficha nunca
         // debe consumir una consulta: el gasto ocurre en Company::ajaxUnlockRisk(),
@@ -546,6 +549,7 @@ class Company extends BaseController
             'nombresAnteriores' => $nombresAnteriores,
             'grupoGleif'       => $grupoGleif,
             'tamanoEmpresa'    => $tamanoEmpresa,
+            'cifsAnteriores'   => $cifsAnteriores,
             'fichaCapital'     => $fichaCapital,
             'fichaDomicilios'  => $fichaDomicilios,
             'subsidies'        => $subsidies,
@@ -579,10 +583,16 @@ class Company extends BaseController
             $cif = strtoupper(substr($segment, 0, 9));
         }
 
-        $company = $this->companyModel->getByCif($cif);
+        $company = $this->companyModel->getByCif($cif, false, true);
 
         if (!$company) {
             return $this->handleSlugUrl($segment);
+        }
+
+        // CIF anterior (12-10-2026): la URL con el CIF que la sociedad tenía antes de transformarse
+        // redirige (301, abajo) a la de su CIF actual. Ver CompanyModel::getByCif().
+        if (!empty($company['previous_cif_match']) && !empty($company['cif'])) {
+            $cif = strtoupper((string) $company['cif']);
         }
 
         // Canonical Check

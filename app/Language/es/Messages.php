@@ -10,7 +10,7 @@ return [
     'flash_7' => 'El plan seleccionado no existe.',
     'flash_8' => 'El precio anual no está configurado para este plan.',
     'flash_9' => 'El precio del plan no es válido.',
-    'flash_10' => 'La cantidad mínima de créditos es 10.000.',
+    'flash_10' => 'La cantidad mínima de créditos es 10.000 (o el bono de inicio de 1.000).',
     'flash_11' => 'Simulación de recarga completada.',
     'flash_12' => 'Error en la simulación de recarga.',
     'flash_13' => 'Debes iniciar sesión para continuar.',
