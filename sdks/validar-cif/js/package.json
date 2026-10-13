@@ -1,0 +1,15 @@
+{
+  "name": "validar-cif",
+  "version": "1.0.0",
+  "description": "Valida CIF, DNI y NIE españoles (formato y dígito de control). Sin dependencias.",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "files": ["index.js", "index.d.ts", "README.md", "LICENSE"],
+  "scripts": { "test": "node test.js" },
+  "keywords": ["cif", "nif", "dni", "nie", "validar", "validator", "spain", "españa", "apiempresas"],
+  "homepage": "https://apiempresas.es/validar-cif-php-python",
+  "repository": { "type": "git", "url": "git+https://github.com/abasmartinc/validar-cif.git" },
+  "author": "APIEmpresas.es (https://apiempresas.es)",
+  "license": "MIT",
+  "engines": { "node": ">=12" }
+}

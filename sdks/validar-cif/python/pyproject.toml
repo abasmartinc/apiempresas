@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "validar-cif"
+version = "1.0.0"
+description = "Valida CIF, DNI y NIE españoles (formato y dígito de control). Sin dependencias."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.7"
+authors = [{ name = "APIEmpresas.es" }]
+keywords = ["cif", "nif", "dni", "nie", "validar", "validator", "spain", "apiempresas"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Natural Language :: Spanish",
+]
+
+[project.urls]
+Homepage = "https://apiempresas.es/validar-cif-php-python"
+Repository = "https://github.com/abasmartinc/validar-cif"
+"API de empresas" = "https://apiempresas.es"
+
+[tool.setuptools]
+packages = ["validar_cif"]

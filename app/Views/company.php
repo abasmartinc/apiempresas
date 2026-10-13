@@ -879,7 +879,7 @@
                 <?php endif; ?>
             </p>
         <?php endif; ?>
-        <p style="margin:8px 0 0 0; color:#94a3b8; font-size:0.78rem;">Datos del BORME, de la Plataforma de Contratación del Sector Público y de la BDNS.</p>
+        <p style="margin:8px 0 0 0; color:#94a3b8; font-size:0.78rem;">Datos del BORME, de la Plataforma de Contratación del Sector Público, de TED (Diario Oficial de la UE) y de la BDNS.</p>
     </div>
     <?php endif; ?>
 
@@ -1714,7 +1714,7 @@
                                                         <?php endif; ?>
                                                     </td>
                                                     <td style="padding: 12px 16px; font-size: 0.95rem; font-weight: 700; color: #0f172a; text-align: right; white-space: nowrap; vertical-align: top;">
-                                                        <?= number_format($contract['importe_adjudicacion'], 2, ',', '.') ?> €
+                                                        <?= ($contract['importe_adjudicacion'] ?? null) !== null && (float) $contract['importe_adjudicacion'] > 0 ? number_format((float) $contract['importe_adjudicacion'], 2, ',', '.') . ' €' : '<span style="color:#94a3b8; font-weight:500;" title="El anuncio no publica el importe adjudicado a esta empresa (p. ej. acuerdos marco con varias empresas)">No consta</span>' ?>
                                                     </td>
                                                 </tr>
                                                 <?php endforeach; ?>
@@ -1782,7 +1782,7 @@
     {
       "fecha": "<?= !empty($contracts) ? date('Y-m-d', strtotime($contracts[0]['fecha_adjudicacion'])) : '2023-11-15' ?>",
       "organo": "<?= !empty($contracts) ? esc($contracts[0]['organo_contratacion']) : 'Ministerio de Defensa' ?>",
-      "importe": <?= !empty($contracts) ? $contracts[0]['importe_adjudicacion'] : '145000.50' ?>
+      "importe": <?= !empty($contracts) ? (($contracts[0]['importe_adjudicacion'] ?? null) !== null ? (float) $contracts[0]['importe_adjudicacion'] : 'null') : '145000.50' ?>
     }
   ]
 }</pre>

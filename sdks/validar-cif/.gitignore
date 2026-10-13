@@ -1,0 +1,8 @@
+node_modules/
+vendor/
+composer.lock
+__pycache__/
+*.egg-info/
+dist/
+build/
+.phpunit.result.cache

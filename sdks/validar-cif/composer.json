@@ -1,0 +1,13 @@
+{
+    "name": "apiempresas/validar-cif",
+    "description": "Valida CIF, DNI y NIE españoles (formato y dígito de control). Sin dependencias.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["cif", "nif", "dni", "nie", "validar", "validator", "spain", "españa", "apiempresas"],
+    "homepage": "https://apiempresas.es/validar-cif-php-python",
+    "authors": [{ "name": "APIEmpresas.es", "homepage": "https://apiempresas.es" }],
+    "require": { "php": ">=7.4" },
+    "require-dev": { "phpunit/phpunit": "^9.6" },
+    "autoload": { "psr-4": { "ApiEmpresas\\ValidarCif\\": "php/src/" } },
+    "scripts": { "test": "phpunit php/tests" }
+}
