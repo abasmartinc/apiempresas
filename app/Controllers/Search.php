@@ -242,6 +242,48 @@ class Search extends BaseController
 
             $companyArr = is_object($company) ? (array) $company : (array) $company;
 
+            // Últimas publicaciones del BORME, con su PDF oficial, para que el validador
+            // enseñe de dónde sale el dato (13-10-2026). Si falla, el resultado sale igual.
+            $companyArr['borme_recent'] = [];
+            if (!empty($companyArr['id'])) {
+                try {
+                    $posts = (new \App\Models\BormePostsModel())
+                        ->select('borme_date, act_types, url_pdf')
+                        ->where('company_id', (int) $companyArr['id'])
+                        ->orderBy('borme_date', 'DESC')
+                        ->limit(20)
+                        ->findAll();
+                    // Un boletín (mismo día y mismo PDF) por línea, con sus tipos de acto juntos
+                    $grupos = [];
+                    foreach ($posts as $p) {
+                        $url   = (string) ($p['url_pdf'] ?? '');
+                        $url   = strpos($url, 'https://www.boe.es/') === 0 ? $url : null; // solo enlaces al BOE
+                        $clave = ($p['borme_date'] ?? '') . '|' . $url;
+                        if (!isset($grupos[$clave])) {
+                            if (count($grupos) >= 3) {
+                                continue;
+                            }
+                            $grupos[$clave] = ['date' => $p['borme_date'] ?? null, 'tipos' => [], 'url_pdf' => $url];
+                        }
+                        foreach (explode(',', (string) ($p['act_types'] ?? '')) as $t) {
+                            $t = trim($t);
+                            if ($t !== '') {
+                                $grupos[$clave]['tipos'][mb_strtolower($t, 'UTF-8')] = $t;
+                            }
+                        }
+                    }
+                    foreach ($grupos as $g) {
+                        $companyArr['borme_recent'][] = [
+                            'date'      => $g['date'],
+                            'act_types' => implode(', ', $g['tipos']),
+                            'url_pdf'   => $g['url_pdf'],
+                        ];
+                    }
+                } catch (\Throwable $e) {
+                    log_message('error', 'search borme_recent: ' . $e->getMessage());
+                }
+            }
+
             $this->logSearch([
                 'created_at'      => date('Y-m-d H:i:s'),
                 'user_id'         => $ctx['user_id'],
@@ -265,10 +307,21 @@ class Search extends BaseController
                 'event_hash'      => $this->buildEventHash($ctx, $qInfo, 'ok', $http),
             ]);
 
+            // Respuesta pública (sin cuenta): solo lo que pintan el validador de la home,
+            // /search_company y las herramientas (/validar-cif, empresa activa, NIF de
+            // facturación). Antes salía la fila entera: teléfonos, email, web, coordenadas,
+            // objeto social y textos de IA (13-10-2026).
+            $camposPublicos = [
+                'name', 'cif', 'nif', 'status', 'status_code', 'province', 'municipality',
+                'cnae', 'cnae_label', 'cnae_2025', 'cnae_2025_label', 'founded',
+                'capital_social_raw', 'address', 'previous_cif_match', 'borme_recent',
+            ];
+            $publico = array_intersect_key($companyArr, array_flip($camposPublicos));
+
             return $this->respond(
                 [
                     'success' => true,
-                    'data'    => $companyArr,
+                    'data'    => $publico,
                 ],
                 $http
             );

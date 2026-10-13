@@ -59,7 +59,7 @@
                 </svg>
                 <div class="brand-text">
                     <span class="brand-name">API<span class="grad">Empresas</span>.es</span>
-                    <span class="brand-tag">La suite de inteligencia empresarial</span>
+                    <span class="brand-tag">Datos de empresas españolas</span>
                 </div>
             </a>
         </div>
@@ -159,28 +159,6 @@
                                 <strong style="display: flex; align-items: center; gap: 6px;">Extensión Google Sheets <b
                                         style="background: #10b981; color: white; font-size: 8px; font-weight: 800; padding: 2px 5px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; line-height: 1;">DISPONIBLE</b></strong>
                                 <span>Sincroniza y enriquece BBDD masivamente desde tus hojas de cálculo.</span>
-                            </div>
-                        </a>
-                        <a href="#" class="js-track-wp-cta">
-                            <div class="nav-item-icon">
-                                <img src="<?= base_url('public/img/logos/zapier.svg') ?>" width="18" height="18"
-                                    alt="Zapier" style="display: block;">
-                            </div>
-                            <div>
-                                <strong style="display: flex; align-items: center; gap: 6px;">App Zapier / Make <b
-                                        style="background: #f1f5f9; color: #64748b; font-size: 8px; font-weight: 800; padding: 2px 5px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; line-height: 1;">PRÓXIMAMENTE</b></strong>
-                                <span>Automatiza conectando nuestra API con miles de herramientas.</span>
-                            </div>
-                        </a>
-                        <a href="#" class="js-track-wp-cta">
-                            <div class="nav-item-icon">
-                                <img src="<?= base_url('public/img/logos/shopify.svg') ?>" width="18" height="18"
-                                    alt="Shopify" style="display: block;">
-                            </div>
-                            <div>
-                                <strong style="display: flex; align-items: center; gap: 6px;">Plugin Shopify B2B <b
-                                        style="background: #f1f5f9; color: #64748b; font-size: 8px; font-weight: 800; padding: 2px 5px; border-radius: 4px; letter-spacing: 0.5px; font-style: normal; line-height: 1;">PRÓXIMAMENTE</b></strong>
-                                <span>Valida CIF y solvencia financiera en el checkout B2B.</span>
                             </div>
                         </a>
                     </div>
@@ -400,8 +378,6 @@
                             WordPress</span></a>
                     <a href="<?= site_url('integraciones/google-sheets') ?>" class="mobile-nav-link"><span>Google
                             Sheets</span></a>
-                    <a href="#" class="mobile-nav-link js-track-wp-cta"><span>Zapier / Make</span></a>
-                    <a href="#" class="mobile-nav-link js-track-wp-cta"><span>Shopify B2B</span></a>
                 </div>
 
                 <div class="mobile-nav-group" style="margin-top: 16px;">

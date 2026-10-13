@@ -164,11 +164,14 @@ class SandboxController extends \App\Controllers\Api\V1\BaseApiController
             'success' => true,
             'data' => [
                 'cif' => $cif,
-                'score' => 98,
-                'fuerza_financiera' => 'Excelente',
-                'riesgo_impago' => 'Muy Bajo',
-                'trayectoria' => 'Sólida',
-                'mensaje' => 'La empresa presenta una solidez financiera sobresaliente.'
+                'score' => 82,
+                'priority' => 'muy_alta',
+                'reasons' => ['OPP:95|QUAL:80|CONT:60 · Ampliación de capital'],
+                'last_signal' => [
+                    'type' => 'Ampliación de capital',
+                    'date' => '2026-09-15',
+                ],
+                'source' => 'radar',
             ]
         ]);
     }

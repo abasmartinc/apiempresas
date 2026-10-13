@@ -157,7 +157,7 @@
                     </svg>
                     <div class="brand-text">
                         <span class="brand-name">API<span class="grad">Empresas</span>.es</span>
-                        <span class="brand-tag">La suite de inteligencia empresarial</span>
+                        <span class="brand-tag">Datos de empresas españolas</span>
                     </div>
                 </div>
                 <p class="foot-desc">

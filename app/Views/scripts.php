@@ -2,6 +2,21 @@
 helper('api'); 
 $isEn = (service('request')->getLocale() === 'en');
 ?>
+<style>
+    /* Resultado del validador en móvil (13-10-2026): una columna en vez de tres */
+    @media (max-width: 640px) {
+        #resultado .search-result-card { padding: 24px 18px !important; }
+        #resultado .result-header { flex-direction: column; align-items: flex-start !important; gap: 16px; }
+        #resultado .result-header h2 { font-size: 1.4rem !important; }
+        #resultado .result-info-grid { grid-template-columns: 1fr !important; gap: 16px !important; padding: 18px !important; }
+        #resultado .result-actions { flex-direction: column; }
+        #resultado .result-actions .btn { padding: 16px 20px !important; }
+        #resultado .api-bridge-card { flex-direction: column !important; align-items: flex-start !important; gap: 16px !important; padding: 24px 18px !important; }
+        #resultado .api-bridge-card > div:last-child { width: 100%; align-items: stretch !important; }
+        #resultado .api-bridge-card > div:last-child a { justify-content: center; }
+        #resultado .borme-recent { padding: 16px 18px !important; }
+    }
+</style>
 <script>
     function runWithJquery(fn) {
         if (window.jQuery) {
@@ -157,6 +172,8 @@ $isEn = (service('request')->getLocale() === 'en');
     </div>
   </div>
 
+  ${renderBormeRecent(company.borme_recent)}
+
   <div class="address-box" style="margin-bottom: 32px; padding: 18px 24px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; display: flex; gap: 16px; align-items: center; text-align: left;">
     <div style="background: #f1f5f9; padding: 10px; border-radius: 12px; color: #64748b;">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
@@ -228,6 +245,32 @@ $isEn = (service('request')->getLocale() === 'en');
 </div>`);
 
             $container.show();
+        }
+
+        // Últimas publicaciones del BORME con enlace al PDF oficial (13-10-2026)
+        function escHtml(s) {
+            return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+            });
+        }
+
+        function renderBormeRecent(items) {
+            if (!Array.isArray(items) || !items.length) return '';
+            const rows = items.map(function (it) {
+                const d = it.date ? String(it.date).slice(0, 10).split('-').reverse().join('/') : '';
+                const tipo = escHtml(it.act_types || '<?= $isEn ? 'Filing' : 'Publicación' ?>');
+                const link = it.url_pdf
+                    ? `<a href="${escHtml(it.url_pdf)}" target="_blank" rel="noopener nofollow" style="color: #2563eb; font-weight: 700; text-decoration: none; white-space: nowrap;"><?= $isEn ? 'Official BORME PDF' : 'PDF oficial del BORME' ?> ↗</a>`
+                    : '';
+                return `<li style="display: flex; gap: 12px; align-items: baseline; justify-content: space-between; padding: 10px 0; border-top: 1px solid #f1f5f9; flex-wrap: wrap;">
+                    <span style="color: #1e293b; font-weight: 600;"><span style="color: #64748b; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; margin-right: 10px;">${d}</span>${tipo}</span>
+                    ${link}
+                </li>`;
+            }).join('');
+            return `<div class="borme-recent" style="margin-bottom: 24px; padding: 18px 24px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; text-align: left;">
+                <span style="display: block; font-size: 0.65rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px;"><?= $isEn ? 'Latest BORME filings (source)' : 'Últimas publicaciones en el BORME (fuente)' ?></span>
+                <ul style="list-style: none; margin: 0; padding: 0; font-size: 0.95rem;">${rows}</ul>
+            </div>`;
         }
 
         function formatJsonForIde(obj) {

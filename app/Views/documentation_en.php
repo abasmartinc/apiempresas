@@ -748,15 +748,16 @@ Accept: application/json</code></pre>
                             <code>/companies/score</code>
                             <span class="plan-badge pro">Pro</span>
                         </div>
-                        <p>Get the commercial interest score and priority level for a company.</p>
+                        <p>Commercial score from 0 to 100 for a company: its recent BORME activity, how complete its record is and whether it has a phone, email or website. It does not measure solvency (use <code>/companies/risk-profile</code> for that). On Free it returns the number only; <code>priority</code>, <code>reasons</code> and <code>last_signal</code> come back locked.</p>
                         <pre><code class="language-json">{
   "success": true,
   "data": {
     "cif": "B12345678",
-    "score": 85,
-    "priority": "Alta",
-    "reasons": "Constitución reciente, Sector en crecimiento",
-    "last_signal": { "type": "CONSTITUCION", "date": "2023-10-01" }
+    "score": 82,
+    "priority": "muy_alta",
+    "reasons": ["OPP:95|QUAL:80|CONT:60 · Ampliación de capital"],
+    "last_signal": { "type": "Ampliación de capital", "date": "2026-09-15" },
+    "source": "radar"
   }
 }</code></pre>
                         <table class="docs-table" style="margin-top: 16px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
@@ -764,8 +765,10 @@ Accept: application/json</code></pre>
                                 <tr><th style="width: 25%;">Field</th><th style="width: 15%;">Type</th><th>Description</th></tr>
                             </thead>
                             <tbody>
-                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">data.score</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td style="color: #475569;">Score from 0 to 100 indicating the level of commercial activity.</td></tr>
-                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">data.priority</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">enum</span></td><td style="color: #475569;">Prospecting priority level: Alta (High), Media (Medium), Baja (Low).</td></tr>
+                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">data.score</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td style="color: #475569;">Commercial score from 0 to 100.</td></tr>
+                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">data.priority</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">enum</span></td><td style="color: #475569;">Prospecting priority from the score: <code>muy_alta</code> (75 or more), <code>alta</code> (60), <code>media</code> (40), <code>baja</code> (20) or <code>muy_baja</code>.</td></tr>
+                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">data.reasons</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">array</span></td><td style="color: #475569;">List of reasons behind the score.</td></tr>
+                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">data.last_signal</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">object</span></td><td style="color: #475569;">Latest BORME act that counts towards the score: <code>type</code> and <code>date</code>.</td></tr>
                             </tbody>
                         </table>
                     </div>

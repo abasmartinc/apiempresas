@@ -56,7 +56,7 @@
                 <li><?= $fmtMas((int) $hs['companies'], 'empresas españolas') ?></li>
                 <li><?= $fmtMas((int) $hs['acts'], 'actos del BORME') ?></li>
                 <?php if (!empty($hs['last_borme'])): $t = strtotime($hs['last_borme']); ?>
-                <li>Último BORME procesado: <strong><?= (int) date('j', $t) . ' ' . $mesesCortos[(int) date('n', $t)] . ' ' . date('Y', $t) ?></strong></li>
+                <li>Último BORME procesado: <strong><?= (int) date('j', $t) . ' ' . $mesesCortos[(int) date('n', $t)] . ' ' . date('Y', $t) ?></strong> (se publica cada día hábil)</li>
                 <?php endif; ?>
             </ul>
             <style>
@@ -75,21 +75,39 @@
                         <div class="dots">
                             <div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div>
                         </div>
-                        <div class="tab">Tu primera llamada</div>
-                        <button type="button" class="hero-curl-copy" id="heroCurlCopy" aria-label="Copiar la petición curl">Copiar</button>
+                        <div class="hc-tabs" role="tablist" aria-label="Lenguaje del ejemplo">
+                            <button type="button" class="hc-tab active" role="tab" aria-selected="true" data-lang="curl">curl</button>
+                            <button type="button" class="hc-tab" role="tab" aria-selected="false" data-lang="node">Node.js</button>
+                            <button type="button" class="hc-tab" role="tab" aria-selected="false" data-lang="python">Python</button>
+                            <button type="button" class="hc-tab" role="tab" aria-selected="false" data-lang="php">PHP</button>
+                        </div>
+                        <button type="button" class="hero-curl-copy" id="heroCurlCopy" aria-label="Copiar el ejemplo">Copiar</button>
                     </div>
                     <div class="editor-body">
-<pre><code id="heroCurlCode"><span class="hc-cmd">curl</span> <span class="hc-str">"https://apiempresas.es/api/v1/companies?cif=A46103834"</span> \
+<pre class="hc-code" data-lang="curl"><code id="heroCurlCode"><span class="hc-cmd">curl</span> <span class="hc-str">"https://apiempresas.es/api/v1/companies?cif=A46103834"</span> \
   <span class="hc-flag">-H</span> <span class="hc-str">"X-API-KEY: TU_API_KEY"</span></code></pre>
+<pre class="hc-code" data-lang="node" hidden><code><span class="hc-muted">// npm install apiempresas</span>
+<span class="hc-cmd">import</span> { ApiEmpresas } <span class="hc-cmd">from</span> <span class="hc-str">'apiempresas'</span>;
+
+<span class="hc-cmd">const</span> api = <span class="hc-cmd">new</span> ApiEmpresas({ apiKey: <span class="hc-str">'TU_API_KEY'</span> });
+<span class="hc-cmd">const</span> empresa = <span class="hc-cmd">await</span> api.companies.get(<span class="hc-str">'A46103834'</span>);
+console.log(empresa.name);</code></pre>
+<pre class="hc-code" data-lang="python" hidden><code><span class="hc-muted"># pip install apiempresas</span>
+<span class="hc-cmd">from</span> apiempresas <span class="hc-cmd">import</span> ApiEmpresas
+
+api = ApiEmpresas(<span class="hc-str">'TU_API_KEY'</span>)
+empresa = api.companies.get(<span class="hc-str">'A46103834'</span>)
+print(empresa[<span class="hc-str">'name'</span>])</code></pre>
+<pre class="hc-code" data-lang="php" hidden><code><span class="hc-muted">// composer require apiempresas/apiempresas-php</span>
+<span class="hc-cmd">require</span> <span class="hc-str">'vendor/autoload.php'</span>;
+<span class="hc-cmd">use</span> ApiEmpresas\ApiEmpresas;
+
+$api = <span class="hc-cmd">new</span> ApiEmpresas(<span class="hc-str">'TU_API_KEY'</span>);
+$empresa = $api-&gt;companies-&gt;get(<span class="hc-str">'A46103834'</span>);
+<span class="hc-cmd">echo</span> $empresa[<span class="hc-str">'name'</span>];</code></pre>
 <pre class="hc-res"><code><span class="hc-muted"># Respuesta (resumida)</span>
 { <span class="hc-key">"success"</span>: <span class="hc-bool">true</span>, <span class="hc-key">"data"</span>: { <span class="hc-key">"cif"</span>: <span class="hc-val">"A46103834"</span>, <span class="hc-key">"name"</span>: <span class="hc-val">"MERCADONA SA"</span>, <span class="hc-key">"status"</span>: <span class="hc-val">"Activa"</span>, … } }</code></pre>
                     </div>
-                </div>
-                <div class="hero-sdks" aria-label="Instalar un SDK">
-                    <span class="hero-sdks-label">O instala un SDK:</span>
-                    <code>npm install apiempresas</code>
-                    <code>pip install apiempresas</code>
-                    <code>composer require apiempresas/apiempresas-php</code>
                 </div>
                 <p class="hero-curl-note">Crea tu cuenta gratis y cambia <code>A46103834</code> por el CIF que quieras y <code>TU_API_KEY</code> por tu clave. <a href="<?= site_url('documentation#sdks') ?>">Ver ejemplos en PHP, Node.js y Python →</a></p>
             </div>
@@ -108,9 +126,13 @@
                 .hero-curl code { color: #E2E8F0; font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace; }
                 .hero-curl-copy { margin-left: auto; background: rgba(255,255,255,0.08); color: #E2E8F0; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 4px 12px; font-size: 0.8rem; font-weight: 700; cursor: pointer; }
                 .hero-curl-copy:hover { background: rgba(255,255,255,0.16); }
-                .hero-sdks { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; margin-top: 14px; }
-                .hero-sdks-label { font-size: 0.85rem; font-weight: 700; color: var(--ae-slate); }
-                .hero-sdks code { background: #0f172a; color: #C3E88D; padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace; user-select: all; }
+                .hero-curl .editor-header { flex-wrap: wrap; gap: 8px; }
+                .hero-curl .hc-tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+                .hero-curl .hc-tab { background: transparent; color: #94A3B8; border: 0; border-radius: 6px; padding: 4px 10px; font-size: 0.8rem; font-weight: 700; cursor: pointer; font-family: inherit; }
+                .hero-curl .hc-tab:hover { color: #E2E8F0; }
+                .hero-curl .hc-tab.active { background: rgba(255,255,255,0.1); color: #E2E8F0; }
+                .hero-curl pre.hc-code[hidden] { display: none; }
+                @media (max-width: 520px) { .hero-curl .editor-header .dots { display: none; } }
                 .hero-curl-note { font-size: 0.9rem !important; margin: 14px 0 0 !important; max-width: none !important; text-align: center; color: var(--ae-slate); }
                 .hero-curl-note code { background: #eef2ff; color: #1e3a8a; padding: 1px 6px; border-radius: 6px; font-size: 0.85em; }
                 .hero-curl-note a { color: var(--ae-blue); font-weight: 700; text-decoration: none; }
@@ -163,16 +185,6 @@
             <div class="container">
                 <h3 class="integrations-title">Úsala desde tus herramientas</h3>
                 <div class="integrations-grid">
-                    <!-- Zapier -->
-                    <div class="integration-item" title="Zapier: próximamente" style="opacity: .55;">
-                        <svg viewBox="0 0 24 24" fill="#FF4F00"><path d="M19.141 12l3.418-3.418c.319-.319.319-.838 0-1.157L19.141 4c-.319-.319-.838-.319-1.157 0L14.566 7.418l1.157 1.157L18 6.314l2.121 2.121-2.121 2.121 2.121 2.121 2.121-2.121-2.121-2.121 1.157-1.157c-.159 0-3.417 3.418-3.417 3.418zM4.859 12L1.441 8.582c-.319-.319-.319-.838 0-1.157L4.859 4c.319-.319.838-.319 1.157 0l3.418 3.418-1.157 1.157L6 6.314 3.879 8.435 6 10.556 3.879 12.677 1.758 10.556l2.121-2.121L4.859 12zm14.282 3.418l-3.418 3.418-1.157-1.157L18 17.686l2.121-2.121-2.121-2.121-2.121 2.121 2.121 2.121-2.121-2.121-1.157 1.157c.159 0 3.417-3.418 3.417-3.418zM4.859 15.418L1.441 18.836c-.319.319-.319.838 0 1.157L4.859 23.412c.319.319.838.319 1.157 0l3.418-3.418-1.157-1.157L6 21.123 3.879 19 6 16.877l-2.121-2.121 1.157-1.157c.159 0 3.417 3.418 3.417 3.418z"/></svg>
-                        <span>Zapier <small>(próximamente)</small></span>
-                    </div>
-                    <!-- Make -->
-                    <div class="integration-item" title="Make: próximamente" style="opacity: .55;">
-                        <svg viewBox="0 0 24 24" fill="#6435c9"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8zm-3-9h6v2H9z"/></svg>
-                        <span>Make <small>(próximamente)</small></span>
-                    </div>
                     <!-- Google Sheets -->
                     <a href="<?= site_url('integraciones/google-sheets') ?>" class="integration-item" title="Extensión de Google Sheets" style="text-decoration: none; color: inherit;">
                         <svg viewBox="0 0 24 24" fill="#0F9D58"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
@@ -582,15 +594,17 @@
                     <div class="hiw-sources-grid">
                         <div>
                             <strong>BORME (Boletín Oficial del Registro Mercantil)</strong>
+                            <span class="hiw-freq">Cada día hábil</span>
                             <p>Constituciones, nombramientos y ceses, cambios de domicilio, objeto o capital, disoluciones, concursos y extinciones. Lo revisamos a diario, con cada boletín publicado.</p>
                         </div>
                         <div>
                             <strong>Plataforma de Contratación del Sector Público</strong>
-                            <p>Contratos y adjudicaciones públicas de cada empresa: órgano de contratación, importes y fechas.</p>
+                            <span class="hiw-freq">Cada día</span>
+                            <p>Contratos y adjudicaciones públicas de cada empresa: órgano de contratación, importes y fechas. Los nuevos se cargan cada día.</p>
                         </div>
                         <div>
                             <strong>Datos calculados por APIEmpresas</strong>
-                            <p>El estado registral, el scoring y el perfil de riesgo se calculan a partir de esas publicaciones. No son un dato oficial del Registro Mercantil.</p>
+                            <p>El estado registral, la puntuación comercial y el perfil de riesgo se calculan a partir de esas publicaciones. No son un dato oficial del Registro Mercantil.</p>
                         </div>
                     </div>
                 </div>
@@ -608,6 +622,7 @@
                 .how-it-works .hiw-sources-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
                 .how-it-works .hiw-sources-grid strong { display: block; color: var(--ae-dark); margin-bottom: 6px; font-size: 0.98rem; }
                 .how-it-works .hiw-sources-grid p { color: var(--ae-slate); font-size: 0.92rem; margin: 0; line-height: 1.5; }
+                .how-it-works .hiw-freq { display: inline-block; margin: 0 0 8px; padding: 2px 10px; border-radius: 99px; background: #ecfdf5; color: #047857; font-size: 0.75rem; font-weight: 800; }
                 @media (max-width: 900px) {
                     .how-it-works .hiw-steps, .how-it-works .hiw-sources-grid { grid-template-columns: 1fr; }
                     .how-it-works .hiw-sources { padding: 22px; }
@@ -641,7 +656,7 @@
                         (int) $freeLimit . ' consultas gratis (no se renuevan)',
                         'Validación por CIF y buscador por nombre',
                         'Datos básicos: razón social, estado normalizado, CNAE, provincia y fecha de constitución',
-                        'Scoring comercial básico (sin desglose)',
+                        'Puntuación comercial (0-100): solo la cifra',
                         'Empresas recién constituidas (hoy, 7 o 30 días): 10 por consulta',
                         'Recuento de segmentos gratis: cuántas empresas hay por sector, zona y tamaño',
                         'Sin tarjeta de crédito',
@@ -655,13 +670,13 @@
                         'Consultas por lotes: hasta 100 CIFs por petición',
                         'Historial BORME, señales y grafos societarios',
                         'Vigilancia de 100 empresas: cambios en el BORME, el estado y el riesgo, sin gastar consultas',
-                        'Scoring comercial IA completo (0-100)',
+                        'Puntuación comercial con sus motivos y la última señal del BORME',
                         'Empresas recién constituidas (hoy, 7 o 30 días): hasta 100 por consulta, filtrables por CNAE y teléfono',
                         'Soporte prioritario por email: respuesta en menos de 2 h',
                     ],
                     'business' => [
                         '10.000 consultas al mes',
-                        'Perfil de riesgo y solvencia',
+                        'Perfil de riesgo y solvencia (distinto de la puntuación comercial)',
                         'Contratos y adjudicaciones públicas',
                         'Vigilancia de 1.000 empresas (BORME, estado y riesgo)',
                         'Webhooks Push (Notificaciones BORME)',
@@ -676,6 +691,8 @@
                 ?>
                 <style>
                     .annual-note-home { margin: -6px 0 12px; font-size: 0.82rem; font-weight: 700; color: #ecfdf5; opacity: .92; }
+                    .per-query-home { margin: -8px 0 10px; font-size: 0.85rem; font-weight: 600; color: #ecfdf5; opacity: .85; }
+                    .per-query-home b { font-weight: 800; }
                 </style>
                 <div class="tier-grid" style="margin-top: 16px;">
                     <!-- FREE -->
@@ -703,6 +720,7 @@
                         <div class="tier-subtitle">Para automatizar validaciones</div>
                         <div class="tier-desc">La opción ideal para SaaS, ERPs y productos que ya necesitan validación en producción.</div>
                         <div class="price"><b id="priceProHome" data-monthly="19" data-annual="15,17" style="font-weight: inherit;">19</b>€<span>/mes + IVA</span></div>
+                        <div class="per-query-home">Unos <b data-monthly="0,6" data-annual="0,5">0,6</b> céntimos por consulta</div>
                         <div class="annual-note-home" style="visibility: hidden;">Facturado 182 € + IVA al año (ahorras 46 €)</div>
                         <ul class="tier-features">
                             <li style="font-weight: 800;"><?= $tierTick ?> Todo lo del plan Free, más:</li>
@@ -723,6 +741,7 @@
                         <div class="tier-subtitle">Para equipos y alto volumen</div>
                         <div class="tier-desc">Pensado para plataformas con más carga, procesos críticos y necesidades de mayor disponibilidad.</div>
                         <div class="price"><b id="priceBizHome" data-monthly="49" data-annual="39,17" style="font-weight: inherit;">49</b>€<span>/mes + IVA</span></div>
+                        <div class="per-query-home">Unos <b data-monthly="0,5" data-annual="0,4">0,5</b> céntimos por consulta</div>
                         <div class="annual-note-home" style="visibility: hidden;">Facturado 470 € + IVA al año (ahorras 118 €)</div>
                         <ul class="tier-features">
                             <li style="font-weight: 800;"><?= $tierTick ?> Todo lo del plan Pro, más:</li>
@@ -1012,7 +1031,7 @@
                         <tbody class="cap-group-head">
                             <tr><td colspan="4">
                                 <button type="button" class="cap-fold-btn" aria-expanded="false" aria-controls="cap-group-prospeccion-comercial-con-ia" onclick="var t=document.getElementById('cap-group-prospeccion-comercial-con-ia'),o=this.getAttribute('aria-expanded')==='true';t.hidden=o;this.setAttribute('aria-expanded',o?'false':'true');">
-                                    <span class="cap-group-title">Prospección comercial con IA</span> <span class="cap-group-sub">Scoring, insights, contact prep y match B2B, para equipos de ventas</span> <span class="cap-fold-cta"><span class="cap-fold-open">Ver las 4 funciones</span><span class="cap-fold-close">Ocultar</span> <span class="cap-fold-icon" aria-hidden="true">▾</span></span>
+                                    <span class="cap-group-title">Prospección comercial con IA</span> <span class="cap-group-sub">Puntuación comercial, insights, contact prep y match B2B, para equipos de ventas</span> <span class="cap-fold-cta"><span class="cap-fold-open">Ver las 4 funciones</span><span class="cap-fold-close">Ocultar</span> <span class="cap-fold-icon" aria-hidden="true">▾</span></span>
                                 </button>
                             </td></tr>
                         </tbody>
@@ -1020,9 +1039,9 @@
                             <tr>
                                 <td>
                                     <div class="cap-col-feature">
-                                        <div class="cap-feature-name">Scoring Comercial IA</div>
+                                        <div class="cap-feature-name">Puntuación comercial</div>
                                         <div class="cap-feature-endpoint">GET /api/v1/companies/score</div>
-                                        <div class="cap-feature-desc">Clasifica empresas por potencial de compra y salud financiera mediante nuestro algoritmo.</div>
+                                        <div class="cap-feature-desc">Puntúa de 0 a 100 el interés comercial de una empresa según su actividad reciente en el BORME, lo completa que está su ficha y si tiene teléfono, email o web. No mide solvencia: para eso está el perfil de riesgo.</div>
                                         <button type="button" onclick="event.preventDefault(); showJsonPreview('get_score')" class="btn-json-preview">Ver Respuesta JSON</button>
                                     </div>
                                 </td>
@@ -1095,7 +1114,7 @@
                     <div style="position: sticky; top: 120px;">
                         <span class="tag reveal" style="background: rgba(37,99,235,0.1); color: var(--ae-blue); border: none; font-weight: 800; padding: 6px 16px; border-radius: 100px; display: inline-block; margin-bottom: 8px;">Soporte Técnico</span>
                         <h2 class="reveal delay-1" style="font-size: 3rem; font-weight: 950; margin-top: 16px; margin-bottom: 24px; text-align: left; line-height: 1.1; letter-spacing: -0.03em;">Preguntas frecuentes sobre la <span class="gradient-text" style="display: inline-block; padding-bottom: 4px;">API de empresas</span></h2>
-                        <p class="reveal delay-2" style="color: var(--ae-slate); font-size: 1.15rem; line-height: 1.6; margin-bottom: 32px; font-weight: 500;">Si no encuentras la respuesta que buscas, escríbeme. Te responde directamente quien desarrolla la API, y te ayudo a integrarla en tu sistema.</p>
+                        <p class="reveal delay-2" style="color: var(--ae-slate); font-size: 1.15rem; line-height: 1.6; margin-bottom: 32px; font-weight: 500;">Si no encuentras la respuesta que buscas, escríbenos. Te responde directamente quien desarrolla la API y te ayuda a integrarla en tu sistema.</p>
                         
                         <!-- Soporte y estado del servicio (sin avatares: el soporte lo da quien desarrolla la API) -->
                         <div class="reveal delay-2" style="display: grid; gap: 12px; margin-bottom: 32px; max-width: 420px;">
@@ -1123,9 +1142,9 @@
                         $homeFaqs = [
                             ['¿Qué datos devuelve la API?', 'Devuelve la razón social, el estado (activa, extinguida, en concurso…), la fecha de constitución, la provincia y la actividad principal (CNAE). Con Pro, también administradores, domicilio completo y tramo de facturación.'],
                             ['¿Puedo probarla gratis?', 'Sí. Al registrarte obtienes el plan Free con ' . (int) $freeLimit . ' consultas gratuitas (no se renuevan) contra la API real, sin tarjeta y sin compromiso.'],
-                            ['¿La información es oficial?', 'Los datos proceden de fuentes públicas oficiales, como el BORME (Registro Mercantil) y la Plataforma de Contratación del Sector Público, y se actualizan cada día. El estado registral y el scoring los calculamos nosotros a partir de esas publicaciones: no son un certificado del Registro Mercantil.'],
+                            ['¿La información es oficial?', 'Los datos proceden de fuentes públicas oficiales, como el BORME (Registro Mercantil) y la Plataforma de Contratación del Sector Público, y se actualizan cada día. El estado registral, la puntuación comercial y el perfil de riesgo los calculamos nosotros a partir de esas publicaciones: no son un certificado del Registro Mercantil.'],
                             ['¿Qué tipo de autenticación utiliza la API?', 'Envías tu API Key en la cabecera X-API-KEY (también se acepta Authorization: Bearer). Al crear tu cuenta obtienes al instante tu API Key, lista para usar.'],
-                            ['¿Cuánto se tarda en integrar?', 'Nuestra API REST está diseñada con estándares modernos y es extremadamente sencilla. Un desarrollador promedio puede completar la integración y validar su primera empresa en menos de una hora. Dispones de documentación detallada para guiarte.'],
+                            ['¿Cuánto se tarda en integrar?', 'La primera llamada se hace en un minuto: copias el ejemplo con curl de arriba, pones tu API Key y recibes el JSON. Para desarrollar sin gastar consultas tienes el Sandbox con CIF de prueba, y SDK oficiales para PHP, Node.js y Python.'],
                             ['¿Se puede integrar en cualquier lenguaje o plataforma?', 'Sí. Al ser una API REST estándar que devuelve respuestas en JSON, puedes consumirla desde cualquier lenguaje (PHP, Node.js, Python, Java, C#, Go) o integrarla en ERPs/CRMs como Salesforce, HubSpot o SAP, y en cualquier herramienta no-code que haga peticiones HTTP.'],
                         ];
                         foreach ($homeFaqs as $i => [$q, $a]): ?>
@@ -1504,12 +1523,28 @@
             });
         });
 
-        // Copiar el curl del hero
+        // Pestañas de lenguaje y copiar el ejemplo visible del hero
         (function () {
             var btn = document.getElementById('heroCurlCopy');
             if (!btn) return;
+            var lang = 'curl';
+            document.querySelectorAll('.hero-curl .hc-tab').forEach(function (tab) {
+                tab.addEventListener('click', function () {
+                    lang = tab.dataset.lang;
+                    document.querySelectorAll('.hero-curl .hc-tab').forEach(function (t) {
+                        var on = t === tab;
+                        t.classList.toggle('active', on);
+                        t.setAttribute('aria-selected', on ? 'true' : 'false');
+                    });
+                    document.querySelectorAll('.hero-curl pre.hc-code').forEach(function (pre) {
+                        pre.hidden = pre.dataset.lang !== lang;
+                    });
+                    if (window.trackEvent) window.trackEvent('hero_code_tab', { lang: lang, source_block: 'hero', page_type: 'home' }, 'heroCodeTab');
+                });
+            });
             btn.addEventListener('click', function () {
-                var text = 'curl "https://apiempresas.es/api/v1/companies?cif=A46103834" \\\n  -H "X-API-KEY: TU_API_KEY"';
+                var pre = document.querySelector('.hero-curl pre.hc-code[data-lang="' + lang + '"]');
+                var text = pre ? pre.textContent : '';
                 var done = function () {
                     btn.textContent = 'Copiado';
                     setTimeout(function () { btn.textContent = 'Copiar'; }, 2000);
@@ -1522,7 +1557,7 @@
                     try { document.execCommand('copy'); done(); } catch (e) {}
                     document.body.removeChild(ta);
                 }
-                if (window.trackEvent) window.trackEvent('hero_curl_copy', { source_block: 'hero', page_type: 'home' }, 'heroCurlCopy');
+                if (window.trackEvent) window.trackEvent('hero_curl_copy', { lang: lang, source_block: 'hero', page_type: 'home' }, 'heroCurlCopy');
             });
         })();
 
@@ -1546,6 +1581,7 @@
                 pricePro.textContent = pricePro.dataset.annual;
                 priceBiz.textContent = priceBiz.dataset.annual;
                 document.querySelectorAll('.annual-note-home').forEach(function (n) { n.style.visibility = ''; });
+                document.querySelectorAll('.per-query-home b').forEach(function (n) { n.textContent = n.dataset.annual; });
             } else {
                 knob.style.transform = 'translateX(0px)';
                 labelMonthly.style.color = '#2563eb';
@@ -1556,6 +1592,7 @@
                 pricePro.textContent = pricePro.dataset.monthly;
                 priceBiz.textContent = priceBiz.dataset.monthly;
                 document.querySelectorAll('.annual-note-home').forEach(function (n) { n.style.visibility = 'hidden'; });
+                document.querySelectorAll('.per-query-home b').forEach(function (n) { n.textContent = n.dataset.monthly; });
             }
 
             // Los botones de pago llevan el periodo que el usuario está viendo

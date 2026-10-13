@@ -21,7 +21,7 @@
             
             <div class="kicker-light">FEEDBACK PRIORITARIO</div>
             <h2 class="title-light-gradient">¿Cómo puntuarías tu experiencia?</h2>
-            <p class="subtitle-light">Tu opinión nos ayuda a construir la herramienta de inteligencia comercial más potente del mercado.</p>
+            <p class="subtitle-light">Tu opinión nos ayuda a decidir qué mejorar primero.</p>
 
             <!-- Sistema de Estrellas Gigantes (72px) -->
             <div class="stars-light-wrapper">
@@ -173,6 +173,17 @@
         transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     .star-btn-light:hover { transform: scale(1.3); color: #fbbf24; }
+
+    /* Móvil (13-10-2026): el título de 42 px y las estrellas de 72 px no cabían en 375 px */
+    @media (max-width: 640px) {
+        .review-modal-ultra-light { width: calc(100% - 24px) !important; }
+        .review-modal-ultra-light .modal-content-pro { padding: 56px 20px 28px !important; }
+        .title-light-gradient { font-size: 28px !important; }
+        .star-rating-light { gap: 8px; }
+        .star-btn-light { width: 44px; height: 44px; }
+        .review-modal-close-light { top: 14px !important; right: 14px !important; width: 40px !important; height: 40px !important; }
+        .kicker-light { margin-top: 8px; letter-spacing: 0.12em !important; }
+    }
     .star-btn-light.active { color: #fbbf24; filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.4)); }
     .star-btn-light.active svg { fill: #fbbf24; }
 
@@ -355,7 +366,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.querySelectorAll('[data-close-modal]').forEach(el => {
         el.addEventListener('click', () => {
-            if(el.id === 'dismissReviewModal') localStorage.setItem('ae_review_dismissed', 'true');
+            // Cerrar con la X o con "Ahora no" cuenta como descartar: si no, sale en cada carga (13-10-2026)
+            try { localStorage.setItem('ae_review_dismissed', 'true'); } catch (e) {}
             closeModal();
         });
     });

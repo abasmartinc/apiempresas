@@ -79,10 +79,11 @@ class CompanyEnrichmentController extends BaseApiController
                 'data' => [
                     'cif' => 'B********',
                     'score' => $data['score'],
-                    'fuerza_financiera' => '🔒 Actualiza a Pro',
-                    'riesgo_impago' => '🔒 Actualiza a Pro',
-                    'trayectoria' => '🔒 Actualiza a Pro',
-                    'mensaje' => 'Actualiza a Pro para ver el desglose detallado y señales del BORME',
+                    // Mismos campos que la respuesta Pro (priority, reasons, last_signal), bloqueados
+                    'priority' => '🔒 Disponible en Pro',
+                    'reasons' => '🔒 Disponible en Pro',
+                    'last_signal' => '🔒 Disponible en Pro',
+                    'mensaje' => 'Con Pro ves la prioridad, los motivos de la puntuación y la última señal del BORME',
                     // Campo nuevo: enlace de compra con origen
                     'checkout_url' => self::checkoutUrl('pro', 'api_free_score'),
                 ]

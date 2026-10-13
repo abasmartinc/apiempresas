@@ -52,7 +52,7 @@
                 <li><?= $fmtOver((int) $hs['companies'], 'Spanish companies') ?></li>
                 <li><?= $fmtOver((int) $hs['acts'], 'BORME filings') ?></li>
                 <?php if (!empty($hs['last_borme'])): ?>
-                <li>Latest BORME processed: <strong><?= date('j M Y', strtotime($hs['last_borme'])) ?></strong></li>
+                <li>Latest BORME processed: <strong><?= date('j M Y', strtotime($hs['last_borme'])) ?></strong> (published every working day)</li>
                 <?php endif; ?>
             </ul>
             <style>
@@ -71,21 +71,39 @@
                         <div class="dots">
                             <div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div>
                         </div>
-                        <div class="tab">Your first call</div>
-                        <button type="button" class="hero-curl-copy" id="heroCurlCopy" aria-label="Copy the curl request">Copy</button>
+                        <div class="hc-tabs" role="tablist" aria-label="Example language">
+                            <button type="button" class="hc-tab active" role="tab" aria-selected="true" data-lang="curl">curl</button>
+                            <button type="button" class="hc-tab" role="tab" aria-selected="false" data-lang="node">Node.js</button>
+                            <button type="button" class="hc-tab" role="tab" aria-selected="false" data-lang="python">Python</button>
+                            <button type="button" class="hc-tab" role="tab" aria-selected="false" data-lang="php">PHP</button>
+                        </div>
+                        <button type="button" class="hero-curl-copy" id="heroCurlCopy" aria-label="Copy the example">Copy</button>
                     </div>
                     <div class="editor-body">
-<pre><code id="heroCurlCode"><span class="hc-cmd">curl</span> <span class="hc-str">"https://apiempresas.es/api/v1/companies?cif=A46103834"</span> \
+<pre class="hc-code" data-lang="curl"><code id="heroCurlCode"><span class="hc-cmd">curl</span> <span class="hc-str">"https://apiempresas.es/api/v1/companies?cif=A46103834"</span> \
   <span class="hc-flag">-H</span> <span class="hc-str">"X-API-KEY: YOUR_API_KEY"</span></code></pre>
+<pre class="hc-code" data-lang="node" hidden><code><span class="hc-muted">// npm install apiempresas</span>
+<span class="hc-cmd">import</span> { ApiEmpresas } <span class="hc-cmd">from</span> <span class="hc-str">'apiempresas'</span>;
+
+<span class="hc-cmd">const</span> api = <span class="hc-cmd">new</span> ApiEmpresas({ apiKey: <span class="hc-str">'YOUR_API_KEY'</span> });
+<span class="hc-cmd">const</span> company = <span class="hc-cmd">await</span> api.companies.get(<span class="hc-str">'A46103834'</span>);
+console.log(company.name);</code></pre>
+<pre class="hc-code" data-lang="python" hidden><code><span class="hc-muted"># pip install apiempresas</span>
+<span class="hc-cmd">from</span> apiempresas <span class="hc-cmd">import</span> ApiEmpresas
+
+api = ApiEmpresas(<span class="hc-str">'YOUR_API_KEY'</span>)
+company = api.companies.get(<span class="hc-str">'A46103834'</span>)
+print(company[<span class="hc-str">'name'</span>])</code></pre>
+<pre class="hc-code" data-lang="php" hidden><code><span class="hc-muted">// composer require apiempresas/apiempresas-php</span>
+<span class="hc-cmd">require</span> <span class="hc-str">'vendor/autoload.php'</span>;
+<span class="hc-cmd">use</span> ApiEmpresas\ApiEmpresas;
+
+$api = <span class="hc-cmd">new</span> ApiEmpresas(<span class="hc-str">'YOUR_API_KEY'</span>);
+$company = $api-&gt;companies-&gt;get(<span class="hc-str">'A46103834'</span>);
+<span class="hc-cmd">echo</span> $company[<span class="hc-str">'name'</span>];</code></pre>
 <pre class="hc-res"><code><span class="hc-muted"># Response (shortened)</span>
 { <span class="hc-key">"success"</span>: <span class="hc-bool">true</span>, <span class="hc-key">"data"</span>: { <span class="hc-key">"cif"</span>: <span class="hc-val">"A46103834"</span>, <span class="hc-key">"name"</span>: <span class="hc-val">"MERCADONA SA"</span>, <span class="hc-key">"status"</span>: <span class="hc-val">"Activa"</span>, … } }</code></pre>
                     </div>
-                </div>
-                <div class="hero-sdks" aria-label="Install an SDK">
-                    <span class="hero-sdks-label">Or install an SDK:</span>
-                    <code>npm install apiempresas</code>
-                    <code>pip install apiempresas</code>
-                    <code>composer require apiempresas/apiempresas-php</code>
                 </div>
                 <p class="hero-curl-note">Sign up for free, then replace <code>A46103834</code> with any CIF and <code>YOUR_API_KEY</code> with your key. <a href="<?= site_url('docs#sdks') ?>">See PHP, Node.js and Python examples →</a></p>
             </div>
@@ -104,9 +122,13 @@
                 .hero-curl code { color: #E2E8F0; font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace; }
                 .hero-curl-copy { margin-left: auto; background: rgba(255,255,255,0.08); color: #E2E8F0; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 4px 12px; font-size: 0.8rem; font-weight: 700; cursor: pointer; }
                 .hero-curl-copy:hover { background: rgba(255,255,255,0.16); }
-                .hero-sdks { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; margin-top: 14px; }
-                .hero-sdks-label { font-size: 0.85rem; font-weight: 700; color: var(--ae-slate); }
-                .hero-sdks code { background: #0f172a; color: #C3E88D; padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace; user-select: all; }
+                .hero-curl .editor-header { flex-wrap: wrap; gap: 8px; }
+                .hero-curl .hc-tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+                .hero-curl .hc-tab { background: transparent; color: #94A3B8; border: 0; border-radius: 6px; padding: 4px 10px; font-size: 0.8rem; font-weight: 700; cursor: pointer; font-family: inherit; }
+                .hero-curl .hc-tab:hover { color: #E2E8F0; }
+                .hero-curl .hc-tab.active { background: rgba(255,255,255,0.1); color: #E2E8F0; }
+                .hero-curl pre.hc-code[hidden] { display: none; }
+                @media (max-width: 520px) { .hero-curl .editor-header .dots { display: none; } }
                 .hero-curl-note { font-size: 0.9rem !important; margin: 14px 0 0 !important; max-width: none !important; text-align: center; color: var(--ae-slate); }
                 .hero-curl-note code { background: #eef2ff; color: #1e3a8a; padding: 1px 6px; border-radius: 6px; font-size: 0.85em; }
                 .hero-curl-note a { color: var(--ae-blue); font-weight: 700; text-decoration: none; }
@@ -179,16 +201,6 @@
             <div class="container">
                 <h3 class="integrations-title">Use it from your tools</h3>
                 <div class="integrations-grid">
-                    <!-- Zapier -->
-                    <div class="integration-item" title="Zapier: coming soon" style="opacity: .55;">
-                        <svg viewBox="0 0 24 24" fill="#FF4F00"><path d="M19.141 12l3.418-3.418c.319-.319.319-.838 0-1.157L19.141 4c-.319-.319-.838-.319-1.157 0L14.566 7.418l1.157 1.157L18 6.314l2.121 2.121-2.121 2.121 2.121 2.121 2.121-2.121-2.121-2.121 1.157-1.157c-.159 0-3.417 3.418-3.417 3.418zM4.859 12L1.441 8.582c-.319-.319-.319-.838 0-1.157L4.859 4c.319-.319.838-.319 1.157 0l3.418 3.418-1.157 1.157L6 6.314 3.879 8.435 6 10.556 3.879 12.677 1.758 10.556l2.121-2.121L4.859 12zm14.282 3.418l-3.418 3.418-1.157-1.157L18 17.686l2.121-2.121-2.121-2.121-2.121 2.121 2.121 2.121-2.121-2.121-1.157 1.157c.159 0 3.417-3.418 3.417-3.418zM4.859 15.418L1.441 18.836c-.319.319-.319.838 0 1.157L4.859 23.412c.319.319.838.319 1.157 0l3.418-3.418-1.157-1.157L6 21.123 3.879 19 6 16.877l-2.121-2.121 1.157-1.157c.159 0 3.417 3.418 3.417 3.418z"/></svg>
-                        <span>Zapier <small>(coming soon)</small></span>
-                    </div>
-                    <!-- Make -->
-                    <div class="integration-item" title="Make: coming soon" style="opacity: .55;">
-                        <svg viewBox="0 0 24 24" fill="#6435c9"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8zm-3-9h6v2H9z"/></svg>
-                        <span>Make <small>(coming soon)</small></span>
-                    </div>
                     <!-- Google Sheets -->
                     <div class="integration-item" title="Google Sheets add-on">
                         <svg viewBox="0 0 24 24" fill="#0F9D58"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
@@ -600,15 +612,17 @@
                     <div class="hiw-sources-grid">
                         <div>
                             <strong>BORME (Boletín Oficial del Registro Mercantil)</strong>
+                            <span class="hiw-freq">Every working day</span>
                             <p>The official gazette of Spain's Commercial Registry: incorporations, director appointments and resignations, changes of address, purpose or capital, dissolutions, insolvencies and closures. We process every issue, every day.</p>
                         </div>
                         <div>
                             <strong>Spanish Public Procurement Platform</strong>
-                            <p>Public contracts awarded to each company: contracting authority, amounts and dates.</p>
+                            <span class="hiw-freq">Every day</span>
+                            <p>Public contracts awarded to each company: contracting authority, amounts and dates. New ones are loaded every day.</p>
                         </div>
                         <div>
                             <strong>Data computed by SpainCompanyAPI</strong>
-                            <p>Registry status, scoring and risk profile are calculated from those publications. They are not an official certificate from the Commercial Registry.</p>
+                            <p>Registry status, commercial score and risk profile are calculated from those publications. They are not an official certificate from the Commercial Registry.</p>
                         </div>
                     </div>
                 </div>
@@ -644,6 +658,9 @@
                 .how-it-works .hiw-sources-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
                 .how-it-works .hiw-sources-grid strong { display: block; color: var(--ae-dark); margin-bottom: 6px; font-size: 0.98rem; }
                 .how-it-works .hiw-sources-grid p { color: var(--ae-slate); font-size: 0.92rem; margin: 0; line-height: 1.5; }
+                .how-it-works .hiw-freq { display: inline-block; margin: 0 0 8px; padding: 2px 10px; border-radius: 99px; background: #ecfdf5; color: #047857; font-size: 0.75rem; font-weight: 800; }
+                .per-query-home { margin: -8px 0 12px; font-size: 0.85rem; font-weight: 600; color: #ecfdf5; opacity: .85; }
+                .per-query-home b { font-weight: 800; }
                 @media (max-width: 900px) {
                     .how-it-works .hiw-steps, .how-it-works .hiw-sources-grid { grid-template-columns: 1fr; }
                     .how-it-works .hiw-sources { padding: 22px; }
@@ -681,7 +698,7 @@
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> <?= $freeLimit ?> free requests (one-time, not renewed)</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Lookup by CIF and search by name</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Basic data: company name, normalised status, CNAE, province and incorporation date</li>
-                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Basic commercial score (no breakdown)</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Commercial score (0-100): the number only</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Newly incorporated companies (today, 7 or 30 days): 10 per request</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Free segment counts: how many companies by sector, area and size</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> No credit card required</li>
@@ -696,6 +713,7 @@
                         <div class="tier-subtitle">To automate validations</div>
                         <div class="tier-desc">The ideal option for SaaS, ERPs and products that require validation in production.</div>
                         <div class="price"><b id="priceProHome" data-monthly="19" data-annual="15.17" style="font-weight: inherit;">19</b>€<span>/mo</span></div>
+                        <div class="per-query-home">About <b data-monthly="0.6" data-annual="0.5">0.6</b> euro cents per request</div>
                         <ul class="tier-features">
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> 3,000 requests per month</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Full data, with address and current directors (with appointment date)</li>
@@ -705,7 +723,7 @@
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Batch lookups: up to 100 CIFs per request</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> BORME history, signals and corporate graphs</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Watchlist of 100 companies: BORME, status and risk changes, without using requests</li>
-                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Full AI commercial score (0-100)</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Commercial score with its reasons and the latest BORME signal</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Newly incorporated companies (today, 7 or 30 days): up to 100 per request, filterable by CNAE and phone</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Priority email support</li>
                         </ul>
@@ -719,9 +737,10 @@
                         <div class="tier-subtitle">For teams and high volume</div>
                         <div class="tier-desc">Designed for platforms with higher load, critical processes and high availability needs.</div>
                         <div class="price"><b id="priceBizHome" data-monthly="49" data-annual="39.17" style="font-weight: inherit;">49</b>€<span>/mo</span></div>
+                        <div class="per-query-home">About <b data-monthly="0.5" data-annual="0.4">0.5</b> euro cents per request</div>
                         <ul class="tier-features">
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> 10,000 requests per month</li>
-                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Risk and solvency profile</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Risk and solvency profile (separate from the commercial score)</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Public contracts and awards</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Watchlist of 1,000 companies (BORME, status and risk)</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Push webhooks for watchlist changes</li>
@@ -849,9 +868,9 @@
                             <tr>
                                 <td>
                                     <div class="cap-col-feature">
-                                        <div class="cap-feature-name">AI Commercial Scoring</div>
+                                        <div class="cap-feature-name">Commercial score</div>
                                         <div class="cap-feature-endpoint">GET /api/v1/companies/score</div>
-                                        <div class="cap-feature-desc">Classify companies by purchasing potential and financial health using our algorithm.</div>
+                                        <div class="cap-feature-desc">Rates from 0 to 100 how interesting a company is commercially, based on its recent BORME activity, how complete its record is and whether it has a phone, email or website. It does not measure solvency: that is what the risk profile is for.</div>
                                         <button type="button" onclick="event.preventDefault(); showJsonPreview('get_score')" class="btn-json-preview">View JSON Response</button>
                                     </div>
                                 </td>
@@ -1058,7 +1077,7 @@
                             ['What data does the Spanish company API return?', 'Legal name, status (active, dissolved, in insolvency…), incorporation date, province and main activity (CNAE code). On the Pro plan you also get current directors, the full registered address, revenue band and the BORME filing history.'],
                             ['What is a CIF and how do I validate it?', 'The CIF (now officially the NIF of a legal entity) is the tax ID of a Spanish company: a letter for the legal form, seven digits and a check character, for example A46103834. The API checks the check digit and tells you whether a company with that CIF exists and whether it is active.'],
                             ['Can I try it for free?', 'Yes. The Free plan gives you ' . (int) $freeLimit . ' requests against the live API (one-time, not renewed), with no card and no commitment. There is also a sandbox that does not use requests, for testing the response format.'],
-                            ['Is the data official?', 'The data comes from official public sources: the BORME (the gazette of the Spanish Commercial Registry) and the Spanish Public Procurement Platform, updated every day. Registry status and scores are calculated by us from those publications, so they are not an official Commercial Registry certificate.'],
+                            ['Is the data official?', 'The data comes from official public sources: the BORME (the gazette of the Spanish Commercial Registry) and the Spanish Public Procurement Platform, updated every day. Registry status, the commercial score and the risk profile are calculated by us from those publications, so they are not an official Commercial Registry certificate.'],
                             ['How do I authenticate?', 'Send your API key in the X-API-KEY header (Authorization: Bearer is also accepted). The base URL is https://apiempresas.es/api/v1. You get your key in the dashboard as soon as you sign up.'],
                             ['Can it check EU VAT numbers in VIES?', 'Yes. The KYB verification endpoint (Pro) checks in one call that the company exists and is active, that the name matches, that the signer is a current director and that the VAT number is registered in VIES.'],
                             ['What does it not cover?', 'Ultimate beneficial owners (UBO), sanctions and PEP screening, sole traders (autónomos) and full annual accounts. If your compliance process needs them, combine the API with a screening provider.'],
@@ -1485,12 +1504,28 @@
             });
         });
 
-        // Copy the hero curl
+        // Language tabs and copy the visible hero example
         (function () {
             var btn = document.getElementById('heroCurlCopy');
             if (!btn) return;
+            var lang = 'curl';
+            document.querySelectorAll('.hero-curl .hc-tab').forEach(function (tab) {
+                tab.addEventListener('click', function () {
+                    lang = tab.dataset.lang;
+                    document.querySelectorAll('.hero-curl .hc-tab').forEach(function (t) {
+                        var on = t === tab;
+                        t.classList.toggle('active', on);
+                        t.setAttribute('aria-selected', on ? 'true' : 'false');
+                    });
+                    document.querySelectorAll('.hero-curl pre.hc-code').forEach(function (pre) {
+                        pre.hidden = pre.dataset.lang !== lang;
+                    });
+                    if (window.trackEvent) window.trackEvent('hero_code_tab', { lang: lang, source_block: 'hero', page_type: 'home_en' }, 'heroCodeTab');
+                });
+            });
             btn.addEventListener('click', function () {
-                var text = 'curl "https://apiempresas.es/api/v1/companies?cif=A46103834" \\\n  -H "X-API-KEY: YOUR_API_KEY"';
+                var pre = document.querySelector('.hero-curl pre.hc-code[data-lang="' + lang + '"]');
+                var text = pre ? pre.textContent : '';
                 var done = function () {
                     btn.textContent = 'Copied';
                     setTimeout(function () { btn.textContent = 'Copy'; }, 2000);
@@ -1503,7 +1538,7 @@
                     try { document.execCommand('copy'); done(); } catch (e) {}
                     document.body.removeChild(ta);
                 }
-                if (window.trackEvent) window.trackEvent('hero_curl_copy', { source_block: 'hero', page_type: 'home_en' }, 'heroCurlCopy');
+                if (window.trackEvent) window.trackEvent('hero_curl_copy', { lang: lang, source_block: 'hero', page_type: 'home_en' }, 'heroCurlCopy');
             });
         })();
 
@@ -1526,6 +1561,7 @@
                 
                 pricePro.textContent = pricePro.dataset.annual;
                 priceBiz.textContent = priceBiz.dataset.annual;
+                document.querySelectorAll('.per-query-home b').forEach(function (n) { n.textContent = n.dataset.annual; });
             } else {
                 knob.style.transform = 'translateX(0px)';
                 labelMonthly.style.color = '#2563eb';
@@ -1535,6 +1571,7 @@
                 
                 pricePro.textContent = pricePro.dataset.monthly;
                 priceBiz.textContent = priceBiz.dataset.monthly;
+                document.querySelectorAll('.per-query-home b').forEach(function (n) { n.textContent = n.dataset.monthly; });
             }
 
             // Paid sign-up links carry the billing period the visitor is looking at

@@ -780,15 +780,16 @@ Accept: application/json</code></pre>
                             <code>/companies/score</code>
                             <a href="<?= site_url('register?intent=api&plan=pro&period=monthly&source=docs_expanded') ?>" class="plan-badge pro" style="text-decoration: none;" title="Ver el plan Pro">Pro</a>
                         </div>
-                        <p>Obtén el score de interés comercial y el nivel de prioridad de una empresa.</p>
+                        <p>Puntuación comercial de 0 a 100 de una empresa: su actividad reciente en el BORME, lo completa que está su ficha y si tiene teléfono, email o web. No mide solvencia (para eso está <code>/companies/risk-profile</code>). En Free devuelve solo la cifra; <code>priority</code>, <code>reasons</code> y <code>last_signal</code> llegan bloqueados.</p>
                         <pre><code class="language-json">{
   "success": true,
   "data": {
     "cif": "B12345678",
-    "score": 85,
-    "priority": "Alta",
-    "reasons": "Constitución reciente, Sector en crecimiento",
-    "last_signal": { "type": "CONSTITUCION", "date": "2023-10-01" }
+    "score": 82,
+    "priority": "muy_alta",
+    "reasons": ["OPP:95|QUAL:80|CONT:60 · Ampliación de capital"],
+    "last_signal": { "type": "Ampliación de capital", "date": "2026-09-15" },
+    "source": "radar"
   }
 }</code></pre>
                         <table class="docs-table" style="margin-top: 16px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
@@ -796,8 +797,10 @@ Accept: application/json</code></pre>
                                 <tr><th style="width: 25%;">Campo</th><th style="width: 15%;">Tipo</th><th>Descripción</th></tr>
                             </thead>
                             <tbody>
-                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">data.score</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td style="color: #475569;">Puntuación de 0 a 100 indicando el nivel de actividad comercial.</td></tr>
-                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">data.priority</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">enum</span></td><td style="color: #475569;">Nivel de prioridad de prospección: Alta, Media, Baja.</td></tr>
+                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">data.score</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td style="color: #475569;">Puntuación comercial de 0 a 100.</td></tr>
+                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">data.priority</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">enum</span></td><td style="color: #475569;">Prioridad de prospección según la puntuación: <code>muy_alta</code> (75 o más), <code>alta</code> (60), <code>media</code> (40), <code>baja</code> (20) o <code>muy_baja</code>.</td></tr>
+                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">data.reasons</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">array</span></td><td style="color: #475569;">Lista de motivos de la puntuación.</td></tr>
+                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">data.last_signal</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">object</span></td><td style="color: #475569;">Último acto del BORME que cuenta para la puntuación: <code>type</code> y <code>date</code>.</td></tr>
                             </tbody>
                         </table>
                     </div>
