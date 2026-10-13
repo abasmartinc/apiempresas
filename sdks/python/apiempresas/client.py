@@ -53,6 +53,12 @@ class ApiEmpresas:
         """Consumo de tu API Key: {'stats': {...}, 'history': [...]}. No gasta consultas. No está en el Sandbox."""
         return self.request('GET', '/usage')
 
+    def catalog(self) -> dict:
+        """Valores válidos de los filtros (provincias, tamaños, estados, radar, eventos de webhook).
+        No gasta consultas. También está en el Sandbox."""
+        r = self.request('GET', '/catalog')
+        return r.get('data', r) if isinstance(r, dict) else r
+
     def request(self, method: str, endpoint: str, params: dict = None, json_data: dict = None) -> dict:
         """
         Método interno genérico para lanzar las peticiones HTTP.

@@ -189,6 +189,7 @@ class Sitemap extends Controller
                 ['loc' => site_url('docs'), 'priority' => '0.9', 'freq' => 'weekly'],
                 ['loc' => site_url('spanish-company-data-api'), 'priority' => '0.8', 'freq' => 'monthly'],
                 ['loc' => site_url('buy-api-credits'), 'priority' => '0.6', 'freq' => 'monthly'],
+                ['loc' => site_url('data-sources'), 'priority' => '0.6', 'freq' => 'monthly'],
                 ['loc' => site_url('enter'), 'priority' => '0.5', 'freq' => 'monthly'],
                 ['loc' => site_url('register'), 'priority' => '0.5', 'freq' => 'monthly'],
             ];
@@ -216,6 +217,7 @@ class Sitemap extends Controller
                 ['loc' => site_url('crear-bono-api'), 'priority' => '0.6', 'freq' => 'monthly'],
                 ['loc' => site_url('plugin-wordpress-buscador-empresas'), 'priority' => '0.6', 'freq' => 'monthly'],
                 ['loc' => site_url('integraciones/google-sheets'), 'priority' => '0.6', 'freq' => 'monthly'],
+                ['loc' => site_url('fuentes-de-datos'), 'priority' => '0.6', 'freq' => 'monthly'],
             ];
         }
 

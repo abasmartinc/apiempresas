@@ -90,6 +90,10 @@ $api->watchlist->remove('A28015865');
 $hook = $api->webhooks->create(['url' => 'https://tu-servidor.com/apiempresas', 'event' => 'watchlist.*']);
 // Guarda $hook['secret']: con él se comprueba la firma.
 $api->webhooks->test($hook['id']);
+
+// Historial de entregas (lo más reciente primero): estado, intentos, código HTTP y error
+$r = $api->webhooks->deliveries($hook['id'], 'dead', null, 20);
+echo $r['meta']['total'];
 ```
 
 En tu servidor, comprueba la firma con el cuerpo en bruto:
@@ -122,6 +126,13 @@ $api = new ApiEmpresas('TU_API_KEY', 'https://apiempresas.es/api/sandbox/v1');
 ```php
 $u = $api->usage(); // no gasta consultas; no está en el Sandbox
 echo $u['stats']['remaining_calls'];
+```
+
+## Valores de los filtros
+
+```php
+$cat = $api->catalog(); // no gasta consultas; también en el Sandbox
+print_r($cat['province']);
 ```
 
 ## Errores

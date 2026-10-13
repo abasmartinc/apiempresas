@@ -49,6 +49,7 @@
                     <a href="<?= site_url('spanish-company-data-api') ?>" class="minor">KYB API</a> ·
                     <a href="<?= site_url('buy-api-credits') ?>" class="minor">Credit packs</a> ·
                     <a href="https://spaincompanyapi.com/api/reference/openapi.json" class="minor">OpenAPI</a> ·
+                    <a href="<?= site_url('data-sources') ?>" class="minor">Data sources</a> ·
                     <a href="https://status.apiempresas.es" class="minor" rel="noopener">Status</a> ·
                     <a href="https://apiempresas.es/" class="minor" hreflang="es" lang="es">Versión en español</a>
                 </nav>
@@ -89,7 +90,9 @@
 </footer>
 
 <!-- AI CHAT BUBBLE -->
+<?php if (empty($sinWidgets)): // the home page leaves it out (13-10-2026) ?>
 <?= view('partials/ai_chat_bubble') ?>
+<?php endif; ?>
 
 <?= view('partials/legal_modals') ?>
 

@@ -174,5 +174,24 @@ class TestNovedades130(unittest.TestCase):
         self.api.companies.batch(['A46103834'])
         self.assertEqual(self.req.call_args.kwargs['json'], {'cifs': ['A46103834']})
 
+    def test_catalog(self):
+        self.req.return_value = FakeResponse({'success': True, 'data': {'province': ['Madrid'], 'webhook_events': ['watchlist.*']},
+                                              'meta': {'updated_at': '2026-10-13', 'cost': 0}})
+        c = self.api.catalog()
+        self.assertTrue(self.req.call_args.kwargs['url'].endswith('/catalog'))
+        self.assertEqual(c['province'], ['Madrid'])
+
+    def test_webhook_deliveries(self):
+        self.req.return_value = FakeResponse({'success': True, 'data': [{'delivery_id': 'd1', 'status': 'dead'}],
+                                              'meta': {'webhook_id': 7, 'total': 1, 'page': 1, 'limit': 10, 'has_more': False}})
+        r = self.api.webhooks.deliveries(7, status='dead', limit=10)
+        kw = self.req.call_args.kwargs
+        self.assertTrue(kw['url'].endswith('/webhooks/7/deliveries'))
+        self.assertEqual(kw['params'], {'status': 'dead', 'limit': 10})
+        self.assertEqual(r['data'][0]['delivery_id'], 'd1')
+        self.assertFalse(r['meta']['has_more'])
+        self.api.webhooks.deliveries(7)
+        self.assertIsNone(self.req.call_args.kwargs['params'])
+
     def test_firma_no_ascii(self):
         self.assertFalse(verify_webhook_signature(b'{}', 't=1,v1=\u00e9\u00e9', 's', tolerance=0))

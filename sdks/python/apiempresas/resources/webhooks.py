@@ -84,3 +84,13 @@ class Webhooks:
             if e.status == 502 and isinstance(e.raw_data, dict) and isinstance(e.raw_data.get('data'), dict):
                 return e.raw_data['data']
             raise
+
+    def deliveries(self, webhook_id: int, status: str = None, page: int = None, limit: int = None) -> dict:
+        """Historial de entregas del webhook, de la más reciente a la más antigua.
+        Devuelve {'data': [...], 'meta': {'total', 'page', 'limit', 'has_more', ...}}.
+        status: pending, processing, retry, delivered o dead. limit: 1-100 (50 por defecto)."""
+        params = {k: v for k, v in (('status', status), ('page', page), ('limit', limit)) if v is not None}
+        r = self._client.request('GET', f'/webhooks/{int(webhook_id)}/deliveries', params=params or None)
+        if isinstance(r, dict) and 'data' in r:
+            return {'data': r['data'], 'meta': r.get('meta', {})}
+        return {'data': r, 'meta': {}}

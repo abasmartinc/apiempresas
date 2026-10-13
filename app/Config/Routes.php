@@ -17,6 +17,9 @@ $englishRoutes = static function ($routes) {
     // English API Prices/Marketing Page
     $routes->get('spanish-company-data-api', 'ApiPrices::englishStandalone');
     
+    // Data sources (13-10-2026)
+    $routes->get('data-sources', 'FuentesDatos::english');
+
     // Auth English
     $routes->get('enter', 'Login::english');
     $routes->get('register', 'Register::english');
@@ -679,6 +682,9 @@ $routes->group('api', function($routes) {
 // Tiene página propia a propósito: una garantía que el usuario no sabe ejecutar
 // convierte igual pero genera contracargos, que son peores que un reembolso.
 $routes->get('garantia', 'Garantia::index');
+
+// Fuentes de datos (13-10-2026): lista de fuentes, licencias y atribución. /data-sources solo en spaincompanyapi.com
+$routes->get('fuentes-de-datos', 'FuentesDatos::index');
 $routes->post('garantia/solicitar', 'Garantia::solicitar');
 
 // Unsubscribe

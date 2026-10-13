@@ -104,6 +104,34 @@ describe('verify, watchlist y webhooks (1.2.0)', () => {
   });
 });
 
+describe('catalog y entregas de webhooks (1.3.0)', () => {
+  let api: ApiEmpresas;
+
+  beforeEach(() => {
+    mockFetch.mockReset();
+    api = new ApiEmpresas({ apiKey: 'k' });
+  });
+
+  it('catalog() pide /catalog y devuelve data', async () => {
+    mockFetch.mockResolvedValueOnce(okJson({ success: true, data: { province: ['Madrid'], webhook_events: ['watchlist.*'] }, meta: { cost: 0 } }));
+    const c = await api.catalog();
+    expect(mockFetch.mock.calls[0][0]).toMatch(/\/catalog$/);
+    expect(c.province).toEqual(['Madrid']);
+  });
+
+  it('webhooks.deliveries() arma la URL con status, page y limit', async () => {
+    mockFetch.mockResolvedValueOnce(okJson({ success: true, data: [{ delivery_id: 'd1', status: 'dead' }], meta: { webhook_id: 7, total: 1, page: 2, limit: 10, has_more: false } }));
+    const r = await api.webhooks.deliveries(7, { status: 'dead', page: 2, limit: 10 });
+    expect(mockFetch.mock.calls[0][0]).toMatch(/\/webhooks\/7\/deliveries\?status=dead&page=2&limit=10$/);
+    expect(r.data[0].delivery_id).toBe('d1');
+    expect(r.meta.has_more).toBe(false);
+
+    mockFetch.mockResolvedValueOnce(okJson({ success: true, data: [], meta: { webhook_id: 7, total: 0, page: 1, limit: 50, has_more: false } }));
+    await api.webhooks.deliveries(7);
+    expect(mockFetch.mock.calls[1][0]).toMatch(/\/webhooks\/7\/deliveries$/);
+  });
+});
+
 describe('verifyWebhookSignature', () => {
   const secret = 'whsec_test';
   const body = '{"id":"u1","event":"company.borme_act","created_at":"2026-09-28T10:00:00+02:00","data":{"cif":"A1"}}';

@@ -1,6 +1,6 @@
 import { ApiEmpresas } from '../ApiEmpresas';
 import { ApiError } from '../errors/ApiError';
-import { WebhookCreateOptions, WebhookCreated, WebhookTestResult } from '../types';
+import { WebhookCreateOptions, WebhookCreated, WebhookTestResult, WebhookDeliveriesOptions, WebhookDeliveries } from '../types';
 
 /** (Business) Webhooks: la API te avisa por POST firmado cuando cambia algo que vigilas. */
 export class Webhooks {
@@ -39,5 +39,19 @@ export class Webhooks {
       }
       throw e;
     }
+  }
+
+  /**
+   * Historial de entregas del webhook, de la más reciente a la más antigua: estado, intentos,
+   * código HTTP de tu servidor, duración y error. Pagina con page/limit mientras meta.has_more.
+   */
+  public async deliveries(id: number, options: WebhookDeliveriesOptions = {}): Promise<WebhookDeliveries> {
+    const params = new URLSearchParams();
+    if (options.status) params.set('status', options.status);
+    if (options.page !== undefined) params.set('page', String(options.page));
+    if (options.limit !== undefined) params.set('limit', String(options.limit));
+    const qs = params.toString();
+    const r = await this.client.request<any>(`/webhooks/${encodeURIComponent(String(id))}/deliveries${qs ? '?' + qs : ''}`);
+    return { data: r.data, meta: r.meta };
   }
 }

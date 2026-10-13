@@ -136,6 +136,16 @@ class ApiEmpresas
         return $response['data'] ?? [];
     }
 
+    /**
+     * Valores válidos de los filtros: provincias, tramos de tamaño, estados, opciones del
+     * radar, prioridades y eventos de webhook. No gasta consultas. También está en el Sandbox.
+     */
+    public function catalog(): array
+    {
+        $response = $this->request('GET', '/catalog');
+        return $response['data'] ?? [];
+    }
+
     private static function extractErrorMessage(array $data): ?string
     {
         foreach (['message', 'detail'] as $key) {

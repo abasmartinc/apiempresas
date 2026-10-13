@@ -33,6 +33,8 @@
         <nav class="desktop-only" aria-label="Main" style="display:flex; align-items:center; gap: 24px;">
             <a href="/spanish-company-data-api" style="color: rgba(255,255,255,0.85); font-weight: 600; text-decoration: none; font-size: 0.95rem; transition: color 0.2s;">API</a>
             <span style="color: rgba(255,255,255,0.2);">|</span>
+            <a href="/api/reference" style="color: rgba(255,255,255,0.85); font-weight: 600; text-decoration: none; font-size: 0.95rem; transition: color 0.2s;">API reference</a>
+            <span style="color: rgba(255,255,255,0.2);">|</span>
             <a href="/docs" style="color: rgba(255,255,255,0.85); font-weight: 600; text-decoration: none; font-size: 0.95rem; transition: color 0.2s;">Documentation</a>
         </nav>
 
@@ -65,6 +67,7 @@
             </div>
             <nav class="mobile-nav" style="display: flex; flex-direction: column; gap: 16px;">
                 <a href="/spanish-company-data-api" class="mobile-nav-link" style="color: #0f172a; font-weight: 700; text-decoration: none; font-size: 1.1rem;">API</a>
+                <a href="/api/reference" class="mobile-nav-link" style="color: #0f172a; font-weight: 700; text-decoration: none; font-size: 1.1rem;">API reference</a>
                 <a href="/docs" class="mobile-nav-link" style="color: #0f172a; font-weight: 700; text-decoration: none; font-size: 1.1rem;">Documentation</a>
                 
                 <div class="mobile-auth" style="margin-top: 24px; display: flex; flex-direction: column; gap: 12px;">

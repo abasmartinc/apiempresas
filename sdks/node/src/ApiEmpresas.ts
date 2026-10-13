@@ -1,4 +1,4 @@
-import { ApiEmpresasOptions, UsageData } from './types';
+import { ApiEmpresasOptions, UsageData, CatalogData } from './types';
 import { ApiError } from './errors/ApiError';
 import { Companies } from './resources/Companies';
 import { Watchlist } from './resources/Watchlist';
@@ -60,6 +60,15 @@ export class ApiEmpresas {
    */
   public async usage(): Promise<UsageData> {
     const res = await this.request<{ success: boolean; data: UsageData }>('/usage');
+    return res.data;
+  }
+
+  /**
+   * Valores válidos de los filtros: provincias, tramos de tamaño, estados, opciones del radar,
+   * prioridades y eventos de webhook. No gasta consultas. También está en el Sandbox.
+   */
+  public async catalog(): Promise<CatalogData> {
+    const res = await this.request<{ success: boolean; data: CatalogData }>('/catalog');
     return res.data;
   }
 

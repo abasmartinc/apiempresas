@@ -265,6 +265,53 @@ export interface WebhookTestResult {
   delivery_id: string;
 }
 
+/** Estado de una entrega de webhook. */
+export type WebhookDeliveryStatus = 'pending' | 'processing' | 'retry' | 'delivered' | 'dead';
+
+export interface WebhookDeliveriesOptions {
+  /** Solo las entregas en ese estado. */
+  status?: WebhookDeliveryStatus;
+  /** Página (desde 1). */
+  page?: number;
+  /** Entregas por página (1-100). Por defecto, 50. */
+  limit?: number;
+}
+
+export interface WebhookDelivery {
+  delivery_id: string;
+  event: string;
+  /** id del evento de la vigilancia (el mismo de /watchlist/events), si lo hay. */
+  event_id: string | null;
+  status: WebhookDeliveryStatus;
+  attempts: number;
+  /** Código HTTP con el que respondió tu servidor. */
+  http_status: number | null;
+  duration_ms: number | null;
+  error: string | null;
+  created_at: string;
+  last_attempt_at: string | null;
+  next_attempt_at: string | null;
+  completed_at: string | null;
+}
+
+export interface WebhookDeliveries {
+  data: WebhookDelivery[];
+  meta: { webhook_id: number; total: number; page: number; limit: number; has_more: boolean };
+}
+
+/** Valores válidos de los filtros (GET /catalog). No gasta consultas. */
+export interface CatalogData {
+  province: string[];
+  cnae: { format: string; count: string };
+  size_band: { value: string; label: string }[];
+  status: string[];
+  radar: { range: string[]; range_note: string; priority: string[]; main_act_type: string[] };
+  score_priority: string[];
+  webhook_events: string[];
+  watchlist_event_types: string[];
+  [key: string]: any;
+}
+
 /** Cuerpo que recibe tu servidor. */
 export interface WebhookPayload<T = any> {
   id: string;

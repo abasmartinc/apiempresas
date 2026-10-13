@@ -26,7 +26,7 @@
                 API de empresas españolas para validar CIF
                 <span class="gradient-text">con datos del Registro Mercantil y BORME</span>
             </h1>
-            <p class="reveal delay-1">Integra en tu software los datos de cualquier empresa española: valida el CIF y la razón social, comprueba si está activa y obtén CNAE, domicilio, administradores y actos del BORME con una sola llamada REST.</p>
+            <p class="reveal delay-1">Integra en tu software los datos de cualquier empresa española: valida el CIF y la razón social, comprueba si está activa y obtén CNAE, domicilio, administradores y actos del BORME con una sola llamada REST. Y vigila sus cambios con avisos por API o webhook.</p>
             
             <div class="hero-btns reveal delay-3">
                 <a href="<?= site_url('register?intent=api&plan=free&source=home_hero') ?>" class="btn-ae btn-ae-primary" data-track-event="hero_cta_click" data-track-metadata='{"cta_text": "Obtener API key gratis", "plan": "free", "source_block": "hero", "page_type": "home"}'>Obtener API key gratis</a>
@@ -180,25 +180,212 @@ $empresa = $api-&gt;companies-&gt;get(<span class="hc-str">'A46103834'</span>);
             </div>
         </section>
 
-        <!-- INTEGRATIONS STRIP -->
-        <section class="integrations-strip">
+        <!-- 2b. FUENTES (13-10-2026): justo después del validador, para que se vea pronto de dónde sale cada dato -->
+        <section class="band sources-band" data-track-section="sources">
             <div class="container">
-                <h3 class="integrations-title">Úsala desde tus herramientas</h3>
-                <div class="integrations-grid">
-                    <!-- Google Sheets -->
-                    <a href="<?= site_url('integraciones/google-sheets') ?>" class="integration-item" title="Extensión de Google Sheets" style="text-decoration: none; color: inherit;">
-                        <svg viewBox="0 0 24 24" fill="#0F9D58"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
-                        <span>Google Sheets</span>
-                    </a>
-                    <!-- WordPress -->
-                    <a href="<?= site_url('plugin-wordpress-buscador-empresas') ?>" class="integration-item" title="Plugin de WordPress" style="text-decoration: none; color: inherit;">
-                        <svg viewBox="0 0 24 24" fill="#21759b"><path d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2zm0 1.5c-4.694 0-8.5 3.806-8.5 8.5 0 .543.053 1.074.154 1.59l4.58-12.564c-.015-.008-.03-.017-.045-.026a8.411 8.411 0 0 0-4.689 2.5zm6.541 12.39c.094-.43.14-.858.14-1.283 0-1.13-.207-2.144-.622-3.042l-2.482 7.027c1.32-.716 2.427-1.631 3.32-2.702l-.356-.1zM12 12.75l-2.484 7.042c.8.21 1.637.333 2.484.333 1.103 0 2.158-.205 3.13-.578l-3.13-6.797zm-5.116-.252l2.64 7.37c-1.393-.572-2.584-1.464-3.5-2.613l.86-4.757z"/></svg>
-                        <span>WordPress</span>
-                    </a>
+                <div class="src-wrap reveal">
+                    <div class="src-head">
+                        <h3>De dónde salen los datos</h3>
+                        <p>Cada dato cruzado por CIF, con la frecuencia de cada fuente.</p>
+                    </div>
+                    <div class="src-grid">
+                        <article class="src-tile">
+                            <div class="src-top">
+                                <span class="src-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg></span>
+                                <span class="src-freq">Cada día hábil</span>
+                            </div>
+                            <h4>BORME (Boletín Oficial del Registro Mercantil)</h4>
+                            <p>Constituciones, nombramientos y ceses, cambios de domicilio, objeto o capital, disoluciones, concursos y extinciones. Lo revisamos a diario, con cada boletín publicado.</p>
+                            <div class="src-tags"><span>BOE</span></div>
+                        </article>
+                        <article class="src-tile">
+                            <div class="src-top">
+                                <span class="src-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="2" y1="13" x2="22" y2="13"/></svg></span>
+                                <span class="src-freq">Cada día</span>
+                            </div>
+                            <h4>Contratos públicos</h4>
+                            <p>Plataforma de Contratación del Sector Público y TED (Diario Oficial de la UE): adjudicaciones de cada empresa, con órgano, importes y fechas.</p>
+                            <div class="src-tags"><span>PLACSP</span><span>TED</span></div>
+                        </article>
+                        <article class="src-tile">
+                            <div class="src-top">
+                                <span class="src-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15.5 8.5a4 4 0 1 0 0 7"/><line x1="7" y1="11" x2="13" y2="11"/><line x1="7" y1="13.5" x2="12" y2="13.5"/></svg></span>
+                                <span class="src-freq">Cada día</span>
+                            </div>
+                            <h4>Subvenciones</h4>
+                            <p>Base de Datos Nacional de Subvenciones (BDNS): ayudas concedidas a cada sociedad, con el organismo y el importe.</p>
+                            <div class="src-tags"><span>BDNS</span><span>Kit Digital</span></div>
+                        </article>
+                        <article class="src-tile">
+                            <div class="src-top">
+                                <span class="src-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V10"/><path d="M19 21V10"/><path d="M9 21V10"/><path d="M15 21V10"/><path d="M2 10l10-6 10 6"/></svg></span>
+                                
+                            </div>
+                            <h4>Otros registros oficiales</h4>
+                            <p>Código LEI (GLEIF), NIF-IVA comprobado en el momento (VIES), registros autonómicos de asociaciones y cooperativas, y coordenadas de CartoCiudad (IGN).</p>
+                            <div class="src-tags"><span>GLEIF</span><span>VIES</span><span>CartoCiudad</span></div>
+                        </article>
+                        <article class="src-tile">
+                            <div class="src-top">
+                                <span class="src-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15 15 0 0 1 0 20a15 15 0 0 1 0-20z"/></svg></span>
+                                
+                            </div>
+                            <h4>Web de la propia empresa</h4>
+                            <p>Web, teléfono y email genérico, solo cuando su web publica el CIF, como obliga la ley en el aviso legal.</p>
+                            <div class="src-tags"><span>Aviso legal</span></div>
+                        </article>
+                        <article class="src-tile src-tile-calc">
+                            <div class="src-top">
+                                <span class="src-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="11" x2="8" y2="11.01"/><line x1="12" y1="11" x2="12" y2="11.01"/><line x1="16" y1="11" x2="16" y2="11.01"/><line x1="8" y1="15" x2="8" y2="15.01"/><line x1="12" y1="15" x2="12" y2="15.01"/><line x1="16" y1="15" x2="16" y2="18"/></svg></span>
+                                <span class="src-freq src-freq-calc">Calculado</span>
+                            </div>
+                            <h4>Datos calculados por APIEmpresas</h4>
+                            <p>El estado registral, la puntuación comercial, el perfil de riesgo y el tamaño estimado se calculan a partir de esas fuentes. No son un dato oficial del Registro Mercantil.</p>
+                        </article>
+                    </div>
+                    <div class="src-note">
+                        <span>Algunos datos de dirección, contacto y tamaño se completan con otras fuentes públicas.</span>
+                        <a href="<?= site_url('fuentes-de-datos') ?>" data-track-event="sources_click" data-track-metadata='{"page_type": "home"}'>Ver todas las fuentes y sus licencias <span aria-hidden="true">→</span></a>
+                    </div>
                 </div>
             </div>
+            <style>
+                .sources-band .src-wrap { background: #fff; border: 1px solid var(--ae-border); border-radius: 24px; padding: 32px; box-shadow: 0 10px 30px -18px rgba(15, 23, 42, 0.18); }
+                .sources-band .src-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 24px; margin-bottom: 24px; }
+                .sources-band .src-head h3 { font-size: 1.35rem; font-weight: 900; color: var(--ae-dark); margin: 0; letter-spacing: -0.02em; }
+                .sources-band .src-head p { margin: 0; color: var(--ae-slate); font-size: 0.95rem; }
+                .sources-band .src-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+                .sources-band .src-tile { background: #f8fafc; border: 1px solid #eef2f7; border-radius: 16px; padding: 18px 20px; display: flex; flex-direction: column; transition: border-color .2s, box-shadow .2s, transform .2s; }
+                .sources-band .src-tile:hover { border-color: #bfdbfe; box-shadow: 0 8px 20px -14px rgba(37, 99, 235, 0.45); transform: translateY(-1px); }
+                .sources-band .src-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+                .sources-band .src-ico { width: 38px; height: 38px; border-radius: 11px; display: inline-flex; align-items: center; justify-content: center; background: #eff6ff; color: #2563eb; border: 1px solid #dbeafe; flex-shrink: 0; }
+                .sources-band .src-freq { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; background: #ecfdf5; color: #047857; font-size: 0.72rem; font-weight: 800; white-space: nowrap; }
+                .sources-band .src-freq::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #10b981; }
+                .sources-band .src-tile h4 { font-size: 1rem; font-weight: 850; color: var(--ae-dark); margin: 0 0 6px; line-height: 1.3; }
+                .sources-band .src-tile p { color: var(--ae-slate); font-size: 0.9rem; line-height: 1.55; margin: 0; }
+                .sources-band .src-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 14px; }
+                .sources-band .src-tags span { font-size: 0.72rem; font-weight: 700; color: #334155; background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 2px 8px; }
+                .sources-band .src-tile-calc { background: #fff; border: 1px dashed #cbd5e1; }
+                .sources-band .src-tile-calc .src-ico { background: #f1f5f9; color: #475569; border-color: #e2e8f0; }
+                .sources-band .src-freq-calc { background: #f1f5f9; color: #475569; }
+                .sources-band .src-freq-calc::before { background: #94a3b8; }
+                .sources-band .src-note { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 24px; margin-top: 20px; padding: 14px 18px; border-radius: 14px; background: #f8fafc; color: var(--ae-slate); font-size: 0.9rem; }
+                .sources-band .src-note a { color: var(--ae-blue); font-weight: 800; text-decoration: none; white-space: nowrap; }
+                .sources-band .src-note a:hover { text-decoration: underline; }
+                @media (max-width: 960px) { .sources-band .src-grid { grid-template-columns: repeat(2, 1fr); } }
+                @media (max-width: 600px) {
+                    .sources-band .src-wrap { padding: 22px 18px; border-radius: 20px; }
+                    .sources-band .src-grid { grid-template-columns: 1fr; gap: 10px; }
+                    .sources-band .src-note a { white-space: normal; }
+                }
+            </style>
         </section>
 
+        <!-- 4. QUÉ HACE LA API (13-10-2026): mapa de rutas con su plan. Sustituye al ejemplo de
+             JSON, que repetía el del hero; se conservan el H2 y el párrafo. -->
+        <section class="band band-light api-map" data-track-section="api_map">
+            <div class="container">
+                <div class="band-header" style="margin-left: auto; margin-right: auto; text-align: center;">
+                    <div class="pro-badge pro-badge-green reveal" style="margin-left: auto; margin-right: auto;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                        Qué puedes pedirle a la API
+                    </div>
+                    <h2 class="reveal delay-1">API REST con datos del <span class="gradient-text">Registro Mercantil y el BORME</span></h2>
+                    <p class="reveal delay-1">Lleva los datos de cualquier empresa española a tus procesos de alta, formularios o aplicaciones internas. Respuestas en JSON y SDK para PHP, Node.js y Python.</p>
+                </div>
+                <ul class="api-map-grid">
+                    <li class="api-map-card">
+                        <code>GET /companies</code>
+                        <h3>Datos de una empresa por CIF</h3>
+                        <p>Razón social, estado, CNAE, domicilio y administradores.</p>
+                        <span class="api-map-plan">Free · domicilio y cargos en Pro</span>
+                    </li>
+                    <li class="api-map-card">
+                        <code>GET /companies/search</code>
+                        <h3>Buscar por nombre</h3>
+                        <p>La mejor coincidencia o una lista paginada de candidatas.</p>
+                        <span class="api-map-plan">Free</span>
+                    </li>
+                    <li class="api-map-card">
+                        <code>GET /companies/verify</code>
+                        <h3>Verificación KYB</h3>
+                        <p>Si existe, si está activa y quién la administra, en una llamada.</p>
+                        <span class="api-map-plan">Pro</span>
+                    </li>
+                    <li class="api-map-card">
+                        <code>POST /companies/batch · /reconcile</code>
+                        <h3>Lotes y nombre a CIF</h3>
+                        <p>Hasta 100 CIF por petición, o tu lista de nombres convertida en CIF.</p>
+                        <span class="api-map-plan">Pro</span>
+                    </li>
+                    <li class="api-map-card">
+                        <code>GET /companies/borme</code>
+                        <h3>Historial del BORME</h3>
+                        <p>Todos los actos publicados: nombramientos, ceses, capital, disoluciones…</p>
+                        <span class="api-map-plan">Pro</span>
+                    </li>
+                    <li class="api-map-card">
+                        <code>GET /companies/network</code>
+                        <h3>Red societaria</h3>
+                        <p>Empresas vinculadas a través de sus administradores.</p>
+                        <span class="api-map-plan">Pro</span>
+                    </li>
+                    <li class="api-map-card">
+                        <code>GET /companies/score · /signals</code>
+                        <h3>Puntuación comercial y señales</h3>
+                        <p>Prioridad de 0 a 100 con sus motivos y el último acto del BORME, con su PDF oficial.</p>
+                        <span class="api-map-plan">Free solo la cifra · completo en Pro</span>
+                    </li>
+                    <li class="api-map-card">
+                        <code>GET /companies/radar</code>
+                        <h3>Empresas recién creadas</h3>
+                        <p>Las constituciones del día, por provincia, CNAE y prioridad.</p>
+                        <span class="api-map-plan">Free 10 · Pro 100 · Business 1.000</span>
+                    </li>
+                    <li class="api-map-card">
+                        <code>/watchlist · /webhooks</code>
+                        <h3>Vigilancia y webhooks</h3>
+                        <p>Avisos cuando una empresa vigilada publica en el BORME, cambia de estado o de nivel de riesgo.</p>
+                        <span class="api-map-plan">Pro 100 empresas · Business 1.000 y webhooks</span>
+                    </li>
+                    <li class="api-map-card">
+                        <code>GET /companies/risk-profile</code>
+                        <h3>Perfil de riesgo</h3>
+                        <p>Nivel, puntuación, dimensiones y alertas calculados a partir del BORME.</p>
+                        <span class="api-map-plan">Business</span>
+                    </li>
+                    <li class="api-map-card">
+                        <code>GET /companies/contracts</code>
+                        <h3>Contratos públicos</h3>
+                        <p>Adjudicaciones de la Plataforma de Contratación: órgano, importes y fechas.</p>
+                        <span class="api-map-plan">Business</span>
+                    </li>
+                    <li class="api-map-card">
+                        <code>GET /companies/filter</code>
+                        <h3>Segmentos de empresas</h3>
+                        <p>Empresas por provincia, CNAE, tamaño y estado. El recuento es gratis.</p>
+                        <span class="api-map-plan">Business</span>
+                    </li>
+                </ul>
+                <div class="api-map-cta">
+                    <a href="<?= site_url('api/referencia') ?>" class="btn-ae btn-ae-primary" data-track-event="api_map_click" data-track-metadata='{"target": "reference", "page_type": "home"}'>Ver la referencia y probar las rutas</a>
+                    <a href="<?= site_url('documentation') ?>" class="api-map-doc" data-track-event="api_map_click" data-track-metadata='{"target": "documentation", "page_type": "home"}'>Ver Documentación API →</a>
+                </div>
+            </div>
+            <style>
+                .api-map .api-map-grid { list-style: none; padding: 0; margin: 40px 0 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+                .api-map .api-map-card { background: #fff; border: 1px solid var(--ae-border); border-radius: 16px; padding: 20px 22px; display: flex; flex-direction: column; }
+                .api-map .api-map-card code { align-self: flex-start; font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace; font-size: 0.78rem; font-weight: 700; color: #1e3a8a; background: #eef2ff; padding: 3px 8px; border-radius: 6px; word-break: break-word; }
+                .api-map .api-map-card h3 { font-size: 1.05rem; font-weight: 850; color: var(--ae-dark); margin: 12px 0 6px; }
+                .api-map .api-map-card p { color: var(--ae-slate); font-size: 0.92rem; line-height: 1.5; margin: 0 0 14px; }
+                .api-map .api-map-plan { margin-top: auto; font-size: 0.74rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; color: #047857; }
+                .api-map .api-map-cta { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 14px 28px; margin-top: 36px; }
+                .api-map .api-map-doc { color: var(--ae-blue); font-weight: 800; text-decoration: none; }
+                .api-map .api-map-doc:hover { text-decoration: underline; }
+                @media (max-width: 960px) { .api-map .api-map-grid { grid-template-columns: repeat(2, 1fr); } }
+                @media (max-width: 600px) { .api-map .api-map-grid { grid-template-columns: 1fr; gap: 10px; margin-top: 28px; } .api-map .api-map-card { padding: 16px 18px; } .api-map .api-map-card h3 { margin-top: 10px; } .api-map .api-map-cta .btn-ae { width: 100%; justify-content: center; text-align: center; } }
+            </style>
+        </section>
         <!-- 3. BLOQUE DE AUTORIDAD -->
         <section class="band">
             <div class="container">
@@ -496,72 +683,6 @@ $empresa = $api-&gt;companies-&gt;get(<span class="hc-str">'A46103834'</span>);
             </div>
         </section>
 
-        <!-- 4. BLOQUE API -->
-        <section class="band band-light">
-            <div class="container product-flex" style="flex-direction: row-reverse;">
-                <div class="product-info">
-                    <div class="pro-badge pro-badge-green reveal">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
-                        Para Desarrolladores y Empresas
-                    </div>
-                    <h2 class="reveal delay-1">API REST con datos del <span class="gradient-text">Registro Mercantil y el BORME</span></h2>
-                    <p class="reveal delay-1">Lleva los datos de cualquier empresa española a tus procesos de alta, formularios o aplicaciones internas con una sola llamada.</p>
-                    <ul class="path-list reveal delay-2" style="margin-bottom: 48px;">
-                        <li style="color: var(--ae-dark); border-bottom: none; padding: 6px 0;">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                            Validación instantánea de CIFs y sociedades en tiempo real
-                        </li>
-                        <li style="color: var(--ae-dark); border-bottom: none; padding: 6px 0;">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                            Historial del BORME, administradores y contratos públicos
-                        </li>
-                        <li style="color: var(--ae-dark); border-bottom: none; padding: 6px 0;">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                            API REST con respuestas JSON y SDKs para PHP, Node.js y Python
-                        </li>
-                    </ul>
-                    <a href="<?= site_url('documentation') ?>" class="btn-ae btn-ae-primary reveal delay-3" style="background: #10B981; border-color: #10B981; box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);">Ver Documentación API</a>
-                </div>
-                <div class="product-visual reveal delay-2" role="img" aria-label="Ejemplo de integración de API REST con respuesta en formato JSON">
-                    
-                    <div class="api-mockup-wrapper">
-                        <div class="api-glow"></div>
-                        
-                        <div class="floating-badge-api">
-                            <span class="pulse-dot"></span>
-                            200 OK
-                        </div>
-
-                        <div class="code-editor-window">
-                            <div class="editor-header">
-                                <div class="dots">
-                                    <div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div>
-                                </div>
-                                <div class="tab" style="white-space: nowrap;">GET /companies?cif=B12345678&amp;admin=true</div>
-                            </div>
-                            <div class="editor-body">
-<pre style="margin: 0;"><code><span class="token punctuation">{</span>
-  <span class="token property">"success"</span><span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
-  <span class="token property">"data"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
-    <span class="token property">"cif"</span><span class="token punctuation">:</span> <span class="token string">"B12345678"</span><span class="token punctuation">,</span>
-    <span class="token property">"name"</span><span class="token punctuation">:</span> <span class="token string">"EMPRESA DE EJEMPLO SL"</span><span class="token punctuation">,</span>
-    <span class="token property">"status"</span><span class="token punctuation">:</span> <span class="token string">"ACTIVA"</span><span class="token punctuation">,</span>
-    <span class="token property">"province"</span><span class="token punctuation">:</span> <span class="token string">"MADRID"</span><span class="token punctuation">,</span>
-    <span class="token property">"cnae"</span><span class="token punctuation">:</span> <span class="token string">"6201"</span><span class="token punctuation">,</span>
-    <span class="token property">"cnae_label"</span><span class="token punctuation">:</span> <span class="token string">"Actividades de programación informática"</span><span class="token punctuation">,</span>
-    <span class="token property">"administrators"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
-      <span class="token punctuation">{</span> <span class="token property">"name"</span><span class="token punctuation">:</span> <span class="token string">"JUAN PÉREZ GARCÍA"</span><span class="token punctuation">,</span> <span class="token property">"position"</span><span class="token punctuation">:</span> <span class="token string">"Administrador Único"</span> <span class="token punctuation">}</span>
-    <span class="token punctuation">]</span>
-  <span class="token punctuation">}</span>
-<span class="token punctuation">}</span></code></pre>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </section>
-
         <!-- 4b. CÓMO FUNCIONA Y FUENTES -->
         <section class="band band-light how-it-works" data-track-section="how_it_works">
             <div class="container">
@@ -584,30 +705,15 @@ $empresa = $api-&gt;companies-&gt;get(<span class="hc-str">'A46103834'</span>);
                     <li class="hiw-step reveal delay-3">
                         <span class="hiw-num">3</span>
                         <h3>Haz tu primera llamada</h3>
-                        <p>Con <code>curl</code> o con los SDK para PHP, Node.js y Python. La respuesta llega en JSON.</p>
-                        <a href="<?= site_url('documentation') ?>" data-track-event="how_cta_click" data-track-metadata='{"step": 3, "page_type": "home"}'>Ver la documentación →</a>
+                        <p>Con <code>curl</code> o con los SDK para PHP, Node.js y Python. Para desarrollar sin gastar consultas tienes el Sandbox, con la misma clave.</p>
+                        <a href="<?= site_url('api/referencia') ?>" data-track-event="how_cta_click" data-track-metadata='{"step": 3, "target": "sandbox", "page_type": "home"}'>Probar en el Sandbox →</a>
                     </li>
                 </ol>
+                <p class="hiw-tools reveal">Sin programar, úsala desde tus herramientas:
+                    <a href="<?= site_url('integraciones/google-sheets') ?>">Google Sheets</a> ·
+                    <a href="<?= site_url('plugin-wordpress-buscador-empresas') ?>">WordPress</a>
+                </p>
 
-                <div class="hiw-sources reveal">
-                    <h3>De dónde salen los datos</h3>
-                    <div class="hiw-sources-grid">
-                        <div>
-                            <strong>BORME (Boletín Oficial del Registro Mercantil)</strong>
-                            <span class="hiw-freq">Cada día hábil</span>
-                            <p>Constituciones, nombramientos y ceses, cambios de domicilio, objeto o capital, disoluciones, concursos y extinciones. Lo revisamos a diario, con cada boletín publicado.</p>
-                        </div>
-                        <div>
-                            <strong>Plataforma de Contratación del Sector Público</strong>
-                            <span class="hiw-freq">Cada día</span>
-                            <p>Contratos y adjudicaciones públicas de cada empresa: órgano de contratación, importes y fechas. Los nuevos se cargan cada día.</p>
-                        </div>
-                        <div>
-                            <strong>Datos calculados por APIEmpresas</strong>
-                            <p>El estado registral, la puntuación comercial y el perfil de riesgo se calculan a partir de esas publicaciones. No son un dato oficial del Registro Mercantil.</p>
-                        </div>
-                    </div>
-                </div>
             </div>
             <style>
                 .how-it-works .hiw-steps { list-style: none; padding: 0; margin: 40px 0 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
@@ -617,6 +723,8 @@ $empresa = $api-&gt;companies-&gt;get(<span class="hc-str">'A46103834'</span>);
                 .how-it-works .hiw-step p { color: var(--ae-slate); font-size: 0.95rem; margin: 0 0 12px; }
                 .how-it-works .hiw-step a { color: var(--ae-blue); font-weight: 800; text-decoration: none; font-size: 0.92rem; }
                 .how-it-works code { background: #eef2ff; color: #1e3a8a; padding: 1px 6px; border-radius: 6px; font-size: 0.85em; }
+                .how-it-works .hiw-tools { text-align: center; margin: 28px 0 0; color: var(--ae-slate); font-size: 0.98rem; }
+                .how-it-works .hiw-tools a { color: var(--ae-blue); font-weight: 800; text-decoration: none; }
                 .how-it-works .hiw-sources { margin-top: 48px; background: #fff; border: 1px solid var(--ae-border); border-radius: 20px; padding: 28px 32px; }
                 .how-it-works .hiw-sources h3 { font-size: 1.2rem; font-weight: 850; margin: 0 0 18px; }
                 .how-it-works .hiw-sources-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
@@ -679,10 +787,10 @@ $empresa = $api-&gt;companies-&gt;get(<span class="hc-str">'A46103834'</span>);
                         'Perfil de riesgo y solvencia (distinto de la puntuación comercial)',
                         'Contratos y adjudicaciones públicas',
                         'Vigilancia de 1.000 empresas (BORME, estado y riesgo)',
-                        'Webhooks Push (Notificaciones BORME)',
+                        'Webhooks: los cambios de las empresas vigiladas llegan a tu servidor',
                         'Segmentos: descarga empresas por CNAE, zona, tamaño y teléfono',
-                        'IA Business Insights completo',
-                        'IA Contact Prep y Calculadora Match B2B',
+                        'Análisis comercial con IA, completo',
+                        'IA para preparar el contacto y encaje con tu sector (match B2B)',
                         'Empresas recién constituidas (hoy, 7 o 30 días): hasta 1.000 por consulta',
                         'Soporte prioritario por email: respuesta en menos de 2 h',
                     ],
@@ -739,7 +847,7 @@ $empresa = $api-&gt;companies-&gt;get(<span class="hc-str">'A46103834'</span>);
                         <div class="tier-tag">ESCALA</div>
                         <h3>Business</h3>
                         <div class="tier-subtitle">Para equipos y alto volumen</div>
-                        <div class="tier-desc">Pensado para plataformas con más carga, procesos críticos y necesidades de mayor disponibilidad.</div>
+                        <div class="tier-desc">Para más volumen y para quien necesita riesgo, contratos públicos, webhooks y segmentos.</div>
                         <div class="price"><b id="priceBizHome" data-monthly="49" data-annual="39,17" style="font-weight: inherit;">49</b>€<span>/mes + IVA</span></div>
                         <div class="per-query-home">Unos <b data-monthly="0,5" data-annual="0,4">0,5</b> céntimos por consulta</div>
                         <div class="annual-note-home" style="visibility: hidden;">Facturado 470 € + IVA al año (ahorras 118 €)</div>
@@ -793,7 +901,16 @@ $empresa = $api-&gt;companies-&gt;get(<span class="hc-str">'A46103834'</span>);
                     <p style="color: var(--ae-slate); font-size: 0.95rem; margin-top: 8px;">Cada plan incluye todo lo del anterior.</p>
                 </div>
                 
-                <div class="table-responsive reveal delay-1" style="overflow-x: auto; background: #fff; border-radius: 24px; border: 1px solid var(--ae-border); box-shadow: var(--ae-shadow-sm);">
+                <details class="cap-details">
+                    <summary class="cap-details-sum" data-track-event="compare_toggle" data-track-metadata='{"page_type": "home"}'>Ver la comparativa completa por plan</summary>
+                    <style>
+                        .cap-details > summary { list-style: none; cursor: pointer; display: table; margin: 0 auto 24px; padding: 12px 24px; border-radius: 999px; background: #eff6ff; border: 1px solid #bfdbfe; color: var(--ae-blue); font-weight: 800; }
+                        .cap-details > summary::-webkit-details-marker { display: none; }
+                        .cap-details > summary::after { content: " ↓"; }
+                        .cap-details[open] > summary::after { content: " ↑"; }
+                        .cap-details > summary:hover { background: #dbeafe; }
+                    </style>
+                <div class="table-responsive" style="overflow-x: auto; background: #fff; border-radius: 24px; border: 1px solid var(--ae-border); box-shadow: var(--ae-shadow-sm);">
                     <style>
                         .capabilities-table .cap-group-head td { background: #f8fafc; padding: 14px 20px !important; border-top: 1px solid var(--ae-border); text-align: left; }
                         .capabilities-table .cap-group-title { font-weight: 850; color: var(--ae-dark); font-size: 0.95rem; text-transform: uppercase; letter-spacing: .04em; }
@@ -1091,6 +1208,7 @@ $empresa = $api-&gt;companies-&gt;get(<span class="hc-str">'A46103834'</span>);
                         </tbody>
                     </table>
                 </div>
+                </details>
 
                 <p style="text-align: center; margin-top: 24px; color: var(--ae-slate); font-size: 0.9rem; font-weight: 500;">
                     ¿Necesitas un plan personalizado con más volumen? <a href="<?= site_url('contact') ?>" style="color: var(--ae-blue); font-weight: 700; text-decoration: none;">Contacta con nosotros</a>
@@ -1140,9 +1258,9 @@ $empresa = $api-&gt;companies-&gt;get(<span class="hc-str">'A46103834'</span>);
                         <?php
                         // Única fuente de las FAQ: se pintan aquí y en el JSON-LD de más abajo.
                         $homeFaqs = [
-                            ['¿Qué datos devuelve la API?', 'Devuelve la razón social, el estado (activa, extinguida, en concurso…), la fecha de constitución, la provincia y la actividad principal (CNAE). Con Pro, también administradores, domicilio completo y tramo de facturación.'],
+                            ['¿Qué datos devuelve la API?', 'Devuelve la razón social, el estado (activa, extinguida, en concurso…), la fecha de constitución, la provincia y la actividad principal (CNAE). Con Pro, también administradores, domicilio completo, tramo de facturación, historial del BORME, puntuación comercial con sus motivos y vigilancia de cambios. Con Business, además, perfil de riesgo, contratos públicos y webhooks.'],
                             ['¿Puedo probarla gratis?', 'Sí. Al registrarte obtienes el plan Free con ' . (int) $freeLimit . ' consultas gratuitas (no se renuevan) contra la API real, sin tarjeta y sin compromiso.'],
-                            ['¿La información es oficial?', 'Los datos proceden de fuentes públicas oficiales, como el BORME (Registro Mercantil) y la Plataforma de Contratación del Sector Público, y se actualizan cada día. El estado registral, la puntuación comercial y el perfil de riesgo los calculamos nosotros a partir de esas publicaciones: no son un certificado del Registro Mercantil.'],
+                            ['¿La información es oficial?', 'La mayoría de los datos proceden de fuentes públicas oficiales, como el BORME (Registro Mercantil), la Plataforma de Contratación del Sector Público, la BDNS o GLEIF, y el BORME se procesa cada día hábil. Algunos datos de dirección, contacto y tamaño se completan con otras fuentes públicas; la lista completa está en la página de fuentes de datos. El estado registral, la puntuación comercial y el perfil de riesgo los calculamos nosotros a partir de esas publicaciones: no son un certificado del Registro Mercantil.'],
                             ['¿Qué tipo de autenticación utiliza la API?', 'Envías tu API Key en la cabecera X-API-KEY (también se acepta Authorization: Bearer). Al crear tu cuenta obtienes al instante tu API Key, lista para usar.'],
                             ['¿Cuánto se tarda en integrar?', 'La primera llamada se hace en un minuto: copias el ejemplo con curl de arriba, pones tu API Key y recibes el JSON. Para desarrollar sin gastar consultas tienes el Sandbox con CIF de prueba, y SDK oficiales para PHP, Node.js y Python.'],
                             ['¿Se puede integrar en cualquier lenguaje o plataforma?', 'Sí. Al ser una API REST estándar que devuelve respuestas en JSON, puedes consumirla desde cualquier lenguaje (PHP, Node.js, Python, Java, C#, Go) o integrarla en ERPs/CRMs como Salesforce, HubSpot o SAP, y en cualquier herramienta no-code que haga peticiones HTTP.'],
@@ -1192,8 +1310,8 @@ $empresa = $api-&gt;companies-&gt;get(<span class="hc-str">'A46103834'</span>);
 
     </main>
 
-    <?= view('partials/footer') ?>
-    <?= view('partials/review_modal') ?>
+    <?php // Home sin asistente flotante ni Copiloto (13-10-2026): distraen de la API. Siguen en el resto de páginas. ?>
+    <?= view('partials/footer', ['sinWidgets' => true]) ?>
 
     <!-- JSON PREVIEW MODAL -->
     <div id="json-modal" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.4); z-index:9999; backdrop-filter:blur(4px); align-items:center; justify-content:center; padding:20px;">

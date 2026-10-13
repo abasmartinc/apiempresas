@@ -121,6 +121,9 @@ await api.watchlist.remove('A28015865');
 const hook = await api.webhooks.create({ url: 'https://tu-servidor.com/apiempresas', event: 'watchlist.*' });
 // Guarda hook.secret: con él se comprueba la firma.
 await api.webhooks.test(hook.id); // envía un test.ping y devuelve lo que respondió tu servidor
+
+// Historial de entregas (lo más reciente primero): estado, intentos, código HTTP y error
+const { data, meta } = await api.webhooks.deliveries(hook.id, { status: 'dead', limit: 20 });
 ```
 
 En tu servidor, comprueba la firma con el cuerpo **en bruto** (no el JSON ya parseado):
@@ -159,6 +162,13 @@ const api = new ApiEmpresas({
 ```typescript
 const u = await api.usage(); // no gasta consultas; no está en el Sandbox
 console.log(u.stats.remaining_calls, u.stats.wallet_balance, u.stats.quota_resets_at);
+```
+
+## Valores de los filtros
+
+```typescript
+const cat = await api.catalog(); // no gasta consultas; también en el Sandbox
+console.log(cat.province, cat.size_band, cat.radar.priority, cat.webhook_events);
 ```
 
 ## Manejo de Errores

@@ -35,7 +35,7 @@ class ResourcesTest extends TestCase
 
     public function testVersion()
     {
-        $this->assertSame('1.2.0', ApiEmpresas::VERSION);
+        $this->assertSame('1.3.0', ApiEmpresas::VERSION);
     }
 
     public function testVerifyBuildsQuery()
@@ -134,5 +134,24 @@ class ResourcesTest extends TestCase
         $this->assertSame('company.borme_act', Webhooks::constructEvent($body, $ok, $secret)['event']);
         $this->expectException(ApiException::class);
         Webhooks::constructEvent($body, $sig, $secret);
+    }
+
+    public function testCatalog()
+    {
+        $this->api->queue[] = ['success' => true, 'data' => ['province' => ['Madrid']], 'meta' => ['cost' => 0]];
+        $c = $this->api->catalog();
+        $this->assertSame(['GET', '/catalog', null], $this->api->calls[0]);
+        $this->assertSame(['Madrid'], $c['province']);
+    }
+
+    public function testWebhookDeliveries()
+    {
+        $this->api->queue[] = ['success' => true, 'data' => [['delivery_id' => 'd1']], 'meta' => ['total' => 1, 'has_more' => false]];
+        $r = $this->api->webhooks->deliveries(7, 'dead', null, 10);
+        $this->assertSame('/webhooks/7/deliveries?status=dead&limit=10', $this->api->calls[0][1]);
+        $this->assertSame('d1', $r['data'][0]['delivery_id']);
+        $this->assertFalse($r['meta']['has_more']);
+        $this->api->webhooks->deliveries(7);
+        $this->assertSame('/webhooks/7/deliveries', $this->api->calls[1][1]);
     }
 }

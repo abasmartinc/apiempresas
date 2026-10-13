@@ -490,4 +490,4 @@
         });
     </script>
     
-    <?= view('partials/wp_coming_soon_modal') ?>
+    <?php // Ventana de "beta cerrada" de Zapier/Shopify: ya no la abre ningún enlace (13-10-2026) ?>

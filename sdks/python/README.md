@@ -81,6 +81,10 @@ api.watchlist.remove('A28015865')
 hook = api.webhooks.create('https://tu-servidor.com/apiempresas', 'watchlist.*')
 # Guarda hook['secret']: con él se comprueba la firma.
 api.webhooks.test(hook['id'])
+
+# Historial de entregas (lo más reciente primero): estado, intentos, código HTTP y error
+r = api.webhooks.deliveries(hook['id'], status='dead', limit=20)
+print(r['meta']['total'], r['data'][:1])
 ```
 
 En tu servidor, comprueba la firma con el cuerpo en bruto (Flask):
@@ -113,6 +117,13 @@ api = ApiEmpresas('TU_API_KEY', base_url='https://apiempresas.es/api/sandbox/v1'
 ```python
 u = api.usage()  # no gasta consultas; no está en el Sandbox
 print(u['stats']['remaining_calls'])
+```
+
+## Valores de los filtros
+
+```python
+cat = api.catalog()  # no gasta consultas; también en el Sandbox
+print(cat['province'], cat['size_band'], cat['radar']['priority'], cat['webhook_events'])
 ```
 
 ## Errores

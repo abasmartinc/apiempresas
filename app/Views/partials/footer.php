@@ -12,6 +12,8 @@
                     <li><a href="<?=site_url('empresas-nuevas-mes') ?>">Constituidas este mes</a></li>
                     <li><a href="<?=site_url('listado-de-empresas') ?>">Ver todas las provincias</a></li>
                     <li><a href="<?= getRadarRedirect('footer') ?>">Beneficios de Radar Pro</a></li>
+                    <li><a href="<?=site_url('encontrar-empresas-similares') ?>">Empresas Gemelas</a></li>
+                    <li><a href="https://vertice.apiempresas.es" target="_blank" rel="noopener">Vértice</a></li>
                 </ul>
             </div>
 
@@ -49,7 +51,10 @@
                 <ul class="foot-links">
                     <li><a href="<?=site_url('api-empresas') ?>">API KYB</a></li>
                     <li><a href="<?=site_url('plugin-wordpress-buscador-empresas') ?>">Plugin de WordPress</a></li>
+                    <li><a href="<?=site_url('integraciones/google-sheets') ?>">Extensión de Google Sheets</a></li>
                     <li><a href="<?=site_url('documentation') ?>">Documentación API</a></li>
+                    <li><a href="<?=site_url('api/referencia') ?>">Referencia de la API</a></li>
+                    <li><a href="<?=site_url('fuentes-de-datos') ?>">Fuentes de datos</a></li>
                     <li><a href="<?=site_url('blog') ?>">Blog de Actualidad</a></li>
                     <li><a href="<?=site_url('contact') ?>">Atención al Cliente</a></li>
                 </ul>
@@ -200,11 +205,13 @@
     </div>
 </footer>
 
+<?php if (empty($sinWidgets)): // la home los quita (13-10-2026) ?>
 <!-- AI CHAT BUBBLE -->
 <?= view('partials/ai_chat_bubble') ?>
 
 <!-- AI COPILOT MODAL & STICKY BAR -->
 <?= view('partials/copilot_modal') ?>
+<?php endif; ?>
 
 <?= view('partials/legal_modals') ?>
 

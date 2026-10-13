@@ -100,7 +100,7 @@
 
             <div class="nav-dropdown">
                 <button class="nav-dropdown-trigger">
-                    Soluciones
+                    API
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
                         stroke-linecap="round" stroke-linejoin="round">
                         <path d="m6 9 6 6 6-6" />
@@ -110,7 +110,7 @@
                     <div class="nav-mega-col">
                         <h4
                             style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin: 0 0 6px 10px;">
-                            Productos</h4>
+                            La API</h4>
 
                         <a href="<?= site_url('api-empresas') ?>">
                             <div class="nav-item-icon">✅</div>
@@ -127,13 +127,7 @@
                                 <span>Consulta scoring de solvencia, alertas BORME y riesgo comercial.</span>
                             </div>
                         </a>
-                        <div class="nav-mega-sub">Otras herramientas</div>
-                        <a class="nav-compact" href="<?= site_url('encontrar-empresas-similares') ?>"><strong>Empresas
-                                Gemelas</strong></a>
-                        <a class="nav-compact" href="<?= getRadarRedirect('header') ?>"><strong>Radar
-                                Inteligente</strong></a>
-                        <a class="nav-compact" href="https://vertice.apiempresas.es" target="_blank"
-                            rel="noopener"><strong>Vértice</strong></a>
+                        <?php // Empresas Gemelas, Radar y Vértice pasan al pie (13-10-2026): el menú es de la API ?>
                     </div>
                     <div class="nav-mega-col">
                         <h4
@@ -207,6 +201,7 @@
 
             <a class="minor-nav-link" href="<?= site_url() ?>#precios" data-track-event="nav_pricing_click"
                 data-track-metadata='{"source_block": "header"}'>Precios</a>
+            <a class="minor-nav-link" href="<?= site_url('api/referencia') ?>">Referencia</a>
             <a class="minor-nav-link" href="<?= site_url('documentation') ?>">Docs</a>
         </nav>
 
@@ -343,10 +338,11 @@
                 <div class="mobile-nav-group" style="margin-bottom: 16px;">
                     <a href="<?= site_url() ?>#precios" class="mobile-nav-link" data-track-event="nav_pricing_click"
                         data-track-metadata='{"source_block": "mobile_header"}'>Precios</a>
+                    <a href="<?= site_url('api/referencia') ?>" class="mobile-nav-link">Referencia de la API</a>
                     <a href="<?= site_url('documentation') ?>" class="mobile-nav-link">Docs</a>
                 </div>
                 <div class="mobile-nav-group">
-                    <div class="mobile-nav-label">Soluciones</div>
+                    <div class="mobile-nav-label">API</div>
 
                     <div
                         style="padding: 12px 18px 4px; font-size: 0.75rem; text-transform: uppercase; font-weight: 800; color: #94a3b8; letter-spacing: 0.05em;">
@@ -360,16 +356,6 @@
                     <a href="<?= site_url('perfil-de-riesgo') ?>" class="mobile-nav-link">
                         <span>Perfil de Riesgo</span>
                     </a>
-
-                    <div
-                        style="padding: 16px 18px 4px; font-size: 0.75rem; text-transform: uppercase; font-weight: 800; color: #94a3b8; letter-spacing: 0.05em;">
-                        Otras herramientas</div>
-                    <a href="<?= site_url('encontrar-empresas-similares') ?>" class="mobile-nav-link"><span>Empresas
-                            Gemelas</span></a>
-                    <a href="<?= getRadarRedirect('mobile_header') ?>" class="mobile-nav-link"><span>Radar
-                            Inteligente</span></a>
-                    <a href="https://vertice.apiempresas.es" target="_blank" rel="noopener"
-                        class="mobile-nav-link"><span>Vértice</span></a>
 
                     <div
                         style="padding: 16px 18px 4px; font-size: 0.75rem; text-transform: uppercase; font-weight: 800; color: #94a3b8; letter-spacing: 0.05em;">
@@ -517,4 +503,4 @@
     });
 </script>
 
-<?= view('partials/wp_coming_soon_modal') ?>
+<?php // Ventana de "beta cerrada" de Zapier/Shopify: ya no la abre ningún enlace (13-10-2026) ?>

@@ -64,6 +64,7 @@ $paresIdioma = [
     '/documentation'  => '/docs',
     '/api-empresas'   => '/spanish-company-data-api',
     '/crear-bono-api' => '/buy-api-credits',
+    '/fuentes-de-datos' => '/data-sources',
 ];
 $esFicha    = (bool) preg_match('#^/[A-Z][0-9]{7}[0-9A-Z]-#', $rutaCanon);
 $hreflangEs = null;

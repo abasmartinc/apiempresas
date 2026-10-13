@@ -67,6 +67,21 @@ class Webhooks
     }
 
     /**
+     * Historial de entregas del webhook, de la más reciente a la más antigua.
+     * Devuelve ['data' => [...], 'meta' => ['total', 'page', 'limit', 'has_more', ...]].
+     *
+     * @param string|null $status pending, processing, retry, delivered o dead
+     * @param int|null    $limit  1-100 (50 por defecto)
+     */
+    public function deliveries(int $id, ?string $status = null, ?int $page = null, ?int $limit = null): array
+    {
+        $query = array_filter(['status' => $status, 'page' => $page, 'limit' => $limit], static fn ($v) => $v !== null);
+        $endpoint = '/webhooks/' . $id . '/deliveries' . ($query ? '?' . http_build_query($query) : '');
+        $response = $this->client->request('GET', $endpoint);
+        return ['data' => $response['data'] ?? [], 'meta' => $response['meta'] ?? []];
+    }
+
+    /**
      * Comprueba la cabecera X-ApiEmpresas-Signature (t=<timestamp>,v1=<hex>).
      * La firma es HMAC-SHA256(secret, "t.cuerpo") sobre el cuerpo en bruto:
      * usa file_get_contents('php://input'), no el JSON ya decodificado.
