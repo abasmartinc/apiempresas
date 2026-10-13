@@ -158,9 +158,6 @@ class RadarController extends BaseController
             $data['robots'] = 'noindex, follow';
         }
 
-        // Tracking (Runs every visit, even if data is cached)
-        $this->logSeoVariant($data);
-
         if ($province && mb_strtolower($province, 'UTF-8') !== 'españa') {
             $viewFile = 'seo/radar_new_companies_province';
         } elseif ($sector) {
@@ -169,28 +166,6 @@ class RadarController extends BaseController
             $viewFile = ($period === 'general' || $period === 'mes') ? 'seo/radar_new_companies' : 'seo/radar_new_companies_period';
         }
         return view($viewFile, $data);
-    }
-
-    private function logSeoVariant($data)
-    {
-        if (!isset($data['variant_id']))
-            return;
-        // Sin bots: cada visita de un rastreador añadía una fila a la tabla.
-        if ($this->request->getUserAgent()->isRobot()) {
-            return;
-        }
-
-        $db = \Config\Database::connect();
-        try {
-            $db->table('seo_variant_performance')->insert([
-                'url' => uri_string(),
-                'variant_id' => $data['variant_id'],
-                'variant_title' => $data['title'] ?? '',
-                'variant_meta' => $data['excerptText'] ?? '',
-                'created_at' => date('Y-m-d H:i:s')
-            ]);
-        } catch (\Exception $e) { /* Fail silently */
-        }
     }
 
     public function excel_preview()
@@ -240,9 +215,6 @@ class RadarController extends BaseController
 
         $data['title'] = $tVariants[$hash % count($tVariants)];
         $data['excerptText'] = $mVariants[$hash % count($mVariants)];
-        $data['variant_id'] = 'excel-rotation-' . ($hash % count($tVariants));
-
-        $this->logSeoVariant($data);
 
         return view('radar/excel_preview', $data);
     }
