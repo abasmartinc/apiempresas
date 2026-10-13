@@ -1,1288 +1,2813 @@
 {
-    "info": {
-        "_postman_id": "8c5e2a1b-7d3a-4f5a-9e2c-1b2a3d4f5a03",
-        "name": "APIEmpresas.es - Plan Business",
-        "description": "Colección de la API de APIEmpresas.es organizada por planes (Free, Pro y Business). Pon tu clave en la variable API_KEY. Actualizada el 28-09-2026.",
-        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  "info": {
+    "_postman_id": "8c5e2a1b-7d3a-4f5a-9e2c-1b2a3d4f5a03",
+    "name": "APIEmpresas.es - Plan Business",
+    "description": "Colección de la API de APIEmpresas.es organizada por planes (Free, Pro y Business). Pon tu clave en la variable API_KEY. BASE_URL apunta a producción; cámbiala a https://apiempresas.es/api/sandbox/v1 para probar sin gastar consultas. Cada petición trae un ejemplo de respuesta. Referencia completa: https://apiempresas.es/api/referencia. Actualizada el 13-10-2026.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Plan Free",
+      "item": [
+        {
+          "name": "Consulta por CIF",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/companies?cif=A15075062",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "companies"
+              ],
+              "query": [
+                {
+                  "key": "cif",
+                  "value": "A15075062"
+                }
+              ]
+            },
+            "description": "Datos básicos y status_code. En Free, dirección y objeto social van recortados. Coste: 1 consulta."
+          },
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/companies?cif=A15075062",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "companies"
+                  ],
+                  "query": [
+                    {
+                      "key": "cif",
+                      "value": "A15075062"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"cif\": \"B12345678\",\n    \"name\": \"EMPRESA DE EJEMPLO SL\",\n    \"status\": \"ACTIVA\",\n    \"status_code\": \"ACTIVE\",\n    \"status_source\": \"registry\",\n    \"status_date\": \"2011-02-03\",\n    \"province\": \"MADRID\",\n    \"cnae\": \"6201\",\n    \"cnae_label\": \"Actividades de programación informática\",\n    \"financials\": {\n      \"size_band\": \"GT_1M\",\n      \"size_band_label\": \"Más de 1 M€\",\n      \"last_accounts_year\": 2023\n    },\n    \"administrators\": [\n      {\n        \"name\": \"JUAN PÉREZ GARCÍA\",\n        \"position\": \"Adm. Unico\",\n        \"since\": \"2019-03-01\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Búsqueda por Nombre",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/companies/search?q=mercadona",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "companies",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "mercadona"
+                }
+              ]
+            },
+            "description": "Añade multiple=true&limit=20 para varios resultados. Coste: 1 consulta (1 crédito con bono)."
+          },
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/companies/search?q=mercadona",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "companies",
+                    "search"
+                  ],
+                  "query": [
+                    {
+                      "key": "q",
+                      "value": "mercadona"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"cif\": \"B12345678\",\n      \"name\": \"EMPRESA DE EJEMPLO SL\",\n      \"status\": \"ACTIVA\",\n      \"province\": \"MADRID\"\n    }\n  ],\n  \"meta\": {\n    \"page\": 1,\n    \"limit\": 20,\n    \"has_more\": false\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Scoring Comercial (básico)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/companies/score?cif=A15075062",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "companies",
+                "score"
+              ],
+              "query": [
+                {
+                  "key": "cif",
+                  "value": "A15075062"
+                }
+              ]
+            },
+            "description": "En Free, solo la puntuación; el desglose va en Pro. No gasta consultas (máximo 25 vistas previas al día), pero hace falta que te quede alguna."
+          },
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/companies/score?cif=A15075062",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "companies",
+                    "score"
+                  ],
+                  "query": [
+                    {
+                      "key": "cif",
+                      "value": "A15075062"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"cif\": \"B12345678\",\n    \"score\": 82,\n    \"priority\": \"muy_alta\",\n    \"reasons\": [\n      \"OPP:95|QUAL:80|CONT:60 · Ampliación de capital\"\n    ],\n    \"last_signal\": {\n      \"type\": \"Ampliación de capital\",\n      \"date\": \"2026-09-15\",\n      \"url_pdf\": \"https://www.boe.es/borme/dias/2026/09/15/pdfs/BORME-A-2026-176-15.pdf\"\n    },\n    \"source\": \"radar\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Empresas recién constituidas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/companies/radar?range=7",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "companies",
+                "radar"
+              ],
+              "query": [
+                {
+                  "key": "range",
+                  "value": "7"
+                }
+              ]
+            },
+            "description": "En Free, 10 resultados con nombre y CIF ocultos. Coste: 1 consulta del plan (3 créditos con bono)."
+          },
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/companies/radar?range=7",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "companies",
+                    "radar"
+                  ],
+                  "query": [
+                    {
+                      "key": "range",
+                      "value": "7"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"meta\": {\n    \"plan\": \"business\",\n    \"count\": 50,\n    \"limit\": 1000,\n    \"total_disponibles\": 50\n  },\n  \"data\": [\n    {\n      \"id\": 4812345,\n      \"company_name\": \"NUEVA EMPRESA SL\",\n      \"cif\": \"B12345678\",\n      \"fecha_constitucion\": \"2026-10-13\",\n      \"cnae\": \"6201\",\n      \"cnae_label\": \"Actividades de programación informática\",\n      \"registro_mercantil\": \"MADRID\",\n      \"municipality\": \"MADRID\",\n      \"score_total\": 78,\n      \"priority_level\": \"alta\",\n      \"main_act_type\": \"Constitución\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Segmentos: recuento (gratis)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/companies/filter?cnae=62&province=MADRID&has_phone=true&count_only=true",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "companies",
+                "filter"
+              ],
+              "query": [
+                {
+                  "key": "cnae",
+                  "value": "62"
+                },
+                {
+                  "key": "province",
+                  "value": "MADRID"
+                },
+                {
+                  "key": "has_phone",
+                  "value": "true"
+                },
+                {
+                  "key": "count_only",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Cuántas empresas encajan con los filtros. Gratis en todos los planes. Filtros: cnae, province, municipality, status (active, active_or_unknown, any), founded_from, founded_to, has_phone, size_band (NO_REVENUE, LT_500K, 500K_1M, GT_1M), min_accounts_year. Hace falta cnae, province o municipality."
+          },
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/companies/filter?cnae=62&province=MADRID&has_phone=true&count_only=true",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "companies",
+                    "filter"
+                  ],
+                  "query": [
+                    {
+                      "key": "cnae",
+                      "value": "62"
+                    },
+                    {
+                      "key": "province",
+                      "value": "MADRID"
+                    },
+                    {
+                      "key": "has_phone",
+                      "value": "true"
+                    },
+                    {
+                      "key": "count_only",
+                      "value": "true"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"total\": 3412\n  },\n  \"meta\": {\n    \"filters\": {\n      \"cnae\": [\n        \"62\"\n      ],\n      \"province\": \"MADRID\",\n      \"status\": \"active\",\n      \"has_phone\": true\n    },\n    \"cost\": 0,\n    \"counted_at\": \"2026-09-29T09:30:00+02:00\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Estadísticas de Consumo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/usage",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "usage"
+              ]
+            },
+            "description": "No gasta consultas."
+          },
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/usage",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "usage"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"stats\": {\n      \"monthly_queries\": 150,\n      \"total_queries\": 1250,\n      \"monthly_quota\": 3000,\n      \"remaining_calls\": 2850,\n      \"wallet_balance\": 0,\n      \"plan_name\": \"Pro\",\n      \"plan_slug\": \"pro\",\n      \"quota_period\": \"monthly\"\n    },\n    \"history\": [\n      {\n        \"cif\": \"A46103834\",\n        \"name\": \"MERCADONA SA\",\n        \"province\": \"VALENCIA\",\n        \"query_count\": 3,\n        \"last_query\": \"2026-10-12 17:40:02\",\n        \"found\": true\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Catálogo de valores de los filtros",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/catalog",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "catalog"
+              ]
+            },
+            "description": "Valores válidos de province, size_band, status, range, priority y main_act_type, eventos de webhook y tipos de evento de la vigilancia. Gratis en todos los planes."
+          },
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/catalog",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "catalog"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"province\": [\n      \"A CORUÑA\",\n      \"ÁLAVA\",\n      \"ALBACETE\",\n      \"…\",\n      \"ZARAGOZA\"\n    ],\n    \"cnae\": {\n      \"format\": \"Prefijos de la CNAE-2009 (INE) de 1 a 4 dígitos, separados por comas: 62 o 4711,4719.\",\n      \"count\": \"/companies/filter?cnae=62&count_only=true (gratis) dice cuántas empresas hay.\"\n    },\n    \"size_band\": [\n      {\n        \"value\": \"NO_REVENUE\",\n        \"label\": \"Sin ventas\"\n      },\n      {\n        \"value\": \"LT_500K\",\n        \"label\": \"Menos de 0,5 M€\"\n      },\n      {\n        \"value\": \"500K_1M\",\n        \"label\": \"Entre 0,5 y 1 M€\"\n      },\n      {\n        \"value\": \"GT_1M\",\n        \"label\": \"Más de 1 M€\"\n      }\n    ],\n    \"status\": [\n      \"active\",\n      \"active_or_unknown\",\n      \"any\"\n    ],\n    \"radar\": {\n      \"range\": [\n        \"hoy\",\n        \"7\",\n        \"30\"\n      ],\n      \"range_note\": \"'hoy' o cualquier número de días atrás\",\n      \"priority\": [\n        \"muy_alta\",\n        \"alta\",\n        \"media\",\n        \"baja\",\n        \"muy_baja\"\n      ],\n      \"main_act_type\": [\n        \"Constitución\",\n        \"Nombramientos\",\n        \"Ampliación de Capital\",\n        \"…\"\n      ]\n    },\n    \"score_priority\": [\n      \"muy_alta\",\n      \"alta\",\n      \"media\",\n      \"baja\",\n      \"muy_baja\"\n    ],\n    \"webhook_events\": [\n      \"test.ping\",\n      \"company.borme_act\",\n      \"company.status_changed\",\n      \"company.risk_level_changed\",\n      \"watchlist.*\"\n    ],\n    \"watchlist_event_types\": [\n      \"borme_act\",\n      \"status_change\",\n      \"risk_level_change\"\n    ]\n  },\n  \"meta\": {\n    \"updated_at\": \"2026-10-13\",\n    \"cost\": 0\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Sandbox: Consulta por CIF",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "https://apiempresas.es/api/sandbox/v1/companies?cif=A15075062&admin=true",
+              "protocol": "https",
+              "host": [
+                "apiempresas",
+                "es"
+              ],
+              "path": [
+                "api",
+                "sandbox",
+                "v1",
+                "companies"
+              ],
+              "query": [
+                {
+                  "key": "cif",
+                  "value": "A15075062"
+                },
+                {
+                  "key": "admin",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Respuestas de ejemplo. Solo acepta A15075062 (éxito) y B00000000 (no encontrada). No gasta consultas."
+          },
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "https://apiempresas.es/api/sandbox/v1/companies?cif=A15075062&admin=true",
+                  "protocol": "https",
+                  "host": [
+                    "apiempresas",
+                    "es"
+                  ],
+                  "path": [
+                    "api",
+                    "sandbox",
+                    "v1",
+                    "companies"
+                  ],
+                  "query": [
+                    {
+                      "key": "cif",
+                      "value": "A15075062"
+                    },
+                    {
+                      "key": "admin",
+                      "value": "true"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"cif\": \"B12345678\",\n    \"name\": \"EMPRESA DE EJEMPLO SL\",\n    \"status\": \"ACTIVA\",\n    \"status_code\": \"ACTIVE\",\n    \"status_source\": \"registry\",\n    \"status_date\": \"2011-02-03\",\n    \"province\": \"MADRID\",\n    \"cnae\": \"6201\",\n    \"cnae_label\": \"Actividades de programación informática\",\n    \"financials\": {\n      \"size_band\": \"GT_1M\",\n      \"size_band_label\": \"Más de 1 M€\",\n      \"last_accounts_year\": 2023\n    },\n    \"administrators\": [\n      {\n        \"name\": \"JUAN PÉREZ GARCÍA\",\n        \"position\": \"Adm. Unico\",\n        \"since\": \"2019-03-01\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        }
+      ]
     },
-    "item": [
+    {
+      "name": "2. Plan Pro",
+      "item": [
         {
-            "name": "1. Plan Free",
-            "item": [
+          "name": "Consulta por CIF con administradores",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/companies?cif=A46103834&admin=true",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "companies"
+              ],
+              "query": [
                 {
-                    "name": "Consulta por CIF",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "X-API-KEY",
-                                "value": "{{API_KEY}}",
-                                "type": "text"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "https://apiempresas.es/api/v1/companies?cif=A15075062",
-                            "protocol": "https",
-                            "host": [
-                                "apiempresas",
-                                "es"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "companies"
-                            ],
-                            "query": [
-                                {
-                                    "key": "cif",
-                                    "value": "A15075062"
-                                }
-                            ]
-                        },
-                        "description": "Datos básicos y status_code. En Free, dirección y objeto social van recortados. Coste: 1 consulta."
-                    }
+                  "key": "cif",
+                  "value": "A46103834"
                 },
                 {
-                    "name": "Búsqueda por Nombre",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "X-API-KEY",
-                                "value": "{{API_KEY}}",
-                                "type": "text"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "https://apiempresas.es/api/v1/companies/search?q=mercadona",
-                            "protocol": "https",
-                            "host": [
-                                "apiempresas",
-                                "es"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "companies",
-                                "search"
-                            ],
-                            "query": [
-                                {
-                                    "key": "q",
-                                    "value": "mercadona"
-                                }
-                            ]
-                        },
-                        "description": "Añade multiple=true&limit=20 para varios resultados."
-                    }
-                },
-                {
-                    "name": "Scoring Comercial (básico)",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "X-API-KEY",
-                                "value": "{{API_KEY}}",
-                                "type": "text"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "https://apiempresas.es/api/v1/companies/score?cif=A15075062",
-                            "protocol": "https",
-                            "host": [
-                                "apiempresas",
-                                "es"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "companies",
-                                "score"
-                            ],
-                            "query": [
-                                {
-                                    "key": "cif",
-                                    "value": "A15075062"
-                                }
-                            ]
-                        },
-                        "description": "En Free, solo la puntuación; el desglose va en Pro."
-                    }
-                },
-                {
-                    "name": "Empresas recién constituidas",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "X-API-KEY",
-                                "value": "{{API_KEY}}",
-                                "type": "text"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "https://apiempresas.es/api/v1/companies/radar?range=7",
-                            "protocol": "https",
-                            "host": [
-                                "apiempresas",
-                                "es"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "companies",
-                                "radar"
-                            ],
-                            "query": [
-                                {
-                                    "key": "range",
-                                    "value": "7"
-                                }
-                            ]
-                        },
-                        "description": "En Free, 10 resultados con nombre y CIF ocultos."
-                    }
-                },
-                {
-                    "name": "Segmentos: recuento (gratis)",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "X-API-KEY",
-                                "value": "{{API_KEY}}",
-                                "type": "text"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "https://apiempresas.es/api/v1/companies/filter?cnae=62&province=MADRID&has_phone=true&count_only=true",
-                            "protocol": "https",
-                            "host": [
-                                "apiempresas",
-                                "es"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "companies",
-                                "filter"
-                            ],
-                            "query": [
-                                {
-                                    "key": "cnae",
-                                    "value": "62"
-                                },
-                                {
-                                    "key": "province",
-                                    "value": "MADRID"
-                                },
-                                {
-                                    "key": "has_phone",
-                                    "value": "true"
-                                },
-                                {
-                                    "key": "count_only",
-                                    "value": "true"
-                                }
-                            ]
-                        },
-                        "description": "Cuántas empresas encajan con los filtros. Gratis en todos los planes. Filtros: cnae, province, municipality, status (active, active_or_unknown, any), founded_from, founded_to, has_phone, size_band (NO_REVENUE, LT_500K, 500K_1M, GT_1M), min_accounts_year. Hace falta cnae, province o municipality."
-                    }
-                },
-                {
-                    "name": "Estadísticas de Consumo",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "X-API-KEY",
-                                "value": "{{API_KEY}}",
-                                "type": "text"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "https://apiempresas.es/api/v1/usage",
-                            "protocol": "https",
-                            "host": [
-                                "apiempresas",
-                                "es"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "usage"
-                            ]
-                        },
-                        "description": "No gasta consultas."
-                    }
-                },
-                {
-                    "name": "Sandbox: Consulta por CIF",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "X-API-KEY",
-                                "value": "{{API_KEY}}",
-                                "type": "text"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "https://apiempresas.es/api/sandbox/v1/companies?cif=A15075062&admin=true",
-                            "protocol": "https",
-                            "host": [
-                                "apiempresas",
-                                "es"
-                            ],
-                            "path": [
-                                "api",
-                                "sandbox",
-                                "v1",
-                                "companies"
-                            ],
-                            "query": [
-                                {
-                                    "key": "cif",
-                                    "value": "A15075062"
-                                },
-                                {
-                                    "key": "admin",
-                                    "value": "true"
-                                }
-                            ]
-                        },
-                        "description": "Respuestas de ejemplo. Solo acepta A15075062 (éxito) y B00000000 (no encontrada). No gasta consultas."
-                    }
+                  "key": "admin",
+                  "value": "true"
                 }
-            ]
+              ]
+            },
+            "description": "Datos completos, financials (tramo de facturación y último año de cuentas) y administradores vigentes con su fecha de nombramiento. Coste: 1 consulta (1 crédito con bono)."
+          },
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/companies?cif=A46103834&admin=true",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "companies"
+                  ],
+                  "query": [
+                    {
+                      "key": "cif",
+                      "value": "A46103834"
+                    },
+                    {
+                      "key": "admin",
+                      "value": "true"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"cif\": \"B12345678\",\n    \"name\": \"EMPRESA DE EJEMPLO SL\",\n    \"status\": \"ACTIVA\",\n    \"status_code\": \"ACTIVE\",\n    \"status_source\": \"registry\",\n    \"status_date\": \"2011-02-03\",\n    \"province\": \"MADRID\",\n    \"cnae\": \"6201\",\n    \"cnae_label\": \"Actividades de programación informática\",\n    \"financials\": {\n      \"size_band\": \"GT_1M\",\n      \"size_band_label\": \"Más de 1 M€\",\n      \"last_accounts_year\": 2023\n    },\n    \"administrators\": [\n      {\n        \"name\": \"JUAN PÉREZ GARCÍA\",\n        \"position\": \"Adm. Unico\",\n        \"since\": \"2019-03-01\"\n      }\n    ]\n  }\n}"
+            }
+          ]
         },
         {
-            "name": "2. Plan Pro",
-            "item": [
+          "name": "Verificación KYB",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/companies/verify?cif=A46103834&name=Mercadona, S.A.&person=Juan Roig Alfonso&vat=true",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "companies",
+                "verify"
+              ],
+              "query": [
                 {
-                    "name": "Consulta por CIF con administradores",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "X-API-KEY",
-                                "value": "{{API_KEY}}",
-                                "type": "text"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "https://apiempresas.es/api/v1/companies?cif=A46103834&admin=true",
-                            "protocol": "https",
-                            "host": [
-                                "apiempresas",
-                                "es"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "companies"
-                            ],
-                            "query": [
-                                {
-                                    "key": "cif",
-                                    "value": "A46103834"
-                                },
-                                {
-                                    "key": "admin",
-                                    "value": "true"
-                                }
-                            ]
-                        },
-                        "description": "Datos completos, financials (tramo de facturación y último año de cuentas) y administradores vigentes con su fecha de nombramiento."
-                    }
+                  "key": "cif",
+                  "value": "A46103834"
                 },
                 {
-                    "name": "Verificación KYB",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "X-API-KEY",
-                                "value": "{{API_KEY}}",
-                                "type": "text"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "https://apiempresas.es/api/v1/companies/verify?cif=A46103834&name=Mercadona, S.A.&person=Juan Roig Alfonso&vat=true",
-                            "protocol": "https",
-                            "host": [
-                                "apiempresas",
-                                "es"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "companies",
-                                "verify"
-                            ],
-                            "query": [
-                                {
-                                    "key": "cif",
-                                    "value": "A46103834"
-                                },
-                                {
-                                    "key": "name",
-                                    "value": "Mercadona, S.A."
-                                },
-                                {
-                                    "key": "person",
-                                    "value": "Juan Roig Alfonso"
-                                },
-                                {
-                                    "key": "vat",
-                                    "value": "true"
-                                }
-                            ]
-                        },
-                        "description": "Estado, nombre, firmante (administrador vigente) y NIF en VIES, con decision_hint pass/review/fail. En Business añade el nivel de riesgo. Coste: 2 consultas."
-                    }
+                  "key": "name",
+                  "value": "Mercadona, S.A."
                 },
                 {
-                    "name": "Nombre a CIF (reconciliación)",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "X-API-KEY",
-                                "value": "{{API_KEY}}",
-                                "type": "text"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            },
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"items\": [\n    {\n      \"name\": \"Mercadona, S.A.\",\n      \"province\": \"Valencia\"\n    },\n    {\n      \"name\": \"Telefónica de España\"\n    },\n    {\n      \"name\": \"Talleres Pérez\"\n    }\n  ]\n}"
-                        },
-                        "url": {
-                            "raw": "https://apiempresas.es/api/v1/companies/reconcile",
-                            "protocol": "https",
-                            "host": [
-                                "apiempresas",
-                                "es"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "companies",
-                                "reconcile"
-                            ]
-                        },
-                        "description": "Hasta 100 nombres por petición, con provincia opcional. Devuelve match (con CIF), ambiguous (hasta 3 candidatos) o no_match. 1 consulta por cada match; el resto no se cobra."
-                    }
+                  "key": "person",
+                  "value": "Juan Roig Alfonso"
                 },
                 {
-                    "name": "Consulta Múltiples Empresas (Batch)",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "X-API-KEY",
-                                "value": "{{API_KEY}}",
-                                "type": "text"
-                            },
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json",
-                                "type": "text"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "https://apiempresas.es/api/v1/companies/batch",
-                            "protocol": "https",
-                            "host": [
-                                "apiempresas",
-                                "es"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "companies",
-                                "batch"
-                            ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"cifs\": [\n    \"A15075062\",\n    \"A46103834\"\n  ],\n  \"admin\": true\n}"
-                        },
-                        "description": "Hasta 100 CIF. Se cobra una consulta por empresa encontrada."
-                    }
-                },
-                {
-                    "name": "Scoring Comercial",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "X-API-KEY",
-                                "value": "{{API_KEY}}",
-                                "type": "text"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "https://apiempresas.es/api/v1/companies/score?cif=A15075062",
-                            "protocol": "https",
-                            "host": [
-                                "apiempresas",
-                                "es"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "companies",
-                                "score"
-                            ],
-                            "query": [
-                                {
-                                    "key": "cif",
-                                    "value": "A15075062"
-                                }
-                            ]
-                        }
-                    }
-                },
-                {
-                    "name": "Señales Societarias",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "X-API-KEY",
-                                "value": "{{API_KEY}}",
-                                "type": "text"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "https://apiempresas.es/api/v1/companies/signals?cif=A15075062",
-                            "protocol": "https",
-                            "host": [
-                                "apiempresas",
-                                "es"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "companies",
-                                "signals"
-                            ],
-                            "query": [
-                                {
-                                    "key": "cif",
-                                    "value": "A15075062"
-                                }
-                            ]
-                        }
-                    }
-                },
-                {
-                    "name": "Historial Actos BORME",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "X-API-KEY",
-                                "value": "{{API_KEY}}",
-                                "type": "text"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "https://apiempresas.es/api/v1/companies/borme?cif=A15075062",
-                            "protocol": "https",
-                            "host": [
-                                "apiempresas",
-                                "es"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "companies",
-                                "borme"
-                            ],
-                            "query": [
-                                {
-                                    "key": "cif",
-                                    "value": "A15075062"
-                                }
-                            ]
-                        }
-                    }
-                },
-                {
-                    "name": "Grafos de Poder Societario",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "X-API-KEY",
-                                "value": "{{API_KEY}}",
-                                "type": "text"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "https://apiempresas.es/api/v1/companies/network?cif=A15075062",
-                            "protocol": "https",
-                            "host": [
-                                "apiempresas",
-                                "es"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "companies",
-                                "network"
-                            ],
-                            "query": [
-                                {
-                                    "key": "cif",
-                                    "value": "A15075062"
-                                }
-                            ]
-                        }
-                    }
-                },
-                {
-                    "name": "Radar con filtros",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "X-API-KEY",
-                                "value": "{{API_KEY}}",
-                                "type": "text"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "https://apiempresas.es/api/v1/companies/radar?range=30&province=MADRID&cnae=62&has_phone=true",
-                            "protocol": "https",
-                            "host": [
-                                "apiempresas",
-                                "es"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "companies",
-                                "radar"
-                            ],
-                            "query": [
-                                {
-                                    "key": "range",
-                                    "value": "30"
-                                },
-                                {
-                                    "key": "province",
-                                    "value": "MADRID"
-                                },
-                                {
-                                    "key": "cnae",
-                                    "value": "62"
-                                },
-                                {
-                                    "key": "has_phone",
-                                    "value": "true"
-                                }
-                            ]
-                        },
-                        "description": "Hasta 100 resultados en Pro y 1.000 en Business. Filtros opcionales: province, cnae (prefijos separados por comas), min_score, priority, main_act_type, has_phone."
-                    }
-                },
-                {
-                    "name": "Insights IA (vista previa)",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "X-API-KEY",
-                                "value": "{{API_KEY}}",
-                                "type": "text"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "https://apiempresas.es/api/v1/companies/insights?cif=A15075062",
-                            "protocol": "https",
-                            "host": [
-                                "apiempresas",
-                                "es"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "companies",
-                                "insights"
-                            ],
-                            "query": [
-                                {
-                                    "key": "cif",
-                                    "value": "A15075062"
-                                }
-                            ]
-                        },
-                        "description": "En Pro, perfil y probabilidad de conversión. El análisis completo va en Business."
-                    }
-                },
-                {
-                    "name": "Vigilancia: añadir empresas",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "X-API-KEY",
-                                "value": "{{API_KEY}}",
-                                "type": "text"
-                            },
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json",
-                                "type": "text"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "https://apiempresas.es/api/v1/watchlist",
-                            "protocol": "https",
-                            "host": [
-                                "apiempresas",
-                                "es"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "watchlist"
-                            ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"cifs\": [\n    \"A15075062\",\n    \"A46103834\"\n  ]\n}"
-                        },
-                        "description": "Hasta 500 CIF por petición. Pro: 100 empresas en total; Business: 1.000. No gasta consultas."
-                    }
-                },
-                {
-                    "name": "Vigilancia: listar empresas",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "X-API-KEY",
-                                "value": "{{API_KEY}}",
-                                "type": "text"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "https://apiempresas.es/api/v1/watchlist?page=1&limit=100",
-                            "protocol": "https",
-                            "host": [
-                                "apiempresas",
-                                "es"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "watchlist"
-                            ],
-                            "query": [
-                                {
-                                    "key": "page",
-                                    "value": "1"
-                                },
-                                {
-                                    "key": "limit",
-                                    "value": "100"
-                                }
-                            ]
-                        },
-                        "description": "No gasta consultas."
-                    }
-                },
-                {
-                    "name": "Vigilancia: eventos",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "X-API-KEY",
-                                "value": "{{API_KEY}}",
-                                "type": "text"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "https://apiempresas.es/api/v1/watchlist/events?since=2026-09-01&types=borme_act,status_change,risk_level_change",
-                            "protocol": "https",
-                            "host": [
-                                "apiempresas",
-                                "es"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "watchlist",
-                                "events"
-                            ],
-                            "query": [
-                                {
-                                    "key": "since",
-                                    "value": "2026-09-01"
-                                },
-                                {
-                                    "key": "types",
-                                    "value": "borme_act,status_change,risk_level_change"
-                                }
-                            ]
-                        },
-                        "description": "Cambios desde una fecha (máximo 90 días atrás), de más antiguo a más reciente. No gasta consultas."
-                    }
-                },
-                {
-                    "name": "Vigilancia: quitar empresa",
-                    "request": {
-                        "method": "DELETE",
-                        "header": [
-                            {
-                                "key": "X-API-KEY",
-                                "value": "{{API_KEY}}",
-                                "type": "text"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "https://apiempresas.es/api/v1/watchlist/A15075062",
-                            "protocol": "https",
-                            "host": [
-                                "apiempresas",
-                                "es"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "watchlist",
-                                "A15075062"
-                            ]
-                        },
-                        "description": "404 NOT_WATCHING si no estaba en tu vigilancia."
-                    }
+                  "key": "vat",
+                  "value": "true"
                 }
-            ]
+              ]
+            },
+            "description": "Estado, nombre, firmante (administrador vigente) y NIF en VIES, con decision_hint pass/review/fail. En Business añade el nivel de riesgo. Coste: 2 consultas."
+          },
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/companies/verify?cif=A46103834&name=Mercadona, S.A.&person=Juan Roig Alfonso&vat=true",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "companies",
+                    "verify"
+                  ],
+                  "query": [
+                    {
+                      "key": "cif",
+                      "value": "A46103834"
+                    },
+                    {
+                      "key": "name",
+                      "value": "Mercadona, S.A."
+                    },
+                    {
+                      "key": "person",
+                      "value": "Juan Roig Alfonso"
+                    },
+                    {
+                      "key": "vat",
+                      "value": "true"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"cif\": \"B12345678\",\n    \"exists\": true,\n    \"name\": \"EMPRESA DE EJEMPLO SL\",\n    \"status\": \"ACTIVA\",\n    \"status_code\": \"ACTIVE\",\n    \"status_source\": \"registry\",\n    \"status_date\": null,\n    \"checks\": {\n      \"name\": {\n        \"provided\": \"Empresa de Ejemplo, S.L.\",\n        \"score\": 100,\n        \"match\": true\n      },\n      \"person\": {\n        \"provided\": \"Juan Pérez García\",\n        \"is_current_admin\": true,\n        \"matched_name\": \"PEREZ GARCIA JUAN\",\n        \"position\": \"Adm. Unico\",\n        \"since\": \"2019-03-01\"\n      },\n      \"vat\": {\n        \"vat_number\": \"ESB12345678\",\n        \"checked\": true,\n        \"valid\": true,\n        \"source\": \"VIES\",\n        \"error\": null\n      },\n      \"accounts\": {\n        \"last_accounts_year\": 2023\n      }\n    },\n    \"flags\": [],\n    \"decision_hint\": \"pass\",\n    \"checked_at\": \"2026-09-28T10:30:00+02:00\"\n  }\n}"
+            }
+          ]
         },
         {
-            "name": "3. Plan Business",
-            "item": [
-                {
-                    "name": "Perfil de Riesgo Corporativo",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "X-API-KEY",
-                                "value": "{{API_KEY}}",
-                                "type": "text"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "https://apiempresas.es/api/v1/companies/risk-profile?cif=A46103834",
-                            "protocol": "https",
-                            "host": [
-                                "apiempresas",
-                                "es"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "companies",
-                                "risk-profile"
-                            ],
-                            "query": [
-                                {
-                                    "key": "cif",
-                                    "value": "A46103834"
-                                }
-                            ]
-                        }
-                    }
+          "name": "Nombre a CIF (reconciliación)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    {\n      \"name\": \"Mercadona, S.A.\",\n      \"province\": \"Valencia\"\n    },\n    {\n      \"name\": \"Telefónica de España\"\n    },\n    {\n      \"name\": \"Talleres Pérez\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/companies/reconcile",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "companies",
+                "reconcile"
+              ]
+            },
+            "description": "Hasta 100 nombres por petición, con provincia opcional. Devuelve match (con CIF), ambiguous (hasta 3 candidatos) o no_match. 1 consulta por cada match; el resto no se cobra."
+          },
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"items\": [\n    {\n      \"name\": \"Mercadona, S.A.\",\n      \"province\": \"Valencia\"\n    },\n    {\n      \"name\": \"Telefónica de España\"\n    },\n    {\n      \"name\": \"Talleres Pérez\"\n    }\n  ]\n}"
                 },
-                {
-                    "name": "Contratos Públicos",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "X-API-KEY",
-                                "value": "{{API_KEY}}",
-                                "type": "text"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "https://apiempresas.es/api/v1/companies/contracts?cif=A01001411&page=1&limit=20",
-                            "protocol": "https",
-                            "host": [
-                                "apiempresas",
-                                "es"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "companies",
-                                "contracts"
-                            ],
-                            "query": [
-                                {
-                                    "key": "cif",
-                                    "value": "A01001411"
-                                },
-                                {
-                                    "key": "page",
-                                    "value": "1"
-                                },
-                                {
-                                    "key": "limit",
-                                    "value": "20"
-                                }
-                            ]
-                        }
-                    }
-                },
-                {
-                    "name": "Insights IA (completo)",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "X-API-KEY",
-                                "value": "{{API_KEY}}",
-                                "type": "text"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "https://apiempresas.es/api/v1/companies/insights?cif=A15075062",
-                            "protocol": "https",
-                            "host": [
-                                "apiempresas",
-                                "es"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "companies",
-                                "insights"
-                            ],
-                            "query": [
-                                {
-                                    "key": "cif",
-                                    "value": "A15075062"
-                                }
-                            ]
-                        }
-                    }
-                },
-                {
-                    "name": "Preparación de Contacto (Contact Prep)",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "X-API-KEY",
-                                "value": "{{API_KEY}}",
-                                "type": "text"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "https://apiempresas.es/api/v1/companies/contact-prep?cif=A15075062",
-                            "protocol": "https",
-                            "host": [
-                                "apiempresas",
-                                "es"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "companies",
-                                "contact-prep"
-                            ],
-                            "query": [
-                                {
-                                    "key": "cif",
-                                    "value": "A15075062"
-                                }
-                            ]
-                        }
-                    }
-                },
-                {
-                    "name": "Calculadora de Match B2B",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "X-API-KEY",
-                                "value": "{{API_KEY}}",
-                                "type": "text"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "https://apiempresas.es/api/v1/companies/match?cif=A15075062&seller_sector=software",
-                            "protocol": "https",
-                            "host": [
-                                "apiempresas",
-                                "es"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "companies",
-                                "match"
-                            ],
-                            "query": [
-                                {
-                                    "key": "cif",
-                                    "value": "A15075062"
-                                },
-                                {
-                                    "key": "seller_sector",
-                                    "value": "software"
-                                }
-                            ]
-                        },
-                        "description": "Puntúa el encaje (0-100) entre la empresa y el sector que tú vendes."
-                    }
-                },
-                {
-                    "name": "Segmentos: descargar empresas",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "X-API-KEY",
-                                "value": "{{API_KEY}}",
-                                "type": "text"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "https://apiempresas.es/api/v1/companies/filter?cnae=62&province=MADRID&has_phone=true&size_band=500K_1M,GT_1M&limit=100",
-                            "protocol": "https",
-                            "host": [
-                                "apiempresas",
-                                "es"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "companies",
-                                "filter"
-                            ],
-                            "query": [
-                                {
-                                    "key": "cnae",
-                                    "value": "62"
-                                },
-                                {
-                                    "key": "province",
-                                    "value": "MADRID"
-                                },
-                                {
-                                    "key": "has_phone",
-                                    "value": "true"
-                                },
-                                {
-                                    "key": "size_band",
-                                    "value": "500K_1M,GT_1M"
-                                },
-                                {
-                                    "key": "limit",
-                                    "value": "100"
-                                }
-                            ]
-                        },
-                        "description": "Filas del segmento (plan Business): 5 consultas por fila devuelta, hasta 1.000 por petición. Para la página siguiente, pasa meta.next_cursor en cursor con los mismos filtros. No devuelve teléfonos, solo has_phone."
-                    }
-                },
-                {
-                    "name": "Listar Webhooks",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "X-API-KEY",
-                                "value": "{{API_KEY}}",
-                                "type": "text"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "https://apiempresas.es/api/v1/webhooks",
-                            "protocol": "https",
-                            "host": [
-                                "apiempresas",
-                                "es"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "webhooks"
-                            ]
-                        },
-                        "description": "Tus webhooks registrados."
-                    }
-                },
-                {
-                    "name": "Crear Webhook",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "X-API-KEY",
-                                "value": "{{API_KEY}}",
-                                "type": "text"
-                            },
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json",
-                                "type": "text"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "https://apiempresas.es/api/v1/webhooks",
-                            "protocol": "https",
-                            "host": [
-                                "apiempresas",
-                                "es"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "webhooks"
-                            ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"url\": \"https://tu-dominio.com/webhooks/apiempresas\",\n  \"event\": \"watchlist.*\"\n}"
-                        },
-                        "description": "Eventos: company.borme_act, company.status_changed, company.risk_level_changed o watchlist.* (los tres). Guarda el secret de la respuesta para comprobar la firma X-ApiEmpresas-Signature. Solo HTTPS a un host público."
-                    }
-                },
-                {
-                    "name": "Probar Webhook",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "X-API-KEY",
-                                "value": "{{API_KEY}}",
-                                "type": "text"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "https://apiempresas.es/api/v1/webhooks/123/test",
-                            "protocol": "https",
-                            "host": [
-                                "apiempresas",
-                                "es"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "webhooks",
-                                "123",
-                                "test"
-                            ]
-                        },
-                        "description": "Envía un test.ping a la URL del webhook en el momento y devuelve el código HTTP que respondió."
-                    }
-                },
-                {
-                    "name": "Eliminar Webhook",
-                    "request": {
-                        "method": "DELETE",
-                        "header": [
-                            {
-                                "key": "X-API-KEY",
-                                "value": "{{API_KEY}}",
-                                "type": "text"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "https://apiempresas.es/api/v1/webhooks/123",
-                            "protocol": "https",
-                            "host": [
-                                "apiempresas",
-                                "es"
-                            ],
-                            "path": [
-                                "api",
-                                "v1",
-                                "webhooks",
-                                "123"
-                            ]
-                        }
-                    }
+                "url": {
+                  "raw": "{{BASE_URL}}/companies/reconcile",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "companies",
+                    "reconcile"
+                  ]
                 }
-            ]
-        }
-    ],
-    "variable": [
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"input\": {\n        \"name\": \"Mercadona, S.A.\",\n        \"province\": \"Valencia\"\n      },\n      \"status\": \"match\",\n      \"score\": 100,\n      \"company\": {\n        \"cif\": \"A46103834\",\n        \"name\": \"MERCADONA SA\",\n        \"province\": \"VALENCIA\",\n        \"status\": \"ACTIVA\",\n        \"status_code\": \"ACTIVE\",\n        \"score\": 100\n      }\n    },\n    {\n      \"input\": {\n        \"name\": \"Talleres Pérez\",\n        \"province\": null\n      },\n      \"status\": \"ambiguous\",\n      \"candidates\": [\n        {\n          \"cif\": \"B12345678\",\n          \"name\": \"TALLERES PEREZ SL\",\n          \"province\": \"MADRID\",\n          \"status\": \"ACTIVA\",\n          \"status_code\": \"ACTIVE\",\n          \"score\": 100\n        },\n        {\n          \"cif\": \"A12345674\",\n          \"name\": \"TALLERES PEREZ SA\",\n          \"province\": \"SEVILLA\",\n          \"status\": \"ACTIVA\",\n          \"status_code\": \"ACTIVE\",\n          \"score\": 100\n        }\n      ]\n    },\n    {\n      \"input\": {\n        \"name\": \"Panadería Inventada del Norte\",\n        \"province\": null\n      },\n      \"status\": \"no_match\"\n    }\n  ],\n  \"meta\": {\n    \"requested\": 3,\n    \"matched\": 1,\n    \"ambiguous\": 1,\n    \"no_match\": 1,\n    \"invalid\": 0,\n    \"skipped_quota\": 0,\n    \"cost\": 1,\n    \"thresholds\": {\n      \"match\": 85,\n      \"ambiguous\": 70\n    }\n  }\n}"
+            }
+          ]
+        },
         {
-            "key": "API_KEY",
-            "value": "tu_api_key_aqui",
-            "type": "string"
+          "name": "Consulta Múltiples Empresas (Batch)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/companies/batch",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "companies",
+                "batch"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cifs\": [\n    \"A15075062\",\n    \"A46103834\"\n  ],\n  \"admin\": true\n}"
+            },
+            "description": "Hasta 100 CIF. Se cobra una consulta por empresa encontrada."
+          },
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/companies/batch",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "companies",
+                    "batch"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"cifs\": [\n    \"A15075062\",\n    \"A46103834\"\n  ],\n  \"admin\": true\n}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"cif\": \"B12345678\",\n      \"name\": \"EMPRESA DE EJEMPLO SL\",\n      \"status\": \"ACTIVA\"\n    },\n    {\n      \"cif\": \"A87654321\",\n      \"name\": \"OTRA EMPRESA SA\",\n      \"status\": \"ACTIVA\"\n    }\n  ],\n  \"meta\": {\n    \"requested\": 3,\n    \"found\": 2,\n    \"cost\": 2,\n    \"truncated\": false\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Scoring Comercial",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/companies/score?cif=A15075062",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "companies",
+                "score"
+              ],
+              "query": [
+                {
+                  "key": "cif",
+                  "value": "A15075062"
+                }
+              ]
+            },
+            "description": "Puntuación comercial (0-100) con prioridad (muy_alta…muy_baja), motivos y última señal del BORME. En Free solo la cifra, sin gastar consultas (máximo 25 vistas previas al día). Coste: 1 consulta del plan (3 créditos con bono)."
+          },
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/companies/score?cif=A15075062",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "companies",
+                    "score"
+                  ],
+                  "query": [
+                    {
+                      "key": "cif",
+                      "value": "A15075062"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"cif\": \"B12345678\",\n    \"score\": 82,\n    \"priority\": \"muy_alta\",\n    \"reasons\": [\n      \"OPP:95|QUAL:80|CONT:60 · Ampliación de capital\"\n    ],\n    \"last_signal\": {\n      \"type\": \"Ampliación de capital\",\n      \"date\": \"2026-09-15\",\n      \"url_pdf\": \"https://www.boe.es/borme/dias/2026/09/15/pdfs/BORME-A-2026-176-15.pdf\"\n    },\n    \"source\": \"radar\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Señales Societarias",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/companies/signals?cif=A15075062",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "companies",
+                "signals"
+              ],
+              "query": [
+                {
+                  "key": "cif",
+                  "value": "A15075062"
+                }
+              ]
+            },
+            "description": "Último acto del BORME que cuenta para la puntuación (como mucho un elemento). probability es la prioridad comercial, no la fiabilidad del evento. 404 si la empresa no existe. Coste: 1 consulta del plan (3 créditos con bono)."
+          },
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/companies/signals?cif=A15075062",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "companies",
+                    "signals"
+                  ],
+                  "query": [
+                    {
+                      "key": "cif",
+                      "value": "A15075062"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"cif\": \"A46103834\",\n    \"signals\": [\n      {\n        \"type\": \"borme_event\",\n        \"label\": \"Ampliación de capital\",\n        \"date\": \"2026-09-15\",\n        \"probability\": \"muy_alta\",\n        \"url_pdf\": \"https://www.boe.es/borme/dias/2026/09/15/pdfs/BORME-A-2026-176-15.pdf\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Historial Actos BORME",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/companies/borme?cif=A15075062",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "companies",
+                "borme"
+              ],
+              "query": [
+                {
+                  "key": "cif",
+                  "value": "A15075062"
+                }
+              ]
+            },
+            "description": "Historial de actos publicados en el BORME. Pro, Business y Free con bono. Coste: 1 consulta del plan (3 créditos con bono)."
+          },
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/companies/borme?cif=A15075062",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "companies",
+                    "borme"
+                  ],
+                  "query": [
+                    {
+                      "key": "cif",
+                      "value": "A15075062"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"cif\": \"B12345678\",\n    \"company_name\": \"EMPRESA DE EJEMPLO SL\",\n    \"events\": [\n      {\n        \"date\": \"2023-11-01\",\n        \"act_types\": \"Nombramientos, Ceses\",\n        \"description\": \"Ceses/Dimisiones. Administrador único: JUAN PEREZ...\",\n        \"url_pdf\": \"https://www.boe.es/borme/dias/2023/11/01/pdfs/BORME-A-2023-100-28.pdf\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Grafos de Poder Societario",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/companies/network?cif=A15075062",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "companies",
+                "network"
+              ],
+              "query": [
+                {
+                  "key": "cif",
+                  "value": "A15075062"
+                }
+              ]
+            },
+            "description": "Red de empresas vinculadas a través de sus administradores. Pro, Business y Free con bono. Coste: 1 consulta del plan (3 créditos con bono)."
+          },
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/companies/network?cif=A15075062",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "companies",
+                    "network"
+                  ],
+                  "query": [
+                    {
+                      "key": "cif",
+                      "value": "A15075062"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"nodes\": [\n      {\n        \"id\": \"C_123\",\n        \"type\": \"company\",\n        \"label\": \"EMPRESA DE EJEMPLO SL\",\n        \"cif\": \"B12345678\",\n        \"root\": true\n      },\n      {\n        \"id\": \"A_abc\",\n        \"type\": \"administrator\",\n        \"label\": \"JUAN PEREZ GARCIA\"\n      }\n    ],\n    \"edges\": [\n      {\n        \"source\": \"A_abc\",\n        \"target\": \"C_123\",\n        \"label\": \"Administrador\"\n      }\n    ],\n    \"stats\": {\n      \"total_administrators\": 1,\n      \"total_linked_companies\": 1\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Radar con filtros",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/companies/radar?range=30&province=MADRID&cnae=62&has_phone=true",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "companies",
+                "radar"
+              ],
+              "query": [
+                {
+                  "key": "range",
+                  "value": "30"
+                },
+                {
+                  "key": "province",
+                  "value": "MADRID"
+                },
+                {
+                  "key": "cnae",
+                  "value": "62"
+                },
+                {
+                  "key": "has_phone",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Hasta 100 resultados en Pro y 1.000 en Business. Filtros opcionales: province, cnae (prefijos separados por comas), min_score, priority, main_act_type, has_phone. Coste: 1 consulta del plan (3 créditos con bono)."
+          },
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/companies/radar?range=30&province=MADRID&cnae=62&has_phone=true",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "companies",
+                    "radar"
+                  ],
+                  "query": [
+                    {
+                      "key": "range",
+                      "value": "30"
+                    },
+                    {
+                      "key": "province",
+                      "value": "MADRID"
+                    },
+                    {
+                      "key": "cnae",
+                      "value": "62"
+                    },
+                    {
+                      "key": "has_phone",
+                      "value": "true"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"meta\": {\n    \"plan\": \"business\",\n    \"count\": 50,\n    \"limit\": 1000,\n    \"total_disponibles\": 50\n  },\n  \"data\": [\n    {\n      \"id\": 4812345,\n      \"company_name\": \"NUEVA EMPRESA SL\",\n      \"cif\": \"B12345678\",\n      \"fecha_constitucion\": \"2026-10-13\",\n      \"cnae\": \"6201\",\n      \"cnae_label\": \"Actividades de programación informática\",\n      \"registro_mercantil\": \"MADRID\",\n      \"municipality\": \"MADRID\",\n      \"score_total\": 78,\n      \"priority_level\": \"alta\",\n      \"main_act_type\": \"Constitución\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Insights IA (vista previa)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/companies/insights?cif=A15075062",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "companies",
+                "insights"
+              ],
+              "query": [
+                {
+                  "key": "cif",
+                  "value": "A15075062"
+                }
+              ]
+            },
+            "description": "En Pro, perfil y probabilidad de conversión. El análisis completo va en Business. No gasta consultas (máximo 25 vistas previas al día), pero hace falta que te quede alguna."
+          },
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/companies/insights?cif=A15075062",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "companies",
+                    "insights"
+                  ],
+                  "query": [
+                    {
+                      "key": "cif",
+                      "value": "A15075062"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"profile\": \"Servicios de Tecnología\",\n    \"summary\": \"Empresa enfocada en desarrollo software...\",\n    \"needs\": [\n      \"Presencia Web\",\n      \"Gestión Cloud\"\n    ],\n    \"conversion_probability\": \"Alta\",\n    \"estimated_ticket\": \"Medio-Alto\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Vigilancia: añadir empresas",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/watchlist",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "watchlist"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cifs\": [\n    \"A15075062\",\n    \"A46103834\"\n  ]\n}"
+            },
+            "description": "Hasta 500 CIF por petición. Pro: 100 empresas en total; Business: 1.000. No gasta consultas."
+          },
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/watchlist",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "watchlist"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"cifs\": [\n    \"A15075062\",\n    \"A46103834\"\n  ]\n}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"added\": [\n      \"A46103834\"\n    ],\n    \"already_watching\": [\n      \"A15075062\"\n    ],\n    \"not_found\": [],\n    \"invalid\": [],\n    \"rejected_over_limit\": []\n  },\n  \"meta\": {\n    \"total\": 2,\n    \"watch_limit\": 100\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Vigilancia: listar empresas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/watchlist?page=1&limit=100",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "watchlist"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "100"
+                }
+              ]
+            },
+            "description": "No gasta consultas."
+          },
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/watchlist?page=1&limit=100",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "watchlist"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "100"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"cif\": \"A46103834\",\n      \"name\": \"MERCADONA SA\",\n      \"added_at\": \"2026-09-27 10:12:04\"\n    },\n    {\n      \"cif\": \"A15075062\",\n      \"name\": \"INDUSTRIA DE DISENO TEXTIL SA\",\n      \"added_at\": \"2026-09-28 08:30:51\"\n    }\n  ],\n  \"meta\": {\n    \"total\": 2,\n    \"watch_limit\": 100,\n    \"page\": 1,\n    \"limit\": 100,\n    \"has_more\": false\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Vigilancia: eventos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/watchlist/events?since=2026-09-01&types=borme_act,status_change,risk_level_change",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "watchlist",
+                "events"
+              ],
+              "query": [
+                {
+                  "key": "since",
+                  "value": "2026-09-01"
+                },
+                {
+                  "key": "types",
+                  "value": "borme_act,status_change,risk_level_change"
+                }
+              ]
+            },
+            "description": "Cambios desde una fecha (máximo 90 días atrás), de más antiguo a más reciente. No gasta consultas."
+          },
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/watchlist/events?since=2026-09-01&types=borme_act,status_change,risk_level_change",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "watchlist",
+                    "events"
+                  ],
+                  "query": [
+                    {
+                      "key": "since",
+                      "value": "2026-09-01"
+                    },
+                    {
+                      "key": "types",
+                      "value": "borme_act,status_change,risk_level_change"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"borme_act:8812345\",\n      \"type\": \"borme_act\",\n      \"date\": \"2026-09-22\",\n      \"cif\": \"B12345678\",\n      \"company_name\": \"EMPRESA DE EJEMPLO SL\",\n      \"data\": {\n        \"act_types\": \"Nombramientos, Ceses/Dimisiones\",\n        \"description\": \"Ceses/Dimisiones. Adm. Unico: ...\",\n        \"url_pdf\": \"https://www.boe.es/borme/dias/2026/09/22/pdfs/BORME-A-2026-181-28.pdf\"\n      }\n    },\n    {\n      \"id\": \"risk_level_change:B12345678:2026-09-25\",\n      \"type\": \"risk_level_change\",\n      \"date\": \"2026-09-25\",\n      \"cif\": \"B12345678\",\n      \"company_name\": \"EMPRESA DE EJEMPLO SL\",\n      \"data\": {\n        \"from\": \"BAJO\",\n        \"to\": \"MEDIO\",\n        \"model_change\": null\n      }\n    }\n  ],\n  \"meta\": {\n    \"since\": \"2026-09-20\",\n    \"types\": [\n      \"borme_act\",\n      \"status_change\",\n      \"risk_level_change\"\n    ],\n    \"total\": 2,\n    \"page\": 1,\n    \"limit\": 100,\n    \"has_more\": false\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Vigilancia: quitar empresa",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/watchlist/A15075062",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "watchlist",
+                "A15075062"
+              ]
+            },
+            "description": "404 NOT_WATCHING si no estaba en tu vigilancia. No gasta consultas."
+          },
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/watchlist/A15075062",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "watchlist",
+                    "A15075062"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"cif\": \"A46103834\",\n    \"removed\": true\n  },\n  \"meta\": {\n    \"total\": 1,\n    \"watch_limit\": 100\n  }\n}"
+            }
+          ]
         }
-    ]
+      ]
+    },
+    {
+      "name": "3. Plan Business",
+      "item": [
+        {
+          "name": "Perfil de Riesgo Corporativo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/companies/risk-profile?cif=A46103834",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "companies",
+                "risk-profile"
+              ],
+              "query": [
+                {
+                  "key": "cif",
+                  "value": "A46103834"
+                }
+              ]
+            },
+            "description": "Perfil de riesgo y solvencia: nivel, puntuación, dimensiones y alertas. Solo Business. 404 RISK_PROFILE_NOT_AVAILABLE si no está calculado. Coste: 1 consulta del plan (3 créditos con bono)."
+          },
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/companies/risk-profile?cif=A46103834",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "companies",
+                    "risk-profile"
+                  ],
+                  "query": [
+                    {
+                      "key": "cif",
+                      "value": "A46103834"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"cif\": \"A01001411\",\n    \"company_name\": \"RHEINMETALL EXPAL MUNITIONS SA\",\n    \"risk_score\": 62,\n    \"risk_level\": \"ALTO\",\n    \"confidence_score\": 49,\n    \"data_quality_score\": 70,\n    \"summary_message\": \"Atención: Constan indicadores de elevado riesgo financiero o corporativo.\",\n    \"legal_state\": \"REGISTRY_CLOSURE_GENERICO\",\n    \"data_sources\": {\n      \"borme_status\": \"CHECKED_WITH_RECORDS\",\n      \"accounts_status\": \"KNOWN_DELAYED\",\n      \"official_status\": \"KNOWN\"\n    },\n    \"dimensions\": {\n      \"legal_distress\": 60,\n      \"filing_compliance\": 0,\n      \"governance_volatility\": 30,\n      \"capital_instability\": 0,\n      \"structural_volatility\": 0,\n      \"stabilizing_credit\": 0\n    },\n    \"canonical_events\": [\n      {\n        \"code\": \"LEGAL_STATE_REGISTRY_CLOSURE_GENERICO\",\n        \"dimension\": \"legal_distress\",\n        \"severity\": \"high\",\n        \"description\": \"Consta publicación registral de cierre sin especificación de causa.\",\n        \"event_date\": \"2026-08-24\",\n        \"classification_confidence\": \"LOW\"\n      }\n    ],\n    \"model_version\": \"2.0.0\",\n    \"calculated_at\": \"2026-08-24T00:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Contratos Públicos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/companies/contracts?cif=A01001411&page=1&limit=20",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "companies",
+                "contracts"
+              ],
+              "query": [
+                {
+                  "key": "cif",
+                  "value": "A01001411"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Contratos públicos adjudicados a la empresa (Plataforma de Contratación del Sector Público). Solo Business. Coste: 1 consulta del plan (3 créditos con bono)."
+          },
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/companies/contracts?cif=A01001411&page=1&limit=20",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "companies",
+                    "contracts"
+                  ],
+                  "query": [
+                    {
+                      "key": "cif",
+                      "value": "A01001411"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "20"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"cif\": \"A01001411\",\n    \"company_name\": \"RHEINMETALL EXPAL MUNITIONS SA\",\n    \"summary\": {\n      \"total_contracts\": 32,\n      \"total_amount\": \"617746086.47\",\n      \"currency\": \"EUR\"\n    },\n    \"contracts\": [\n      {\n        \"tender_id\": \"https://contrataciondelestado.es/sindicacion/licitacionesPerfilContratante/20344437\",\n        \"title\": \"Suministro de 27.000 granadas de mortero de 81 mm...\",\n        \"contracting_authority\": \"Jefatura de Asuntos Económicos del Mando de Apoyo Logístico\",\n        \"award_date\": \"2026-08-25\",\n        \"amount\": \"4395320.00\",\n        \"currency\": \"EUR\",\n        \"tender_url\": \"https://contrataciondelestado.es/wps/poc?uri=deeplink:detalle_licitacion&idEvl=B4EkDEGFvaA%2Bk2oCbDosIw%3D%3D\"\n      }\n    ],\n    \"pagination\": {\n      \"total\": 32,\n      \"page\": 1,\n      \"limit\": 20,\n      \"total_pages\": 2,\n      \"has_more\": true\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Insights IA (completo)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/companies/insights?cif=A15075062",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "companies",
+                "insights"
+              ],
+              "query": [
+                {
+                  "key": "cif",
+                  "value": "A15075062"
+                }
+              ]
+            },
+            "description": "Análisis IA del perfil comercial. En Business, completo; en Pro, vista previa sin coste (profile y conversion_probability). Coste: 1 consulta del plan (3 créditos con bono)."
+          },
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/companies/insights?cif=A15075062",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "companies",
+                    "insights"
+                  ],
+                  "query": [
+                    {
+                      "key": "cif",
+                      "value": "A15075062"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"profile\": \"Servicios de Tecnología\",\n    \"summary\": \"Empresa enfocada en desarrollo software...\",\n    \"needs\": [\n      \"Presencia Web\",\n      \"Gestión Cloud\"\n    ],\n    \"conversion_probability\": \"Alta\",\n    \"estimated_ticket\": \"Medio-Alto\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Preparación de Contacto (Contact Prep)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/companies/contact-prep?cif=A15075062",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "companies",
+                "contact-prep"
+              ],
+              "query": [
+                {
+                  "key": "cif",
+                  "value": "A15075062"
+                }
+              ]
+            },
+            "description": "Enfoque comercial, mensaje sugerido y objeción probable, generados por IA. Solo Business. Coste: 1 consulta del plan (3 créditos con bono)."
+          },
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/companies/contact-prep?cif=A15075062",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "companies",
+                    "contact-prep"
+                  ],
+                  "query": [
+                    {
+                      "key": "cif",
+                      "value": "A15075062"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"sales_approach\": \"Enfoque consultivo y directo...\",\n    \"suggested_message\": \"Hola, he notado el reciente crecimiento de...\",\n    \"likely_objection\": \"Falta de presupuesto temporal\",\n    \"attack_angle\": \"Demostrar el ROI inmediato...\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Calculadora de Match B2B",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/companies/match?cif=A15075062&seller_sector=software",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "companies",
+                "match"
+              ],
+              "query": [
+                {
+                  "key": "cif",
+                  "value": "A15075062"
+                },
+                {
+                  "key": "seller_sector",
+                  "value": "software"
+                }
+              ]
+            },
+            "description": "Puntúa el encaje (0-100) entre la empresa y el sector que tú vendes. Coste: 1 consulta del plan (3 créditos con bono)."
+          },
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/companies/match?cif=A15075062&seller_sector=software",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "companies",
+                    "match"
+                  ],
+                  "query": [
+                    {
+                      "key": "cif",
+                      "value": "A15075062"
+                    },
+                    {
+                      "key": "seller_sector",
+                      "value": "software"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"match_score\": 85,\n    \"fit_level\": \"Alto\",\n    \"pain_points_addressed\": [\n      \"Ineficiencia operativa\",\n      \"Falta de digitalización\"\n    ],\n    \"sales_argument\": \"Nuestro software elimina el trabajo manual...\",\n    \"recommendation\": \"Contactar de inmediato.\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Segmentos: descargar empresas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/companies/filter?cnae=62&province=MADRID&has_phone=true&size_band=500K_1M,GT_1M&limit=100",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "companies",
+                "filter"
+              ],
+              "query": [
+                {
+                  "key": "cnae",
+                  "value": "62"
+                },
+                {
+                  "key": "province",
+                  "value": "MADRID"
+                },
+                {
+                  "key": "has_phone",
+                  "value": "true"
+                },
+                {
+                  "key": "size_band",
+                  "value": "500K_1M,GT_1M"
+                },
+                {
+                  "key": "limit",
+                  "value": "100"
+                }
+              ]
+            },
+            "description": "Filas del segmento (plan Business): 5 consultas por fila devuelta, hasta 1.000 por petición. Para la página siguiente, pasa meta.next_cursor en cursor con los mismos filtros. No devuelve teléfonos, solo has_phone. Coste: 5 consultas por fila devuelta (5 créditos con bono)."
+          },
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/companies/filter?cnae=62&province=MADRID&has_phone=true&size_band=500K_1M,GT_1M&limit=100",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "companies",
+                    "filter"
+                  ],
+                  "query": [
+                    {
+                      "key": "cnae",
+                      "value": "62"
+                    },
+                    {
+                      "key": "province",
+                      "value": "MADRID"
+                    },
+                    {
+                      "key": "has_phone",
+                      "value": "true"
+                    },
+                    {
+                      "key": "size_band",
+                      "value": "500K_1M,GT_1M"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "100"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"total\": 3412\n  },\n  \"meta\": {\n    \"filters\": {\n      \"cnae\": [\n        \"62\"\n      ],\n      \"province\": \"MADRID\",\n      \"status\": \"active\",\n      \"has_phone\": true\n    },\n    \"cost\": 0,\n    \"counted_at\": \"2026-09-29T09:30:00+02:00\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Listar Webhooks",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/webhooks",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "webhooks"
+              ]
+            },
+            "description": "Tus webhooks registrados. No gasta consultas. No está en el Sandbox."
+          },
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/webhooks",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "webhooks"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 12,\n      \"user_id\": 229,\n      \"url\": \"https://tu-dominio.com/webhooks/apiempresas\",\n      \"event\": \"watchlist.*\",\n      \"secret\": \"3f9c1b2a7d...\",\n      \"filters\": \"[]\",\n      \"is_active\": 1,\n      \"failure_count\": 0,\n      \"last_delivery_at\": \"2026-10-13 09:15:02\",\n      \"last_success_at\": \"2026-10-13 09:15:02\",\n      \"last_status_code\": 200,\n      \"disabled_at\": null,\n      \"created_at\": \"2026-09-28 10:00:00\",\n      \"updated_at\": \"2026-10-13 09:15:02\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Crear Webhook",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/webhooks",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "webhooks"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"url\": \"https://tu-dominio.com/webhooks/apiempresas\",\n  \"event\": \"watchlist.*\"\n}"
+            },
+            "description": "Eventos: company.borme_act, company.status_changed, company.risk_level_changed o watchlist.* (los tres). Guarda el secret de la respuesta para comprobar la firma X-ApiEmpresas-Signature. Solo HTTPS a un host público. No gasta consultas. No está en el Sandbox."
+          },
+          "response": [
+            {
+              "name": "Ejemplo 201",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/webhooks",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "webhooks"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"url\": \"https://tu-dominio.com/webhooks/apiempresas\",\n  \"event\": \"watchlist.*\"\n}"
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Webhook creado correctamente\",\n  \"id\": 12,\n  \"event\": \"watchlist.*\",\n  \"secret\": \"3f9c1b2a7d...\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Probar Webhook",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/webhooks/{{WEBHOOK_ID}}/test",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "webhooks",
+                "{{WEBHOOK_ID}}",
+                "test"
+              ]
+            },
+            "description": "Envía un test.ping a la URL del webhook en el momento y devuelve el código HTTP que respondió. No gasta consultas. No está en el Sandbox."
+          },
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/webhooks/{{WEBHOOK_ID}}/test",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "webhooks",
+                    "{{WEBHOOK_ID}}",
+                    "test"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"delivered\": true,\n    \"http_status\": 200,\n    \"duration_ms\": 143,\n    \"error\": null,\n    \"delivery_id\": \"5d41402a-bc4b-2a76-b971-9d911017c592\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Historial de entregas del webhook",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/webhooks/{{WEBHOOK_ID}}/deliveries",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "webhooks",
+                "{{WEBHOOK_ID}}",
+                "deliveries"
+              ]
+            },
+            "description": "Últimos envíos del webhook con estado, intentos, código HTTP de tu servidor y error. Filtros opcionales: status, page, limit (1-100). No gasta consultas. No está en el Sandbox."
+          },
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/webhooks/{{WEBHOOK_ID}}/deliveries",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "webhooks",
+                    "{{WEBHOOK_ID}}",
+                    "deliveries"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"delivery_id\": \"5d41402a-bc4b-2a76-b971-9d911017c592\",\n      \"event\": \"company.borme_act\",\n      \"event_id\": \"borme_act:8812345\",\n      \"status\": \"delivered\",\n      \"attempts\": 1,\n      \"http_status\": 200,\n      \"duration_ms\": 143,\n      \"error\": null,\n      \"created_at\": \"2026-10-13 09:15:00\",\n      \"last_attempt_at\": \"2026-10-13 09:15:02\",\n      \"next_attempt_at\": null,\n      \"completed_at\": \"2026-10-13 09:15:02\"\n    }\n  ],\n  \"meta\": {\n    \"webhook_id\": 12,\n    \"total\": 1,\n    \"page\": 1,\n    \"limit\": 50,\n    \"has_more\": false\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Eliminar Webhook",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{API_KEY}}",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/webhooks/{{WEBHOOK_ID}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "webhooks",
+                "{{WEBHOOK_ID}}"
+              ]
+            },
+            "description": "Borra el webhook. 404 WEBHOOK_NOT_FOUND si no existe. No gasta consultas. No está en el Sandbox."
+          },
+          "response": [
+            {
+              "name": "Ejemplo 200",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/webhooks/{{WEBHOOK_ID}}",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "webhooks",
+                    "{{WEBHOOK_ID}}"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Webhook eliminado\"\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "API_KEY",
+      "value": "tu_api_key_aqui",
+      "type": "string"
+    },
+    {
+      "key": "BASE_URL",
+      "value": "https://apiempresas.es/api/v1",
+      "type": "string",
+      "description": "Producción. Para probar sin gastar consultas: https://apiempresas.es/api/sandbox/v1 (solo CIF A15075062 y B00000000)."
+    },
+    {
+      "key": "WEBHOOK_ID",
+      "value": "123",
+      "type": "string",
+      "description": "id de uno de tus webhooks (lo devuelve Crear Webhook)."
+    }
+  ]
 }

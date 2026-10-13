@@ -533,7 +533,7 @@ $company = $api-&gt;companies-&gt;get(<span class="hc-str">'A46103834'</span>);
                         </li>
                         <li style="color: var(--ae-dark); border-bottom: none; padding: 6px 0;">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                            SDKs for PHP, Node.js and Python, plus an <a href="https://apiempresas.es/public/swagger.json" style="color: inherit;">OpenAPI spec</a>
+                            SDKs for PHP, Node.js and Python, plus an <a href="https://spaincompanyapi.com/api/reference/openapi.json" style="color: inherit;">OpenAPI spec</a>
                         </li>
                     </ul>
                     <a href="<?= site_url('docs') ?>" class="btn-ae btn-ae-primary reveal delay-3" style="background: #10B981; border-color: #10B981; box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);">Read the API docs</a>
@@ -699,7 +699,7 @@ $company = $api-&gt;companies-&gt;get(<span class="hc-str">'A46103834'</span>);
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Lookup by CIF and search by name</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Basic data: company name, normalised status, CNAE, province and incorporation date</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Commercial score (0-100): the number only</li>
-                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Newly incorporated companies (today, 7 or 30 days): 10 per request</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Newly incorporated companies (today, 7 or 30 days): 10 per request, with name and CIF hidden</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Free segment counts: how many companies by sector, area and size</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> No credit card required</li>
                         </ul>
@@ -724,7 +724,7 @@ $company = $api-&gt;companies-&gt;get(<span class="hc-str">'A46103834'</span>);
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> BORME history, signals and corporate graphs</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Watchlist of 100 companies: BORME, status and risk changes, without using requests</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Commercial score with its reasons and the latest BORME signal</li>
-                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Newly incorporated companies (today, 7 or 30 days): up to 100 per request, filterable by CNAE and phone</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Newly incorporated companies (today, 7 or 30 days): up to 100 per request, with name and CIF</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Priority email support</li>
                         </ul>
                         <a href="<?= site_url('register?intent=api&plan=pro&source=en_home_pricing') ?>" class="btn-tier" data-track-event="pricing_cta_click" data-track-metadata='{"cta_text": "Start with Pro", "plan": "pro", "source_block": "pricing_cta", "page_type": "home"}'>Start with Pro</a>

@@ -48,7 +48,7 @@
                     <a href="<?= site_url('docs') ?>" class="minor">API docs</a> ·
                     <a href="<?= site_url('spanish-company-data-api') ?>" class="minor">KYB API</a> ·
                     <a href="<?= site_url('buy-api-credits') ?>" class="minor">Credit packs</a> ·
-                    <a href="https://apiempresas.es/public/swagger.json" class="minor">OpenAPI</a> ·
+                    <a href="https://spaincompanyapi.com/api/reference/openapi.json" class="minor">OpenAPI</a> ·
                     <a href="https://status.apiempresas.es" class="minor" rel="noopener">Status</a> ·
                     <a href="https://apiempresas.es/" class="minor" hreflang="es" lang="es">Versión en español</a>
                 </nav>

@@ -28,7 +28,7 @@ def verify_webhook_signature(raw_body, signature_header, secret: str, tolerance:
             t = v
         elif k == 'v1':
             v1.append(v)
-    if t is None or not t.isdigit() or not v1:
+    if t is None or not t.isascii() or not t.isdigit() or not v1:
         return False
     if now is None:
         now = int(time.time())
@@ -36,7 +36,8 @@ def verify_webhook_signature(raw_body, signature_header, secret: str, tolerance:
         return False
     body = raw_body if isinstance(raw_body, (bytes, bytearray)) else str(raw_body).encode('utf-8')
     expected = hmac.new(secret.encode('utf-8'), t.encode('ascii') + b'.' + bytes(body), hashlib.sha256).hexdigest()
-    return any(hmac.compare_digest(expected, sig) for sig in v1)
+    # En bytes: compare_digest con texto no ASCII lanza TypeError en vez de devolver False
+    return any(hmac.compare_digest(expected.encode('ascii'), sig.encode('utf-8')) for sig in v1)
 
 
 def construct_webhook_event(raw_body, signature_header, secret: str, tolerance: int = DEFAULT_TOLERANCE) -> dict:

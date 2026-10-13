@@ -127,7 +127,7 @@ class RadarApiController extends BaseApiController
             $acceso = strtolower((string) $planSlug);
             $cuando = ($filters['range'] ?? 'hoy') === 'hoy' ? ' hoy' : '';
             if ($acceso === 'free') {
-                $meta['upsell'] = "🔒 Hay {$ocultos} empresas nuevas más{$cuando}. Con Pro ves hasta 100 por consulta, sin datos ocultos y con filtros por CNAE y teléfono.";
+                $meta['upsell'] = "🔒 Hay {$ocultos} empresas nuevas más{$cuando}. Con Pro ves hasta 100 por consulta, con el nombre y el CIF de cada empresa.";
                 $meta['checkout_url'] = self::checkoutUrl('pro', 'api_radar_limit');
             } elseif ($acceso === 'pro') {
                 $meta['upsell'] = "🔒 Hay {$ocultos} empresas nuevas más{$cuando}. Con Business ves hasta 1.000 por consulta.";

@@ -24,7 +24,7 @@ class WebhookService
         $payload = [
             'user_id'    => $userId,
             'url'        => $data['url'],
-            'event'      => $data['event'] ?? 'new_company',
+            'event'      => $data['event'] ?? \App\Services\WebhookEvents::WATCHLIST_ALL, // antes new_company, que nunca se enviaba
             'secret'     => $data['secret'] ?? bin2hex(random_bytes(16)),
             'filters'    => json_encode($data['filters'] ?? []),
             'created_at' => date('Y-m-d H:i:s'),

@@ -37,9 +37,15 @@
                             </a>
                         </li>
                         <li>
-                            <a href="<?= site_url('api/docs') ?>" target="_blank">
+                            <a href="#consumo">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                                <span class="nav-num">2.1</span> Planes y consumo
+                            </a>
+                        </li>
+                        <li>
+                            <a href="<?= site_url('api/referencia') ?>" target="_blank">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
-                                Swagger UI (Interactivo)
+                                Referencia interactiva
                             </a>
                         </li>
                     </ul>
@@ -126,6 +132,12 @@
                                 <span class="nav-num">11.</span> Consumo
                             </a>
                         </li>
+                        <li>
+                            <a href="#endpoint-catalog">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                                <span class="nav-num">11.1</span> Catálogo de valores
+                            </a>
+                        </li>
                     </ul>
                 </div>
 
@@ -203,6 +215,15 @@
                 </div>
 
                 <!-- API PLAYGROUND -->
+                <style>
+                    /* Enlace a la referencia: botón visible (13-10-2026) */
+                    .api-playground > div:first-child { flex-wrap: wrap; gap: 14px; }
+                    .ae-ref-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 10px;
+                        background: #2563eb; color: #fff !important; font-size: 0.9rem; font-weight: 700; text-decoration: none !important;
+                        box-shadow: 0 6px 16px -4px rgba(37, 99, 235, .45); transition: background .15s, transform .15s; white-space: nowrap; }
+                    .ae-ref-btn:hover { background: #1d4ed8; transform: translateY(-1px); }
+                    .ae-ref-btn svg { width: 16px; height: 16px; }
+                </style>
                 <div class="api-playground" style="margin: 40px 0; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); background: #ffffff;">
                     <div style="padding: 20px 24px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; display: flex; align-items: center; justify-content: space-between;">
                         <div>
@@ -212,8 +233,8 @@
                             </h3>
                             <p style="margin: 4px 0 0 0; font-size: 0.9rem; color: #64748b;">Lanza peticiones en tiempo real al entorno Sandbox. No requiere API Key.</p>
                         </div>
-                        <a href="<?= site_url('api/docs') ?>" style="font-size: 0.85rem; color: #3b82f6; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 4px;">
-                            Ir a Swagger UI completo <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                        <a href="<?= site_url('api/referencia') ?>" class="ae-ref-btn">
+                            Abrir la referencia completa <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                         </a>
                     </div>
 
@@ -389,15 +410,11 @@
                             <ul style="margin: 0 0 32px 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px;">
                                 <li style="display: flex; gap: 16px; align-items: flex-start;">
                                     <code style="background: #f1f5f9; color: #0f172a; padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; border: 1px solid #cbd5e1; font-weight: 700; min-width: 90px; text-align: center;">A15075062</code>
-                                    <span style="color: #334155; font-size: 0.95rem; line-height: 1.5; padding-top: 4px;">Simula una consulta exitosa (Devuelve datos reales de Inditex).</span>
+                                    <span style="color: #334155; font-size: 0.95rem; line-height: 1.5; padding-top: 4px;">Simula una consulta exitosa: devuelve una ficha de ejemplo de Inditex (datos fijos).</span>
                                 </li>
                                 <li style="display: flex; gap: 16px; align-items: flex-start;">
                                     <code style="background: #fef2f2; color: #dc2626; padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; border: 1px solid #fecaca; font-weight: 700; min-width: 90px; text-align: center;">B00000000</code>
                                     <span style="color: #334155; font-size: 0.95rem; line-height: 1.5; padding-top: 4px;">Simula un error HTTP 404 estandarizado de "empresa no encontrada".</span>
-                                </li>
-                                <li style="display: flex; gap: 16px; align-items: flex-start;">
-                                    <code style="background: #fffbeb; color: #d97706; padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; border: 1px solid #fde68a; font-weight: 700; min-width: 90px; text-align: center;">C11111111</code>
-                                    <span style="color: #334155; font-size: 0.95rem; line-height: 1.5; padding-top: 4px;">También devuelve 404 de "empresa no encontrada" (igual que B00000000).</span>
                                 </li>
                             </ul>
 
@@ -433,14 +450,63 @@ Accept: application/json</code></pre>
                     <p>También se acepta la cabecera <code>Authorization: Bearer tu_api_key_aqui</code>.</p>
 
                     <h4>Entorno de pruebas (Sandbox)</h4>
-                    <p>Para probar tu integración sin gastar consultas, usa la misma API Key con la base <code>https://apiempresas.es/api/sandbox/v1</code> (mismas rutas que producción: <code>/companies</code>, <code>/companies/search</code>, <code>/companies/score</code>…). El Sandbox no gasta consultas y solo admite estos CIF (en <code>/companies</code> devuelve los datos reales de esa empresa; en los demás endpoints, respuestas de ejemplo con la misma estructura):</p>
+                    <p>Para probar tu integración sin gastar consultas, usa la misma API Key con la base <code>https://apiempresas.es/api/sandbox/v1</code> (mismas rutas que producción: <code>/companies</code>, <code>/companies/search</code>, <code>/companies/score</code>…). El Sandbox no gasta consultas y solo admite estos CIF (todas las respuestas son de ejemplo, con datos fijos y la misma estructura que producción):</p>
                     <ul>
                         <li><code>A15075062</code>: empresa encontrada (Inditex).</li>
                         <li><code>B00000000</code>: empresa no encontrada (404).</li>
                     </ul>
                     <p>Cualquier otro CIF devuelve un error. El Sandbox responde siempre con los datos completos, sin los recortes del plan Free ni los límites de cupo: sirve para comprobar el formato de las respuestas, no lo que verás con tu plan.</p>
                     <p>Cada respuesta correcta del Sandbox añade un bloque <code>sandbox</code>: <code>plan_required</code> (plan mínimo del endpoint), <code>production_url</code> (la misma petición en producción, lista para copiar), <code>cost</code> (siempre 0) y, en <code>/companies</code>, <code>/companies/search</code> y <code>/companies/batch</code>, <code>fields_by_plan</code> con los campos que solo llegan completos con Pro.</p>
-                    <p>También están en el Sandbox <code>/companies/verify</code>, <code>/companies/contracts</code>, <code>/companies/filter</code>, <code>POST /companies/reconcile</code> (<code>"Inditex"</code> da <code>match</code>, un nombre con <code>"Ejemplo"</code> da <code>ambiguous</code> y el resto <code>no_match</code>) y la vigilancia (<code>/watchlist</code> y <code>/watchlist/events</code>, sin guardar nada: responde como si ya vigilaras A15075062).</p>
+                    <p>Están en el Sandbox todas las rutas de <code>/companies</code>, también <code>/companies/verify</code>, <code>/companies/contracts</code>, <code>/companies/filter</code> y <code>POST /companies/reconcile</code> (<code>"Inditex"</code> da <code>match</code>, un nombre con <code>"Ejemplo"</code> da <code>ambiguous</code> y el resto <code>no_match</code>), y la vigilancia (<code>/watchlist</code> y <code>/watchlist/events</code>, sin guardar nada: responde como si ya vigilaras A15075062). No están <code>/webhooks</code> ni <code>/usage</code>.</p>
+                </section>
+
+                <!-- CONSUMO (13-10-2026) -->
+                <section class="docs-section" id="consumo">
+                    <h2>2.1 Planes, consumo y créditos</h2>
+                    <table class="docs-table">
+                        <thead><tr><th>Plan</th><th>Consultas</th><th>Velocidad</th></tr></thead>
+                        <tbody>
+                            <tr><td>Free</td><td>100 en total (no se renuevan)</td><td>2 por segundo</td></tr>
+                            <tr><td>Pro</td><td>3.000 al mes</td><td>20 por segundo</td></tr>
+                            <tr><td>Business</td><td>10.000 al mes</td><td>20 por segundo</td></tr>
+                        </tbody>
+                    </table>
+                    <p>Cada ruta indica el plan que necesita. Con un plan inferior responde 403 con el plan necesario en <code>required_plan</code> y el enlace para cambiar en <code>upsell_opportunities.checkout_url</code>.</p>
+
+                    <h4>Qué gasta una consulta</h4>
+                    <ul>
+                        <li>Solo se cobran las respuestas 200. Los errores no gastan nada.</li>
+                        <li>Mientras te queden consultas en tu plan, cada respuesta 200 gasta 1, sea cual sea la ruta. Excepciones: <code>/companies/verify</code> gasta 2; <code>/companies/batch</code> y <code>POST /companies/reconcile</code>, 1 por cada empresa encontrada; las filas de <code>/companies/filter</code>, 5 por fila.</li>
+                        <li>No gastan nada: el Sandbox, <code>/usage</code>, <code>/catalog</code>, <code>/watchlist</code>, <code>/webhooks</code>, el recuento de <code>/companies/filter</code> (<code>count_only=true</code>) y las vistas previas (<code>/companies/score</code> en Free e <code>/companies/insights</code> en Pro).</li>
+                    </ul>
+
+                    <h4>Créditos del bono</h4>
+                    <p>Cuando se acaban las consultas de tu plan, o si usas un <a href="<?= site_url('crear-bono-api') ?>">bono sin suscripción</a>, cada respuesta 200 se paga con créditos del monedero. No todas las rutas cuestan lo mismo:</p>
+                    <table class="docs-table">
+                        <thead><tr><th>Créditos</th><th>Rutas</th></tr></thead>
+                        <tbody>
+                            <tr><td>1</td><td><code>/companies</code> y <code>/companies/search</code>; <code>/companies/batch</code> y <code>POST /companies/reconcile</code>, 1 por cada empresa encontrada</td></tr>
+                            <tr><td>2</td><td><code>/companies/verify</code></td></tr>
+                            <tr><td>3</td><td><code>/companies/score</code>, <code>/signals</code>, <code>/insights</code>, <code>/contact-prep</code>, <code>/network</code>, <code>/match</code>, <code>/radar</code>, <code>/borme</code>, <code>/contracts</code> y <code>/risk-profile</code></td></tr>
+                            <tr><td>5 por fila</td><td>Filas de <code>/companies/filter</code></td></tr>
+                        </tbody>
+                    </table>
+
+                    <h4>Plan Free con bono</h4>
+                    <ul>
+                        <li>Accedes como Pro: datos completos en <code>/companies</code> y <code>/companies/search</code>, y también <code>/companies/verify</code>, <code>POST /companies/reconcile</code>, <code>/companies/borme</code>, <code>/companies/score</code> completo, <code>/companies/signals</code>, <code>/companies/radar</code> (hasta 100 resultados), <code>/companies/insights</code> (vista previa) y <code>/companies/network</code>.</li>
+                        <li>No incluye <code>/companies/batch</code>, la vigilancia (<code>/watchlist</code>) ni las rutas de Business.</li>
+                        <li>Mientras tengas saldo, cada consulta se paga con créditos, aunque te queden consultas gratuitas. La velocidad sigue siendo de 2 por segundo.</li>
+                    </ul>
+
+                    <h4>Plan Free</h4>
+                    <ul>
+                        <li>Las 100 consultas cuentan todo lo consumido desde el 28/05/2026, también lo gastado con un plan de pago anterior.</li>
+                        <li>La vista previa de <code>/companies/score</code> no gasta consultas, pero necesita que te quede alguna: sin consultas ni saldo responde 429 <code>QUOTA_EXCEEDED</code>.</li>
+                    </ul>
+
+                    <h4>Vistas previas</h4>
+                    <p>Lo que se enseña sin cobrar tiene un tope conjunto de 25 al día por cuenta: la vista previa de <code>/companies/score</code> (Free) y de <code>/companies/insights</code> (Pro), <code>business_preview</code> (Pro) y los recuentos que acompañan a algunos 403 (por ejemplo <code>eventos_ocultos</code> en <code>/companies/signals</code>). Pasado el tope, score e insights responden 429 <code>PREVIEW_LIMIT_EXCEEDED</code>, con <code>Retry-After</code> hasta el día siguiente, y los 403 llegan sin recuentos.</p>
                 </section>
 
                 <!-- BY CIF -->
@@ -729,7 +795,7 @@ Accept: application/json</code></pre>
                             <tr>
                                 <td><code>page</code> / <code>cursor</code></td>
                                 <td>integer / string</td>
-                                <td>Opcional, solo con <code>multiple=true</code>. Página a pedir, o el <code>meta.next_cursor</code> de la respuesta anterior (ver <a href="#paginacion">Paginación</a>).</td>
+                                <td>Opcional, solo con <code>multiple=true</code>. Página a pedir, o el <code>meta.next_cursor</code> de la respuesta anterior (ver <a href="#paginacion">Paginación</a>). Con <code>cursor</code>, envía también el mismo <code>limit</code> que en la primera petición: si no, se usa 20.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -760,12 +826,15 @@ Accept: application/json</code></pre>
                             <tr><th style="width: 25%;">Campo</th><th style="width: 15%;">Tipo</th><th>Descripción</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">data[]</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">array[object]</span></td><td style="color: #475569;">Lista de empresas coincidentes. Contiene campos básicos como <code style="font-size: 0.8rem;">cif</code>, <code style="font-size: 0.8rem;">name</code>, <code style="font-size: 0.8rem;">status</code>, <code style="font-size: 0.8rem;">province</code>.</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">data[]</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">array[object]</span></td><td style="color: #475569;">Lista de empresas coincidentes, con los mismos campos que <code style="font-size: 0.8rem;">/companies</code> (sin administradores): <code style="font-size: 0.8rem;">cif</code>, <code style="font-size: 0.8rem;">name</code>, <code style="font-size: 0.8rem;">status</code>, <code style="font-size: 0.8rem;">status_code</code>, <code style="font-size: 0.8rem;">province</code>…</td></tr>
                             <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">meta.page</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td style="color: #475569;">Página actual de los resultados de búsqueda.</td></tr>
                             <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">meta.limit</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td style="color: #475569;">Número máximo de resultados por página.</td></tr>
                             <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">meta.has_more</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">boolean</span></td><td style="color: #475569;">Indica si existen más resultados para la búsqueda actual.</td></tr>
                         </tbody>
                     </table>
+
+                    <h4>Datos en el plan Free</h4>
+                    <p>En el plan Free (sin saldo de bono), los mismos recortes que en <a href="#endpoint-by-cif">/companies</a>: <code>address</code> oculta, <code>corporate_purpose</code> cortado a 100 caracteres, sin <code>lat</code>, <code>lng</code> ni <code>financials</code>, y con <code>upsell_opportunities</code> (<code>campos_ocultos</code>, <code>mensaje</code> y <code>upgrade_url</code>) en cada empresa. Con Pro, Business o saldo de bono, datos completos.</p>
                 </section>
 
                 <!-- EXPANDED -->
@@ -780,7 +849,7 @@ Accept: application/json</code></pre>
                             <code>/companies/score</code>
                             <a href="<?= site_url('register?intent=api&plan=pro&period=monthly&source=docs_expanded') ?>" class="plan-badge pro" style="text-decoration: none;" title="Ver el plan Pro">Pro</a>
                         </div>
-                        <p>Puntuación comercial de 0 a 100 de una empresa: su actividad reciente en el BORME, lo completa que está su ficha y si tiene teléfono, email o web. No mide solvencia (para eso está <code>/companies/risk-profile</code>). En Free devuelve solo la cifra; <code>priority</code>, <code>reasons</code> y <code>last_signal</code> llegan bloqueados.</p>
+                        <p>Puntuación comercial de 0 a 100 de una empresa: su actividad reciente en el BORME, lo completa que está su ficha y si tiene teléfono, email o web. No mide solvencia (para eso está <code>/companies/risk-profile</code>). En Free devuelve solo la cifra, sin gastar consultas (dentro del tope de 25 vistas previas al día); <code>priority</code>, <code>reasons</code> y <code>last_signal</code> llegan bloqueados.</p>
                         <pre><code class="language-json">{
   "success": true,
   "data": {
@@ -788,7 +857,7 @@ Accept: application/json</code></pre>
     "score": 82,
     "priority": "muy_alta",
     "reasons": ["OPP:95|QUAL:80|CONT:60 · Ampliación de capital"],
-    "last_signal": { "type": "Ampliación de capital", "date": "2026-09-15" },
+    "last_signal": { "type": "Ampliación de capital", "date": "2026-09-15", "url_pdf": "https://www.boe.es/borme/dias/2026/09/15/pdfs/BORME-A-2026-176-15.pdf" },
     "source": "radar"
   }
 }</code></pre>
@@ -800,7 +869,7 @@ Accept: application/json</code></pre>
                                 <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">data.score</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td style="color: #475569;">Puntuación comercial de 0 a 100.</td></tr>
                                 <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">data.priority</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">enum</span></td><td style="color: #475569;">Prioridad de prospección según la puntuación: <code>muy_alta</code> (75 o más), <code>alta</code> (60), <code>media</code> (40), <code>baja</code> (20) o <code>muy_baja</code>.</td></tr>
                                 <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">data.reasons</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">array</span></td><td style="color: #475569;">Lista de motivos de la puntuación.</td></tr>
-                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">data.last_signal</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">object</span></td><td style="color: #475569;">Último acto del BORME que cuenta para la puntuación: <code>type</code> y <code>date</code>.</td></tr>
+                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">data.last_signal</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">object</span></td><td style="color: #475569;">Último acto del BORME que cuenta para la puntuación: <code>type</code>, <code>date</code> y <code>url_pdf</code> (PDF oficial del BORME de ese día; <code>null</code> si no consta).</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -812,17 +881,18 @@ Accept: application/json</code></pre>
                             <code>/companies/signals</code>
                             <a href="<?= site_url('register?intent=api&plan=pro&period=monthly&source=docs_expanded') ?>" class="plan-badge pro" style="text-decoration: none;" title="Ver el plan Pro">Pro</a>
                         </div>
-                        <p>Eventos y actos societarios detectados recientemente.</p>
+                        <p>El último acto del BORME que cuenta para la <a href="#endpoint-expanded">puntuación comercial</a> de la empresa. La lista trae como mucho un elemento. Plan Free: 403 <code>PLAN_RESTRICTION</code> con el número de eventos en <code>upsell_opportunities.eventos_ocultos</code>.</p>
                         <pre><code class="language-json">{
   "success": true,
   "data": {
-    "cif": "B12345678",
+    "cif": "A46103834",
     "signals": [
       {
         "type": "borme_event",
-        "label": "CONSTITUCION",
-        "date": "2023-10-01",
-        "probability": "Alta"
+        "label": "Ampliación de capital",
+        "date": "2026-09-15",
+        "probability": "muy_alta",
+        "url_pdf": "https://www.boe.es/borme/dias/2026/09/15/pdfs/BORME-A-2026-176-15.pdf"
       }
     ]
   }
@@ -832,8 +902,9 @@ Accept: application/json</code></pre>
                                 <tr><th style="width: 25%;">Campo</th><th style="width: 15%;">Tipo</th><th>Descripción</th></tr>
                             </thead>
                             <tbody>
-                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">signals[]</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">array[object]</span></td><td style="color: #475569;">Lista de eventos recientes. Cada objeto tiene un `type` y `label`.</td></tr>
-                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">signals[].probability</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td><td style="color: #475569;">Fiabilidad del evento detectado basado en nuestro modelo.</td></tr>
+                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">signals[]</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">array[object]</span></td><td style="color: #475569;">Como mucho un elemento: <code>type</code> (siempre <code>borme_event</code>), <code>label</code> (tipo de acto) y <code>date</code>.</td></tr>
+                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">signals[].probability</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td><td style="color: #475569;">Prioridad comercial de la empresa, la misma que <code>priority</code> en <code>/companies/score</code>: <code>muy_alta</code>, <code>alta</code>, <code>media</code>, <code>baja</code> o <code>muy_baja</code>. No es la fiabilidad del evento.</td></tr>
+                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">signals[].url_pdf</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string | null</span></td><td style="color: #475569;">PDF oficial del BORME del día de la señal (<code>null</code> si no consta).</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -845,7 +916,7 @@ Accept: application/json</code></pre>
                             <code>/companies/insights</code>
                             <a href="<?= site_url('register?intent=api&plan=business&period=monthly&source=docs_expanded') ?>" class="plan-badge business" style="text-decoration: none;" title="Ver el plan Business">Business</a>
                         </div>
-                        <p>Análisis IA del perfil comercial y necesidades probables de la empresa.</p>
+                        <p>Análisis IA del perfil comercial y necesidades probables de la empresa. Con Pro (o Free con saldo de bono) hay una vista previa que no gasta consultas, dentro del tope de 25 al día: solo <code>profile</code> y <code>conversion_probability</code>; <code>pain_points</code>, <code>buyer_persona</code> y <code>sales_arguments</code> llegan bloqueados, con <code>message</code> y <code>checkout_url</code>. Plan Free: 403 <code>PLAN_RESTRICTION</code>.</p>
                         <pre><code class="language-json">{
   "success": true,
   "data": {
@@ -902,7 +973,7 @@ Accept: application/json</code></pre>
                             <code>/companies/network</code>
                             <a href="<?= site_url('register?intent=api&plan=pro&period=monthly&source=docs_expanded') ?>" class="plan-badge pro" style="text-decoration: none;" title="Ver el plan Pro">Pro</a>
                         </div>
-                        <p>Obtiene la red de vinculación entre empresas a través de sus administradores. Requiere el parámetro <code>cif</code>.</p>
+                        <p>Obtiene la red de vinculación entre empresas a través de sus administradores. Requiere el parámetro <code>cif</code>. Pro, Business y Free con saldo de bono; en Free sin saldo, 403 <code>PLAN_RESTRICTION</code> con los recuentos en <code>data.stats</code>. Si la empresa no tiene administradores conocidos, responde 200 solo con el nodo de la empresa, sin <code>stats</code> y con un <code>message</code> (se cobra como una consulta normal).</p>
                         <pre><code class="language-json">{
   "success": true,
   "data": {
@@ -960,14 +1031,14 @@ Accept: application/json</code></pre>
                     </div>
 
                     <!-- BATCH -->
-                    <div style="margin-top: 32px;">
+                    <div id="batch" style="margin-top: 32px;">
                         <div class="endpoint-header">
                             <span class="http-badge post">POST</span>
                             <code>/companies/batch</code>
                             <a href="<?= site_url('register?intent=api&plan=pro&period=monthly&source=docs_expanded') ?>" class="plan-badge pro" style="text-decoration: none;" title="Ver el plan Pro">Pro</a>
                             <a href="<?= site_url('register?intent=api&plan=business&period=monthly&source=docs_expanded') ?>" class="plan-badge business" style="text-decoration: none;" title="Ver el plan Business">Business</a>
                         </div>
-                        <p>Consulta hasta 100 empresas de una sola vez enviando un array de CIFs. El coste es variable: 1 consulta de tu cuota mensual o monedero por cada empresa <strong>encontrada</strong> (código 200). Si no tienes suficientes créditos para cubrir el lote entero, la respuesta se recortará automáticamente hasta el número de empresas que puedas pagar.</p>
+                        <p>Consulta hasta 100 empresas de una sola vez enviando un array de CIFs. El coste es variable: 1 consulta de tu cuota mensual o monedero por cada empresa <strong>encontrada</strong> (código 200). Si no tienes suficientes créditos para cubrir el lote entero, la respuesta se recortará automáticamente hasta el número de empresas que puedas pagar. Solo con plan Pro o Business: un Free con saldo de bono recibe 403.</p>
                         
                         <h5>Cuerpo de la Petición (JSON)</h5>
                         <pre><code class="language-json">{
@@ -1012,7 +1083,7 @@ Accept: application/json</code></pre>
                 <!-- BORME -->
                 <section class="docs-section" id="endpoint-borme">
                     <h2>6. Historial de Actos del BORME</h2>
-                    <p>Obtén el historial cronológico completo de publicaciones en el Registro Mercantil (BORME) para una empresa.</p>
+                    <p>Obtén el historial cronológico completo de publicaciones en el Registro Mercantil (BORME) para una empresa. Pro, Business y Free con saldo de bono. Plan Free sin saldo: 403 <code>UPGRADE_REQUIRED</code>.</p>
                     
                     <div class="endpoint-header">
                         <span class="http-badge get">GET</span>
@@ -1069,7 +1140,13 @@ Accept: application/json</code></pre>
                 <!-- RADAR -->
                 <section class="docs-section" id="endpoint-radar">
                     <h2>7. Radar de Empresas</h2>
-                    <p>Consulta programáticamente el listado de nuevas empresas detectadas por nuestro radar.</p>
+                    <p>Empresas constituidas en el periodo que pidas (por defecto, hoy), ordenadas de mayor a menor puntuación comercial.</p>
+                    <ul>
+                        <li>Free: 10 resultados con el nombre y el CIF ocultos. Gasta 1 consulta.</li>
+                        <li>Pro y Free con saldo de bono: hasta 100 resultados. Business: hasta 1.000.</li>
+                        <li>Si hay más empresas de las que caben, <code>meta.oportunidades_ocultas</code> dice cuántas faltan.</li>
+                        <li>Todos los filtros funcionan en todos los planes.</li>
+                    </ul>
                     
                     <div class="endpoint-header">
                         <span class="http-badge get">GET</span>
@@ -1092,11 +1169,11 @@ Accept: application/json</code></pre>
                             </tr>
                             <tr>
                                 <td><code>range</code></td>
-                                <td>Ventana temporal. Acepta el valor <code>hoy</code> o un número entero indicando los <strong>días atrás</strong> (ej: <code>7</code>, <code>30</code>).</td>
+                                <td>Ventana temporal. Acepta el valor <code>hoy</code> (por defecto) o un número entero indicando los <strong>días atrás</strong> (ej: <code>7</code>, <code>30</code>).</td>
                             </tr>
                             <tr>
                                 <td><code>priority</code></td>
-                                <td>Nivel de relevancia comercial: <code>alta</code>, <code>media</code>, <code>baja</code>.</td>
+                                <td>Prioridad comercial: <code>muy_alta</code>, <code>alta</code>, <code>media</code>, <code>baja</code> o <code>muy_baja</code>.</td>
                             </tr>
                             <tr>
                                 <td><code>cnae</code></td>
@@ -1128,10 +1205,17 @@ Accept: application/json</code></pre>
   },
   "data": [
     {
-      "cif": "B12345678",
+      "id": 4812345,
       "company_name": "NUEVA EMPRESA SL",
+      "cif": "B12345678",
+      "fecha_constitucion": "2026-10-13",
+      "cnae": "6201",
+      "cnae_label": "Actividades de programación informática",
       "registro_mercantil": "MADRID",
-      "fecha_constitucion": "2023-11-01"
+      "municipality": "MADRID",
+      "score_total": 78,
+      "priority_level": "alta",
+      "main_act_type": "Constitución"
     }
   ]
 }</code></pre>
@@ -1140,7 +1224,9 @@ Accept: application/json</code></pre>
                             <tr><th style="width: 25%;">Campo</th><th style="width: 15%;">Tipo</th><th>Descripción</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">data[].fecha_constitucion</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td><td style="color: #475569;">Fecha en que se ha procesado y publicado en la API.</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">data[].fecha_constitucion</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td><td style="color: #475569;">Fecha de constitución de la empresa.</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">data[].score_total</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer | null</span></td><td style="color: #475569;">Puntuación comercial (0-100). Con <code>priority_level</code> y <code>main_act_type</code>, último acto relevante del BORME.</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">meta.plan</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td><td style="color: #475569;">Tu plan contratado.</td></tr>
                             <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">meta.total_disponibles</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td style="color: #475569;">Número total de empresas en el Radar. Si tu plan está limitado a `limit`, verás el total real aquí.</td></tr>
                         </tbody>
                     </table>
@@ -1178,12 +1264,25 @@ Accept: application/json</code></pre>
                         <code>/watchlist</code>
                     </div>
                     <p>Lista tus empresas vigiladas (<code>page</code>, <code>limit</code> hasta 500).</p>
+                    <pre><code class="language-json">{
+  "success": true,
+  "data": [
+    { "cif": "A46103834", "name": "MERCADONA SA", "added_at": "2026-09-27 10:12:04" },
+    { "cif": "A15075062", "name": "INDUSTRIA DE DISENO TEXTIL SA", "added_at": "2026-09-28 08:30:51" }
+  ],
+  "meta": { "total": 2, "watch_limit": 100, "page": 1, "limit": 100, "has_more": false }
+}</code></pre>
 
                     <div class="endpoint-header">
                         <span class="http-badge delete">DELETE</span>
                         <code>/watchlist/{cif}</code>
                     </div>
                     <p>Quita una empresa. Si no estaba en tu vigilancia, responde 404 <code>NOT_WATCHING</code>.</p>
+                    <pre><code class="language-json">{
+  "success": true,
+  "data": { "cif": "A46103834", "removed": true },
+  "meta": { "total": 1, "watch_limit": 100 }
+}</code></pre>
 
                     <div class="endpoint-header">
                         <span class="http-badge get">GET</span>
@@ -1219,16 +1318,16 @@ Accept: application/json</code></pre>
       "date": "2026-09-25",
       "cif": "B12345678",
       "company_name": "EMPRESA DE EJEMPLO SL",
-      "data": { "from": "BAJO", "to": "MEDIO", "model_change": false }
+      "data": { "from": "BAJO", "to": "MEDIO", "model_change": null }
     }
   ],
   "meta": { "since": "2026-09-20", "types": ["borme_act", "status_change", "risk_level_change"], "total": 2, "page": 1, "limit": 100, "has_more": false }
 }</code></pre>
                     <ul>
                         <li>Los eventos salen de más antiguo a más reciente. El <code>id</code> es estable: úsalo para no procesar dos veces el mismo evento.</li>
-                        <li><code>model_change: true</code> indica que el nivel cambió por un recálculo de nuestro modelo, no por algo nuevo de la empresa; <code>null</code> si no se puede saber.</li>
+                        <li><code>model_change: true</code> indica que el nivel cambió por un recálculo de nuestro modelo, no por algo nuevo de la empresa, y <code>false</code> que no. <code>null</code> si no consta la versión del modelo con la que se calculó (perfiles antiguos).</li>
                         <li>Uso recomendado: una consulta al día con <code>since</code> = la fecha de tu última consulta.</li>
-                        <li>Plan Free: 403 <code>PLAN_RESTRICTION</code>. En Business puedes recibir estos mismos eventos en tu servidor con <a href="#endpoint-webhooks">webhooks</a>.</li>
+                        <li>Plan Free (también con saldo de bono): 403 <code>PLAN_RESTRICTION</code>. En Business puedes recibir estos mismos eventos en tu servidor con <a href="#endpoint-webhooks">webhooks</a>.</li>
                     </ul>
                 </section>
 
@@ -1315,27 +1414,39 @@ Accept: application/json</code></pre>
                     <h2>8. Webhooks (Solo Business)</h2>
                     <p>Recibe en tu servidor, sin tener que consultar la API, los cambios de las empresas de tu <a href="#endpoint-watchlist">vigilancia</a>: actos nuevos en el BORME, cambios de estado y cambios de nivel de riesgo. Los eventos se generan cada 15 minutos.</p>
 
-                    <div class="endpoint-header" style="margin-bottom: 5px;">
+                    <div class="endpoint-header">
                         <span class="http-badge get">GET</span>
                         <code>/webhooks</code>
                         <a href="<?= site_url('register?intent=api&plan=business&period=monthly&source=docs_webhooks') ?>" class="plan-badge business" style="text-decoration: none;" title="Ver el plan Business">Business</a>
                     </div>
-                    <div class="endpoint-header" style="margin-bottom: 5px;">
+                    <p>Lista tus webhooks con su estado: <code>is_active</code>, <code>failure_count</code> (intentos fallidos seguidos), <code>last_status_code</code> y fechas del último envío. Incluye el <code>secret</code> de cada uno.</p>
+                    <pre><code class="language-json">{
+  "success": true,
+  "data": [
+    {
+      "id": 12,
+      "user_id": 229,
+      "url": "https://tu-dominio.com/webhooks/apiempresas",
+      "event": "watchlist.*",
+      "secret": "3f9c1b2a7d...",
+      "filters": "[]",
+      "is_active": 1,
+      "failure_count": 0,
+      "last_delivery_at": "2026-10-13 09:15:02",
+      "last_success_at": "2026-10-13 09:15:02",
+      "last_status_code": 200,
+      "disabled_at": null,
+      "created_at": "2026-09-28 10:00:00",
+      "updated_at": "2026-10-13 09:15:02"
+    }
+  ]
+}</code></pre>
+
+                    <div class="endpoint-header">
                         <span class="http-badge post">POST</span>
                         <code>/webhooks</code>
                         <a href="<?= site_url('register?intent=api&plan=business&period=monthly&source=docs_webhooks') ?>" class="plan-badge business" style="text-decoration: none;" title="Ver el plan Business">Business</a>
                     </div>
-                    <div class="endpoint-header" style="margin-bottom: 5px;">
-                        <span class="http-badge post">POST</span>
-                        <code>/webhooks/{id}/test</code>
-                        <a href="<?= site_url('register?intent=api&plan=business&period=monthly&source=docs_webhooks') ?>" class="plan-badge business" style="text-decoration: none;" title="Ver el plan Business">Business</a>
-                    </div>
-                    <div class="endpoint-header">
-                        <span class="http-badge delete">DELETE</span>
-                        <code>/webhooks/{id}</code>
-                        <a href="<?= site_url('register?intent=api&plan=business&period=monthly&source=docs_webhooks') ?>" class="plan-badge business" style="text-decoration: none;" title="Ver el plan Business">Business</a>
-                    </div>
-
                     <h4>Crear un webhook</h4>
                     <pre><code class="language-json">// Petición
 { "url": "https://tu-dominio.com/webhooks/apiempresas", "event": "watchlist.*" }
@@ -1387,11 +1498,63 @@ $ok = hash_equals(hash_hmac('sha256', $t . '.' . $body, $secret), $v1) && abs(ti
 
                     <h4>Reintentos</h4>
                     <ul>
-                        <li>Responde con un código 2xx en menos de 10 segundos. Si no, reintentamos a los 1, 5 y 30 minutos, a las 2 y a las 6 horas; después se descarta.</li>
+                        <li>Responde con un código 2xx en menos de 10 segundos. Si no, reintentamos con espera creciente: 1, 5 y 30 minutos, 2 y 6 horas. Los envíos salen cada 15 minutos, así que cada reintento llega en la primera pasada después de esa espera. Tras 6 intentos, el envío se descarta.</li>
                         <li>Usa <code>X-ApiEmpresas-Delivery</code> para no procesar dos veces el mismo envío.</li>
-                        <li>Un webhook con 50 fallos seguidos se desactiva. Vuelve a crearlo cuando tu servidor responda.</li>
+                        <li>Un webhook se desactiva tras 50 intentos fallidos seguidos, sumando todos sus envíos; un envío correcto pone la cuenta a cero. Vuelve a crearlo cuando tu servidor responda.</li>
                         <li>La URL debe ser HTTPS (puerto 443) y pública. No seguimos redirecciones.</li>
                     </ul>
+
+                    <div class="endpoint-header">
+                        <span class="http-badge post">POST</span>
+                        <code>/webhooks/{id}/test</code>
+                        <a href="<?= site_url('register?intent=api&plan=business&period=monthly&source=docs_webhooks') ?>" class="plan-badge business" style="text-decoration: none;" title="Ver el plan Business">Business</a>
+                    </div>
+                    <p>Envía al webhook un evento <code>test.ping</code> para comprobar que tu servidor lo recibe y valida la firma. Si tu servidor no responde con un 2xx, la respuesta es 502 <code>WEBHOOK_DELIVERY_FAILED</code> con el mismo <code>data</code> (código HTTP que devolvió tu servidor y el error): es un fallo de tu servidor, no de la API.</p>
+                    <pre><code class="language-json">{
+  "success": true,
+  "data": {
+    "delivered": true,
+    "http_status": 200,
+    "duration_ms": 143,
+    "error": null,
+    "delivery_id": "5d41402a-bc4b-2a76-b971-9d911017c592"
+  }
+}</code></pre>
+
+                    <div class="endpoint-header">
+                        <span class="http-badge get">GET</span>
+                        <code>/webhooks/{id}/deliveries</code>
+                        <a href="<?= site_url('register?intent=api&plan=business&period=monthly&source=docs_webhooks') ?>" class="plan-badge business" style="text-decoration: none;" title="Ver el plan Business">Business</a>
+                    </div>
+                    <p>Últimos envíos del webhook, del más reciente al más antiguo: estado (<code>pending</code>, <code>processing</code>, <code>retry</code>, <code>delivered</code> o <code>dead</code>), intentos, código HTTP que devolvió tu servidor, duración y error. <code>next_attempt_at</code> solo aparece en los que están pendientes o en reintento. Parámetros opcionales: <code>status</code>, <code>page</code> y <code>limit</code> (1-100, por defecto 50). No gasta consultas. 404 <code>WEBHOOK_NOT_FOUND</code> si el webhook no es tuyo.</p>
+                    <pre><code class="language-json">{
+  "success": true,
+  "data": [
+    {
+      "delivery_id": "5d41402a-bc4b-2a76-b971-9d911017c592",
+      "event": "company.borme_act",
+      "event_id": "borme_act:8812345",
+      "status": "delivered",
+      "attempts": 1,
+      "http_status": 200,
+      "duration_ms": 143,
+      "error": null,
+      "created_at": "2026-10-13 09:15:00",
+      "last_attempt_at": "2026-10-13 09:15:02",
+      "next_attempt_at": null,
+      "completed_at": "2026-10-13 09:15:02"
+    }
+  ],
+  "meta": { "webhook_id": 12, "total": 1, "page": 1, "limit": 50, "has_more": false }
+}</code></pre>
+
+                    <div class="endpoint-header">
+                        <span class="http-badge delete">DELETE</span>
+                        <code>/webhooks/{id}</code>
+                        <a href="<?= site_url('register?intent=api&plan=business&period=monthly&source=docs_webhooks') ?>" class="plan-badge business" style="text-decoration: none;" title="Ver el plan Business">Business</a>
+                    </div>
+                    <p>Borra un webhook. Deja de recibir envíos desde ese momento. Si no existe, 404 <code>WEBHOOK_NOT_FOUND</code>.</p>
+                    <pre><code class="language-json">{ "success": true, "message": "Webhook eliminado" }</code></pre>
                 </section>
 
                 <!-- CONTRATOS PUBLICOS -->
@@ -1555,7 +1718,7 @@ $ok = hash_equals(hash_hmac('sha256', $t . '.' . $body, $secret), $v1) && abs(ti
                 <!-- USAGE -->
                 <section class="docs-section" id="endpoint-usage">
                     <h2>11. Estadísticas de Consumo</h2>
-                    <p>Obtén el recuento de peticiones del mes actual y el historial de empresas consultadas asociado a tu API Key.</p>
+                    <p>Obtén el recuento de peticiones del mes actual y el historial de empresas consultadas asociado a tu API Key. No gasta consultas.</p>
                     
                     <div class="endpoint-header">
                         <span class="http-badge get">GET</span>
@@ -1578,8 +1741,12 @@ $ok = hash_equals(hash_hmac('sha256', $t . '.' . $body, $secret), $v1) && abs(ti
     },
     "history": [
       {
-        "cif": "B12345678",
-        "name": "EMPRESA DE EJEMPLO SL"
+        "cif": "A46103834",
+        "name": "MERCADONA SA",
+        "province": "VALENCIA",
+        "query_count": 3,
+        "last_query": "2026-10-12 17:40:02",
+        "found": true
       }
     ]
   }
@@ -1589,16 +1756,53 @@ $ok = hash_equals(hash_hmac('sha256', $t . '.' . $body, $secret), $v1) && abs(ti
                             <tr><th style="width: 25%;">Campo</th><th style="width: 15%;">Tipo</th><th>Descripción</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">stats.monthly_queries</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td style="color: #475569;">Consultas cobradas en el periodo del cupo: el mes en curso en Pro y Business; desde el 28/05/2026 en Free (o desde el alta, si es posterior).</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">stats.monthly_queries</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td style="color: #475569;">Consultas cobradas en el periodo del cupo: el mes en curso en Pro y Business; desde el 28/05/2026 en Free (o desde el alta, si es posterior), incluido lo gastado con un plan de pago anterior.</td></tr>
                             <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">stats.monthly_quota</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td style="color: #475569;">Consultas incluidas en tu plan (al mes, o 100 en total en Free).</td></tr>
                             <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">stats.remaining_calls</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td style="color: #475569;">Consultas del plan que te quedan antes de usar saldo del monedero.</td></tr>
                             <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">stats.quota_period</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td><td style="color: #475569;"><code>monthly</code> (se renueva cada mes) o <code>lifetime</code> (Free: no se renueva).</td></tr>
                             <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">stats.quota_resets_at</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string|null</span></td><td style="color: #475569;">Cuándo se renueva el cupo (ISO 8601). <code>null</code> en Free.</td></tr>
                             <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">stats.checkout_url</code> / <code style="background: transparent; color: #2563eb; font-weight: 600;">stats.recharge_url</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string|null</span></td><td style="color: #475569;">Enlace para pasar al plan siguiente (<code>null</code> si no hay) y para comprar un bono.</td></tr>
-                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">history[]</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">array[object]</span></td><td style="color: #475569;">Histórico de consultas individuales con su fecha y CIF.</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">stats.total_queries</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td style="color: #475569;">Consultas del plan cobradas desde el alta (no incluye los créditos del bono).</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">stats.wallet_balance</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td style="color: #475569;">Créditos que te quedan en el bono.</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">history[]</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">array[object]</span></td><td style="color: #475569;">Las 20 últimas empresas, por CIF, que has consultado en producción con respuesta 200: la ficha de cada una (recortada en Free), <code>query_count</code> (veces), <code>last_query</code> (última vez) y <code>found</code>.</td></tr>
                         </tbody>
                     </table>
                 </section>
+
+                <!-- CATALOGO (13-10-2026) -->
+                <section class="docs-section" id="endpoint-catalog">
+                    <h2>11.1 Catálogo de valores</h2>
+                    <p>Valores válidos de los filtros: <code>province</code> (radar y segmentos), <code>size_band</code> y <code>status</code> (segmentos), <code>range</code>, <code>priority</code> y <code>main_act_type</code> (radar), la prioridad de la puntuación, los eventos de webhook y los tipos de evento de la vigilancia. Todos los planes. <strong>No gasta consultas.</strong> También en el Sandbox.</p>
+
+                    <div class="endpoint-header">
+                        <span class="http-badge get">GET</span>
+                        <code>/catalog</code>
+                    </div>
+                    <p>No hay lista de CNAE: usa prefijos de la CNAE-2009 del INE (1 a 4 dígitos) y comprueba cuántas empresas hay con <code>/companies/filter?cnae=62&amp;count_only=true</code>, que es gratis.</p>
+                    <pre><code class="language-json">{
+  "success": true,
+  "data": {
+    "province": ["A CORUÑA", "ÁLAVA", "ALBACETE", "…", "ZARAGOZA"],
+    "cnae": {
+      "format": "Prefijos de la CNAE-2009 (INE) de 1 a 4 dígitos, separados por comas: 62 o 4711,4719.",
+      "count": "/companies/filter?cnae=62&count_only=true (gratis) dice cuántas empresas hay."
+    },
+    "size_band": [{ "value": "NO_REVENUE", "label": "Sin ventas" }, { "value": "LT_500K", "label": "Menos de 0,5 M€" }, { "value": "500K_1M", "label": "Entre 0,5 y 1 M€" }, { "value": "GT_1M", "label": "Más de 1 M€" }],
+    "status": ["active", "active_or_unknown", "any"],
+    "radar": {
+      "range": ["hoy", "7", "30"],
+      "range_note": "'hoy' o cualquier número de días atrás",
+      "priority": ["muy_alta", "alta", "media", "baja", "muy_baja"],
+      "main_act_type": ["Constitución", "Nombramientos", "Ampliación de Capital", "…"]
+    },
+    "score_priority": ["muy_alta", "alta", "media", "baja", "muy_baja"],
+    "webhook_events": ["test.ping", "company.borme_act", "company.status_changed", "company.risk_level_changed", "watchlist.*"],
+    "watchlist_event_types": ["borme_act", "status_change", "risk_level_change"]
+  },
+  "meta": { "updated_at": "2026-10-13", "cost": 0 }
+}</code></pre>
+                </section>
+
 
                 <!-- ERRORES -->
                 <section class="docs-section" id="errores">
@@ -1615,7 +1819,7 @@ $ok = hash_equals(hash_hmac('sha256', $t . '.' . $body, $secret), $v1) && abs(ti
   "instance": "req_8f73b1a2c9"
 }</code></pre>
                     <p>El campo <code>instance</code> es único para cada petición (coincide con la cabecera <code>X-Request-Id</code>) y resulta muy útil si necesitas reportar un problema a soporte.</p>
-                    <p>Para programar contra los errores usa el campo <code>code</code>: es un identificador estable que viene en todas las respuestas de error. Estos son los errores de autenticación y consumo:</p>
+                    <p>Para programar contra los errores usa el campo <code>code</code>: es un identificador estable. Estos son los que puede devolver la API:</p>
                     <table class="docs-table" style="margin-bottom: 24px;">
                         <thead>
                             <tr>
@@ -1632,6 +1836,21 @@ $ok = hash_equals(hash_hmac('sha256', $t . '.' . $body, $secret), $v1) && abs(ti
                             <tr><td>429</td><td><code>TOO_MANY_REQUESTS</code></td><td>Demasiadas peticiones por segundo. Espera lo que indique <code>Retry-After</code> y reintenta.</td></tr>
                             <tr><td>429</td><td><code>QUOTA_EXCEEDED</code></td><td>Has agotado las consultas de tu plan y no tienes saldo. Reintentar no sirve: recarga saldo o cambia de plan. En planes de pago, <code>quota_resets_at</code> y la cabecera <code>X-Quota-Reset</code> indican cuándo se renueva el cupo; en Free las 100 consultas no se renuevan (<code>quota_resets_at</code> es <code>null</code>).</td></tr>
                             <tr><td>429</td><td><code>IP_LIMIT_EXCEEDED</code></td><td>Límite de seguridad por IP del plan Free.</td></tr>
+                            <tr><td>429</td><td><code>PREVIEW_LIMIT_EXCEEDED</code></td><td>Has pasado el tope de 25 vistas previas gratuitas al día (ver <a href="#consumo">Planes y consumo</a>). <code>Retry-After</code> indica cuándo vuelve a haber.</td></tr>
+                            <tr><td>400</td><td><code>VALIDATION_ERROR</code></td><td>Falta un parámetro obligatorio o no es válido.</td></tr>
+                            <tr><td>400</td><td><code>INVALID_CIF_FORMAT</code></td><td>El CIF no tiene un formato válido.</td></tr>
+                            <tr><td>400</td><td><code>FAKE_CIF_NOT_ALLOWED</code></td><td>CIF de prueba (por ejemplo <code>B12345678</code> o <code>B00000000</code>) en producción. Para probar, usa el Sandbox.</td></tr>
+                            <tr><td>400</td><td><code>AUTONOMO_NOT_SUPPORTED</code></td><td>DNI o NIE: solo damos datos de sociedades.</td></tr>
+                            <tr><td>403</td><td><code>PLAN_RESTRICTION</code></td><td>Tu plan no incluye esta ruta. <code>required_plan</code> dice cuál hace falta y <code>upsell_opportunities.checkout_url</code> lleva a cambiar.</td></tr>
+                            <tr><td>403</td><td><code>UPGRADE_REQUIRED</code></td><td>Lo mismo en <code>/companies/borme</code>.</td></tr>
+                            <tr><td>403</td><td><code>TEST_MODE_RESTRICTION</code></td><td>En el Sandbox, un CIF que no es de prueba.</td></tr>
+                            <tr><td>404</td><td><code>COMPANY_NOT_FOUND</code></td><td>No hay ninguna empresa con ese CIF o nombre.</td></tr>
+                            <tr><td>404</td><td><code>RISK_PROFILE_NOT_AVAILABLE</code></td><td>La empresa no tiene perfil de riesgo calculado.</td></tr>
+                            <tr><td>404</td><td><code>NOT_WATCHING</code></td><td>Quitas de la vigilancia una empresa que no estaba.</td></tr>
+                            <tr><td>404</td><td><code>WEBHOOK_NOT_FOUND</code></td><td>No tienes ningún webhook con ese id.</td></tr>
+                            <tr><td>502</td><td><code>WEBHOOK_DELIVERY_FAILED</code></td><td>En <code>/webhooks/{id}/test</code>: tu servidor no aceptó el envío de prueba.</td></tr>
+                            <tr><td>400</td><td><code>INVALID_EVENT</code></td><td>Al crear un webhook, un evento que no existe.</td></tr>
+                            <tr><td>500 / 503</td><td><code>SERVER_ERROR</code> / <code>SERVICE_UNAVAILABLE</code></td><td>Error nuestro. Reintenta más tarde y, si sigue, escríbenos con el <code>instance</code>.</td></tr>
                         </tbody>
                     </table>
                 </section>
@@ -1684,7 +1903,7 @@ $ok = hash_equals(hash_hmac('sha256', $t . '.' . $body, $secret), $v1) && abs(ti
                         </tbody>
                     </table>
 
-                    <p><strong>Aviso de cupo en la respuesta.</strong> En <code>/api/v1/companies</code>, cuando te queda el 20 % del cupo o menos, la respuesta añade un objeto <code>notice</code> junto a <code>data</code>: <code>type</code> (<code>quota_warning</code>), <code>message</code>, <code>quota_remaining</code>, <code>quota_limit</code>, <code>quota_resets_at</code> (null en Free), <code>checkout_url</code> y <code>recharge_url</code>. Por debajo de ese umbral no aparece.</p>
+                    <p><strong>Aviso de cupo en la respuesta.</strong> En cualquier respuesta correcta que gasta consultas de tu plan, cuando te queda el 20 % del cupo o menos, la respuesta añade un objeto <code>notice</code> junto a <code>data</code>: <code>type</code> (<code>quota_warning</code>), <code>message</code>, <code>quota_remaining</code>, <code>quota_limit</code>, <code>quota_resets_at</code> (null en Free), <code>checkout_url</code> y <code>recharge_url</code>. Por debajo de ese umbral no aparece.</p>
 
                     <p>Si superas el límite por segundo, recibirás un error <code>429 Too Many Requests</code> junto con la cabecera <code>Retry-After: 1</code> indicando que esperes 1 segundo (<code>code</code>: <code>TOO_MANY_REQUESTS</code>). El cupo agotado también responde 429, pero con <code>code</code> <code>QUOTA_EXCEEDED</code> y sin <code>Retry-After</code>: no reintentes en ese caso. Si necesitas procesar muchas empresas de golpe, te recomendamos utilizar el endpoint <a href="#batch">Batch</a>.</p>
                 </section>
@@ -1700,6 +1919,7 @@ $ok = hash_equals(hash_hmac('sha256', $t . '.' . $body, $secret), $v1) && abs(ti
   "has_more": true,
   "next_cursor": "eyJwIjoyfQ=="
 }</code></pre>
+                    <p><code>/companies/filter</code> también pagina con <code>meta.next_cursor</code>. <code>/watchlist</code> y <code>/watchlist/events</code> paginan con <code>page</code> y <code>limit</code>: pide la página siguiente mientras <code>meta.has_more</code> sea <code>true</code>.</p>
                 </section>
 
                 <!-- SDKS -->

@@ -175,7 +175,7 @@ export class Companies {
   }
 
   /**
-   * (Business) Obtiene Insights IA de una empresa.
+   * (Business; en Pro, vista previa con profile y conversion_probability) Insights IA de una empresa.
    */
   public async insights(cif: string): Promise<any> {
     const params = new URLSearchParams({ cif });
@@ -184,7 +184,7 @@ export class Companies {
   }
 
   /**
-   * (Pro) Obtiene datos de contacto y preparación de la empresa.
+   * (Business) Preparación del contacto comercial generada por IA.
    */
   public async contactPrep(cif: string): Promise<any> {
     const params = new URLSearchParams({ cif });
@@ -193,7 +193,8 @@ export class Companies {
   }
 
   /**
-   * (Business) Obtiene la información del Radar de empresas.
+   * (Todos los planes: Free 10 resultados con nombre y CIF ocultos, Pro 100, Business 1.000)
+   * Empresas recién constituidas. Devuelve la lista (data); el resumen (meta) no se incluye.
    */
   public async radar(cifOrOptions: string | RadarOptions = {}): Promise<any> {
     // Compatibilidad: antes se pasaba un CIF, que el Radar no usa. Ahora se pasan
@@ -222,7 +223,7 @@ export class Companies {
   }
 
   /**
-   * (Business) Obtiene la red o entramado societario (Network) de una empresa.
+   * (Pro y Business) Red societaria de una empresa a través de sus administradores.
    */
   public async network(cif: string): Promise<any> {
     const params = new URLSearchParams({ cif });

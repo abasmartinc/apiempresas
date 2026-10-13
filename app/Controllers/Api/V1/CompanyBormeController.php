@@ -29,7 +29,7 @@ class CompanyBormeController extends BaseApiController
     #[OA\Get(
         path: "/api/v1/companies/borme",
         summary: "Historial de Actos del BORME",
-        description: "Devuelve el historial cronológico completo de publicaciones en el Registro Mercantil (BORME) para una empresa. **Coste:** 1 llamada. Exclusivo para planes Pro y Business.",
+        description: "Devuelve el historial cronológico completo de publicaciones en el Registro Mercantil (BORME) para una empresa. **Coste:** 1 consulta de tu plan o, sin consultas, 3 créditos del bono. Las respuestas con error no gastan nada. Pro, Business y Free con saldo de bono.",
         tags: ["2. Plan Pro"]
     )]
     #[OA\Parameter(

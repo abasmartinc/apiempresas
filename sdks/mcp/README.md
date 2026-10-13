@@ -10,12 +10,12 @@ Pregunta en lenguaje natural ("¿Mercadona está activa y quiénes son sus admin
 |---|---|---|
 | `get_company` | Empresa por CIF: razón social, estado, constitución, provincia, CNAE; domicilio y administradores según plan | Free (datos recortados), Pro |
 | `search_companies` | Buscar empresas por nombre | Free |
-| `verify_company` | Verificación KYB: existe, activa, nombre y administrador coinciden (2 consultas) | Pro |
-| `find_cif_by_name` | De nombre a CIF, hasta 100 a la vez (solo cobra las coincidencias) | Pro |
+| `verify_company` | Verificación KYB: existe, activa, nombre y administrador coinciden y, si se pide, NIF-IVA en VIES (2 consultas) | Pro |
+| `find_cif_by_name` | De nombre a CIF, hasta 100 a la vez, con provincia opcional para desempatar (solo cobra las coincidencias) | Pro |
 | `get_borme_history` | Actos publicados en el BORME | Pro |
 | `get_risk_profile` | Perfil de riesgo a partir del BORME | Business |
 | `get_public_contracts` | Contratos públicos adjudicados | Business |
-| `get_usage` | Plan y consultas disponibles (gratis) | Todos |
+| `get_usage` | Plan, consultas disponibles y saldo de créditos (gratis; no funciona en el Sandbox) | Todos |
 
 Todas son de solo lectura. Cada llamada gasta consultas de tu plan, igual que la API.
 

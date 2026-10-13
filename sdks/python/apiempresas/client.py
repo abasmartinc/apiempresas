@@ -4,7 +4,7 @@ from .resources.companies import Companies
 from .resources.watchlist import Watchlist
 from .resources.webhooks import Webhooks
 
-SDK_VERSION = '1.2.0'
+SDK_VERSION = '1.3.0'
 
 
 def _extract_error_message(data):
@@ -49,6 +49,10 @@ class ApiEmpresas:
         # (Business) Webhooks
         self.webhooks = Webhooks(self)
 
+    def usage(self) -> dict:
+        """Consumo de tu API Key: {'stats': {...}, 'history': [...]}. No gasta consultas. No está en el Sandbox."""
+        return self.request('GET', '/usage')
+
     def request(self, method: str, endpoint: str, params: dict = None, json_data: dict = None) -> dict:
         """
         Método interno genérico para lanzar las peticiones HTTP.
@@ -82,7 +86,7 @@ class ApiEmpresas:
             else:
                 message = response.text
                 
-            raise ApiError(message, status=status, error_code=error_code, raw_data=decoded_data)
+            raise ApiError(message, status=status, error_code=error_code, raw_data=decoded_data, headers=getattr(response, 'headers', None))
             
         if decoded_data and 'data' in decoded_data:
             # Para el endpoint /batch, se suele devolver meta y data

@@ -229,6 +229,10 @@ $routes->group('', ['filter' => ['apikey', 'subscription:api']], static function
     $routes->post('api/v1/webhooks', 'Api\V1\WebhookController::create');
     $routes->delete('api/v1/webhooks/(:num)', 'Api\V1\WebhookController::delete/$1');
     $routes->post('api/v1/webhooks/(:num)/test', 'Api\V1\WebhookController::test/$1');
+    $routes->get('api/v1/webhooks/(:num)/deliveries', 'Api\V1\WebhookController::deliveries/$1'); // Historial de entregas (13-10-2026)
+
+    // Catálogo de valores de los filtros (13-10-2026, gratis)
+    $routes->get('api/v1/catalog', 'Api\V1\CatalogController::index');
 
     // Vigilancia de empresas (27-09-2026, piloto). /events antes que la ruta con CIF.
     $routes->get('api/v1/watchlist/events', 'Api\V1\WatchlistController::events');
@@ -266,6 +270,7 @@ $routes->group('api/sandbox/v1', ['filter' => ['apikey']], static function ($rou
     $routes->post('watchlist', 'Api\V1\Sandbox\SandboxController::watchlistAdd');
     $routes->get('watchlist/events', 'Api\V1\Sandbox\SandboxController::watchlistEvents');
     $routes->delete('watchlist/(:segment)', 'Api\V1\Sandbox\SandboxController::watchlistRemove/$1');
+    $routes->get('catalog', 'Api\V1\CatalogController::index'); // mismo catálogo que producción (13-10-2026)
 });
 // ----------- API SANDBOX ----------- //
 
@@ -280,8 +285,16 @@ $routes->post('api/ai/copilot/feedback', 'AiCopilotController::submitFeedback');
 
 // Swagger
 $routes->cli('swagger:generate', 'App\Commands\GenerateSwaggerCommand::run');
-$routes->get('api/docs', 'Api\Docs::index');
+// Swagger UI sustituido por la referencia nueva (13-10-2026). La vista y el controlador
+// siguen ahí: para volver, cambiar esta línea por la ruta a Api\Docs::index.
+$routes->addRedirect('api/docs', 'api/referencia', 301);
 $routes->get('api/docs/openapi.json', 'Api\Docs::json');
+// Referencia de la API con Scalar (13-10-2026). /documentation es la guía; esta, la referencia.
+$routes->get('api/referencia', 'ApiReference::index');
+$routes->get('api/referencia/openapi.json', 'ApiReference::json');
+// Versión en inglés (13-10-2026): la enlazan /docs y spaincompanyapi.com
+$routes->get('api/reference', 'ApiReference::english');
+$routes->get('api/reference/openapi.json', 'ApiReference::jsonEnglish');
 $routes->get('documentation', 'Documentation::index');
 $routes->get('documentation/en', $alIngles('docs'));
 $routes->get('api-docs', $alIngles('docs'));

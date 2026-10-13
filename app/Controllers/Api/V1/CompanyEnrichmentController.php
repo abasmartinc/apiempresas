@@ -51,18 +51,18 @@ class CompanyEnrichmentController extends BaseApiController
     {
         $cif = strtoupper(trim((string) $this->request->getGet('cif')));
         if (!$cif) {
-            return $this->fail('CIF es requerido', 400);
+            return $this->fallo(400, 'VALIDATION_ERROR', 'CIF es requerido');
         }
 
         $planSlug = \App\Filters\ApiKeyFilter::$apiMeta['access_slug'] ?? (\App\Filters\ApiKeyFilter::$apiMeta['plan_slug'] ?? 'free');
 
         if (!$this->planAccess->canAccess($planSlug, 'company_score')) {
-            return $this->failForbidden('Tu plan no tiene acceso al scoring comercial.');
+            return $this->fallo(403, 'PLAN_RESTRICTION', 'Tu plan no tiene acceso al scoring comercial.');
         }
 
         $data = $this->scoringService->getScoreData($cif);
         if (!$data) {
-            return $this->failNotFound('Empresa no encontrada o sin score calculado.');
+            return $this->fallo(404, 'COMPANY_NOT_FOUND', 'Empresa no encontrada o sin score calculado.');
         }
 
         // Si es Free, devolvemos un score "base" o enmascaramos detalles
@@ -79,6 +79,10 @@ class CompanyEnrichmentController extends BaseApiController
                 'data' => [
                     'cif' => 'B********',
                     'score' => $data['score'],
+                    // Campos de siempre (se mantienen para no romper integraciones)
+                    'fuerza_financiera' => '🔒 Actualiza a Pro',
+                    'riesgo_impago' => '🔒 Actualiza a Pro',
+                    'trayectoria' => '🔒 Actualiza a Pro',
                     // Mismos campos que la respuesta Pro (priority, reasons, last_signal), bloqueados
                     'priority' => '🔒 Disponible en Pro',
                     'reasons' => '🔒 Disponible en Pro',
@@ -88,6 +92,11 @@ class CompanyEnrichmentController extends BaseApiController
                     'checkout_url' => self::checkoutUrl('pro', 'api_free_score'),
                 ]
             ]);
+        }
+
+        // Campo nuevo (13-10-2026): enlace al PDF oficial del BORME del acto de last_signal
+        if (isset($data['last_signal']) && is_array($data['last_signal'])) {
+            $data['last_signal']['url_pdf'] = $this->scoringService->bormePdf($cif, $data['last_signal']['date'] ?? null);
         }
 
         return $this->respond([
@@ -125,7 +134,7 @@ class CompanyEnrichmentController extends BaseApiController
     public function signals()
     {
         $cif = $this->request->getGet('cif');
-        if (!$cif) return $this->fail('CIF es requerido', 400);
+        if (!$cif) return $this->fallo(400, 'VALIDATION_ERROR', 'CIF es requerido');
 
         $planSlug = \App\Filters\ApiKeyFilter::$apiMeta['access_slug'] ?? (\App\Filters\ApiKeyFilter::$apiMeta['plan_slug'] ?? 'free');
         if (!$this->planAccess->canAccess($planSlug, 'company_signals')) {
@@ -148,7 +157,17 @@ class CompanyEnrichmentController extends BaseApiController
         }
 
         $signals = $this->scoringService->getSignals($cif);
-        
+        // Lista vacía = la empresa no existe (getScoreData calcula la puntuación de
+        // cualquier empresa que exista). Antes salía 200 con la lista vacía y se cobraba;
+        // ahora 404, como el resto de rutas (13-10-2026).
+        if ($signals === []) {
+            return $this->respond(['success' => false, 'error' => 'COMPANY_NOT_FOUND', 'message' => 'Empresa no encontrada.'], 404);
+        }
+        // Campo nuevo (13-10-2026): enlace al PDF oficial del BORME de cada señal
+        foreach ($signals as $i => $s) {
+            $signals[$i]['url_pdf'] = $this->scoringService->bormePdf((string) $cif, $s['date'] ?? null);
+        }
+
         return $this->respond([
             'success' => true,
             'data' => [
@@ -187,7 +206,7 @@ class CompanyEnrichmentController extends BaseApiController
     public function insights()
     {
         $cif = $this->request->getGet('cif');
-        if (!$cif) return $this->fail('CIF es requerido', 400);
+        if (!$cif) return $this->fallo(400, 'VALIDATION_ERROR', 'CIF es requerido');
 
         $planSlug = \App\Filters\ApiKeyFilter::$apiMeta['access_slug'] ?? (\App\Filters\ApiKeyFilter::$apiMeta['plan_slug'] ?? 'free');
         $accessLevel = $this->planAccess->getAccessLevel($planSlug, 'insights');
@@ -212,7 +231,7 @@ class CompanyEnrichmentController extends BaseApiController
         }
 
         $insights = $this->aiService->getInsights($cif);
-        if (!$insights) return $this->failNotFound('Sin análisis disponible para esta empresa.');
+        if (!$insights) return $this->fallo(404, 'COMPANY_NOT_FOUND', 'Empresa no encontrada.');
 
         if ($accessLevel === 'preview') {
             // Solo mostramos el perfil básico y probabilidad. La vista previa no se cobra.
@@ -270,7 +289,7 @@ class CompanyEnrichmentController extends BaseApiController
     public function contactPrep()
     {
         $cif = $this->request->getGet('cif');
-        if (!$cif) return $this->fail('CIF es requerido', 400);
+        if (!$cif) return $this->fallo(400, 'VALIDATION_ERROR', 'CIF es requerido');
 
         $planSlug = \App\Filters\ApiKeyFilter::$apiMeta['access_slug'] ?? (\App\Filters\ApiKeyFilter::$apiMeta['plan_slug'] ?? 'free');
         if (!$this->planAccess->canAccess($planSlug, 'contact_prep')) {
@@ -290,7 +309,7 @@ class CompanyEnrichmentController extends BaseApiController
         }
 
         $prep = $this->aiService->getContactPrep($cif);
-        if (!$prep) return $this->failNotFound('Sin datos de contacto para esta empresa.');
+        if (!$prep) return $this->fallo(404, 'COMPANY_NOT_FOUND', 'Empresa no encontrada.');
 
         return $this->respond([
             'success' => true,

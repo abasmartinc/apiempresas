@@ -34,8 +34,8 @@ lote = api.companies.batch(['A15075062', 'A46103834'])
 # Match (Business): el sector del vendedor es obligatorio
 match = api.companies.match('A15075062', 'software')
 
-# Radar de empresas nuevas (Business)
-nuevas = api.companies.radar(province='Madrid', range='semana')
+# Radar de empresas nuevas (todos los planes: 10 resultados en Free con nombre y CIF ocultos, 100 en Pro, 1.000 en Business). range: 'hoy' (por defecto) o días atrás ('7', '30')
+nuevas = api.companies.radar(province='Madrid', range='7')
 ```
 
 Los métodos devuelven el contenido de `data`, salvo cuando la respuesta trae también `meta` (`batch`, `search_multiple`, `radar`), que devuelven la respuesta completa.
@@ -108,6 +108,13 @@ Para probar sin gastar consultas, con tu misma API Key y datos simulados:
 api = ApiEmpresas('TU_API_KEY', base_url='https://apiempresas.es/api/sandbox/v1')
 ```
 
+## Consumo
+
+```python
+u = api.usage()  # no gasta consultas; no está en el Sandbox
+print(u['stats']['remaining_calls'])
+```
+
 ## Errores
 
 ```python
@@ -118,6 +125,9 @@ except ApiError as e:
     print(str(e))        # mensaje legible
     print(e.code)        # p. ej. QUOTA_EXCEEDED, TOO_MANY_REQUESTS, API_KEY_INVALID
     print(e.error_code)  # campo "error" de la respuesta (como en versiones anteriores)
+    print(e.request_id)  # dáselo a soporte
+    print(e.retry_after) # segundos, en los 429 por velocidad
+    print(e.required_plan, e.checkout_url)  # en los 403 de plan
 ```
 
 Un `429` con `code == 'TOO_MANY_REQUESTS'` se resuelve esperando y reintentando; con `QUOTA_EXCEEDED` no: hay que recargar saldo o cambiar de plan.

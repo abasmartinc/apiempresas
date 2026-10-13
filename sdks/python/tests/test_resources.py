@@ -8,8 +8,9 @@ from apiempresas import ApiEmpresas, ApiError, verify_webhook_signature, constru
 
 
 class FakeResponse:
-    def __init__(self, body, status=200):
+    def __init__(self, body, status=200, headers=None):
         self._body = body
+        self.headers = headers or {}
         self.status_code = status
         self.ok = status < 400
         self.text = str(body)
@@ -28,8 +29,8 @@ class TestResources(unittest.TestCase):
         return self.req.call_args_list[i].kwargs
 
     def test_version(self):
-        self.assertEqual(__version__, '1.2.0')
-        self.assertIn('1.2.0', self.api.session.headers['User-Agent'])
+        self.assertEqual(__version__, '1.3.0')
+        self.assertIn('1.3.0', self.api.session.headers['User-Agent'])
 
     def test_verify(self):
         self.req.return_value = FakeResponse({'success': True, 'data': {'decision_hint': 'pass'}})
@@ -131,3 +132,47 @@ class TestSignature(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+class TestNovedades130(unittest.TestCase):
+    def setUp(self):
+        self.api = ApiEmpresas('k')
+        self.req = mock.patch.object(self.api.session, 'request').start()
+        self.addCleanup(mock.patch.stopall)
+
+    def test_error_plan(self):
+        self.req.return_value = FakeResponse({
+            'success': False, 'error': 'PLAN_RESTRICTION', 'code': 'PLAN_RESTRICTION', 'message': 'Requiere Pro',
+            'required_plan': 'pro', 'instance': 'req_x',
+            'upsell_opportunities': {'checkout_url': 'https://apiempresas.es/billing?plan=pro'},
+        }, status=403, headers={'X-Request-Id': 'req_abc'})
+        with self.assertRaises(ApiError) as cm:
+            self.api.companies.signals('A46103834')
+        e = cm.exception
+        self.assertEqual(e.code, 'PLAN_RESTRICTION')
+        self.assertEqual(e.request_id, 'req_abc')
+        self.assertEqual(e.required_plan, 'pro')
+        self.assertEqual(e.checkout_url, 'https://apiempresas.es/billing?plan=pro')
+        self.assertIsNone(e.retry_after)
+
+    def test_error_retry_after(self):
+        self.req.return_value = FakeResponse({'success': False, 'code': 'TOO_MANY_REQUESTS', 'message': 'x'},
+                                             status=429, headers={'Retry-After': '1'})
+        with self.assertRaises(ApiError) as cm:
+            self.api.companies.get('A46103834')
+        self.assertEqual(cm.exception.retry_after, 1)
+
+    def test_usage(self):
+        self.req.return_value = FakeResponse({'success': True, 'data': {'stats': {'monthly_queries': 3}, 'history': []}})
+        u = self.api.usage()
+        self.assertTrue(self.req.call_args.kwargs['url'].endswith('/usage'))
+        self.assertEqual(u['stats']['monthly_queries'], 3)
+
+    def test_batch_admin(self):
+        self.req.return_value = FakeResponse({'success': True, 'data': [], 'meta': {}})
+        self.api.companies.batch(['A46103834'], admin=True)
+        self.assertEqual(self.req.call_args.kwargs['json'], {'cifs': ['A46103834'], 'admin': True})
+        self.api.companies.batch(['A46103834'])
+        self.assertEqual(self.req.call_args.kwargs['json'], {'cifs': ['A46103834']})
+
+    def test_firma_no_ascii(self):
+        self.assertFalse(verify_webhook_signature(b'{}', 't=1,v1=\u00e9\u00e9', 's', tolerance=0))

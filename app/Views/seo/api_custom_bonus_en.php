@@ -713,7 +713,7 @@
                     </details>
                     <details class="cro-faq">
                         <summary class="cro-faq-q">Is it easy to integrate with my tech stack?</summary>
-                        <div class="cro-faq-a">Absolutely. We use standard REST architecture with lightning-fast JSON responses. You will have full documentation (Swagger / OpenAPI), ready-to-copy examples in PHP, Python, cURL, and NodeJS, and direct technical support to answer any questions in less than 24 hours.</div>
+                        <div class="cro-faq-a">Absolutely. We use standard REST architecture with lightning-fast JSON responses. You will have full documentation with an interactive reference and an OpenAPI spec, ready-to-copy examples in PHP, Python, cURL, and NodeJS, and direct technical support to answer any questions in less than 24 hours.</div>
                     </details>
                     <details class="cro-faq">
                         <summary class="cro-faq-q">Can I switch to a monthly plan later?</summary>

@@ -32,6 +32,7 @@ class ApiKeyFilter implements FilterInterface
         if (strpos($path, 'api/v1/webhooks') !== false) return 0;
         if (strpos($path, 'api/v1/watchlist') !== false) return 0; // Vigilancia: no gasta cupo (27-09-2026)
         if (strpos($path, 'api/v1/usage') !== false) return 0;
+        if (strpos($path, 'api/v1/catalog') !== false) return 0; // Catálogo de valores de los filtros (13-10-2026)
         if (strpos($path, 'api/v1/companies/batch') !== false) return 0;
         if (strpos($path, 'api/v1/companies/reconcile') !== false) return 0; // Nombre → CIF: cobra el controlador, 1 por match (29-09-2026)
         if (strpos($path, 'api/v1/companies/filter') !== false) return 0; // Segmentos: el recuento es gratis y las filas las cobra el controlador (29-09-2026)
@@ -606,7 +607,10 @@ class ApiKeyFilter implements FilterInterface
             // Solo cuentan las respuestas 200, como el cupo: antes contaban también los
             // errores (que no se cobran) y quien probaba con CIF mal formados podía
             // quedarse bloqueado por IP sin haber gastado ninguna consulta.
-            if ((int)$planId === 1 && $walletBalance <= 0) {
+            // Solo en las rutas que cobran (13-10-2026): una IP que ya había gastado sus
+            // 100 consultas quedaba bloqueada también en el Sandbox y en /usage, que son
+            // gratis y que la documentación da como disponibles siempre.
+            if ((int)$planId === 1 && $walletBalance <= 0 && !self::$apiSkipBilling) {
                 $ipAddress = $request->getIPAddress();
                 $subscriptionTable = 'user_subscriptions';
                 // En IPv6 se compara la red (/64), no la dirección exacta: los equipos
@@ -697,7 +701,8 @@ class ApiKeyFilter implements FilterInterface
             'wallet_cost'     => $walletCost,
             'wallet_balance'  => $walletBalance,
             'rate_limit'      => $maxRequestsPerSecond ?? 2,
-            'rate_remaining'  => max(0, ($maxRequestsPerSecond ?? 2) - ($requestsThisSecond ?? 0)),
+            // $requestsThisSecond no incluye esta petición: sin el +1 la cabecera daba una de más (13-10-2026)
+            'rate_remaining'  => max(0, ($maxRequestsPerSecond ?? 2) - (($requestsThisSecond ?? 0) + 1)),
             'rate_reset'      => time() + 1,
             'quota_limit'     => $monthlyQuota ?? 0,
             'quota_remaining' => max(0, ($monthlyQuota ?? 0) - ($currentUsage ?? 0)),

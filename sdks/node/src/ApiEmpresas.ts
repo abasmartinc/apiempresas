@@ -1,4 +1,4 @@
-import { ApiEmpresasOptions } from './types';
+import { ApiEmpresasOptions, UsageData } from './types';
 import { ApiError } from './errors/ApiError';
 import { Companies } from './resources/Companies';
 import { Watchlist } from './resources/Watchlist';
@@ -6,7 +6,7 @@ import { Webhooks } from './resources/Webhooks';
 import { verifyWebhookSignature, constructWebhookEvent } from './webhooks/signature';
 
 /** Versión del SDK, enviada en el User-Agent. */
-export const SDK_VERSION = '1.2.0';
+export const SDK_VERSION = '1.3.0';
 
 /**
  * Mensaje legible del cuerpo de error. Según el error, la API lo pone en
@@ -54,6 +54,15 @@ export class ApiEmpresas {
     this.webhooks = new Webhooks(this);
   }
 
+  /**
+   * Consumo de tu API Key: consultas del periodo, cupo, saldo de créditos e historial
+   * de las últimas empresas consultadas. No gasta consultas. No está en el Sandbox.
+   */
+  public async usage(): Promise<UsageData> {
+    const res = await this.request<{ success: boolean; data: UsageData }>('/usage');
+    return res.data;
+  }
+
   public async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
     
@@ -85,7 +94,8 @@ export class ApiEmpresas {
           response.status,
           extractErrorMessage(data) || response.statusText || 'Error desconocido en la API',
           data?.error || undefined,
-          data
+          data,
+          response.headers
         );
       }
 

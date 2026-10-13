@@ -66,9 +66,12 @@ class Companies:
                 params[k] = v
         return self._client.request('GET', '/companies/search', params=params)
 
-    def batch(self, cifs: list) -> dict:
-        """Consulta múltiple de CIFs en una sola petición."""
-        return self._client.request('POST', '/companies/batch', json_data={'cifs': cifs})
+    def batch(self, cifs: list, admin: bool = False) -> dict:
+        """(Pro y Business) Hasta 100 CIFs en una sola petición. admin=True incluye los administradores vigentes."""
+        body = {'cifs': cifs}
+        if admin:
+            body['admin'] = True
+        return self._client.request('POST', '/companies/batch', json_data=body)
 
     def score(self, cif: str) -> dict:
         """(Pro) Obtiene el Scoring Comercial de una empresa."""
@@ -83,16 +86,16 @@ class Companies:
         return self._client.request('GET', '/companies/signals', params={'cif': cif})
 
     def insights(self, cif: str) -> dict:
-        """(Business) Obtiene Insights IA de una empresa."""
+        """(Business; en Pro, vista previa con profile y conversion_probability) Insights IA de una empresa."""
         return self._client.request('GET', '/companies/insights', params={'cif': cif})
 
     def contact_prep(self, cif: str) -> dict:
-        """(Pro) Obtiene datos de contacto y preparación de la empresa."""
+        """(Business) Preparación del contacto comercial generada por IA."""
         return self._client.request('GET', '/companies/contact-prep', params={'cif': cif})
 
     def radar(self, cif: str = None, province: str = None, priority: str = None, range: str = None,
               cnae: str = None, min_score: int = None, main_act_type: str = None, has_phone: bool = None) -> dict:
-        """(Business) Radar de empresas nuevas. Filtros: province, priority, range, cnae, min_score,
+        """(Todos los planes: Free 10 resultados con nombre y CIF ocultos, Pro 100, Business 1.000) Radar de empresas nuevas. Filtros: province, priority, range, cnae, min_score,
         main_act_type, has_phone (cif se mantiene por compatibilidad; el Radar no lo usa)."""
         pares = (('cif', cif), ('province', province), ('priority', priority), ('range', range),
                  ('cnae', cnae), ('min_score', min_score), ('main_act_type', main_act_type), ('has_phone', has_phone))
@@ -111,7 +114,7 @@ class Companies:
         return self._client.request('GET', '/companies/match', params=params)
 
     def network(self, cif: str) -> dict:
-        """(Business) Obtiene la red o entramado societario (Network) de una empresa."""
+        """(Pro y Business) Red societaria de una empresa a través de sus administradores."""
         return self._client.request('GET', '/companies/network', params={'cif': cif})
 
     def contracts(self, cif: str, page: int = 1, limit: int = 20) -> dict:

@@ -37,9 +37,15 @@
                             </a>
                         </li>
                         <li>
-                            <a href="<?= site_url('api/docs') ?>" target="_blank">
+                            <a href="#consumo">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                                <span class="nav-num">2.1</span> Plans and usage
+                            </a>
+                        </li>
+                        <li>
+                            <a href="<?= site_url('api/reference') ?>" target="_blank">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
-                                Swagger UI (Interactive)
+                                Interactive reference
                             </a>
                         </li>
                     </ul>
@@ -126,6 +132,12 @@
                                 <span class="nav-num">11.</span> Usage
                             </a>
                         </li>
+                        <li>
+                            <a href="#endpoint-catalog">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                                <span class="nav-num">11.1</span> Filter values
+                            </a>
+                        </li>
                     </ul>
                 </div>
 
@@ -203,6 +215,15 @@
                 </div>
 
                 <!-- API PLAYGROUND -->
+                <style>
+                    /* Enlace a la referencia: botón visible (13-10-2026) */
+                    .api-playground > div:first-child { flex-wrap: wrap; gap: 14px; }
+                    .ae-ref-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 10px;
+                        background: #2563eb; color: #fff !important; font-size: 0.9rem; font-weight: 700; text-decoration: none !important;
+                        box-shadow: 0 6px 16px -4px rgba(37, 99, 235, .45); transition: background .15s, transform .15s; white-space: nowrap; }
+                    .ae-ref-btn:hover { background: #1d4ed8; transform: translateY(-1px); }
+                    .ae-ref-btn svg { width: 16px; height: 16px; }
+                </style>
                 <div class="api-playground" style="margin: 40px 0; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); background: #ffffff;">
                     <div style="padding: 20px 24px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; display: flex; align-items: center; justify-content: space-between;">
                         <div>
@@ -212,8 +233,8 @@
                             </h3>
                             <p style="margin: 4px 0 0 0; font-size: 0.9rem; color: #64748b;">Fire real-time requests to the Sandbox environment. No API Key required.</p>
                         </div>
-                        <a href="<?= site_url('api/docs') ?>" style="font-size: 0.85rem; color: #3b82f6; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 4px;">
-                            Open full Swagger UI <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                        <a href="<?= site_url('api/reference') ?>" class="ae-ref-btn">
+                            Open the full reference <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                         </a>
                     </div>
 
@@ -385,15 +406,11 @@
                             <ul style="margin: 0 0 32px 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px;">
                                 <li style="display: flex; gap: 16px; align-items: flex-start;">
                                     <code style="background: #f1f5f9; color: #0f172a; padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; border: 1px solid #cbd5e1; font-weight: 700; min-width: 90px; text-align: center;">A15075062</code>
-                                    <span style="color: #334155; font-size: 0.95rem; line-height: 1.5; padding-top: 4px;">Successful lookup (returns sample data for Inditex).</span>
+                                    <span style="color: #334155; font-size: 0.95rem; line-height: 1.5; padding-top: 4px;">Successful lookup: returns a sample Inditex record (fixed data).</span>
                                 </li>
                                 <li style="display: flex; gap: 16px; align-items: flex-start;">
                                     <code style="background: #fef2f2; color: #dc2626; padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; border: 1px solid #fecaca; font-weight: 700; min-width: 90px; text-align: center;">B00000000</code>
                                     <span style="color: #334155; font-size: 0.95rem; line-height: 1.5; padding-top: 4px;">Simulates a standardised HTTP 404 "company not found" error.</span>
-                                </li>
-                                <li style="display: flex; gap: 16px; align-items: flex-start;">
-                                    <code style="background: #fffbeb; color: #d97706; padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; border: 1px solid #fde68a; font-weight: 700; min-width: 90px; text-align: center;">C11111111</code>
-                                    <span style="color: #334155; font-size: 0.95rem; line-height: 1.5; padding-top: 4px;">Also returns 404 "company not found" (same as B00000000).</span>
                                 </li>
                             </ul>
 
@@ -422,21 +439,70 @@
                     <p>
                         To access the endpoints you must include your <strong>X-API-KEY</strong> in the request header. You can generate and copy your key from your <a href="<?= site_url('dashboard') ?>">control panel</a>.
                     </p>
-                    <pre><code class="language-http">GET /api/v1/companies?cif=B12345678 HTTP/1.1
+                    <pre><code class="language-http">GET /api/v1/companies?cif=A15075062 HTTP/1.1
 Host: spaincompanyapi.com
 X-API-KEY: your_api_key_here
 Accept: application/json</code></pre>
                     <p>The <code>Authorization: Bearer your_api_key_here</code> header is also accepted.</p>
 
                     <h4>Test environment (Sandbox)</h4>
-                    <p>To test your integration without using requests, use the same API key with the base URL <code>https://spaincompanyapi.com/api/sandbox/v1</code> (same paths as production: <code>/companies</code>, <code>/companies/search</code>, <code>/companies/score</code>…). The Sandbox does not use requests and only accepts these CIFs (on <code>/companies</code> it returns that company's data; on the other endpoints, sample responses with the same structure):</p>
+                    <p>To test your integration without using requests, use the same API key with the base URL <code>https://spaincompanyapi.com/api/sandbox/v1</code> (same paths as production: <code>/companies</code>, <code>/companies/search</code>, <code>/companies/score</code>…). The Sandbox does not use requests and only accepts these CIFs (all responses are samples, with fixed data and the same structure as production):</p>
                     <ul>
                         <li><code>A15075062</code>: company found (Inditex).</li>
                         <li><code>B00000000</code>: company not found (404).</li>
                     </ul>
                     <p>Any other CIF returns an error. The Sandbox always answers with the full data, without the Free plan truncation or quota limits: use it to check the response format, not what you will see on your plan.</p>
                     <p>Every successful Sandbox response adds a <code>sandbox</code> block: <code>plan_required</code> (minimum plan for the endpoint), <code>production_url</code> (the same request in production, ready to copy), <code>cost</code> (always 0) and, on <code>/companies</code>, <code>/companies/search</code> and <code>/companies/batch</code>, <code>fields_by_plan</code> with the fields that only come complete on Pro.</p>
-                    <p><code>/companies/verify</code>, <code>/companies/contracts</code>, <code>/companies/filter</code>, <code>POST /companies/reconcile</code> (<code>"Inditex"</code> gives <code>match</code>, a name containing <code>"Ejemplo"</code> gives <code>ambiguous</code> and anything else <code>no_match</code>) and monitoring (<code>/watchlist</code> and <code>/watchlist/events</code>, nothing is saved: it answers as if you were already watching A15075062) are also in the Sandbox.</p>
+                    <p><code>/companies/verify</code>, <code>/companies/contracts</code>, <code>/companies/filter</code>, <code>POST /companies/reconcile</code> (<code>"Inditex"</code> gives <code>match</code>, a name containing <code>"Ejemplo"</code> gives <code>ambiguous</code> and anything else <code>no_match</code>) and monitoring (<code>/watchlist</code> and <code>/watchlist/events</code>, nothing is saved: it answers as if you were already watching A15075062) are also in the Sandbox, along with every other <code>/companies</code> path. <code>/webhooks</code> and <code>/usage</code> are not.</p>
+                </section>
+
+                <!-- USAGE AND CREDITS (13-10-2026) -->
+                <section class="docs-section" id="consumo">
+                    <h2>2.1 Plans, usage and credits</h2>
+                    <table class="docs-table">
+                        <thead><tr><th>Plan</th><th>Requests</th><th>Speed</th></tr></thead>
+                        <tbody>
+                            <tr><td>Free</td><td>100 in total (not renewed)</td><td>2 per second</td></tr>
+                            <tr><td>Pro</td><td>3,000 per month</td><td>20 per second</td></tr>
+                            <tr><td>Business</td><td>10,000 per month</td><td>20 per second</td></tr>
+                        </tbody>
+                    </table>
+                    <p>Each endpoint shows the plan it needs. On a lower plan it returns 403 with the plan you need in <code>required_plan</code> and the upgrade link in <code>upsell_opportunities.checkout_url</code>.</p>
+
+                    <h4>What uses a request</h4>
+                    <ul>
+                        <li>Only 200 responses are charged. Errors cost nothing.</li>
+                        <li>While your plan has requests left, every 200 response uses 1, whatever the endpoint. Exceptions: <code>/companies/verify</code> uses 2; <code>/companies/batch</code> and <code>POST /companies/reconcile</code>, 1 per company found; <code>/companies/filter</code> rows, 5 per row.</li>
+                        <li>Free of charge: the Sandbox, <code>/usage</code>, <code>/catalog</code>, <code>/watchlist</code>, <code>/webhooks</code>, the <code>/companies/filter</code> count (<code>count_only=true</code>) and previews (<code>/companies/score</code> on Free and <code>/companies/insights</code> on Pro).</li>
+                    </ul>
+
+                    <h4>Credits</h4>
+                    <p>When your plan's requests run out, or if you use prepaid credits without a subscription, each 200 response is paid from your wallet. Endpoints do not all cost the same:</p>
+                    <table class="docs-table">
+                        <thead><tr><th>Credits</th><th>Endpoints</th></tr></thead>
+                        <tbody>
+                            <tr><td>1</td><td><code>/companies</code> and <code>/companies/search</code>; <code>/companies/batch</code> and <code>POST /companies/reconcile</code>, 1 per company found</td></tr>
+                            <tr><td>2</td><td><code>/companies/verify</code></td></tr>
+                            <tr><td>3</td><td><code>/companies/score</code>, <code>/signals</code>, <code>/insights</code>, <code>/contact-prep</code>, <code>/network</code>, <code>/match</code>, <code>/radar</code>, <code>/borme</code>, <code>/contracts</code> and <code>/risk-profile</code></td></tr>
+                            <tr><td>5 per row</td><td><code>/companies/filter</code> rows</td></tr>
+                        </tbody>
+                    </table>
+
+                    <h4>Free plan with credits</h4>
+                    <ul>
+                        <li>You get Pro access: full data on <code>/companies</code> and <code>/companies/search</code>, plus <code>/companies/verify</code>, <code>POST /companies/reconcile</code>, <code>/companies/borme</code>, full <code>/companies/score</code>, <code>/companies/signals</code>, <code>/companies/radar</code> (up to 100 results), <code>/companies/insights</code> (preview) and <code>/companies/network</code>.</li>
+                        <li>It does not include <code>/companies/batch</code>, monitoring (<code>/watchlist</code>) or Business endpoints.</li>
+                        <li>While you have credits, every request is paid with them, even if you have free requests left. Speed stays at 2 per second.</li>
+                    </ul>
+
+                    <h4>Free plan</h4>
+                    <ul>
+                        <li>The 100 requests count everything used since 28/05/2026, including usage on an earlier paid plan.</li>
+                        <li>The <code>/companies/score</code> preview does not use requests, but you need at least one left: with no requests and no credits it returns 429 <code>QUOTA_EXCEEDED</code>.</li>
+                    </ul>
+
+                    <h4>Previews</h4>
+                    <p>What we show without charging has a shared cap of 25 per day per account: the <code>/companies/score</code> preview (Free), the <code>/companies/insights</code> preview (Pro), <code>business_preview</code> (Pro) and the counts included in some 403 responses (for example <code>eventos_ocultos</code> on <code>/companies/signals</code>). Past the cap, score and insights return 429 <code>PREVIEW_LIMIT_EXCEEDED</code>, with <code>Retry-After</code> until the next day, and 403 responses come without counts.</p>
                 </section>
 
                 <!-- LOOKUP BY CIF -->
@@ -710,6 +776,21 @@ Accept: application/json</code></pre>
                                 <td>string</td>
                                 <td><strong>Required.</strong> The name or partial name to search for. (Alias: <code>q</code>)</td>
                             </tr>
+                            <tr>
+                                <td><code>multiple</code></td>
+                                <td>boolean</td>
+                                <td>Optional. Without it (or with <code>false</code>) <code>data</code> is <strong>a single object</strong>: the best match. With <code>true</code>, <code>data</code> is a <strong>list</strong> and pagination goes in <code>meta</code>.</td>
+                            </tr>
+                            <tr>
+                                <td><code>limit</code></td>
+                                <td>integer</td>
+                                <td>Optional, only with <code>multiple=true</code>. Results per page (default 20, up to 100).</td>
+                            </tr>
+                            <tr>
+                                <td><code>page</code> / <code>cursor</code></td>
+                                <td>integer / string</td>
+                                <td>Optional, only with <code>multiple=true</code>. Page to request, or <code>meta.next_cursor</code> from the previous response. With <code>cursor</code>, send the same <code>limit</code> as in the first request too: otherwise 20 is used.</td>
+                            </tr>
                         </tbody>
                     </table>
 
@@ -739,12 +820,15 @@ Accept: application/json</code></pre>
                             <tr><th style="width: 25%;">Field</th><th style="width: 15%;">Type</th><th>Description</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">data[]</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">array[object]</span></td><td style="color: #475569;">List of matching companies. Contains basic fields: <code style="font-size: 0.8rem;">cif</code>, <code style="font-size: 0.8rem;">name</code>, <code style="font-size: 0.8rem;">status</code>, <code style="font-size: 0.8rem;">province</code>.</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">data[]</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">array[object]</span></td><td style="color: #475569;">List of matching companies, with the same fields as <code style="font-size: 0.8rem;">/companies</code> (without directors): <code style="font-size: 0.8rem;">cif</code>, <code style="font-size: 0.8rem;">name</code>, <code style="font-size: 0.8rem;">status</code>, <code style="font-size: 0.8rem;">status_code</code>, <code style="font-size: 0.8rem;">province</code>…</td></tr>
                             <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">meta.page</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td style="color: #475569;">Current page of search results.</td></tr>
                             <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">meta.limit</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td style="color: #475569;">Maximum number of results per page.</td></tr>
                             <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">meta.has_more</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">boolean</span></td><td style="color: #475569;">Indicates whether more results exist for the current search.</td></tr>
                         </tbody>
                     </table>
+
+                    <h4>Data on the Free plan</h4>
+                    <p>On the Free plan (without credits), the same cuts as <a href="#endpoint-by-cif">/companies</a>: <code>address</code> hidden, <code>corporate_purpose</code> cut to 100 characters, no <code>lat</code>, <code>lng</code> or <code>financials</code>, and an <code>upsell_opportunities</code> object (<code>campos_ocultos</code>, <code>mensaje</code> and <code>upgrade_url</code>) on each company. On Pro, Business or with credits, full data.</p>
                 </section>
 
                 <!-- COMMERCIAL CAPABILITIES -->
@@ -759,7 +843,7 @@ Accept: application/json</code></pre>
                             <code>/companies/score</code>
                             <span class="plan-badge pro">Pro</span>
                         </div>
-                        <p>Commercial score from 0 to 100 for a company: its recent BORME activity, how complete its record is and whether it has a phone, email or website. It does not measure solvency (use <code>/companies/risk-profile</code> for that). On Free it returns the number only; <code>priority</code>, <code>reasons</code> and <code>last_signal</code> come back locked.</p>
+                        <p>Commercial score from 0 to 100 for a company: its recent BORME activity, how complete its record is and whether it has a phone, email or website. It does not measure solvency (use <code>/companies/risk-profile</code> for that). On Free it returns the number only, without using requests (within the cap of 25 previews a day); <code>priority</code>, <code>reasons</code> and <code>last_signal</code> come back locked.</p>
                         <pre><code class="language-json">{
   "success": true,
   "data": {
@@ -767,7 +851,7 @@ Accept: application/json</code></pre>
     "score": 82,
     "priority": "muy_alta",
     "reasons": ["OPP:95|QUAL:80|CONT:60 · Ampliación de capital"],
-    "last_signal": { "type": "Ampliación de capital", "date": "2026-09-15" },
+    "last_signal": { "type": "Ampliación de capital", "date": "2026-09-15", "url_pdf": "https://www.boe.es/borme/dias/2026/09/15/pdfs/BORME-A-2026-176-15.pdf" },
     "source": "radar"
   }
 }</code></pre>
@@ -779,7 +863,7 @@ Accept: application/json</code></pre>
                                 <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">data.score</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td style="color: #475569;">Commercial score from 0 to 100.</td></tr>
                                 <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">data.priority</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">enum</span></td><td style="color: #475569;">Prospecting priority from the score: <code>muy_alta</code> (75 or more), <code>alta</code> (60), <code>media</code> (40), <code>baja</code> (20) or <code>muy_baja</code>.</td></tr>
                                 <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">data.reasons</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">array</span></td><td style="color: #475569;">List of reasons behind the score.</td></tr>
-                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">data.last_signal</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">object</span></td><td style="color: #475569;">Latest BORME act that counts towards the score: <code>type</code> and <code>date</code>.</td></tr>
+                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">data.last_signal</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">object</span></td><td style="color: #475569;">Latest BORME act that counts towards the score: <code>type</code>, <code>date</code> and <code>url_pdf</code> (official BORME PDF for that day; <code>null</code> if not recorded).</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -791,17 +875,18 @@ Accept: application/json</code></pre>
                             <code>/companies/signals</code>
                             <span class="plan-badge pro">Pro</span>
                         </div>
-                        <p>Recently detected corporate events and acts.</p>
+                        <p>The latest BORME act that counts towards the company's commercial score. The list has one item at most. Free plan: 403 <code>PLAN_RESTRICTION</code> with the number of events in <code>upsell_opportunities.eventos_ocultos</code>.</p>
                         <pre><code class="language-json">{
   "success": true,
   "data": {
-    "cif": "B12345678",
+    "cif": "A46103834",
     "signals": [
       {
         "type": "borme_event",
-        "label": "CONSTITUCION",
-        "date": "2023-10-01",
-        "probability": "Alta"
+        "label": "Ampliación de capital",
+        "date": "2026-09-15",
+        "probability": "muy_alta",
+        "url_pdf": "https://www.boe.es/borme/dias/2026/09/15/pdfs/BORME-A-2026-176-15.pdf"
       }
     ]
   }
@@ -811,8 +896,9 @@ Accept: application/json</code></pre>
                                 <tr><th style="width: 25%;">Field</th><th style="width: 15%;">Type</th><th>Description</th></tr>
                             </thead>
                             <tbody>
-                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">signals[]</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">array[object]</span></td><td style="color: #475569;">List of recent events. Each object has a <code>type</code> and <code>label</code>.</td></tr>
-                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">signals[].probability</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td><td style="color: #475569;">Reliability of the detected event based on our model.</td></tr>
+                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">signals[]</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">array[object]</span></td><td style="color: #475569;">One item at most: <code>type</code> (always <code>borme_event</code>), <code>label</code> (type of act) and <code>date</code>.</td></tr>
+                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">signals[].probability</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td><td style="color: #475569;">The company's commercial priority, the same as <code>priority</code> on <code>/companies/score</code>: <code>muy_alta</code>, <code>alta</code>, <code>media</code>, <code>baja</code> or <code>muy_baja</code>. It is not the reliability of the event.</td></tr>
+                                <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">signals[].url_pdf</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string | null</span></td><td style="color: #475569;">Official BORME PDF for the day of the signal (<code>null</code> if not recorded).</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -824,7 +910,7 @@ Accept: application/json</code></pre>
                             <code>/companies/insights</code>
                             <span class="plan-badge business">Business</span>
                         </div>
-                        <p>AI-powered analysis of the commercial profile and probable needs of a company.</p>
+                        <p>AI-powered analysis of the commercial profile and probable needs of a company. On Pro (or Free with credits) there is a preview that does not use requests, within the cap of 25 a day: only <code>profile</code> and <code>conversion_probability</code>; <code>pain_points</code>, <code>buyer_persona</code> and <code>sales_arguments</code> come back locked, with <code>message</code> and <code>checkout_url</code>. Free plan: 403 <code>PLAN_RESTRICTION</code>.</p>
                         <pre><code class="language-json">{
   "success": true,
   "data": {
@@ -881,7 +967,7 @@ Accept: application/json</code></pre>
                             <code>/companies/network</code>
                             <span class="plan-badge pro">Pro</span>
                         </div>
-                        <p>Gets the corporate network linking companies through their directors. Requires the <code>cif</code> parameter.</p>
+                        <p>Gets the corporate network linking companies through their directors. Requires the <code>cif</code> parameter. Pro, Business and Free with credits; on Free without credits, 403 <code>PLAN_RESTRICTION</code> with the counts in <code>data.stats</code>. If the company has no known directors, it returns 200 with only the company node, no <code>stats</code> and a <code>message</code> (charged like any other request).</p>
                         <pre><code class="language-json">{
   "success": true,
   "data": {
@@ -939,14 +1025,14 @@ Accept: application/json</code></pre>
                     </div>
 
                     <!-- BATCH -->
-                    <div style="margin-top: 32px;">
+                    <div id="batch" style="margin-top: 32px;">
                         <div class="endpoint-header">
                             <span class="http-badge post">POST</span>
                             <code>/companies/batch</code>
                             <span class="plan-badge pro">Pro</span>
                             <span class="plan-badge business">Business</span>
                         </div>
-                        <p>Query up to 100 companies in a single request by sending an array of CIFs. The cost is variable: 1 credit from your monthly quota or wallet per company <strong>found</strong> (HTTP 200). If you don't have enough credits to cover the entire batch, the response will be automatically trimmed to the number of companies you can afford.</p>
+                        <p>Query up to 100 companies in a single request by sending an array of CIFs. The cost is variable: 1 credit from your monthly quota or wallet per company <strong>found</strong> (HTTP 200). If you don't have enough credits to cover the entire batch, the response will be automatically trimmed to the number of companies you can afford. Pro or Business plan only: Free with credits gets 403.</p>
                         
                         <h5>Request Body (JSON)</h5>
                         <pre><code class="language-json">{
@@ -983,7 +1069,7 @@ Accept: application/json</code></pre>
                 <!-- BORME HISTORY -->
                 <section class="docs-section" id="endpoint-borme">
                     <h2>6. BORME Act History</h2>
-                    <p>Get the complete chronological history of publications in the Spanish Commercial Registry (BORME) for a company.</p>
+                    <p>Get the complete chronological history of publications in the Spanish Commercial Registry (BORME) for a company. Pro, Business and Free with credits. Free without credits: 403 <code>UPGRADE_REQUIRED</code>.</p>
                     
                     <div class="endpoint-header">
                         <span class="http-badge get">GET</span>
@@ -1040,7 +1126,13 @@ Accept: application/json</code></pre>
                 <!-- RADAR -->
                 <section class="docs-section" id="endpoint-radar">
                     <h2>7. Company Radar</h2>
-                    <p>Programmatically query the list of newly incorporated companies detected by our radar.</p>
+                    <p>Companies incorporated in the period you ask for (today by default), sorted by commercial score, highest first.</p>
+                    <ul>
+                        <li>Free: 10 results with name and CIF hidden. Uses 1 request.</li>
+                        <li>Pro and Free with credits: up to 100 results. Business: up to 1,000.</li>
+                        <li>If there are more companies than fit, <code>meta.oportunidades_ocultas</code> says how many are missing.</li>
+                        <li>All filters work on every plan.</li>
+                    </ul>
                     
                     <div class="endpoint-header">
                         <span class="http-badge get">GET</span>
@@ -1063,11 +1155,11 @@ Accept: application/json</code></pre>
                             </tr>
                             <tr>
                                 <td><code>range</code></td>
-                                <td>Time window. Accepts <code>hoy</code> (today) or an integer for <strong>days back</strong> (e.g. <code>7</code>, <code>30</code>).</td>
+                                <td>Time window. Accepts <code>hoy</code> (today, the default) or an integer for <strong>days back</strong> (e.g. <code>7</code>, <code>30</code>).</td>
                             </tr>
                             <tr>
                                 <td><code>priority</code></td>
-                                <td>Commercial relevance level: <code>alta</code> (high), <code>media</code> (medium), <code>baja</code> (low).</td>
+                                <td>Commercial priority: <code>muy_alta</code>, <code>alta</code>, <code>media</code>, <code>baja</code> or <code>muy_baja</code> (very high to very low).</td>
                             </tr>
                             <tr>
                                 <td><code>cnae</code></td>
@@ -1099,10 +1191,17 @@ Accept: application/json</code></pre>
   },
   "data": [
     {
-      "cif": "B12345678",
+      "id": 4812345,
       "company_name": "NUEVA EMPRESA SL",
+      "cif": "B12345678",
+      "fecha_constitucion": "2026-10-13",
+      "cnae": "6201",
+      "cnae_label": "Actividades de programación informática",
       "registro_mercantil": "MADRID",
-      "fecha_constitucion": "2023-11-01"
+      "municipality": "MADRID",
+      "score_total": 78,
+      "priority_level": "alta",
+      "main_act_type": "Constitución"
     }
   ]
 }</code></pre>
@@ -1111,7 +1210,9 @@ Accept: application/json</code></pre>
                             <tr><th style="width: 25%;">Field</th><th style="width: 15%;">Type</th><th>Description</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">data[].fecha_constitucion</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td><td style="color: #475569;">Date the company was processed and published in the API.</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">data[].fecha_constitucion</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td><td style="color: #475569;">Date the company was incorporated.</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">data[].score_total</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer | null</span></td><td style="color: #475569;">Commercial score (0-100). With <code>priority_level</code> and <code>main_act_type</code>, the latest relevant BORME act.</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">meta.plan</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td><td style="color: #475569;">Your current plan.</td></tr>
                             <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">meta.total_disponibles</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td style="color: #475569;">Total companies in the Radar. If your plan is capped at <code>limit</code>, you'll see the real total here.</td></tr>
                         </tbody>
                     </table>
@@ -1149,12 +1250,25 @@ Accept: application/json</code></pre>
                         <code>/watchlist</code>
                     </div>
                     <p>Lists your watched companies (<code>page</code>, <code>limit</code> up to 500).</p>
+                    <pre><code class="language-json">{
+  "success": true,
+  "data": [
+    { "cif": "A46103834", "name": "MERCADONA SA", "added_at": "2026-09-27 10:12:04" },
+    { "cif": "A15075062", "name": "INDUSTRIA DE DISENO TEXTIL SA", "added_at": "2026-09-28 08:30:51" }
+  ],
+  "meta": { "total": 2, "watch_limit": 100, "page": 1, "limit": 100, "has_more": false }
+}</code></pre>
 
                     <div class="endpoint-header">
                         <span class="http-badge delete">DELETE</span>
                         <code>/watchlist/{cif}</code>
                     </div>
                     <p>Removes a company. If it was not on your watchlist, returns 404 <code>NOT_WATCHING</code>.</p>
+                    <pre><code class="language-json">{
+  "success": true,
+  "data": { "cif": "A46103834", "removed": true },
+  "meta": { "total": 1, "watch_limit": 100 }
+}</code></pre>
 
                     <div class="endpoint-header">
                         <span class="http-badge get">GET</span>
@@ -1190,16 +1304,16 @@ Accept: application/json</code></pre>
       "date": "2026-09-25",
       "cif": "B12345678",
       "company_name": "EMPRESA DE EJEMPLO SL",
-      "data": { "from": "BAJO", "to": "MEDIO", "model_change": false }
+      "data": { "from": "BAJO", "to": "MEDIO", "model_change": null }
     }
   ],
   "meta": { "since": "2026-09-20", "types": ["borme_act", "status_change", "risk_level_change"], "total": 2, "page": 1, "limit": 100, "has_more": false }
 }</code></pre>
                     <ul>
                         <li>Events are returned oldest first. The <code>id</code> is stable: use it to avoid processing the same event twice.</li>
-                        <li><code>model_change: true</code> means the level changed because we recalculated our model, not because of anything new at the company; <code>null</code> if it cannot be known.</li>
+                        <li><code>model_change: true</code> means the level changed because we recalculated our model, not because of anything new at the company, and <code>false</code> that it did not. <code>null</code> if the model version used for the calculation is not recorded (older profiles).</li>
                         <li>Recommended use: one call a day with <code>since</code> = the date of your last call.</li>
-                        <li>Free plan: 403 <code>PLAN_RESTRICTION</code>. On Business you can receive these same events on your server with <a href="#endpoint-webhooks">webhooks</a>.</li>
+                        <li>Free plan (also with credits): 403 <code>PLAN_RESTRICTION</code>. On Business you can receive these same events on your server with <a href="#endpoint-webhooks">webhooks</a>.</li>
                     </ul>
                 </section>
 
@@ -1287,27 +1401,39 @@ Accept: application/json</code></pre>
                     <h2>8. Webhooks (Business only)</h2>
                     <p>Receive the changes of the companies on your <a href="#endpoint-watchlist">watchlist</a> on your server, without polling the API: new BORME acts, status changes and risk level changes. Events are generated every 15 minutes.</p>
 
-                    <div class="endpoint-header" style="margin-bottom: 5px;">
+                    <div class="endpoint-header">
                         <span class="http-badge get">GET</span>
                         <code>/webhooks</code>
                         <span class="plan-badge business">Business</span>
                     </div>
-                    <div class="endpoint-header" style="margin-bottom: 5px;">
+                    <p>Lists your webhooks with their status: <code>is_active</code>, <code>failure_count</code> (failed attempts in a row), <code>last_status_code</code> and the dates of the last delivery. It includes each webhook's <code>secret</code>.</p>
+                    <pre><code class="language-json">{
+  "success": true,
+  "data": [
+    {
+      "id": 12,
+      "user_id": 229,
+      "url": "https://tu-dominio.com/webhooks/apiempresas",
+      "event": "watchlist.*",
+      "secret": "3f9c1b2a7d...",
+      "filters": "[]",
+      "is_active": 1,
+      "failure_count": 0,
+      "last_delivery_at": "2026-10-13 09:15:02",
+      "last_success_at": "2026-10-13 09:15:02",
+      "last_status_code": 200,
+      "disabled_at": null,
+      "created_at": "2026-09-28 10:00:00",
+      "updated_at": "2026-10-13 09:15:02"
+    }
+  ]
+}</code></pre>
+
+                    <div class="endpoint-header">
                         <span class="http-badge post">POST</span>
                         <code>/webhooks</code>
                         <span class="plan-badge business">Business</span>
                     </div>
-                    <div class="endpoint-header" style="margin-bottom: 5px;">
-                        <span class="http-badge post">POST</span>
-                        <code>/webhooks/{id}/test</code>
-                        <span class="plan-badge business">Business</span>
-                    </div>
-                    <div class="endpoint-header">
-                        <span class="http-badge delete">DELETE</span>
-                        <code>/webhooks/{id}</code>
-                        <span class="plan-badge business">Business</span>
-                    </div>
-
                     <h4>Create a webhook</h4>
                     <pre><code class="language-json">// Request
 { "url": "https://yourdomain.com/webhooks/apiempresas", "event": "watchlist.*" }
@@ -1359,11 +1485,63 @@ $ok = hash_equals(hash_hmac('sha256', $t . '.' . $body, $secret), $v1) && abs(ti
 
                     <h4>Retries</h4>
                     <ul>
-                        <li>Reply with a 2xx code within 10 seconds. Otherwise we retry after 1, 5 and 30 minutes, and after 2 and 6 hours; then the delivery is dropped.</li>
+                        <li>Reply with a 2xx code within 10 seconds. Otherwise we retry with growing waits: 1, 5 and 30 minutes, 2 and 6 hours. Deliveries go out every 15 minutes, so each retry arrives on the first run after that wait. After 6 attempts the delivery is dropped.</li>
                         <li>Use <code>X-ApiEmpresas-Delivery</code> to avoid processing the same delivery twice.</li>
-                        <li>A webhook with 50 consecutive failures is disabled. Create it again once your server responds.</li>
+                        <li>A webhook is disabled after 50 failed attempts in a row, counting all its deliveries; a successful delivery resets the count. Create it again once your server responds.</li>
                         <li>The URL must be HTTPS (port 443) and public. We do not follow redirects.</li>
                     </ul>
+
+                    <div class="endpoint-header">
+                        <span class="http-badge post">POST</span>
+                        <code>/webhooks/{id}/test</code>
+                        <span class="plan-badge business">Business</span>
+                    </div>
+                    <p>Sends a <code>test.ping</code> event to the webhook to check that your server receives it and validates the signature. If your server does not reply with a 2xx, the response is 502 <code>WEBHOOK_DELIVERY_FAILED</code> with the same <code>data</code> (the HTTP status your server returned and the error): the failure is on your server, not the API.</p>
+                    <pre><code class="language-json">{
+  "success": true,
+  "data": {
+    "delivered": true,
+    "http_status": 200,
+    "duration_ms": 143,
+    "error": null,
+    "delivery_id": "5d41402a-bc4b-2a76-b971-9d911017c592"
+  }
+}</code></pre>
+
+                    <div class="endpoint-header">
+                        <span class="http-badge get">GET</span>
+                        <code>/webhooks/{id}/deliveries</code>
+                        <span class="plan-badge business">Business</span>
+                    </div>
+                    <p>Latest deliveries of the webhook, newest first: status (<code>pending</code>, <code>processing</code>, <code>retry</code>, <code>delivered</code> or <code>dead</code>), attempts, HTTP status your server returned, duration and error. <code>next_attempt_at</code> only appears on pending or retrying deliveries. Optional parameters: <code>status</code>, <code>page</code> and <code>limit</code> (1-100, default 50). Does not use requests. 404 <code>WEBHOOK_NOT_FOUND</code> if the webhook is not yours.</p>
+                    <pre><code class="language-json">{
+  "success": true,
+  "data": [
+    {
+      "delivery_id": "5d41402a-bc4b-2a76-b971-9d911017c592",
+      "event": "company.borme_act",
+      "event_id": "borme_act:8812345",
+      "status": "delivered",
+      "attempts": 1,
+      "http_status": 200,
+      "duration_ms": 143,
+      "error": null,
+      "created_at": "2026-10-13 09:15:00",
+      "last_attempt_at": "2026-10-13 09:15:02",
+      "next_attempt_at": null,
+      "completed_at": "2026-10-13 09:15:02"
+    }
+  ],
+  "meta": { "webhook_id": 12, "total": 1, "page": 1, "limit": 50, "has_more": false }
+}</code></pre>
+
+                    <div class="endpoint-header">
+                        <span class="http-badge delete">DELETE</span>
+                        <code>/webhooks/{id}</code>
+                        <span class="plan-badge business">Business</span>
+                    </div>
+                    <p>Deletes a webhook. You stop receiving deliveries from that moment. If it does not exist, 404 <code>WEBHOOK_NOT_FOUND</code>.</p>
+                    <pre><code class="language-json">{ "success": true, "message": "Webhook eliminado" }</code></pre>
                 </section>
 
                 <!-- PUBLIC CONTRACTS -->
@@ -1527,7 +1705,7 @@ $ok = hash_equals(hash_hmac('sha256', $t . '.' . $body, $secret), $v1) && abs(ti
                 <!-- USAGE -->
                 <section class="docs-section" id="endpoint-usage">
                     <h2>11. Usage Statistics</h2>
-                    <p>Get the request count for the current month and the history of companies queried associated with your API Key.</p>
+                    <p>Get the request count for the current month and the history of companies queried associated with your API Key. Does not use requests.</p>
                     
                     <div class="endpoint-header">
                         <span class="http-badge get">GET</span>
@@ -1544,8 +1722,12 @@ $ok = hash_equals(hash_hmac('sha256', $t . '.' . $body, $secret), $v1) && abs(ti
     },
     "history": [
       {
-        "cif": "B12345678",
-        "name": "EMPRESA DE EJEMPLO SL"
+        "cif": "A46103834",
+        "name": "MERCADONA SA",
+        "province": "VALENCIA",
+        "query_count": 3,
+        "last_query": "2026-10-12 17:40:02",
+        "found": true
       }
     ]
   }
@@ -1555,11 +1737,50 @@ $ok = hash_equals(hash_hmac('sha256', $t . '.' . $body, $secret), $v1) && abs(ti
                             <tr><th style="width: 25%;">Field</th><th style="width: 15%;">Type</th><th>Description</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">stats.monthly_queries</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td style="color: #475569;">Number of calls made in the current billing cycle.</td></tr>
-                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">history[]</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">array[object]</span></td><td style="color: #475569;">History of individual queries with their date and CIF.</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">stats.monthly_queries</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td style="color: #475569;">Requests charged in the quota period: the current month on Pro and Business; since 28/05/2026 on Free (or since sign-up, if later), including usage on an earlier paid plan.</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">stats.monthly_quota</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td style="color: #475569;">Requests included in your plan (per month, or 100 in total on Free).</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">stats.remaining_calls</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td style="color: #475569;">Plan requests left before credits are used.</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">stats.total_queries</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td style="color: #475569;">Plan requests charged since sign-up (credits not included).</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">stats.wallet_balance</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">integer</span></td><td style="color: #475569;">Credits left in your wallet.</td></tr>
+                            <tr><td><code style="background: transparent; color: #2563eb; font-weight: 600;">history[]</code></td><td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">array[object]</span></td><td style="color: #475569;">The last 20 companies, by CIF, that you queried in production with a 200 response: each company record (cut on Free), <code>query_count</code>, <code>last_query</code> and <code>found</code>.</td></tr>
                         </tbody>
                     </table>
                 </section>
+
+                <!-- FILTER VALUES (13-10-2026) -->
+                <section class="docs-section" id="endpoint-catalog">
+                    <h2>11.1 Filter values</h2>
+                    <p>Valid values for the filters: <code>province</code> (radar and segments), <code>size_band</code> and <code>status</code> (segments), <code>range</code>, <code>priority</code> and <code>main_act_type</code> (radar), the score priority, webhook events and monitoring event types. Every plan. <strong>Does not use requests.</strong> Also in the Sandbox.</p>
+
+                    <div class="endpoint-header">
+                        <span class="http-badge get">GET</span>
+                        <code>/catalog</code>
+                    </div>
+                    <p>There is no CNAE list: use CNAE-2009 (INE) prefixes of 1 to 4 digits and check how many companies match with <code>/companies/filter?cnae=62&amp;count_only=true</code>, which is free. Labels are in Spanish.</p>
+                    <pre><code class="language-json">{
+  "success": true,
+  "data": {
+    "province": ["A CORUÑA", "ÁLAVA", "ALBACETE", "…", "ZARAGOZA"],
+    "cnae": {
+      "format": "Prefijos de la CNAE-2009 (INE) de 1 a 4 dígitos, separados por comas: 62 o 4711,4719.",
+      "count": "/companies/filter?cnae=62&count_only=true (gratis) dice cuántas empresas hay."
+    },
+    "size_band": [{ "value": "NO_REVENUE", "label": "Sin ventas" }, { "value": "LT_500K", "label": "Menos de 0,5 M€" }, { "value": "500K_1M", "label": "Entre 0,5 y 1 M€" }, { "value": "GT_1M", "label": "Más de 1 M€" }],
+    "status": ["active", "active_or_unknown", "any"],
+    "radar": {
+      "range": ["hoy", "7", "30"],
+      "range_note": "'hoy' o cualquier número de días atrás",
+      "priority": ["muy_alta", "alta", "media", "baja", "muy_baja"],
+      "main_act_type": ["Constitución", "Nombramientos", "Ampliación de Capital", "…"]
+    },
+    "score_priority": ["muy_alta", "alta", "media", "baja", "muy_baja"],
+    "webhook_events": ["test.ping", "company.borme_act", "company.status_changed", "company.risk_level_changed", "watchlist.*"],
+    "watchlist_event_types": ["borme_act", "status_change", "risk_level_change"]
+  },
+  "meta": { "updated_at": "2026-10-13", "cost": 0 }
+}</code></pre>
+                </section>
+
 
                 <!-- ERROR HANDLING -->
                 <section class="docs-section" id="errores">
@@ -1576,6 +1797,34 @@ $ok = hash_equals(hash_hmac('sha256', $t . '.' . $body, $secret), $v1) && abs(ti
   "instance": "req_8f73b1a2c9"
 }</code></pre>
                     <p>The <code>instance</code> field is unique per request and is very useful if you need to report a problem to support.</p>
+                    <p>To handle errors in code, use the <code>code</code> field: it is a stable identifier. These are the codes the API can return:</p>
+                    <table class="docs-table" style="margin-bottom: 24px;">
+                        <thead><tr><th>HTTP</th><th><code>code</code></th><th>Meaning</th></tr></thead>
+                        <tbody>
+                            <tr><td>401</td><td><code>API_KEY_MISSING</code></td><td>The <code>X-API-KEY</code> header was not sent.</td></tr>
+                            <tr><td>401</td><td><code>API_KEY_INVALID</code></td><td>The API key does not exist.</td></tr>
+                            <tr><td>403</td><td><code>API_KEY_INACTIVE</code></td><td>The API key or the account is disabled.</td></tr>
+                            <tr><td>403</td><td><code>COUNTRY_NOT_ALLOWED</code></td><td>The request comes from a country not allowed for your API key.</td></tr>
+                            <tr><td>429</td><td><code>TOO_MANY_REQUESTS</code></td><td>Too many requests per second. Wait as long as <code>Retry-After</code> says and retry.</td></tr>
+                            <tr><td>429</td><td><code>QUOTA_EXCEEDED</code></td><td>Your plan's requests are used up and you have no credits. Retrying does not help: buy credits or upgrade.</td></tr>
+                            <tr><td>429</td><td><code>IP_LIMIT_EXCEEDED</code></td><td>Free plan security limit per IP address.</td></tr>
+                            <tr><td>429</td><td><code>PREVIEW_LIMIT_EXCEEDED</code></td><td>You passed the cap of 25 free previews a day (see <a href="#consumo">Plans and usage</a>). <code>Retry-After</code> says when they are available again.</td></tr>
+                            <tr><td>400</td><td><code>VALIDATION_ERROR</code></td><td>A required parameter is missing or not valid.</td></tr>
+                            <tr><td>400</td><td><code>INVALID_CIF_FORMAT</code></td><td>The CIF format is not valid.</td></tr>
+                            <tr><td>400</td><td><code>FAKE_CIF_NOT_ALLOWED</code></td><td>A test CIF (for example <code>B12345678</code> or <code>B00000000</code>) in production. To test, use the Sandbox.</td></tr>
+                            <tr><td>400</td><td><code>AUTONOMO_NOT_SUPPORTED</code></td><td>A DNI or NIE: we only provide data on companies.</td></tr>
+                            <tr><td>403</td><td><code>PLAN_RESTRICTION</code></td><td>Your plan does not include this endpoint. <code>required_plan</code> says which one does and <code>upsell_opportunities.checkout_url</code> links to the upgrade.</td></tr>
+                            <tr><td>403</td><td><code>UPGRADE_REQUIRED</code></td><td>The same, on <code>/companies/borme</code>.</td></tr>
+                            <tr><td>403</td><td><code>TEST_MODE_RESTRICTION</code></td><td>In the Sandbox, a CIF that is not a test CIF.</td></tr>
+                            <tr><td>404</td><td><code>COMPANY_NOT_FOUND</code></td><td>No company with that CIF or name.</td></tr>
+                            <tr><td>404</td><td><code>RISK_PROFILE_NOT_AVAILABLE</code></td><td>The company has no calculated risk profile.</td></tr>
+                            <tr><td>404</td><td><code>NOT_WATCHING</code></td><td>You removed a company you were not monitoring.</td></tr>
+                            <tr><td>404</td><td><code>WEBHOOK_NOT_FOUND</code></td><td>You have no webhook with that id.</td></tr>
+                            <tr><td>502</td><td><code>WEBHOOK_DELIVERY_FAILED</code></td><td>On <code>/webhooks/{id}/test</code>: your server did not accept the test delivery.</td></tr>
+                            <tr><td>400</td><td><code>INVALID_EVENT</code></td><td>When creating a webhook, an event that does not exist.</td></tr>
+                            <tr><td>500 / 503</td><td><code>SERVER_ERROR</code> / <code>SERVICE_UNAVAILABLE</code></td><td>Our error. Retry later and, if it persists, write to us with the <code>instance</code>.</td></tr>
+                        </tbody>
+                    </table>
                 </section>
 
                 <!-- RATE LIMITING -->
@@ -1609,11 +1858,11 @@ $ok = hash_equals(hash_hmac('sha256', $t . '.' . $body, $secret), $v1) && abs(ti
                             </tr>
                             <tr>
                                 <td><code>X-Quota-Limit</code></td>
-                                <td>Total monthly query limit for your current plan.</td>
+                                <td>Requests included in your plan: per month on Pro and Business; on Free, 100 in total (not renewed).</td>
                             </tr>
                             <tr>
                                 <td><code>X-Quota-Remaining</code></td>
-                                <td>Monthly queries remaining before you start using wallet balance.</td>
+                                <td>Plan requests left, after this request, before credits are used.</td>
                             </tr>
                             <tr>
                                 <td><code>X-Request-Id</code></td>
@@ -1636,6 +1885,7 @@ $ok = hash_equals(hash_hmac('sha256', $t . '.' . $body, $secret), $v1) && abs(ti
   "has_more": true,
   "next_cursor": "eyJwIjoyfQ=="
 }</code></pre>
+                    <p><code>/companies/filter</code> also paginates with <code>meta.next_cursor</code>. <code>/watchlist</code> and <code>/watchlist/events</code> paginate with <code>page</code> and <code>limit</code>: request the next page while <code>meta.has_more</code> is <code>true</code>.</p>
                 </section>
 
                 <!-- OFFICIAL SDKs -->
@@ -1733,7 +1983,7 @@ const evento = constructWebhookEvent(rawBody, req.headers['x-apiempresas-signatu
                         </h3>
                         <pre><code class="language-php">&lt;?php
 $apiKey = 'YOUR_API_KEY';
-$cif = 'B12345678';
+$cif = 'A15075062';
 $url = 'https://spaincompanyapi.com/api/v1/companies?cif=' . $cif;
 
 $ch = curl_init($url);
@@ -1757,7 +2007,7 @@ print_r($data);
 $response = Http::withHeaders([
     'X-API-KEY' => 'YOUR_API_KEY'
 ])->get('https://spaincompanyapi.com/api/v1/companies', [
-    'cif' => 'B12345678'
+    'cif' => 'A15075062'
 ]);
 
 if ($response->successful()) {
@@ -1775,7 +2025,7 @@ $response = $client->request('GET', 'https://spaincompanyapi.com/api/v1/companie
         'X-API-KEY' => 'YOUR_API_KEY',
         'Accept'    => 'application/json'
     ],
-    'query' => ['cif' => 'B12345678']
+    'query' => ['cif' => 'A15075062']
 ]);
 
 $data = json_decode($response->getBody(), true);</code></pre>
@@ -1801,7 +2051,7 @@ const getCompany = async (cif) => {
                         <pre><code class="language-python">import requests
 
 url = "https://spaincompanyapi.com/api/v1/companies"
-params = {"cif": "B12345678"}
+params = {"cif": "A15075062"}
 headers = {"X-API-KEY": "YOUR_API_KEY"}
 
 response = requests.get(url, params=params, headers=headers)
@@ -1811,7 +2061,7 @@ print(response.json())</code></pre>
                             <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-original.svg" width="24" height="24" alt="JavaScript" />
                             JavaScript (Browser Fetch)
                         </h3>
-                        <pre><code class="language-js">fetch('https://spaincompanyapi.com/api/v1/companies?cif=B12345678', {
+                        <pre><code class="language-js">fetch('https://spaincompanyapi.com/api/v1/companies?cif=A15075062', {
   headers: {
     'X-API-KEY': 'YOUR_API_KEY',
     'Accept': 'application/json'

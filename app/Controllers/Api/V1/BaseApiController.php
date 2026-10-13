@@ -132,6 +132,31 @@ class BaseApiController extends ResourceController
         ], 429);
     }
 
+    /**
+     * Error con code estable (13-10-2026). Sustituye a fail()/failNotFound()/...: esos
+     * salían con code UNKNOWN_ERROR y sin message. Conserva los campos que daban
+     * (status, error con el número HTTP, messages) y añade success, code, title, type
+     * y message, igual que el 403 de /companies/batch.
+     *
+     * @param string|array $mensaje Texto, o errores por campo (validación)
+     */
+    protected function fallo(int $status, string $code, $mensaje, array $extra = [])
+    {
+        $messages = is_array($mensaje) ? $mensaje : ['error' => (string) $mensaje];
+        $texto    = is_array($mensaje) ? implode(' ', array_map('strval', array_values($mensaje))) : (string) $mensaje;
+
+        return $this->respond([
+            'status'   => $status,
+            'error'    => $status,
+            'messages' => $messages,
+            'success'  => false,
+            'code'     => $code,
+            'title'    => $code,
+            'type'     => 'https://apiempresas.es/docs/errors/' . strtolower($code),
+            'message'  => $texto,
+        ] + $extra, $status);
+    }
+
     /** Plan al que subir desde el actual: Free → pro, Pro → business, resto → null. */
     protected static function planSiguiente(): ?string
     {

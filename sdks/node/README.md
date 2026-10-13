@@ -69,8 +69,8 @@ while (pagina.meta.next_cursor) {
 // Match (Business): el sector del vendedor es obligatorio
 const match = await api.companies.match('A15075062', 'software');
 
-// Radar de empresas nuevas (Business)
-const nuevas = await api.companies.radar({ province: 'Madrid', range: 'semana' });
+// Radar de empresas nuevas (todos los planes: 10 resultados en Free con nombre y CIF ocultos, 100 en Pro, 1.000 en Business). range: 'hoy' (por defecto) o días atrás ('7', '30')
+const nuevas = await api.companies.radar({ province: 'Madrid', range: '7' });
 // Filtros añadidos en 1.2.0: cnae, min_score, main_act_type, has_phone
 const software = await api.companies.radar({ cnae: '62', min_score: 70, has_phone: true });
 ```
@@ -154,6 +154,13 @@ const api = new ApiEmpresas({
 });
 ```
 
+## Consumo
+
+```typescript
+const u = await api.usage(); // no gasta consultas; no está en el Sandbox
+console.log(u.stats.remaining_calls, u.stats.wallet_balance, u.stats.quota_resets_at);
+```
+
 ## Manejo de Errores
 
 El SDK arrojará un `ApiError` detallado si ocurre algún problema (ej. Plan Insuficiente, CIF inválido).
@@ -168,6 +175,9 @@ try {
     console.error(`Status: ${error.status}`);
     console.error(`Message: ${error.message}`);
     console.error(`Code: ${error.code}`); // p. ej. QUOTA_EXCEEDED, TOO_MANY_REQUESTS, API_KEY_INVALID
+    console.error(`Request: ${error.requestId}`);        // dáselo a soporte
+    console.error(`Retry after: ${error.retryAfter}`);   // segundos, en los 429 por velocidad
+    console.error(`Plan: ${error.requiredPlan} ${error.checkoutUrl}`); // en los 403 de plan
   }
 }
 ```

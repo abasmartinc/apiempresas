@@ -34,7 +34,7 @@ class UsageController extends BaseApiController
     #[OA\Get(
         path: "/api/v1/usage",
         summary: "Obtener Estadísticas de Consumo",
-        description: "Devuelve el recuento de peticiones del mes actual y el historial reciente de empresas consultadas asociado a la API Key.",
+        description: "Devuelve el recuento de peticiones del mes actual y el historial reciente de empresas consultadas asociado a la API Key. **Coste:** 0.",
         tags: ["1. Plan Free"]
     )]
     #[OA\Response(
@@ -62,7 +62,7 @@ class UsageController extends BaseApiController
         $userId = \App\Filters\ApiKeyFilter::$apiMeta['user_id'] ?? null;
 
         if (!$userId) {
-            return $this->failUnauthorized('No se pudo identificar al usuario desde la API Key.');
+            return $this->fallo(401, 'API_KEY_INVALID', 'No se pudo identificar al usuario desde la API Key.');
         }
 
         try {

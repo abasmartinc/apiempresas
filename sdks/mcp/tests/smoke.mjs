@@ -23,9 +23,11 @@ const api = http.createServer((req, res) => {
       return send(404, { success: false, code: 'COMPANY_NOT_FOUND', message: 'Empresa no encontrada' });
     }
     if (u.pathname === '/api/v1/companies/risk-profile') {
+      // Forma real de un 403 de plan: el enlace va dentro de upsell_opportunities
       return send(403, {
-        success: false, code: 'PLAN_REQUIRED', message: 'Endpoint disponible en Business',
-        checkout_url: 'https://apiempresas.es/billing?plan=business',
+        success: false, error: 'PLAN_RESTRICTION', code: 'PLAN_RESTRICTION', message: 'Endpoint disponible en Business',
+        required_plan: 'business', current_plan: 'free',
+        upsell_opportunities: { checkout_url: 'https://apiempresas.es/billing?plan=business' },
       });
     }
     if (u.pathname === '/api/v1/companies/borme') {
@@ -84,7 +86,7 @@ assert.match(txt(r), /404 \(COMPANY_NOT_FOUND\)/);
 
 r = await c.callTool({ name: 'get_risk_profile', arguments: { cif: 'A46103834' } });
 assert.equal(r.isError, true);
-assert.match(txt(r), /no está incluido en el plan/);
+assert.match(txt(r), /no está incluido en el plan actual de la cuenta \(necesita el plan Business\)/);
 assert.match(txt(r), /Mejorar plan: https:\/\/apiempresas\.es\/billing\?plan=business/);
 
 r = await c.callTool({ name: 'get_borme_history', arguments: { cif: 'A46103834' } });

@@ -180,7 +180,7 @@ $isEn = (service('request')->getLocale() === 'en');
     </div>
     <div>
         <span style="display: block; font-size: 0.65rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 2px;"><?= $isEn ? 'Official Registered Address' : 'Dirección Fiscal Oficial' ?></span>
-        <span style="display: block; font-size: 1rem; color: #1e293b; font-weight: 700;">${company.address || '<?= $isEn ? 'View in full profile' : 'Consultar en ficha completa' ?>'}</span>
+        <span style="display: block; font-size: 1rem; color: #1e293b; font-weight: 700;">${(company.address && company.address.indexOf('***') !== 0) ? escHtml(company.address) : (company.address ? '<a href="<?= site_url('register?intent=api&plan=pro&period=monthly&source=home_validator_address') ?>" style="color: #2563eb; text-decoration: none;"><?= $isEn ? 'Full address with the Pro plan' : 'Dirección completa con el plan Pro' ?> →</a>' : '<?= $isEn ? 'View in full profile' : 'Consultar en ficha completa' ?>')}</span>
     </div>
   </div>
 

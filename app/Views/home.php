@@ -657,7 +657,7 @@ $empresa = $api-&gt;companies-&gt;get(<span class="hc-str">'A46103834'</span>);
                         'Validación por CIF y buscador por nombre',
                         'Datos básicos: razón social, estado normalizado, CNAE, provincia y fecha de constitución',
                         'Puntuación comercial (0-100): solo la cifra',
-                        'Empresas recién constituidas (hoy, 7 o 30 días): 10 por consulta',
+                        'Empresas recién constituidas (hoy, 7 o 30 días): 10 por consulta, con nombre y CIF ocultos',
                         'Recuento de segmentos gratis: cuántas empresas hay por sector, zona y tamaño',
                         'Sin tarjeta de crédito',
                     ],
@@ -671,7 +671,7 @@ $empresa = $api-&gt;companies-&gt;get(<span class="hc-str">'A46103834'</span>);
                         'Historial BORME, señales y grafos societarios',
                         'Vigilancia de 100 empresas: cambios en el BORME, el estado y el riesgo, sin gastar consultas',
                         'Puntuación comercial con sus motivos y la última señal del BORME',
-                        'Empresas recién constituidas (hoy, 7 o 30 días): hasta 100 por consulta, filtrables por CNAE y teléfono',
+                        'Empresas recién constituidas (hoy, 7 o 30 días): hasta 100 por consulta, con nombre y CIF',
                         'Soporte prioritario por email: respuesta en menos de 2 h',
                     ],
                     'business' => [

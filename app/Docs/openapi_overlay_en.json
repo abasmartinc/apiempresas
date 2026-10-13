@@ -1,0 +1,1002 @@
+{
+ "lang": "en",
+ "info": {
+  "title": "Spain Company API",
+  "version": "v1",
+  "description": "REST API with data on Spanish companies: identity, status, activity (CNAE code), registered address, directors and BORME filings, plus commercial score, risk profile and public contracts. All responses are JSON over HTTPS.\n\n## Data sources\n\n| Source | Updated |\n|---|---|\n| BORME (Spanish Commercial Registry Gazette) | Every business day |\n| Spanish Public Procurement Platform | Daily |\n| Calculated by APIEmpresas | With each load |\n\n- **BORME:** incorporations, appointments and removals, changes of address, corporate purpose or capital, dissolutions, insolvency proceedings and strike-offs.\n- **Public Procurement Platform:** awarded contracts, with contracting body, amounts and dates.\n- **Calculated by APIEmpresas:** registry status, commercial score and risk profile, based on those publications.\n\nCalculated data is not a Commercial Registry certificate.\n\n## Environments\n\n| Environment | Base URL | Usage |\n|---|---|---|\n| Production | `https://spaincompanyapi.com/api/v1` | Every 200 response uses requests from your plan |\n| Sandbox | `https://spaincompanyapi.com/api/sandbox/v1` | Free. Same API key and same paths |\n\nThe server selector on this page starts on **Sandbox**, so you can try the endpoints without using requests. Switch it to Production to see real data.\n\n## Authentication\n\nSend your API key in the `X-API-KEY` header (`Authorization: Bearer <your_api_key>` is also accepted). You'll find it in your [dashboard](https://spaincompanyapi.com/dashboard) as soon as you [sign up for free](https://spaincompanyapi.com/register?intent=api&source=api_reference_en).\n\n```\ncurl \"https://spaincompanyapi.com/api/v1/companies?cif=A46103834\" \\\n  -H \"X-API-KEY: YOUR_API_KEY\"\n```\n\n## Sandbox\n\nIt only accepts these CIFs (Spanish company tax IDs):\n\n- `A15075062`: company found (Inditex). All responses are samples, with fixed data and the same structure as production.\n- `B00000000`: company not found (404).\n\nThe Sandbox always answers with full data, without the Free plan cuts or quota limits: use it to check the format, not what you will get on your plan. Each response adds a `sandbox` block with the endpoint's minimum plan and the same request in production. `/webhooks` and `/usage` are not in the Sandbox.\n\n## Plans\n\n| Plan | Requests | Speed | Price |\n|---|---|---|---|\n| Free | 100 in total (not renewed) | 2 per second | Free, no card |\n| Pro | 3,000 per month | 20 per second | €19/month + VAT |\n| Business | 10,000 per month | 20 per second | €49/month + VAT |\n\nEach endpoint shows the plan it needs; on a lower plan it returns 403 with the plan you need in `required_plan` and a link to upgrade.\n\n## Usage and credits\n\n- Only 200 responses are charged. Errors cost nothing.\n- While your plan has requests left, every 200 response uses 1, whatever the endpoint. Exceptions: `/companies/verify` uses 2; `/companies/batch` and `POST /companies/reconcile`, 1 per company found; `/companies/filter` rows, 5 per row.\n- Free of charge: the Sandbox, `/usage`, `/catalog`, `/watchlist`, `/webhooks`, the `/companies/filter` count and previews (`/companies/score` on Free and `/companies/insights` on Pro).\n\nWhen your plan's requests run out, or with [prepaid credits](https://spaincompanyapi.com/buy-api-credits), each 200 response is paid with credits:\n\n| Credits | Endpoints |\n|---|---|\n| 1 | `/companies`, `/companies/search`; `/companies/batch` and `POST /companies/reconcile`, 1 per company found |\n| 2 | `/companies/verify` |\n| 3 | score, signals, insights, contact-prep, network, match, radar, borme, contracts and risk-profile |\n| 5 per row | `/companies/filter` rows |\n\n**Free plan with credits:** you get Pro access (full data, verify, reconcile, borme, score, signals, radar up to 100, insights preview and network), without batch, monitoring or Business endpoints. While you have credits, every request is paid with them even if you have free requests left, and speed stays at 2 per second.\n\n**Free plan:** the 100 requests count everything used since 28/05/2026, including usage on an earlier paid plan.\n\n**Previews:** what we show without charging (score on Free, insights on Pro, `business_preview` and the counts in some 403 responses) has a shared cap of 25 per day per account. Past the cap, score and insights return 429 `PREVIEW_LIMIT_EXCEEDED`.\n\n## Limits and headers\n\n| Header | Meaning |\n|---|---|\n| `X-RateLimit-Limit` / `X-RateLimit-Remaining` / `X-RateLimit-Reset` | Per-second limit, what is left in the current window and when it resets |\n| `X-Quota-Limit` / `X-Quota-Remaining` | Your plan's requests and how many are left, after this request |\n| `X-Quota-Reset` | Only on the quota-exceeded error of paid plans: when it renews |\n| `X-Request-Id` | Request identifier; include it if you contact support |\n\n## Errors\n\nErrors follow RFC 7807 (Problem Details) and keep `success`, `error` and `message`. In code, use `code`: it is stable. Messages are in Spanish.\n\n```json\n{\n  \"success\": false,\n  \"error\": \"COMPANY_NOT_FOUND\",\n  \"code\": \"COMPANY_NOT_FOUND\",\n  \"message\": \"Empresa no encontrada.\",\n  \"type\": \"https://apiempresas.es/docs/errors/company_not_found\",\n  \"title\": \"COMPANY_NOT_FOUND\",\n  \"status\": 404,\n  \"detail\": \"Empresa no encontrada.\",\n  \"instance\": \"req_8f73b1a2c9\"\n}\n```\n\n| HTTP | `code` | Meaning |\n|---|---|---|\n| 401 | `API_KEY_MISSING` | The `X-API-KEY` header is missing |\n| 401 | `API_KEY_INVALID` | The API key does not exist |\n| 403 | `API_KEY_INACTIVE` | The API key or the account is disabled |\n| 403 | `PLAN_RESTRICTION` | Your plan does not include this endpoint (the response includes the upgrade link) |\n| 429 | `TOO_MANY_REQUESTS` | Too many requests per second: wait as long as `Retry-After` says and retry |\n| 429 | `QUOTA_EXCEEDED` | Quota used up and no credits: don't retry, buy credits or upgrade |\n| 429 | `IP_LIMIT_EXCEEDED` | Free plan security limit per IP address |\n| 429 | `PREVIEW_LIMIT_EXCEEDED` | Daily cap of free previews reached |\n| 400 | `VALIDATION_ERROR` | A parameter is missing or not valid |\n| 400 | `INVALID_CIF_FORMAT` | The CIF format is not valid |\n| 400 | `FAKE_CIF_NOT_ALLOWED` | Test CIF in production: use the Sandbox |\n| 400 | `AUTONOMO_NOT_SUPPORTED` | DNI or NIE (individuals): we only provide data on companies |\n| 403 | `UPGRADE_REQUIRED` | Same as `PLAN_RESTRICTION`, on `/companies/borme` |\n| 403 | `TEST_MODE_RESTRICTION` | In the Sandbox, a CIF that is not a test CIF |\n| 404 | `COMPANY_NOT_FOUND` | No company with that CIF or name |\n| 404 | `RISK_PROFILE_NOT_AVAILABLE` | The company has no calculated risk profile |\n| 404 | `NOT_WATCHING` | You removed a company you were not monitoring |\n| 404 | `WEBHOOK_NOT_FOUND` | You have no webhook with that id |\n| 502 | `WEBHOOK_DELIVERY_FAILED` | On `/webhooks/{id}/test`, your server did not accept the test delivery |\n| 400 | `INVALID_EVENT` | When creating a webhook, an event that does not exist |\n\n## Pagination\n\n`/companies/search?multiple=true` and `/companies/filter` return `meta` with `has_more` and `next_cursor`: for the next page, send that value as is in `cursor`. `/watchlist` and `/watchlist/events` paginate with `page` and `limit` while `meta.has_more` is `true`.\n\n## Official SDKs\n\n```\nnpm install apiempresas\npip install apiempresas\ncomposer require apiempresas/apiempresas-php\n```\n\nService status: [status.apiempresas.es](https://status.apiempresas.es). Support: [soporte@apiempresas.es](mailto:soporte@apiempresas.es).\n"
+ },
+ "servers": [
+  {
+   "url": "https://spaincompanyapi.com/api/sandbox/v1",
+   "description": "Sandbox: does not use requests (test CIFs A15075062 and B00000000)"
+  },
+  {
+   "url": "https://spaincompanyapi.com/api/v1",
+   "description": "Production: every 200 response uses requests"
+  }
+ ],
+ "production_server": {
+  "url": "https://spaincompanyapi.com/api/v1",
+  "description": "Production"
+ },
+ "tags": [
+  {
+   "name": "Companies",
+   "description": "Company data by CIF or by name, in bulk, KYB verification and name to CIF."
+  },
+  {
+   "name": "Registry and BORME",
+   "description": "Filings published in the BORME, recent signals and corporate links."
+  },
+  {
+   "name": "Risk and contracts",
+   "description": "Risk profile calculated from the BORME and awarded public contracts."
+  },
+  {
+   "name": "Prospecting",
+   "description": "Commercial score, new companies, segments and AI sales tools."
+  },
+  {
+   "name": "Monitoring",
+   "description": "Follow changes in your companies without using requests."
+  },
+  {
+   "name": "Webhooks",
+   "description": "Receive changes in monitored companies on your server."
+  },
+  {
+   "name": "Account",
+   "description": "Your API key usage and valid filter values."
+  }
+ ],
+ "x-tagGroups": [
+  {
+   "name": "Company data",
+   "tags": [
+    "Companies",
+    "Registry and BORME",
+    "Risk and contracts"
+   ]
+  },
+  {
+   "name": "Sales",
+   "tags": [
+    "Prospecting"
+   ]
+  },
+  {
+   "name": "Alerts",
+   "tags": [
+    "Monitoring",
+    "Webhooks"
+   ]
+  },
+  {
+   "name": "Account",
+   "tags": [
+    "Account"
+   ]
+  }
+ ],
+ "paths": {
+  "/companies": {
+   "get": {
+    "tag": "Companies",
+    "summary": "Look up a company by CIF",
+    "description": "**Plan:** Free, Pro and Business (on Free, address masked and no directors)\n\nRetrieve the complete profile of a company by providing its CIF or NIF.\n\n#### Parameters\n\n| Field | Type | Description |\n| --- | --- | --- |\n| `cif` | string | **Required.** The company CIF/NIF (e.g. B12345678). |\n| `admin` | boolean | **Optional.** If `true`, includes current directors and officers (appointments minus the removals, resignations and revocations published in the BORME). Pro |\n\n\\* The `administrators` array is only included if you send `admin=true` and your plan supports it.\n\n#### Data Dictionary (Schema)\n\n| Field | Type | Description |\n| --- | --- | --- |\n| `cif` | string | The normalised Tax Identification Code (Spanish CIF/NIF). |\n| `name` | string | The official company name as registered in the BORME. |\n| `status` | enum | Status as it appears in the Registry, not normalised (e.g. `ACTIVA`, `Activa`, `Extinción`). May be empty. In your code, use `status_code`. |\n| `status_code` | enum | Normalised status: `ACTIVE` (active in the Registry), `PRESUMED_ACTIVE` (no status in the Registry, other Registry data present and no BORME event that closes it), `INSOLVENCY` (insolvency proceedings in progress), `IN_LIQUIDATION`, `DISSOLVED`, `REGISTRY_CLOSED` (registry sheet closed), `MERGED` (absorbed), `INACTIVE`, `EXTINCT` or `UNKNOWN` (not enough data to decide, e.g. UTE joint ventures or records with no Registry data). All plans. |\n| `status_source` | string | null | Where `status_code` comes from: `registry` (Registry status) or `borme_analysis` (reading of the BORME acts, which prevails when there is a more serious event than the registered status). |\n| `status_date` | date | null | Date of the status, when known. |\n| `financials` | object | Pro `size_band`: indicative revenue band (`LT_500K`, `500K_1M`, `GT_1M` or `NO_REVENUE`; null if unknown), with its label in `size_band_label`. `last_accounts_year`: latest financial year with filed accounts in our database (a later one may exist that we have not loaded yet). |\n| `province` | string | Spanish province where the registered office is located. |\n| `cnae` / `cnae_label` | string | CNAE industry code for the primary economic activity and its full descriptive label. |\n| `administrators[]` | array[object] | Current directors and officers: BORME appointments minus later removals, resignations and revocations. Each object contains `name`, the title (`position`; comma-separated if several) and `since`, the date of the current appointment (null if it predates our BORME history). |\n\n#### Data on the Free plan\n\nOn the Free plan (without prepaid credit) the response has the same structure, with these cuts:\n\n- `address` contains the text `*** [ACTUALIZA A PRO PARA VER LA DIRECCION ]`.\n- `corporate_purpose` is cut to 100 characters when longer.\n- `lat` and `lng` are not included.\n- An `upsell_opportunities` object is added. If your code needs to know whether the response is trimmed, check for that field.\n- `financials` is not included. Inside `upsell_opportunities`, `datos_pro` says whether a revenue band and accounts year exist, and how many people currently hold a board position (excluding attorneys-in-fact; `admin=true` on Pro also returns the other posts).\n- `status_code`, `status_source` and `status_date` are returned as on paid plans.\n\nWith a Pro or Business plan, or with prepaid credit, you get the full data without changing your code.",
+    "sandbox": true,
+    "request_example": null,
+    "response_example": {
+     "success": true,
+     "data": {
+      "cif": "B12345678",
+      "name": "EMPRESA DE EJEMPLO SL",
+      "status": "ACTIVA",
+      "status_code": "ACTIVE",
+      "status_source": "registry",
+      "status_date": "2011-02-03",
+      "province": "MADRID",
+      "cnae": "6201",
+      "cnae_label": "Actividades de programación informática",
+      "financials": {
+       "size_band": "GT_1M",
+       "size_band_label": "Más de 1 M€",
+       "last_accounts_year": 2023
+      },
+      "administrators": [
+       {
+        "name": "JUAN PÉREZ GARCÍA",
+        "position": "Adm. Unico",
+        "since": "2019-03-01"
+       }
+      ]
+     }
+    }
+   }
+  },
+  "/companies/search": {
+   "get": {
+    "tag": "Companies",
+    "summary": "Search companies by name",
+    "description": "**Plan:** Free, Pro and Business\n\nSearch for companies matching a name or business name. Without `multiple` it returns the best match, favouring companies registered in the Registry over UTE joint ventures and records without data.\n\n#### Parameters\n\n| Field | Type | Description |\n| --- | --- | --- |\n| `name` | string | **Required.** The name or partial name to search for. (Alias: `q`) |\n| `multiple` | boolean | Optional. Without it (or with `false`) `data` is **a single object**: the best match. With `true`, `data` is a **list** and pagination goes in `meta`. |\n| `limit` | integer | Optional, only with `multiple=true`. Results per page (default 20, up to 100). |\n| `page` / `cursor` | integer / string | Optional, only with `multiple=true`. Page to request, or `meta.next_cursor` from the previous response. With `cursor`, send the same `limit` as in the first request too: otherwise 20 is used. |\n\n#### Data Dictionary (Search)\n\n| Field | Type | Description |\n| --- | --- | --- |\n| `data[]` | array[object] | List of matching companies, with the same fields as `/companies` (without directors): `cif`, `name`, `status`, `status_code`, `province`… |\n| `meta.page` | integer | Current page of search results. |\n| `meta.limit` | integer | Maximum number of results per page. |\n| `meta.has_more` | boolean | Indicates whether more results exist for the current search. |\n\n#### Data on the Free plan\n\nOn the Free plan (without credits), the same cuts as /companies: `address` hidden, `corporate_purpose` cut to 100 characters, no `lat`, `lng` or `financials`, and an `upsell_opportunities` object (`campos_ocultos`, `mensaje` and `upgrade_url`) on each company. On Pro, Business or with credits, full data.",
+    "sandbox": true,
+    "request_example": null,
+    "response_example": {
+     "success": true,
+     "data": [
+      {
+       "cif": "B12345678",
+       "name": "EMPRESA DE EJEMPLO SL",
+       "status": "ACTIVA",
+       "province": "MADRID"
+      }
+     ],
+     "meta": {
+      "page": 1,
+      "limit": 20,
+      "has_more": false
+     }
+    }
+   }
+  },
+  "/companies/batch": {
+   "post": {
+    "tag": "Companies",
+    "summary": "Look up to 100 CIFs at once",
+    "description": "**Plan:** Pro and Business\n\nQuery up to 100 companies in a single request by sending an array of CIFs. The cost is variable: 1 credit from your monthly quota or wallet per company **found** (HTTP 200). If you don't have enough credits to cover the entire batch, the response will be automatically trimmed to the number of companies you can afford. Pro or Business plan only: Free with credits gets 403.\n\n| Field | Type | Description |\n| --- | --- | --- |\n| `meta.requested` | integer | Number of CIFs sent in the request. |\n| `meta.cost` | integer | Credits deducted from your plan for companies found. |",
+    "sandbox": true,
+    "request_example": {
+     "cifs": [
+      "B12345678",
+      "A87654321",
+      "B00000000"
+     ],
+     "admin": true
+    },
+    "response_example": {
+     "success": true,
+     "data": [
+      {
+       "cif": "B12345678",
+       "name": "EMPRESA DE EJEMPLO SL",
+       "status": "ACTIVA"
+      },
+      {
+       "cif": "A87654321",
+       "name": "OTRA EMPRESA SA",
+       "status": "ACTIVA"
+      }
+     ],
+     "meta": {
+      "requested": 3,
+      "found": 2,
+      "cost": 2,
+      "truncated": false
+     }
+    }
+   }
+  },
+  "/companies/verify": {
+   "get": {
+    "tag": "Companies",
+    "summary": "KYB verification in one call",
+    "description": "**Plan:** Pro and Business\n\nIn a single call: whether the company exists and is operating, whether the name you were given matches the registered name, whether the signer is a current director and whether the VAT number is registered in VIES. Returns alerts and a recommendation (`decision_hint`) that you can use as is, or ignore and decide from the data. **Cost: 2 requests.**\n\n| Parameter | Description |\n| --- | --- |\n| `cif` | **Required.** Company CIF. |\n| `name` | Optional. The company name you were given. Compared without accents, punctuation or legal form (0-100; matches from 80). |\n| `person` | Optional. Full name of the signer. Looked up among the current directors, in any word order. |\n| `vat` | Optional. With `true`, checks the EU VAT number in VIES (European Commission). |\n\n| decision\\_hint | When |\n| --- | --- |\n| `fail` | The company is not operating: extinct, dissolved, in liquidation, registry sheet closed, absorbed or inactive. |\n| `review` | Insolvency proceedings, unknown status, name mismatch, signer is not a current director, VAT number not in VIES (if requested) or, on Business, high risk. |\n| `pass` | None of the above. |\n\n- Each alert in `flags` has `code`, `severity` (critical, high, medium, low) and `message`.\n- If VIES does not respond, `checks.vat.checked` is `false` and the decision is not affected.\n- The latest accounts year is informative: later filings may exist that we have not loaded yet.\n- **Business:** the response adds `risk` (`risk_level`, `risk_score`).\n- Company not found: 404 `COMPANY_NOT_FOUND` with `decision_hint: \"fail\"` (not charged). Free plan without credit: 403 `PLAN_RESTRICTION`.",
+    "sandbox": true,
+    "request_example": null,
+    "response_example": {
+     "success": true,
+     "data": {
+      "cif": "B12345678",
+      "exists": true,
+      "name": "EMPRESA DE EJEMPLO SL",
+      "status": "ACTIVA",
+      "status_code": "ACTIVE",
+      "status_source": "registry",
+      "status_date": null,
+      "checks": {
+       "name": {
+        "provided": "Empresa de Ejemplo, S.L.",
+        "score": 100,
+        "match": true
+       },
+       "person": {
+        "provided": "Juan Pérez García",
+        "is_current_admin": true,
+        "matched_name": "PEREZ GARCIA JUAN",
+        "position": "Adm. Unico",
+        "since": "2019-03-01"
+       },
+       "vat": {
+        "vat_number": "ESB12345678",
+        "checked": true,
+        "valid": true,
+        "source": "VIES",
+        "error": null
+       },
+       "accounts": {
+        "last_accounts_year": 2023
+       }
+      },
+      "flags": [],
+      "decision_hint": "pass",
+      "checked_at": "2026-09-28T10:30:00+02:00"
+     }
+    }
+   }
+  },
+  "/companies/reconcile": {
+   "post": {
+    "tag": "Companies",
+    "summary": "Name to CIF (bulk)",
+    "description": "**Plan:** Pro and Business (and Free with credits)\n\nSend a list of company names and get each one's CIF with a confidence score. Useful to complete or clean customer and supplier databases that have the name but not the CIF. **Cost: 1 request per name with a match (`match`)**; ambiguous and not-found names are free.\n\n- Up to 100 names per request. `{\"names\": [\"...\", \"...\"]}` also works.\n- Names are compared without accents, punctuation or legal form. `match`: score 85 or higher and clearly ahead of the next candidate. `ambiguous`: plausible candidates (70 or higher), up to 3 returned. `no_match`: none reaches 70.\n- The province (`province`) is optional and breaks ties between companies with the same name.\n- If your quota runs out, the remaining names come back as `skipped_quota` and are not charged.\n- Pro and Business (and Free with credit). Free plan without credit: 403 `PLAN_RESTRICTION`.",
+    "sandbox": true,
+    "request_example": {
+     "items": [
+      {
+       "name": "Mercadona, S.A.",
+       "province": "Valencia"
+      },
+      {
+       "name": "Talleres Pérez"
+      },
+      {
+       "name": "Panadería Inventada del Norte"
+      }
+     ]
+    },
+    "response_example": {
+     "success": true,
+     "data": [
+      {
+       "input": {
+        "name": "Mercadona, S.A.",
+        "province": "Valencia"
+       },
+       "status": "match",
+       "score": 100,
+       "company": {
+        "cif": "A46103834",
+        "name": "MERCADONA SA",
+        "province": "VALENCIA",
+        "status": "ACTIVA",
+        "status_code": "ACTIVE",
+        "score": 100
+       }
+      },
+      {
+       "input": {
+        "name": "Talleres Pérez",
+        "province": null
+       },
+       "status": "ambiguous",
+       "candidates": [
+        {
+         "cif": "B12345678",
+         "name": "TALLERES PEREZ SL",
+         "province": "MADRID",
+         "status": "ACTIVA",
+         "status_code": "ACTIVE",
+         "score": 100
+        },
+        {
+         "cif": "A12345674",
+         "name": "TALLERES PEREZ SA",
+         "province": "SEVILLA",
+         "status": "ACTIVA",
+         "status_code": "ACTIVE",
+         "score": 100
+        }
+       ]
+      },
+      {
+       "input": {
+        "name": "Panadería Inventada del Norte",
+        "province": null
+       },
+       "status": "no_match"
+      }
+     ],
+     "meta": {
+      "requested": 3,
+      "matched": 1,
+      "ambiguous": 1,
+      "no_match": 1,
+      "invalid": 0,
+      "skipped_quota": 0,
+      "cost": 1,
+      "thresholds": {
+       "match": 85,
+       "ambiguous": 70
+      }
+     }
+    }
+   }
+  },
+  "/companies/borme": {
+   "get": {
+    "tag": "Registry and BORME",
+    "summary": "BORME filing history",
+    "description": "**Plan:** Pro and Business\n\nGet the complete chronological history of publications in the Spanish Commercial Registry (BORME) for a company. Pro, Business and Free with credits. Free without credits: 403 `UPGRADE_REQUIRED`.\n\n#### Parameters\n\n| Field | Type | Description |\n| --- | --- | --- |\n| `cif` | string | **Required.** The company CIF/NIF (e.g. B12345678). |\n\n| Field | Type | Description |\n| --- | --- | --- |\n| `events[].date` | string | Official BORME publication date (YYYY-MM-DD format). |\n| `events[].act_types` | string | Categorised corporate act type (e.g. Appointments, Capital Increase). |\n| `events[].url_pdf` | string | Direct URL to the original PDF scan of the Official Gazette. |",
+    "sandbox": true,
+    "request_example": null,
+    "response_example": {
+     "success": true,
+     "data": {
+      "cif": "B12345678",
+      "company_name": "EMPRESA DE EJEMPLO SL",
+      "events": [
+       {
+        "date": "2023-11-01",
+        "act_types": "Nombramientos, Ceses",
+        "description": "Ceses/Dimisiones. Administrador único: JUAN PEREZ...",
+        "url_pdf": "https://www.boe.es/borme/dias/2023/11/01/pdfs/BORME-A-2023-100-28.pdf"
+       }
+      ]
+     }
+    }
+   }
+  },
+  "/companies/signals": {
+   "get": {
+    "tag": "Registry and BORME",
+    "summary": "Recent corporate signals",
+    "description": "**Plan:** Pro and Business\n\nThe latest BORME act that counts towards the company's commercial score. The list has one item at most. Free plan: 403 `PLAN_RESTRICTION` with the number of events in `upsell_opportunities.eventos_ocultos`.\n\n| Field | Type | Description |\n| --- | --- | --- |\n| `signals[]` | array[object] | One item at most: `type` (always `borme_event`), `label` (type of act) and `date`. |\n| `signals[].probability` | string | The company's commercial priority, the same as `priority` on `/companies/score`: `muy_alta`, `alta`, `media`, `baja` or `muy_baja`. It is not the reliability of the event. |\n| `signals[].url_pdf` | string | null | Official BORME PDF for the day of the signal (`null` if not recorded). |",
+    "sandbox": true,
+    "request_example": null,
+    "response_example": {
+     "success": true,
+     "data": {
+      "cif": "A46103834",
+      "signals": [
+       {
+        "type": "borme_event",
+        "label": "Ampliación de capital",
+        "date": "2026-09-15",
+        "probability": "muy_alta",
+        "url_pdf": "https://www.boe.es/borme/dias/2026/09/15/pdfs/BORME-A-2026-176-15.pdf"
+       }
+      ]
+     }
+    }
+   }
+  },
+  "/companies/network": {
+   "get": {
+    "tag": "Registry and BORME",
+    "summary": "Corporate network",
+    "description": "**Plan:** Pro and Business\n\nGets the corporate network linking companies through their directors. Requires the `cif` parameter. Pro, Business and Free with credits; on Free without credits, 403 `PLAN_RESTRICTION` with the counts in `data.stats`. If the company has no known directors, it returns 200 with only the company node, no `stats` and a `message` (charged like any other request).\n\n| Field | Type | Description |\n| --- | --- | --- |\n| `nodes[]` | array[object] | Graph nodes (companies or directors). |\n| `edges[]` | array[object] | Connections (links) between nodes. |",
+    "sandbox": true,
+    "request_example": null,
+    "response_example": {
+     "success": true,
+     "data": {
+      "nodes": [
+       {
+        "id": "C_123",
+        "type": "company",
+        "label": "EMPRESA DE EJEMPLO SL",
+        "cif": "B12345678",
+        "root": true
+       },
+       {
+        "id": "A_abc",
+        "type": "administrator",
+        "label": "JUAN PEREZ GARCIA"
+       }
+      ],
+      "edges": [
+       {
+        "source": "A_abc",
+        "target": "C_123",
+        "label": "Administrador"
+       }
+      ],
+      "stats": {
+       "total_administrators": 1,
+       "total_linked_companies": 1
+      }
+     }
+    }
+   }
+  },
+  "/companies/risk-profile": {
+   "get": {
+    "tag": "Risk and contracts",
+    "summary": "Risk and solvency profile",
+    "description": "**Plan:** Business\n\nReturns the corporate risk profile, registry compliance (annual accounts filing), governance stability, capital volatility, and official distress alerts associated with a company by CIF. Designed to automate credit scoring, solvency checks, and compliance in B2B onboarding workflows.\n\n| Parameter | Type | Required | Description |\n| --- | --- | --- | --- |\n| `cif` | string | Required | Company CIF/NIF to audit (e.g. `A01001411` or `A15075062` in Sandbox). |\n\n#### Plan restricted response (403 Forbidden - Free & Pro Plans)\n\n```\n{\n  \"success\": false,\n  \"error\": \"PLAN_RESTRICTION\",\n  \"message\": \"El acceso al perfil de riesgo corporativo requiere el plan Business.\",\n  \"upsell_opportunities\": {\n    \"mensaje\": \"Nivel de riesgo de esta empresa: MEDIO. Con el plan Business ves la puntuación, las seis dimensiones, el estado legal y cada evento del BORME que lo explica.\",\n    \"upgrade_url\": \"https://apiempresas.es/billing?plan=business&source=api_403_risk\",\n    \"perfil_disponible\": true,\n    \"nivel_riesgo\": \"MEDIO\"\n  }\n}\n```\n\n`nivel_riesgo` only appears on paid plans; on Free you only get whether a profile exists (`perfil_disponible`). Up to 25 responses with this summary per account per day.\n\n| Field | Type | Description |\n| --- | --- | --- |\n| `risk_score` | integer (0-100) | Consolidated algorithmic risk rating (higher values denote higher default or distress risk). |\n| `risk_level` | string | Qualitative risk grade: `BAJO`, `MEDIO`, `ALTO`, `CRITICO`. |\n| `dimensions` | object | Detailed breakdown of risk factors: legal distress, filing compliance, governance changes, capital instability and credit mitigation. |\n| `canonical_events[]` | array[object] | Chronological list of official corporate and mercantile registry events with severity assessment. |",
+    "sandbox": true,
+    "request_example": null,
+    "response_example": {
+     "success": true,
+     "data": {
+      "cif": "A01001411",
+      "company_name": "RHEINMETALL EXPAL MUNITIONS SA",
+      "risk_score": 62,
+      "risk_level": "ALTO",
+      "confidence_score": 49,
+      "data_quality_score": 70,
+      "summary_message": "Atención: Constan indicadores de elevado riesgo financiero o corporativo.",
+      "legal_state": "REGISTRY_CLOSURE_GENERICO",
+      "data_sources": {
+       "borme_status": "CHECKED_WITH_RECORDS",
+       "accounts_status": "KNOWN_DELAYED",
+       "official_status": "KNOWN"
+      },
+      "dimensions": {
+       "legal_distress": 60,
+       "filing_compliance": 0,
+       "governance_volatility": 30,
+       "capital_instability": 0,
+       "structural_volatility": 0,
+       "stabilizing_credit": 0
+      },
+      "canonical_events": [
+       {
+        "code": "LEGAL_STATE_REGISTRY_CLOSURE_GENERICO",
+        "dimension": "legal_distress",
+        "severity": "high",
+        "description": "Consta publicación registral de cierre sin especificación de causa.",
+        "event_date": "2026-08-24",
+        "classification_confidence": "LOW"
+       }
+      ],
+      "model_version": "2.0.0",
+      "calculated_at": "2026-08-24T00:00:00Z"
+     }
+    }
+   }
+  },
+  "/companies/contracts": {
+   "get": {
+    "tag": "Risk and contracts",
+    "summary": "Public contracts and awards",
+    "description": "**Plan:** Business\n\nQuery public procurement contracts and awards associated with Spanish companies by CIF. Retrieve contracting authority details, award amounts, award dates, and official tender links.\n\n| Parameter | Type | Required | Description |\n| --- | --- | --- | --- |\n| `cif` | string | Required | Company CIF/NIF to query (e.g. `A01001411`). |\n| `page` | integer | Optional | Page number to retrieve. Default: `1`. |\n| `limit` | integer | Optional | Number of contracts per page. Default: `20` (maximum: `100`). |\n\n#### Plan restricted response (403 Forbidden - Free & Pro Plans)\n\n```\n{\n  \"success\": false,\n  \"error\": \"PLAN_RESTRICTION\",\n  \"message\": \"El acceso a contratos públicos requiere el plan Business.\",\n  \"upsell_opportunities\": {\n    \"mensaje\": \"Esta empresa tiene 14 contratos públicos adjudicados por 2.318.400 €. Con el plan Business ves cada contrato: órgano, título, fecha, importe y enlace a la licitación.\",\n    \"upgrade_url\": \"https://apiempresas.es/billing?plan=business&source=api_403_contracts\",\n    \"contratos_detectados\": 14,\n    \"importe_total\": 2318400.0,\n    \"currency\": \"EUR\",\n    \"ultima_adjudicacion\": \"2026-06-12\"\n  }\n}\n```\n\nThe `upsell_opportunities` summary is included in up to 25 403 responses per account per day; after that they only carry `mensaje` and `upgrade_url`.",
+    "sandbox": true,
+    "request_example": null,
+    "response_example": {
+     "success": true,
+     "data": {
+      "cif": "A01001411",
+      "company_name": "RHEINMETALL EXPAL MUNITIONS SA",
+      "summary": {
+       "total_contracts": 32,
+       "total_amount": "617746086.47",
+       "currency": "EUR"
+      },
+      "contracts": [
+       {
+        "tender_id": "https://contrataciondelestado.es/sindicacion/licitacionesPerfilContratante/20344437",
+        "title": "Suministro de 27.000 granadas de mortero de 81 mm...",
+        "contracting_authority": "Jefatura de Asuntos Económicos del Mando de Apoyo Logístico",
+        "award_date": "2026-08-25",
+        "amount": "4395320.00",
+        "currency": "EUR",
+        "tender_url": "https://contrataciondelestado.es/wps/poc?uri=deeplink:detalle_licitacion&idEvl=B4EkDEGFvaA%2Bk2oCbDosIw%3D%3D"
+       }
+      ],
+      "pagination": {
+       "total": 32,
+       "page": 1,
+       "limit": 20,
+       "total_pages": 2,
+       "has_more": true
+      }
+     }
+    }
+   }
+  },
+  "/companies/score": {
+   "get": {
+    "tag": "Prospecting",
+    "summary": "Commercial score (0-100)",
+    "description": "**Plan:** Free, Pro and Business (on Free, the number only)\n\nPower your prospecting with enriched data and real-time business signals.\n\nCommercial score from 0 to 100 for a company: its recent BORME activity, how complete its record is and whether it has a phone, email or website. It does not measure solvency (use `/companies/risk-profile` for that). On Free it returns the number only, without using requests (within the cap of 25 previews a day); `priority`, `reasons` and `last_signal` come back locked.\n\n| Field | Type | Description |\n| --- | --- | --- |\n| `data.score` | integer | Commercial score from 0 to 100. |\n| `data.priority` | enum | Prospecting priority from the score: `muy_alta` (75 or more), `alta` (60), `media` (40), `baja` (20) or `muy_baja`. |\n| `data.reasons` | array | List of reasons behind the score. |\n| `data.last_signal` | object | Latest BORME act that counts towards the score: `type`, `date` and `url_pdf` (official BORME PDF for that day; `null` if not recorded). |",
+    "sandbox": true,
+    "request_example": null,
+    "response_example": {
+     "success": true,
+     "data": {
+      "cif": "B12345678",
+      "score": 82,
+      "priority": "muy_alta",
+      "reasons": [
+       "OPP:95|QUAL:80|CONT:60 · Ampliación de capital"
+      ],
+      "last_signal": {
+       "type": "Ampliación de capital",
+       "date": "2026-09-15",
+       "url_pdf": "https://www.boe.es/borme/dias/2026/09/15/pdfs/BORME-A-2026-176-15.pdf"
+      },
+      "source": "radar"
+     }
+    }
+   }
+  },
+  "/companies/radar": {
+   "get": {
+    "tag": "Prospecting",
+    "summary": "Newly incorporated companies",
+    "description": "**Plan:** Free, Pro and Business (10, 100 or 1,000 results per request)\n\nCompanies incorporated in the period you ask for (today by default), sorted by commercial score, highest first.\n\n- Free: 10 results with name and CIF hidden. Uses 1 request.\n- Pro and Free with credits: up to 100 results. Business: up to 1,000.\n- If there are more companies than fit, `meta.oportunidades_ocultas` says how many are missing.\n- All filters work on every plan.\n\n#### Optional parameters\n\n| Field | Description |\n| --- | --- |\n| `province` | Filter by Spanish province (e.g. MADRID). |\n| `range` | Time window. Accepts `hoy` (today, the default) or an integer for **days back** (e.g. `7`, `30`). |\n| `priority` | Commercial priority: `muy_alta`, `alta`, `media`, `baja` or `muy_baja` (very high to very low). |\n| `cnae` | One or more comma-separated CNAE prefixes (e.g. `62` or `4711,4719`). |\n| `min_score` | Minimum opportunity score, 0 to 100. |\n| `main_act_type` | Type of the latest relevant BORME act (e.g. `Constitución`, `Ampliación de capital`). |\n| `has_phone` | With `true`, only companies with a phone number. |\n\n| Field | Type | Description |\n| --- | --- | --- |\n| `data[].fecha_constitucion` | string | Date the company was incorporated. |\n| `data[].score_total` | integer | null | Commercial score (0-100). With `priority_level` and `main_act_type`, the latest relevant BORME act. |\n| `meta.plan` | string | Your current plan. |\n| `meta.total_disponibles` | integer | Total companies in the Radar. If your plan is capped at `limit`, you'll see the real total here. |",
+    "sandbox": true,
+    "request_example": null,
+    "response_example": {
+     "success": true,
+     "meta": {
+      "plan": "business",
+      "count": 50,
+      "limit": 1000,
+      "total_disponibles": 50
+     },
+     "data": [
+      {
+       "id": 4812345,
+       "company_name": "NUEVA EMPRESA SL",
+       "cif": "B12345678",
+       "fecha_constitucion": "2026-10-13",
+       "cnae": "6201",
+       "cnae_label": "Actividades de programación informática",
+       "registro_mercantil": "MADRID",
+       "municipality": "MADRID",
+       "score_total": 78,
+       "priority_level": "alta",
+       "main_act_type": "Constitución"
+      }
+     ]
+    }
+   }
+  },
+  "/companies/filter": {
+   "get": {
+    "tag": "Prospecting",
+    "summary": "Company segments",
+    "description": "**Plan:** Business (the count is free on every plan)\n\nFilter companies by activity, area, size and other criteria. **Counting is free on every plan** (`count_only=true`): you see how many companies match before paying anything. Downloading the rows is a Business feature and costs **5 requests per returned row**.\n\n| Parameter | Description |\n| --- | --- |\n| `cnae` | Comma-separated CNAE prefixes (e.g. `62` or `4711,4719`). |\n| `province` | Mercantile Registry province (e.g. `MADRID`). |\n| `municipality` | Municipality (e.g. `GETAFE`). |\n| `status` | `active` (default: active in the Registry), `active_or_unknown` (also those with no registered status) or `any`. |\n| `founded_from / founded_to` | Incorporation date, `YYYY-MM-DD`. |\n| `has_phone` | With `true`, only companies with a phone number. The number is not returned. |\n| `size_band` | Comma-separated revenue bands: `NO_REVENUE`, `LT_500K`, `500K_1M`, `GT_1M`. |\n| `min_accounts_year` | Latest filed accounts year equal or later (e.g. `2023`). |\n| `count_only` | With `true`, only the count. Free. |\n| `limit / cursor` | Rows per page (1-1000, default 100) and `meta.next_cursor` from the previous page. |\n\nAt least one of `cnae`, `province` or `municipality` is required.\n\n#### Count only (all plans, free)\n\n#### Rows (Business)\n\n```\n// GET /companies/filter?cnae=62&province=MADRID&has_phone=true&limit=100\n{\n  \"success\": true,\n  \"data\": [\n    {\n      \"cif\": \"B12345678\",\n      \"name\": \"EMPRESA DE EJEMPLO SL\",\n      \"cnae\": \"6201\",\n      \"cnae_label\": \"Actividades de programación informática\",\n      \"province\": \"MADRID\",\n      \"municipality\": \"MADRID\",\n      \"founded\": \"2019-03-01\",\n      \"status\": \"ACTIVA\",\n      \"status_code\": \"ACTIVE\",\n      \"status_source\": \"registry\",\n      \"financials\": { \"size_band\": \"GT_1M\", \"size_band_label\": \"Más de 1 M€\", \"last_accounts_year\": 2023 },\n      \"has_phone\": true\n    }\n  ],\n  \"meta\": {\n    \"total\": 3412,\n    \"returned\": 100,\n    \"limit\": 100,\n    \"has_more\": true,\n    \"next_cursor\": \"eyJpZCI6ODgxMjM0NX0\",\n    \"cost\": 500,\n    \"cost_per_row\": 5,\n    \"truncated\": false,\n    \"filters\": { \"cnae\": [\"62\"], \"province\": \"MADRID\", \"status\": \"active\", \"has_phone\": true }\n  }\n}\n```\n\n- Only returned rows are charged: `meta.cost` = rows × 5. If your quota is not enough, the page is cut (`truncated: true`) to the rows you can pay for.\n- For the next page, pass `meta.next_cursor` as `cursor` with the same filters.\n- Counts are cached for 6 hours: repeating the same search is not recalculated.\n- Without a Business plan, asking for rows returns 403 `PLAN_RESTRICTION` with the count in `upsell_opportunities.total`.\n- Phone numbers and emails are never returned: only `has_phone`.",
+    "sandbox": true,
+    "request_example": null,
+    "response_example": {
+     "success": true,
+     "data": {
+      "total": 3412
+     },
+     "meta": {
+      "filters": {
+       "cnae": [
+        "62"
+       ],
+       "province": "MADRID",
+       "status": "active",
+       "has_phone": true
+      },
+      "cost": 0,
+      "counted_at": "2026-09-29T09:30:00+02:00"
+     }
+    }
+   }
+  },
+  "/companies/insights": {
+   "get": {
+    "tag": "Prospecting",
+    "summary": "AI commercial analysis",
+    "description": "**Plan:** Business (preview on Pro)\n\nAI-powered analysis of the commercial profile and probable needs of a company. On Pro (or Free with credits) there is a preview that does not use requests, within the cap of 25 a day: only `profile` and `conversion_probability`; `pain_points`, `buyer_persona` and `sales_arguments` come back locked, with `message` and `checkout_url`. Free plan: 403 `PLAN_RESTRICTION`.\n\n| Field | Type | Description |\n| --- | --- | --- |\n| `needs[]` | array[string] | List of software needs detected through AI inference. |\n| `conversion_probability` | string | Estimated B2B cross-selling probability. |",
+    "sandbox": true,
+    "request_example": null,
+    "response_example": {
+     "success": true,
+     "data": {
+      "profile": "Servicios de Tecnología",
+      "summary": "Empresa enfocada en desarrollo software...",
+      "needs": [
+       "Presencia Web",
+       "Gestión Cloud"
+      ],
+      "conversion_probability": "Alta",
+      "estimated_ticket": "Medio-Alto"
+     }
+    }
+   }
+  },
+  "/companies/contact-prep": {
+   "get": {
+    "tag": "Prospecting",
+    "summary": "AI contact preparation",
+    "description": "**Plan:** Business\n\nAI-generated sales pitch and objection handling for a target company.\n\n| Field | Type | Description |\n| --- | --- | --- |\n| `sales_approach` | string | Suggested commercial outreach strategy. |\n| `likely_objection` | string | Most likely objection from the prospect. |",
+    "sandbox": true,
+    "request_example": null,
+    "response_example": {
+     "success": true,
+     "data": {
+      "sales_approach": "Consultative and direct approach...",
+      "suggested_message": "Hi, I noticed the recent growth of...",
+      "likely_objection": "Temporary budget constraints",
+      "attack_angle": "Demonstrate immediate ROI..."
+     }
+    }
+   }
+  },
+  "/companies/match": {
+   "get": {
+    "tag": "Prospecting",
+    "summary": "Fit with your sector (B2B match)",
+    "description": "**Plan:** Business\n\nB2B Match calculator. Requires `cif` and `seller_sector` parameters. Returns the commercial fit level and a personalised sales argument.\n\n| Field | Type | Description |\n| --- | --- | --- |\n| `match_score` | integer | B2B fit level (0–100). |\n| `sales_argument` | string | Sales argument tailored to the match. |",
+    "sandbox": true,
+    "request_example": null,
+    "response_example": {
+     "success": true,
+     "data": {
+      "match_score": 85,
+      "fit_level": "Alto",
+      "pain_points_addressed": [
+       "Ineficiencia operativa",
+       "Falta de digitalización"
+      ],
+      "sales_argument": "Our software eliminates manual work...",
+      "recommendation": "Contact immediately."
+     }
+    }
+   }
+  },
+  "/watchlist": {
+   "post": {
+    "tag": "Monitoring",
+    "summary": "Add companies to monitoring",
+    "description": "**Plan:** Pro and Business (100 companies on Pro, 1,000 on Business)\n\nAdd the companies you care about and fetch their changes since a date: new BORME acts, Registry status changes and risk level changes. **Does not consume requests.** Pro: up to 100 companies. Business: up to 1,000.\n\nAdd up to 500 CIFs per request. The response says what happened to each one.",
+    "sandbox": true,
+    "request_example": {
+     "cifs": [
+      "A46103834",
+      "A15075062"
+     ]
+    },
+    "response_example": {
+     "success": true,
+     "data": {
+      "added": [
+       "A46103834"
+      ],
+      "already_watching": [
+       "A15075062"
+      ],
+      "not_found": [],
+      "invalid": [],
+      "rejected_over_limit": []
+     },
+     "meta": {
+      "total": 2,
+      "watch_limit": 100
+     }
+    }
+   },
+   "get": {
+    "tag": "Monitoring",
+    "summary": "List monitored companies",
+    "description": "**Plan:** Pro and Business\n\nLists your watched companies (`page`, `limit` up to 500).",
+    "sandbox": true,
+    "request_example": null,
+    "response_example": {
+     "success": true,
+     "data": [
+      {
+       "cif": "A46103834",
+       "name": "MERCADONA SA",
+       "added_at": "2026-09-27 10:12:04"
+      },
+      {
+       "cif": "A15075062",
+       "name": "INDUSTRIA DE DISENO TEXTIL SA",
+       "added_at": "2026-09-28 08:30:51"
+      }
+     ],
+     "meta": {
+      "total": 2,
+      "watch_limit": 100,
+      "page": 1,
+      "limit": 100,
+      "has_more": false
+     }
+    }
+   }
+  },
+  "/watchlist/{cif}": {
+   "delete": {
+    "tag": "Monitoring",
+    "summary": "Stop monitoring a company",
+    "description": "**Plan:** Pro and Business\n\nRemoves a company. If it was not on your watchlist, returns 404 `NOT_WATCHING`.",
+    "sandbox": true,
+    "request_example": null,
+    "response_example": {
+     "success": true,
+     "data": {
+      "cif": "A46103834",
+      "removed": true
+     },
+     "meta": {
+      "total": 1,
+      "watch_limit": 100
+     }
+    }
+   }
+  },
+  "/watchlist/events": {
+   "get": {
+    "tag": "Monitoring",
+    "summary": "Changes in monitored companies",
+    "description": "**Plan:** Pro and Business\n\n| Parameter | Description |\n| --- | --- |\n| `since` | Date `YYYY-MM-DD`, inclusive. Default: 7 days ago; at most 90 days back. |\n| `types` | Optional. `borme_act`, `status_change`, `risk_level_change`, comma-separated. |\n| `cif` | Optional. Only the events of that company. |\n| `page` / `limit` | Pagination (up to 500 per page). |\n\n- Events are returned oldest first. The `id` is stable: use it to avoid processing the same event twice.\n- `model_change: true` means the level changed because we recalculated our model, not because of anything new at the company, and `false` that it did not. `null` if the model version used for the calculation is not recorded (older profiles).\n- Recommended use: one call a day with `since` = the date of your last call.\n- Free plan (also with credits): 403 `PLAN_RESTRICTION`. On Business you can receive these same events on your server with webhooks.",
+    "sandbox": true,
+    "request_example": null,
+    "response_example": {
+     "success": true,
+     "data": [
+      {
+       "id": "borme_act:8812345",
+       "type": "borme_act",
+       "date": "2026-09-22",
+       "cif": "B12345678",
+       "company_name": "EMPRESA DE EJEMPLO SL",
+       "data": {
+        "act_types": "Nombramientos, Ceses/Dimisiones",
+        "description": "Ceses/Dimisiones. Adm. Unico: ...",
+        "url_pdf": "https://www.boe.es/borme/dias/2026/09/22/pdfs/BORME-A-2026-181-28.pdf"
+       }
+      },
+      {
+       "id": "risk_level_change:B12345678:2026-09-25",
+       "type": "risk_level_change",
+       "date": "2026-09-25",
+       "cif": "B12345678",
+       "company_name": "EMPRESA DE EJEMPLO SL",
+       "data": {
+        "from": "BAJO",
+        "to": "MEDIO",
+        "model_change": null
+       }
+      }
+     ],
+     "meta": {
+      "since": "2026-09-20",
+      "types": [
+       "borme_act",
+       "status_change",
+       "risk_level_change"
+      ],
+      "total": 2,
+      "page": 1,
+      "limit": 100,
+      "has_more": false
+     }
+    }
+   }
+  },
+  "/webhooks": {
+   "get": {
+    "tag": "Webhooks",
+    "summary": "List your webhooks",
+    "description": "**Plan:** Business\n\n> Not available in the Sandbox: this endpoint only works in production.\n\nReceive the changes of the companies on your watchlist on your server, without polling the API: new BORME acts, status changes and risk level changes. Events are generated every 15 minutes.\n\nLists your webhooks with their status: `is_active`, `failure_count` (failed attempts in a row), `last_status_code` and the dates of the last delivery. It includes each webhook's `secret`.",
+    "sandbox": false,
+    "request_example": null,
+    "response_example": {
+     "success": true,
+     "data": [
+      {
+       "id": 12,
+       "user_id": 229,
+       "url": "https://tu-dominio.com/webhooks/apiempresas",
+       "event": "watchlist.*",
+       "secret": "3f9c1b2a7d...",
+       "filters": "[]",
+       "is_active": 1,
+       "failure_count": 0,
+       "last_delivery_at": "2026-10-13 09:15:02",
+       "last_success_at": "2026-10-13 09:15:02",
+       "last_status_code": 200,
+       "disabled_at": null,
+       "created_at": "2026-09-28 10:00:00",
+       "updated_at": "2026-10-13 09:15:02"
+      }
+     ]
+    }
+   },
+   "post": {
+    "tag": "Webhooks",
+    "summary": "Create a webhook",
+    "description": "**Plan:** Business\n\n> Not available in the Sandbox: this endpoint only works in production.\n\n#### Create a webhook\n\nKeep the `secret`: it lets you check that each delivery comes from us. If you send one in the request, yours is used.\n\n| Event | When it arrives |\n| --- | --- |\n| `company.borme_act` | An act is published in the BORME for a watched company. |\n| `company.status_changed` | The Registry changes the status of a watched company. |\n| `company.risk_level_changed` | Its risk level changes (`model_change: true` if caused by a recalculation of our model). |\n| `watchlist.*` | All three above. |\n| `test.ping` | Only when calling `/webhooks/{id}/test`. |\n\n#### What your server receives\n\nA JSON `POST` with these headers: `X-ApiEmpresas-Event`, `X-ApiEmpresas-Delivery` (unique delivery id) and `X-ApiEmpresas-Signature`.\n\n```\n{\n  \"id\": \"5d41402a-bc4b-2a76-b971-9d911017c592\",\n  \"event\": \"company.borme_act\",\n  \"created_at\": \"2026-09-28T10:15:00+02:00\",\n  \"data\": {\n    \"id\": \"borme_act:8812345\",\n    \"type\": \"borme_act\",\n    \"date\": \"2026-09-28\",\n    \"cif\": \"B12345678\",\n    \"company_name\": \"EMPRESA DE EJEMPLO SL\",\n    \"data\": { \"act_types\": \"Nombramientos\", \"description\": \"Nombramientos. Adm. Unico: ...\", \"url_pdf\": \"https://www.boe.es/borme/...\" }\n  }\n}\n```\n\n#### Verify the signature\n\n`X-ApiEmpresas-Signature` looks like `t=1790000000,v1=<signature>`. The signature is the hex HMAC-SHA256 of `t + \".\" + body` with your `secret`. Reject the delivery if it does not match or if `t` is more than 5 minutes old. The SDKs include a helper that does this.\n\n```\n[$t, $v1] = array_map(fn($p) => explode('=', $p, 2)[1], explode(',', $_SERVER['HTTP_X_APIEMPRESAS_SIGNATURE']));\n$body = file_get_contents('php://input');\n$ok = hash_equals(hash_hmac('sha256', $t . '.' . $body, $secret), $v1) && abs(time() - (int) $t) < 300;\n```\n\n#### Retries\n\n- Reply with a 2xx code within 10 seconds. Otherwise we retry with growing waits: 1, 5 and 30 minutes, 2 and 6 hours. Deliveries go out every 15 minutes, so each retry arrives on the first run after that wait. After 6 attempts the delivery is dropped.\n- Use `X-ApiEmpresas-Delivery` to avoid processing the same delivery twice.\n- A webhook is disabled after 50 failed attempts in a row, counting all its deliveries; a successful delivery resets the count. Create it again once your server responds.\n- The URL must be HTTPS (port 443) and public. We do not follow redirects.",
+    "sandbox": false,
+    "request_example": {
+     "url": "https://yourdomain.com/webhooks/apiempresas",
+     "event": "watchlist.*"
+    },
+    "response_example": {
+     "success": true,
+     "message": "Webhook creado correctamente",
+     "id": 12,
+     "event": "watchlist.*",
+     "secret": "3f9c1b2a7d..."
+    }
+   }
+  },
+  "/webhooks/{id}/test": {
+   "post": {
+    "tag": "Webhooks",
+    "summary": "Send a test event",
+    "description": "**Plan:** Business\n\n> Not available in the Sandbox: this endpoint only works in production.\n\nSends a `test.ping` event to the webhook to check that your server receives it and validates the signature. If your server does not reply with a 2xx, the response is 502 `WEBHOOK_DELIVERY_FAILED` with the same `data` (the HTTP status your server returned and the error): the failure is on your server, not the API.",
+    "sandbox": false,
+    "request_example": null,
+    "response_example": {
+     "success": true,
+     "data": {
+      "delivered": true,
+      "http_status": 200,
+      "duration_ms": 143,
+      "error": null,
+      "delivery_id": "5d41402a-bc4b-2a76-b971-9d911017c592"
+     }
+    }
+   }
+  },
+  "/webhooks/{id}/deliveries": {
+   "get": {
+    "tag": "Webhooks",
+    "summary": "Delivery history",
+    "description": "**Plan:** Business\n\n> Not available in the Sandbox: this endpoint only works in production.\n\nLatest deliveries of the webhook, newest first: status (`pending`, `processing`, `retry`, `delivered` or `dead`), attempts, HTTP status your server returned, duration and error. `next_attempt_at` only appears on pending or retrying deliveries. Optional parameters: `status`, `page` and `limit` (1-100, default 50). Does not use requests. 404 `WEBHOOK_NOT_FOUND` if the webhook is not yours.",
+    "sandbox": false,
+    "request_example": null,
+    "response_example": {
+     "success": true,
+     "data": [
+      {
+       "delivery_id": "5d41402a-bc4b-2a76-b971-9d911017c592",
+       "event": "company.borme_act",
+       "event_id": "borme_act:8812345",
+       "status": "delivered",
+       "attempts": 1,
+       "http_status": 200,
+       "duration_ms": 143,
+       "error": null,
+       "created_at": "2026-10-13 09:15:00",
+       "last_attempt_at": "2026-10-13 09:15:02",
+       "next_attempt_at": null,
+       "completed_at": "2026-10-13 09:15:02"
+      }
+     ],
+     "meta": {
+      "webhook_id": 12,
+      "total": 1,
+      "page": 1,
+      "limit": 50,
+      "has_more": false
+     }
+    }
+   }
+  },
+  "/webhooks/{id}": {
+   "delete": {
+    "tag": "Webhooks",
+    "summary": "Delete a webhook",
+    "description": "**Plan:** Business\n\n> Not available in the Sandbox: this endpoint only works in production.\n\nDeletes a webhook. You stop receiving deliveries from that moment. If it does not exist, 404 `WEBHOOK_NOT_FOUND`.",
+    "sandbox": false,
+    "request_example": null,
+    "response_example": {
+     "success": true,
+     "message": "Webhook eliminado"
+    }
+   }
+  },
+  "/usage": {
+   "get": {
+    "tag": "Account",
+    "summary": "Your API key usage",
+    "description": "**Plan:** Free, Pro and Business\n\n> Not available in the Sandbox: this endpoint only works in production.\n\nGet the request count for the current month and the history of companies queried associated with your API Key. Does not use requests.\n\n| Field | Type | Description |\n| --- | --- | --- |\n| `stats.monthly_queries` | integer | Requests charged in the quota period: the current month on Pro and Business; since 28/05/2026 on Free (or since sign-up, if later), including usage on an earlier paid plan. |\n| `stats.monthly_quota` | integer | Requests included in your plan (per month, or 100 in total on Free). |\n| `stats.remaining_calls` | integer | Plan requests left before credits are used. |\n| `stats.total_queries` | integer | Plan requests charged since sign-up (credits not included). |\n| `stats.wallet_balance` | integer | Credits left in your wallet. |\n| `history[]` | array[object] | The last 20 companies, by CIF, that you queried in production with a 200 response: each company record (cut on Free), `query_count`, `last_query` and `found`. |",
+    "sandbox": false,
+    "request_example": null,
+    "response_example": {
+     "success": true,
+     "data": {
+      "stats": {
+       "monthly_queries": 150,
+       "total_queries": 1250
+      },
+      "history": [
+       {
+        "cif": "A46103834",
+        "name": "MERCADONA SA",
+        "province": "VALENCIA",
+        "query_count": 3,
+        "last_query": "2026-10-12 17:40:02",
+        "found": true
+       }
+      ]
+     }
+    }
+   }
+  },
+  "/catalog": {
+   "get": {
+    "tag": "Account",
+    "summary": "Valid filter values",
+    "description": "**Plan:** Free, Pro and Business\n\nValid values for the filters: `province` (radar and segments), `size_band` and `status` (segments), `range`, `priority` and `main_act_type` (radar), the score priority, webhook events and monitoring event types. Every plan. **Does not use requests.** Also in the Sandbox.\n\nThere is no CNAE list: use CNAE-2009 (INE) prefixes of 1 to 4 digits and check how many companies match with `/companies/filter?cnae=62&count_only=true`, which is free. Labels are in Spanish.",
+    "sandbox": true,
+    "request_example": null,
+    "response_example": {
+     "success": true,
+     "data": {
+      "province": [
+       "A CORUÑA",
+       "ÁLAVA",
+       "ALBACETE",
+       "…",
+       "ZARAGOZA"
+      ],
+      "cnae": {
+       "format": "Prefijos de la CNAE-2009 (INE) de 1 a 4 dígitos, separados por comas: 62 o 4711,4719.",
+       "count": "/companies/filter?cnae=62&count_only=true (gratis) dice cuántas empresas hay."
+      },
+      "size_band": [
+       {
+        "value": "NO_REVENUE",
+        "label": "Sin ventas"
+       },
+       {
+        "value": "LT_500K",
+        "label": "Menos de 0,5 M€"
+       },
+       {
+        "value": "500K_1M",
+        "label": "Entre 0,5 y 1 M€"
+       },
+       {
+        "value": "GT_1M",
+        "label": "Más de 1 M€"
+       }
+      ],
+      "status": [
+       "active",
+       "active_or_unknown",
+       "any"
+      ],
+      "radar": {
+       "range": [
+        "hoy",
+        "7",
+        "30"
+       ],
+       "range_note": "'hoy' o cualquier número de días atrás",
+       "priority": [
+        "muy_alta",
+        "alta",
+        "media",
+        "baja",
+        "muy_baja"
+       ],
+       "main_act_type": [
+        "Constitución",
+        "Nombramientos",
+        "Ampliación de Capital",
+        "…"
+       ]
+      },
+      "score_priority": [
+       "muy_alta",
+       "alta",
+       "media",
+       "baja",
+       "muy_baja"
+      ],
+      "webhook_events": [
+       "test.ping",
+       "company.borme_act",
+       "company.status_changed",
+       "company.risk_level_changed",
+       "watchlist.*"
+      ],
+      "watchlist_event_types": [
+       "borme_act",
+       "status_change",
+       "risk_level_change"
+      ]
+     },
+     "meta": {
+      "updated_at": "2026-10-13",
+      "cost": 0
+     }
+    }
+   }
+  }
+ }
+}

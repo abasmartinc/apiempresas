@@ -170,6 +170,7 @@ class SandboxController extends \App\Controllers\Api\V1\BaseApiController
                 'last_signal' => [
                     'type' => 'Ampliación de capital',
                     'date' => '2026-09-15',
+                    'url_pdf' => 'https://www.boe.es/borme/dias/2026/09/15/pdfs/BORME-A-2026-176-15.pdf',
                 ],
                 'source' => 'radar',
             ]
@@ -195,9 +196,11 @@ class SandboxController extends \App\Controllers\Api\V1\BaseApiController
             'success' => true,
             'data' => [
                 'cif' => $cif,
+                // Misma forma que producción (13-10-2026): como mucho un elemento, el último
+                // acto que cuenta para la puntuación; probability = prioridad (ver /score)
                 'signals' => [
-                    ['date' => '2025-01-15', 'type' => 'Nombramiento', 'description' => 'Nombramiento de nuevo Consejero Delegado publicado en BORME.'],
-                    ['date' => '2024-11-20', 'type' => 'Ampliación de Capital', 'description' => 'Ampliación de capital social registrada.']
+                    ['type' => 'borme_event', 'label' => 'Ampliación de capital', 'date' => '2026-09-15', 'probability' => 'muy_alta',
+                     'url_pdf' => 'https://www.boe.es/borme/dias/2026/09/15/pdfs/BORME-A-2026-176-15.pdf'],
                 ]
             ]
         ]);

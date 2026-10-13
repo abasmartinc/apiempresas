@@ -10,7 +10,7 @@ use ApiEmpresas\Resources\Webhooks;
 class ApiEmpresas
 {
     /** Versión del SDK, enviada en el User-Agent. */
-    public const VERSION = '1.2.0';
+    public const VERSION = '1.3.0';
 
     private string $apiKey;
     private string $baseUrl;
@@ -82,6 +82,15 @@ class ApiEmpresas
 
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        // Cabeceras de respuesta: X-Request-Id y Retry-After van a la excepción
+        $respHeaders = [];
+        curl_setopt($ch, CURLOPT_HEADERFUNCTION, static function ($ch, string $line) use (&$respHeaders): int {
+            $parts = explode(':', $line, 2);
+            if (count($parts) === 2) {
+                $respHeaders[strtolower(trim($parts[0]))] = trim($parts[1]);
+            }
+            return strlen($line);
+        });
         curl_setopt($ch, CURLOPT_TIMEOUT, $this->timeout);
         // Descomentar para debug si hay problemas de SSL en local:
         // curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
@@ -110,10 +119,21 @@ class ApiEmpresas
                 $message = $response; // Fallback si devuelve HTML
             }
 
-            throw new ApiException($message, $statusCode, $errorCode, $isJson ? $decodedData : null);
+            throw new ApiException($message, $statusCode, $errorCode, $isJson ? $decodedData : null, $respHeaders);
         }
 
         return $isJson ? $decodedData : ['raw' => $response];
+    }
+
+    /**
+     * Consumo de tu API Key: consultas del periodo, cupo, saldo de créditos e historial de
+     * las últimas empresas consultadas ['stats' => [...], 'history' => [...]]. No gasta
+     * consultas. No está en el Sandbox.
+     */
+    public function usage(): array
+    {
+        $response = $this->request('GET', '/usage');
+        return $response['data'] ?? [];
     }
 
     private static function extractErrorMessage(array $data): ?string

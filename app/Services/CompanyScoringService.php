@@ -117,6 +117,36 @@ class CompanyScoringService
         return 'muy_baja';
     }
 
+    /**
+     * PDF oficial del BORME del acto de esa fecha (13-10-2026). Solo lo usan las rutas de la
+     * API /companies/score y /companies/signals para añadir last_signal.url_pdf (campo nuevo);
+     * getScoreData() no cambia. null si no hay anuncio ese día o el enlace no es del BOE.
+     */
+    public function bormePdf(string $cif, ?string $fecha): ?string
+    {
+        $cif   = strtoupper(trim($cif));
+        $fecha = trim((string) $fecha);
+        if ($cif === '' || !preg_match('/^\d{4}-\d{2}-\d{2}/', $fecha)) {
+            return null;
+        }
+        try {
+            $row = \Config\Database::connect()
+                ->table('borme_posts bp')
+                ->select('bp.url_pdf')
+                ->join('companies c', 'c.id = bp.company_id')
+                ->where('c.cif', $cif)
+                ->where('bp.borme_date', substr($fecha, 0, 10))
+                ->orderBy('bp.id', 'DESC')
+                ->limit(1)
+                ->get()->getRowArray();
+        } catch (\Throwable $e) {
+            log_message('error', '[CompanyScoringService::bormePdf] ' . $e->getMessage());
+            return null;
+        }
+        $url = (string) ($row['url_pdf'] ?? '');
+        return strpos($url, 'https://www.boe.es/') === 0 ? $url : null;
+    }
+
     private function getLatestBormeSignal(int $companyId): ?array
     {
         if ($companyId <= 0) {

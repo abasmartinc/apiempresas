@@ -41,13 +41,13 @@ class CompanyNetworkController extends BaseApiController
         $cif = $this->request->getGet('cif');
         
         if (!$cif) {
-            return $this->fail('Parámetro cif requerido', 400);
+            return $this->fallo(400, 'VALIDATION_ERROR', 'Parámetro cif requerido');
         }
 
         // Verify API Key and Permissions
         $apiKey = $this->apiKeyFromRequest();
         if (empty($apiKey)) {
-            return $this->failUnauthorized('API Key no proporcionada');
+            return $this->fallo(401, 'API_KEY_MISSING', 'API Key no proporcionada');
         }
 
         $accessService = new PlanAccessService();
@@ -111,7 +111,7 @@ class CompanyNetworkController extends BaseApiController
         $company = $model->getByCif($cif);
         if (!$company) {
             ApiRequestLogger::log($userId, 'network', 'error', 'Empresa no encontrada: ' . $cif);
-            return $this->failNotFound('Empresa no encontrada');
+            return $this->fallo(404, 'COMPANY_NOT_FOUND', 'Empresa no encontrada');
         }
 
         $adminModel = new CompanyAdministratorModel();

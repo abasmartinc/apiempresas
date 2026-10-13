@@ -311,12 +311,18 @@ class Search extends BaseController
             // /search_company y las herramientas (/validar-cif, empresa activa, NIF de
             // facturación). Antes salía la fila entera: teléfonos, email, web, coordenadas,
             // objeto social y textos de IA (13-10-2026).
+            // Solo lo que alguna página pinta. La dirección ya es pública en la ficha.
             $camposPublicos = [
                 'name', 'cif', 'nif', 'status', 'status_code', 'province', 'municipality',
-                'cnae', 'cnae_label', 'cnae_2025', 'cnae_2025_label', 'founded',
-                'capital_social_raw', 'address', 'previous_cif_match', 'borme_recent',
+                'cnae', 'cnae_label', 'founded', 'address', 'borme_recent',
             ];
             $publico = array_intersect_key($companyArr, array_flip($camposPublicos));
+
+            // Dirección como en la API del plan Free (mask_company_data): enmascarada.
+            // Este buscador dice enseñar "los mismos datos que devuelve la API".
+            if (!empty($publico['address'])) {
+                $publico['address'] = '*** [ACTUALIZA A PRO PARA VER LA DIRECCION ]';
+            }
 
             return $this->respond(
                 [

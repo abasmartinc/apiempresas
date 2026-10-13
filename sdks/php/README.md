@@ -37,8 +37,8 @@ $lote = $api->companies->batch(['A15075062', 'A46103834']);
 // Match (Business): el sector del vendedor es obligatorio
 $match = $api->companies->match('A15075062', 'software');
 
-// Radar de empresas nuevas (Business)
-$nuevas = $api->companies->radar(['province' => 'Madrid', 'range' => 'semana']);
+// Radar de empresas nuevas (todos los planes: 10 resultados en Free con nombre y CIF ocultos, 100 en Pro, 1.000 en Business). range: 'hoy' (por defecto) o días atrás ('7', '30')
+$nuevas = $api->companies->radar(['province' => 'Madrid', 'range' => '7']);
 ```
 
 ### Verificación KYB (Pro) — 2 consultas
@@ -54,7 +54,7 @@ echo $v['decision_hint'];              // pass | review | fail
 
 Cada empresa trae además `status_code` (ACTIVE, INSOLVENCY, EXTINCT...), `status_source`, `status_date` y, en Pro/Business, `financials`. Los administradores traen `since`.
 
-### Radar con filtros (Business)
+### Radar con filtros (todos los planes)
 
 ```php
 $nuevas = $api->companies->radar(['province' => 'Madrid', 'cnae' => '62', 'min_score' => 70, 'has_phone' => true]);
@@ -117,6 +117,13 @@ Para probar sin gastar consultas, con tu misma API Key y datos simulados:
 $api = new ApiEmpresas('TU_API_KEY', 'https://apiempresas.es/api/sandbox/v1');
 ```
 
+## Consumo
+
+```php
+$u = $api->usage(); // no gasta consultas; no está en el Sandbox
+echo $u['stats']['remaining_calls'];
+```
+
 ## Errores
 
 ```php
@@ -127,6 +134,9 @@ try {
     echo $e->getMessage();     // mensaje legible
     echo $e->getApiCode();     // p. ej. QUOTA_EXCEEDED, TOO_MANY_REQUESTS, API_KEY_INVALID
     echo $e->getErrorCode();   // campo "error" de la respuesta (como en versiones anteriores)
+    echo $e->getRequestId();   // dáselo a soporte
+    echo $e->getRetryAfter();  // segundos, en los 429 por velocidad
+    echo $e->getRequiredPlan() . ' ' . $e->getCheckoutUrl(); // en los 403 de plan
 }
 ```
 

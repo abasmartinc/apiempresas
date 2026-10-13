@@ -28,7 +28,7 @@ class CompanyRiskProfileController extends BaseApiController
     #[OA\Get(
         path: "/api/v1/companies/risk-profile",
         summary: "Perfil de Riesgo Corporativo",
-        description: "Devuelve el perfil de riesgo corporativo, cumplimiento registral (depósito de cuentas), estabilidad de gobernanza y alertas mercantiles asociadas a una empresa mediante su CIF. **Coste:** 1 llamada. Exclusivo para el plan Business.",
+        description: "Devuelve el perfil de riesgo corporativo, cumplimiento registral (depósito de cuentas), estabilidad de gobernanza y alertas mercantiles asociadas a una empresa mediante su CIF. **Coste:** 1 consulta de tu plan o, sin consultas, 3 créditos del bono. Las respuestas con error no gastan nada. Solo plan Business.",
         tags: ["3. Plan Business"]
     )]
     #[OA\Parameter(

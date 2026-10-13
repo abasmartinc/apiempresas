@@ -239,12 +239,14 @@ class ApiWatchlistService
         if (in_array('risk_level_change', $tipos, true)) {
             foreach (array_chunk(array_keys($porCif), 500) as $cifs) {
                 $hist = $db->table('company_risk_profiles_history')
-                    ->select('cif, risk_level, calculated_at, model_config_hash')
+                    ->select('cif, risk_level, calculated_at, model_config_hash, model_version')
                     ->whereIn('cif', $cifs)
                     ->orderBy('calculated_at', 'ASC')
                     ->get()->getResultArray();
+                // risk_profile para leer model_version: el perfil vigente la lleva en su JSON
+                // (es lo que usa CompanyRiskService::getScoreTrend) (13-10-2026)
                 $actual = $db->table('company_risk_profiles')
-                    ->select('cif, risk_level, updated_at')
+                    ->select('cif, risk_level, updated_at, risk_profile')
                     ->whereIn('cif', $cifs)
                     ->get()->getResultArray();
                 $histPorCif = [];
@@ -275,9 +277,14 @@ class ApiWatchlistService
      * Cambios de nivel de riesgo a partir del histórico (versiones anteriores, con su
      * fecha de cálculo) y del perfil actual. Pura: se prueba aparte.
      *
-     * model_change: true cuando el cambio coincide con un cambio de configuración del
-     * modelo (recalculo masivo), para que el cliente pueda distinguirlo de un cambio en
-     * la empresa; null si no se puede saber.
+     * model_change: true cuando el cambio coincide con un cambio del modelo (recálculo
+     * masivo), para que el cliente pueda distinguirlo de un cambio en la empresa; null
+     * si no se puede saber.
+     *
+     * Se compara model_version (histórico: columna; perfil vigente: dentro del JSON
+     * risk_profile). Antes solo model_config_hash, que el perfil vigente no tiene: casi
+     * todos los cambios salían con null (13-10-2026). Con la misma versión, un hash
+     * distinto también cuenta como cambio del modelo.
      */
     public static function riskEvents(array $historial, ?array $actual, string $since): array
     {
@@ -287,13 +294,20 @@ class ApiWatchlistService
                 'level' => strtoupper((string) $h['risk_level']),
                 'date'  => substr((string) $h['calculated_at'], 0, 10),
                 'hash'  => $h['model_config_hash'] ?? null,
+                'ver'   => self::versionModelo($h['model_version'] ?? null),
             ];
         }
         if ($actual !== null && !empty($actual['risk_level'])) {
+            $verActual = $actual['model_version'] ?? null;
+            if ($verActual === null && !empty($actual['risk_profile'])) {
+                $json = json_decode((string) $actual['risk_profile'], true);
+                $verActual = is_array($json) ? ($json['model_version'] ?? null) : null;
+            }
             $serie[] = [
                 'level' => strtoupper((string) $actual['risk_level']),
                 'date'  => substr((string) ($actual['updated_at'] ?? ''), 0, 10),
                 'hash'  => null,
+                'ver'   => self::versionModelo($verActual),
             ];
         }
         usort($serie, fn($a, $b) => strcmp($a['date'], $b['date']));
@@ -306,7 +320,10 @@ class ApiWatchlistService
                 continue;
             }
             $modelChange = null;
-            if ($prev['hash'] !== null && $cur['hash'] !== null) {
+            if ($prev['ver'] !== null && $cur['ver'] !== null) {
+                $modelChange = $prev['ver'] !== $cur['ver'];
+            }
+            if ($modelChange !== true && $prev['hash'] !== null && $cur['hash'] !== null) {
                 $modelChange = $prev['hash'] !== $cur['hash'];
             }
             $out[] = [
@@ -320,6 +337,13 @@ class ApiWatchlistService
             ];
         }
         return $out;
+    }
+
+    /** Versión del modelo normalizada, o null si no consta. */
+    private static function versionModelo($v): ?string
+    {
+        $v = trim((string) ($v ?? ''));
+        return $v === '' ? null : $v;
     }
 
     /** Orden estable: fecha, tipo, id. */

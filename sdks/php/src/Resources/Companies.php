@@ -133,13 +133,16 @@ class Companies
     }
 
     /**
-     * Consulta múltiple de CIFs en una sola petición.
+     * (Pro y Business) Hasta 100 CIFs en una sola petición. Con $admin = true incluye
+     * los administradores vigentes.
      */
-    public function batch(array $cifs): array
+    public function batch(array $cifs, bool $admin = false): array
     {
-        $response = $this->client->request('POST', '/companies/batch', [
-            'cifs' => $cifs
-        ]);
+        $body = ['cifs' => $cifs];
+        if ($admin) {
+            $body['admin'] = true;
+        }
+        $response = $this->client->request('POST', '/companies/batch', $body);
         return [
             'meta' => $response['meta'] ?? [],
             'data' => $response['data'] ?? []
@@ -177,7 +180,7 @@ class Companies
     }
 
     /**
-     * (Business) Obtiene Insights IA de una empresa.
+     * (Business; en Pro, vista previa con profile y conversion_probability) Insights IA de una empresa.
      */
     public function insights(string $cif): array
     {
@@ -187,7 +190,7 @@ class Companies
     }
 
     /**
-     * (Pro) Obtiene datos de contacto y preparación de la empresa.
+     * (Business) Preparación del contacto comercial generada por IA.
      */
     public function contactPrep(string $cif): array
     {
@@ -197,7 +200,8 @@ class Companies
     }
 
     /**
-     * (Business) Obtiene la información del Radar de empresas.
+     * (Todos los planes: Free 10 resultados con nombre y CIF ocultos, Pro 100, Business 1.000)
+     * Empresas recién constituidas. Devuelve la lista (data); el resumen (meta) no se incluye.
      */
     public function radar($cifOrOptions = []): array
     {
@@ -232,7 +236,7 @@ class Companies
     }
 
     /**
-     * (Business) Obtiene la red o entramado societario (Network) de una empresa.
+     * (Pro y Business) Red societaria de una empresa a través de sus administradores.
      */
     public function network(string $cif): array
     {

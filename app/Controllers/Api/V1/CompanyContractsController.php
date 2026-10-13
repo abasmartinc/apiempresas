@@ -28,7 +28,7 @@ class CompanyContractsController extends BaseApiController
     #[OA\Get(
         path: "/api/v1/companies/contracts",
         summary: "Contratos Públicos y Licitaciones",
-        description: "Devuelve el historial oficial de adjudicaciones y licitaciones del Sector Público asociadas a una empresa mediante su CIF. **Coste:** 1 llamada. Exclusivo para el plan Business.",
+        description: "Devuelve el historial oficial de adjudicaciones y licitaciones del Sector Público asociadas a una empresa mediante su CIF. **Coste:** 1 consulta de tu plan o, sin consultas, 3 créditos del bono. Las respuestas con error no gastan nada. Solo plan Business.",
         tags: ["3. Plan Business"]
     )]
     #[OA\Parameter(

@@ -7,12 +7,12 @@
     "source": "github"
   },
   "websiteUrl": "https://apiempresas.es",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "apiempresas-mcp",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "transport": {
         "type": "stdio"
       },

@@ -35,7 +35,7 @@ Datos importantes para no confundir:
 ## Enlaces
 
 - [Documentación de la API](https://apiempresas.es/documentation): todos los endpoints, errores y ejemplos.
-- [Especificación OpenAPI](https://apiempresas.es/public/swagger.json)
+- [Especificación OpenAPI](https://apiempresas.es/api/referencia/openapi.json)
 - [Precios y planes](https://apiempresas.es/#precios)
 - [API KYB para verificar empresas](https://apiempresas.es/api-empresas): flujo de alta de clientes, qué cubre y qué no.
 - [Bonos de créditos](https://apiempresas.es/crear-bono-api)

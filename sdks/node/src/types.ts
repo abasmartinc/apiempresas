@@ -199,12 +199,14 @@ export interface SegmentMeta {
 export type WatchlistEventType = 'borme_act' | 'status_change' | 'risk_level_change';
 
 export interface WatchlistEvent {
+  /** Estable: úsalo para no procesar dos veces el mismo evento. */
+  id: string;
   type: WatchlistEventType;
   cif: string;
   company_name?: string | null;
   date: string;
   /** borme_act: act_types, description, url_pdf. status_change: status, status_code.
-   *  risk_level_change: from, to, model_change. */
+   *  risk_level_change: from, to, model_change (true/false, o null si no consta la versión del modelo). */
   data: Record<string, any>;
 }
 
@@ -239,7 +241,7 @@ export interface WatchlistEventsOptions {
 
 export type WebhookEvent =
   | 'company.borme_act' | 'company.status_changed' | 'company.risk_level_changed'
-  | 'watchlist.*' | 'company.created' | 'export.completed' | string;
+  | 'watchlist.*' | 'test.ping' | string;
 
 export interface WebhookCreateOptions {
   url: string;
@@ -283,15 +285,19 @@ export interface BatchResponse {
   truncated: boolean;
 }
 
+export type Priority = 'muy_alta' | 'alta' | 'media' | 'baja' | 'muy_baja';
+
+/** En el plan Free, priority, reasons y last_signal llegan como texto bloqueado ("🔒 Disponible en Pro"). */
 export interface ScoreData {
   cif: string;
   score: number;
-  priority: string;
-  reasons: string[];
+  priority: Priority | string;
+  reasons: string[] | string;
   last_signal?: {
     type: string;
-    date: string;
-  };
+    date: string | null;
+  } | string;
+  source?: string;
 }
 
 export interface BormeEvent {
@@ -307,14 +313,39 @@ export interface BormeData {
   events: BormeEvent[];
 }
 
+/** Como mucho un elemento: el último acto del BORME que cuenta para la puntuación. */
 export interface SignalEvent {
-  type: string;
+  type: 'borme_event' | string;
   label: string;
-  date: string;
-  probability: string;
+  date: string | null;
+  /** Prioridad comercial de la empresa (la misma que priority en score), no la fiabilidad del evento. */
+  probability: Priority | string;
 }
 
 export interface SignalsData {
   cif: string;
   signals: SignalEvent[];
+}
+
+// ---------------------------------------------------------------------------
+// Consumo (/usage)
+// ---------------------------------------------------------------------------
+
+export interface UsageData {
+  stats: {
+    monthly_queries: number;
+    total_queries: number;
+    monthly_quota: number;
+    remaining_calls: number;
+    wallet_balance: number;
+    plan_name: string;
+    plan_slug: string;
+    /** monthly (se renueva cada mes) o lifetime (Free: 100 en total). */
+    quota_period: 'monthly' | 'lifetime';
+    quota_resets_at: string | null;
+    checkout_url?: string | null;
+    recharge_url?: string | null;
+  };
+  /** Las 20 últimas empresas consultadas (respuesta 200 en producción). */
+  history: Array<Record<string, any> & { cif: string; query_count: number; last_query: string; found: boolean }>;
 }

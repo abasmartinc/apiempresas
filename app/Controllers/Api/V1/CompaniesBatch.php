@@ -95,15 +95,15 @@ class CompaniesBatch extends BaseApiController
         $includeAdmins = filter_var($json['admin'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
         if (!is_array($cifs)) {
-            return $this->failValidationErrors('El parámetro "cifs" debe ser un array.');
+            return $this->fallo(400, 'VALIDATION_ERROR', 'El parámetro "cifs" debe ser un array.');
         }
 
         if (empty($cifs)) {
-            return $this->failValidationErrors('El array "cifs" no puede estar vacío.');
+            return $this->fallo(400, 'VALIDATION_ERROR', 'El array "cifs" no puede estar vacío.');
         }
 
         if (count($cifs) > 100) {
-            return $this->failValidationErrors('El número máximo de CIFs por petición es 100.');
+            return $this->fallo(400, 'VALIDATION_ERROR', 'El número máximo de CIFs por petición es 100.');
         }
 
         // Clean CIFs

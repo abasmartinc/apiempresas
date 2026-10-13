@@ -35,7 +35,7 @@ Good to know:
 ## Links
 
 - [API documentation](https://spaincompanyapi.com/docs): all endpoints, errors and examples.
-- [OpenAPI specification](https://apiempresas.es/public/swagger.json)
+- [OpenAPI specification](https://spaincompanyapi.com/api/reference/openapi.json)
 - [Spanish company data API: plans and KYB use cases](https://spaincompanyapi.com/spanish-company-data-api)
 - [Credit packs](https://spaincompanyapi.com/buy-api-credits)
 - [Create a free account and API key](https://spaincompanyapi.com/register)

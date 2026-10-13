@@ -15,7 +15,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 
-export const VERSION = '1.0.0';
+export const VERSION = '1.1.0';
 
 const API_KEY = (process.env.APIEMPRESAS_API_KEY || '').trim();
 const BASE_URL = (process.env.APIEMPRESAS_BASE_URL || 'https://apiempresas.es/api/v1').replace(/\/+$/, '');
@@ -53,32 +53,54 @@ const cifSchema = z
 /** Mensaje de error útil para el asistente y para la persona: qué pasó y qué hacer. */
 function mensajeError(status: number, body: any): string {
   const partes: string[] = [];
-  const msg = body && typeof body === 'object' ? body.message || body.detail || (typeof body.error === 'string' ? body.error : '') : '';
-  partes.push(`Error ${status}${body?.code ? ` (${body.code})` : ''}: ${msg || 'la API no ha devuelto detalle'}`);
+  const b = body && typeof body === 'object' ? body : {};
+  const primero = b.messages && typeof b.messages === 'object' ? Object.values(b.messages)[0] : '';
+  const msg = b.message || b.detail || (typeof b.error === 'string' ? b.error : '') || (typeof primero === 'string' ? primero : '');
+  const code: string = typeof b.code === 'string' ? b.code : '';
+  partes.push(`Error ${status}${code ? ` (${code})` : ''}: ${msg || 'la API no ha devuelto detalle'}`);
 
-  if (status === 401) {
-    partes.push(`La API key no es válida o falta. Se obtiene gratis en ${SIGNUP_URL} y se configura en APIEMPRESAS_API_KEY.`);
-  }
-  if (status === 403) {
+  // Qué hacer, según el código estable de la API (13-10-2026)
+  const plan = typeof b.required_plan === 'string' ? ` (necesita el plan ${b.required_plan === 'business' ? 'Business' : 'Pro'})` : '';
+  const consejos: Record<string, string> = {
+    API_KEY_MISSING: `Falta la API key. Se obtiene gratis en ${SIGNUP_URL} y se configura en APIEMPRESAS_API_KEY.`,
+    API_KEY_INVALID: `La API key no es válida. Se obtiene gratis en ${SIGNUP_URL} y se configura en APIEMPRESAS_API_KEY.`,
+    API_KEY_INACTIVE: 'La API key o la cuenta están desactivadas. Revísalo en el panel de APIEmpresas.',
+    COUNTRY_NOT_ALLOWED: 'La API key no admite peticiones desde este país (se configura en el panel).',
+    TEST_MODE_RESTRICTION: 'En el Sandbox solo valen los CIF de prueba A15075062 (encontrada) y B00000000 (no encontrada).',
+    PLAN_RESTRICTION: `Este dato no está incluido en el plan actual de la cuenta${plan}.`,
+    UPGRADE_REQUIRED: `Este dato no está incluido en el plan actual de la cuenta${plan}.`,
+    QUOTA_EXCEEDED: 'Se han agotado las consultas del plan y no queda saldo. Reintentar no sirve.',
+    TOO_MANY_REQUESTS: 'Demasiadas peticiones por segundo: espera un momento y vuelve a intentarlo.',
+    IP_LIMIT_EXCEEDED: 'Se ha alcanzado el límite de seguridad por IP del plan Free.',
+    PREVIEW_LIMIT_EXCEEDED: 'Se ha alcanzado el límite diario de vistas previas gratuitas. Vuelve mañana o mejora el plan.',
+    COMPANY_NOT_FOUND: 'No hay ninguna empresa con ese CIF o nombre en la base de datos.',
+    AUTONOMO_NOT_SUPPORTED: 'Es un DNI o NIE: la API solo tiene datos de sociedades, no de autónomos.',
+    FAKE_CIF_NOT_ALLOWED: 'Es un CIF de prueba: en producción usa un CIF real (los de prueba solo valen en el Sandbox).',
+    INVALID_CIF_FORMAT: 'El CIF no tiene un formato válido.',
+    RISK_PROFILE_NOT_AVAILABLE: 'La empresa existe, pero no tiene perfil de riesgo calculado.',
+  };
+  if (code && consejos[code]) {
+    partes.push(consejos[code]);
+  } else if (status === 401) {
+    partes.push(consejos.API_KEY_INVALID);
+  } else if (status === 403) {
     partes.push('Este dato no está incluido en el plan actual de la cuenta.');
   }
-  if (status === 429 && body?.code === 'QUOTA_EXCEEDED') {
-    partes.push('Se han agotado las consultas del plan.');
-  }
-  // Enlaces de compra que trae la propia API en los 403/429 (solo los que vengan)
+  // Enlaces de compra que trae la propia API en los 403/429 (arriba o dentro de upsell_opportunities)
   const etiquetas: Record<string, string> = {
     starter_url: 'Bono de 1.000 créditos (pago único)',
     checkout_url: 'Mejorar plan',
     recharge_url: 'Recargar créditos',
     upgrade_url: 'Planes',
   };
+  const up = b.upsell_opportunities && typeof b.upsell_opportunities === 'object' ? b.upsell_opportunities : {};
+  const vistos = new Set<string>();
   for (const [k, etiqueta] of Object.entries(etiquetas)) {
-    if (body && typeof body[k] === 'string' && body[k]) {
-      partes.push(`${etiqueta}: ${body[k]}`);
+    const url = (typeof b[k] === 'string' && b[k]) || (typeof up[k] === 'string' && up[k]) || '';
+    if (url && !vistos.has(url)) {
+      vistos.add(url);
+      partes.push(`${etiqueta}: ${url}`);
     }
-  }
-  if (status === 404) {
-    partes.push('No hay ninguna empresa con ese CIF en la base de datos (o el CIF es de un autónomo, que la API no cubre).');
   }
   return partes.join('\n');
 }
@@ -184,10 +206,12 @@ export function crearServidor(): McpServer {
         cif: cifSchema,
         name: z.string().optional().describe('Razón social que ha declarado el cliente, para comprobar que coincide'),
         person: z.string().optional().describe('Nombre de la persona que firma, para comprobar si es administradora'),
+        vat: z.boolean().optional().describe('true para comprobar además el NIF-IVA en VIES (operador intracomunitario)'),
       },
       annotations: soloLectura,
     },
-    async ({ cif, name, person }) => llamar(`/companies/verify?${qs({ cif: limpiarCif(cif), name, person })}`),
+    async ({ cif, name, person, vat }) =>
+      llamar(`/companies/verify?${qs({ cif: limpiarCif(cif), name, person, vat: vat ? true : undefined })}`),
   );
 
   server.registerTool(
@@ -199,13 +223,17 @@ export function crearServidor(): McpServer {
         'ambiguous o no_match; solo los match gastan consulta. Plan Pro o superior. Útil para completar hojas de clientes.',
       inputSchema: {
         names: z.array(z.string().min(2)).min(1).max(100).describe('Nombres de empresas'),
+        province: z
+          .string()
+          .optional()
+          .describe('Provincia (p. ej. VALENCIA) para desempatar entre empresas con el mismo nombre; se aplica a todos'),
       },
       annotations: soloLectura,
     },
-    async ({ names }) =>
+    async ({ names, province }) =>
       llamar('/companies/reconcile', {
         method: 'POST',
-        body: JSON.stringify({ items: names.map((name) => ({ name })) }),
+        body: JSON.stringify({ items: names.map((name) => (province ? { name, province } : { name })) }),
       }),
   );
 
@@ -256,7 +284,7 @@ export function crearServidor(): McpServer {
     'get_usage',
     {
       title: 'Consumo de la cuenta',
-      description: 'Plan de la cuenta, consultas usadas y disponibles. No gasta consultas.',
+      description: 'Plan de la cuenta, consultas usadas y disponibles, y saldo de créditos. No gasta consultas. No funciona en el Sandbox.',
       inputSchema: {},
       annotations: soloLectura,
     },

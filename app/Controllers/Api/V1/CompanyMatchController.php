@@ -16,7 +16,7 @@ class CompanyMatchController extends BaseApiController
     #[OA\Get(
         path: "/api/v1/companies/match",
         summary: "Calculadora de Match B2B",
-        description: "Evalúa el encaje comercial entre una empresa prospecto y un sector de ventas.",
+        description: "Evalúa el encaje comercial entre una empresa prospecto y un sector de ventas. **Coste:** 1 consulta de tu plan o, sin consultas, 3 créditos del bono. Las respuestas con error no gastan nada. Solo plan Business.",
         tags: ["3. Plan Business"]
     )]
     #[OA\Parameter(
@@ -49,13 +49,13 @@ class CompanyMatchController extends BaseApiController
         $sellerSector = $this->request->getGet('seller_sector');
         
         if (!$cif || !$sellerSector) {
-            return $this->fail('Parámetros cif y seller_sector requeridos', 400);
+            return $this->fallo(400, 'VALIDATION_ERROR', 'Parámetros cif y seller_sector requeridos');
         }
 
         // Verify API Key and Permissions
         $apiKey = $this->apiKeyFromRequest();
         if (empty($apiKey)) {
-            return $this->failUnauthorized('API Key no proporcionada');
+            return $this->fallo(401, 'API_KEY_MISSING', 'API Key no proporcionada');
         }
 
         $accessService = new PlanAccessService();
@@ -118,7 +118,7 @@ class CompanyMatchController extends BaseApiController
         $company = $model->getByCif($cif);
         if (!$company) {
             ApiRequestLogger::log($userId, 'match', 'error', 'Empresa no encontrada: ' . $cif);
-            return $this->failNotFound('Empresa no encontrada');
+            return $this->fallo(404, 'COMPANY_NOT_FOUND', 'Empresa no encontrada');
         }
         
         // Merge with scores if exist

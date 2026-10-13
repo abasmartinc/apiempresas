@@ -78,7 +78,7 @@ print(response.json())</div>
             <div class="dash-dev-card">
                 <span class="dash-dev-kicker">Sandbox · gratis</span>
                 <p>Prueba tu código sin gastar consultas: misma clave, base <code>/api/sandbox/v1</code> y CIF <code>A15075062</code>.</p>
-                <a href="<?= site_url('documentation#auth') ?>">Ver cómo usarlo &rarr;</a>
+                <a href="<?= site_url('api/referencia') ?>">Probarlo en la referencia &rarr;</a>
             </div>
             <div class="dash-dev-card">
                 <span class="dash-dev-kicker">SDK oficiales</span>

@@ -37,9 +37,10 @@ class WebhookEvents
      */
     public static function all(): array
     {
+        // company.created y export.completed (y su alias new_company) ya no se aceptan
+        // (13-10-2026): nunca se enviaban (WebhookDispatcher solo manda los de la
+        // vigilancia) y ningún webhook los tenía. Quien los pida recibe INVALID_EVENT.
         return [
-            self::COMPANY_CREATED,
-            self::EXPORT_COMPLETED,
             self::TEST_PING,
             self::COMPANY_BORME_ACT,
             self::COMPANY_STATUS_CHANGED,
