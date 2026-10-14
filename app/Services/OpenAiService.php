@@ -26,9 +26,17 @@ class OpenAiService
 
     /**
      * Send a conversation to OpenAI and get a response.
+     *
+     * Por defecto, si OpenAI falla devuelve un texto de disculpa (lo enseña el chat). Con
+     * $options['throw'] = true lanza una RuntimeException con código 503 y el mensaje real: la
+     * generación de textos SEO (14-10-2026) recibía la disculpa, la leía como "JSON no válido" y
+     * gastaba los 3 intentos de cada empresa durante una caída de la API (732 errores el 12-10).
      */
     public function getChatResponse(array $messages, array $options = [])
     {
+        $throw = !empty($options['throw']);
+        unset($options['throw']);
+
         try {
             $params = array_merge([
                 'model' => $this->model,
@@ -41,6 +49,9 @@ class OpenAiService
             return $response->choices[0]->message->content ?? 'Lo siento, no he podido procesar tu solicitud.';
         } catch (\Exception $e) {
             log_message('error', 'OpenAI Chat Error: ' . $e->getMessage());
+            if ($throw) {
+                throw new \RuntimeException('OpenAI: ' . $e->getMessage(), 503, $e);
+            }
             return 'Hubo un error al conectar con la inteligencia artificial.';
         }
     }

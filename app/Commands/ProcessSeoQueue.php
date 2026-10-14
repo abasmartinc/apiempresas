@@ -158,6 +158,16 @@ class ProcessSeoQueue extends BaseCommand
                         CLI::write("Omitida ID {$companyId} ({$seoData['motivo']}). Eliminando de la cola.", 'light_gray');
                         $db->table('seo_generation_queue')->where('company_id', $companyId)->delete();
                         continue;
+                    } elseif ($seoData && !empty($seoData['api_caida'])) {
+                        // 14-10-2026: la API de OpenAI falla (cuota, límite, caída). Se devuelve
+                        // el intento y se para: seguir solo gastaba los 3 intentos de cada empresa
+                        // (732 errores en 6 horas el 12-10).
+                        $db->query(
+                            "UPDATE seo_generation_queue SET status = 'pending', attempts = GREATEST(attempts - 1, 0), processing_started_at = NULL, last_error = ? WHERE company_id = ?",
+                            [mb_substr(preg_replace('/[\r\n\t]+/', ' ', (string) $seoData['error']), 0, 250), $companyId]
+                        );
+                        CLI::error("La API de OpenAI no responde ({$seoData['error']}). Se para la cola hasta la próxima ejecución.");
+                        break;
                     } else {
                         $errorMsg = !empty($seoData['error'])
                             ? mb_substr('IA: ' . preg_replace('/[\r\n\t]+/', ' ', (string) $seoData['error']), 0, 250)

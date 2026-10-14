@@ -169,6 +169,18 @@ if (!function_exists('seo_ai_datos')) {
         }
         sort($fechas);
 
+        // 14-10-2026: año de constitución que contradice los datos. Una fecha futura (el extractor
+        // guarda a veces el inicio de operaciones, p. ej. 2026-11-01) o anterior a anuncios del
+        // BORME de la propia ficha en más de 30 días (fecha equivocada o nombre reutilizado) no se
+        // le da a la IA: con "Año de constitución: 2026" y anuncios de años antes escribía otro
+        // año y la validación lo rechazaba ("Año de constitución equivocado: 1934 (es 2026)").
+        if ($anio !== '') {
+            $fFecha = substr($f, 0, 10);
+            if ($fFecha > date('Y-m-d') || ($fechas && $fechas[0] < date('Y-m-d', strtotime($fFecha . ' -30 days')))) {
+                $anio = '';
+            }
+        }
+
         // Actos: los de una misma fecha se juntan (Mercadona tiene 4 anuncios el mismo día) y se
         // cuentan los tipos de TODOS los anuncios, no solo de los últimos: si no, el resumen de
         // una empresa con 300 anuncios habla solo de las últimas semanas.
@@ -266,7 +278,13 @@ if (!function_exists('seo_ai_generar')) {
         }
         if ($d['capital'] !== '')   $lineas[] = "Capital social: {$d['capital']}";
         $lineas[] = 'Actividad registrada (CNAE): ' . ($hayCnae ? $d['cnae'] : 'NO CONSTA');
-        $lineas[] = 'Objeto social (estatutos): ' . ($hayObjeto ? $d['objeto'] : 'NO CONSTA');
+        // 14-10-2026: sin objeto social ya no se pone "Objeto social (estatutos): NO CONSTA". Esa
+        // línea, junto con las reglas y la FAQ que hablaban siempre de "según sus estatutos, puede
+        // dedicarse a…", hacía que la IA lo citara igualmente y la validación lo rechazaba
+        // ("Cita el objeto social y no consta"): 1.056 errores en 4 días en seo:process-queue.
+        if ($hayObjeto) {
+            $lineas[] = "Objeto social (estatutos): {$d['objeto']}";
+        }
         if ($d['num_actos'] === 1) {
             $lineas[] = "Anuncios publicados en el BORME (en nuestros datos): uno solo, del {$d['ultimo_acto']}"
                 . ($d['actos'] ? ' (' . preg_replace('/^[^:]+:\s*/u', '', $d['actos'][0]) . ')' : '') . '.';
@@ -298,11 +316,17 @@ if (!function_exists('seo_ai_generar')) {
             $p2 = 'las actividades que recoge su objeto social, resumidas en lenguaje claro y agrupadas en dos a cuatro líneas de actividad (no lo copies literalmente). Empieza con "Según sus estatutos, puede dedicarse a…" o "Su objeto social recoge…". Marca con <strong></strong> dos o tres actividades que aparezcan en el objeto social; nunca el nombre ni lugares.';
             $pitchEj = 'Sociedad limitada de Getafe (Madrid) cuyo objeto social es la instalación de sistemas de climatización.';
             $origenTags = 'del objeto social' . ($hayCnae ? ' o del CNAE' : '');
+            $reglasObjeto = '- El objeto social es lo que la sociedad PUEDE hacer según sus estatutos, no prueba lo que hace hoy. Exprésalo como "su objeto social recoge…", "según sus estatutos, puede dedicarse a…" o "está registrada para…". Nunca "se dedica", "ofrece", "presta servicios a sus clientes". Tampoco con el CNAE: "su actividad registrada es…", no "se dedica a…".
+- Resume el objeto social sin ampliarlo: no añadas explicaciones ni actividades que no estén escritas en él.
+- Si la actividad registrada (CNAE) no tiene nada que ver con el objeto social (p. ej. CNAE de construcción y objeto social de producción audiovisual), no menciones el CNAE en ningún campo.';
+            $faqDedica = 'A "¿A qué se dedica…?" se responde con "Según sus estatutos, puede dedicarse a…"' . ($hayCnae ? ' o "Su actividad registrada es…"' : '') . '.';
         } else {
             $p1Actividad = 'y actividad registrada (CNAE)';
             $p2 = 'el objeto social NO CONSTA: no escribas "objeto social" ni "estatutos" ni "puede dedicarse". Explica en lenguaje claro qué abarca su actividad registrada (CNAE) en general, sin atribuirle servicios, productos ni actividades concretas. Marca con <strong></strong> la actividad registrada.';
             $pitchEj = 'Sociedad anónima de Bilbao (Vizcaya) con actividad registrada en intermediación monetaria.';
             $origenTags = 'del CNAE (solo lo que dice su nombre; nada que no esté en él)';
+            $reglasObjeto = '- No tenemos el objeto social de esta empresa: en NINGÚN campo (texto, FAQ, frase corta) escribas "objeto social", "estatutos" ni "puede dedicarse", ni siquiera para decir que no consta. Habla solo de su actividad registrada (CNAE): "su actividad registrada es…", "está registrada en…". Nunca "se dedica", "ofrece", "presta servicios a sus clientes".';
+            $faqDedica = 'A "¿A qué se dedica…?" se responde SOLO con "Su actividad registrada es…" (nunca "Según sus estatutos" ni "puede dedicarse").';
         }
 
         $prompt = <<<TXT
@@ -313,9 +337,7 @@ Escribe en español de España, con tono informativo y neutro, como una ficha de
 
 REGLAS (obligatorias en todos los campos):
 - Usa solo los datos de arriba. Lo que pone NO CONSTA no lo menciones ni lo deduzcas de otro dato.
-- El objeto social es lo que la sociedad PUEDE hacer según sus estatutos, no prueba lo que hace hoy. Exprésalo como "su objeto social recoge…", "según sus estatutos, puede dedicarse a…" o "está registrada para…". Nunca "se dedica", "ofrece", "presta servicios a sus clientes". Tampoco con el CNAE: "su actividad registrada es…", no "se dedica a…".
-- Resume el objeto social sin ampliarlo: no añadas explicaciones ni actividades que no estén escritas en él.
-- Si la actividad registrada (CNAE) no tiene nada que ver con el objeto social (p. ej. CNAE de construcción y objeto social de producción audiovisual), no menciones el CNAE en ningún campo.
+{$reglasObjeto}
 - No inventes servicios, productos, clientes, empleados, facturación, instalaciones, marcas, premios, valores, misión, años de experiencia ni ubicaciones.
 - Prohibido: líder, referente, compromiso, excelencia, calidad, innovador, soluciones integrales, amplia experiencia, trayectoria, de confianza, profesionales cualificados, a medida, servicio personalizado.
 - No digas si la empresa está activa, cerrada o en buena situación, ni valores su solvencia: no es un dato de arriba.
@@ -325,10 +347,10 @@ REGLAS (obligatorias en todos los campos):
 - Escribe el nombre exactamente así: "{$n}".
 
 CAMPOS:
-1. "seo_text": dos párrafos (entre 80 y 140 palabras en total) separados por una línea en blanco (\\n\\n).
+1. "seo_text": dos párrafos (entre 80 y 140 palabras en total; si los datos no dan para tanto, escribe menos, nunca menos de 40, antes que rellenar o repetir) separados por una línea en blanco (\\n\\n).
    - Párrafo 1: quién es: nombre, forma jurídica, domicilio, año de constitución, CIF {$p1Actividad}, solo con los datos que consten.
    - Párrafo 2: {$p2} Si hay anuncios del BORME, termina con una frase que diga cuántos constan en nuestros datos y la fecha del último, sin interpretarlos.
-2. "faqs": exactamente 3 objetos {"q": "...", "a": "..."}. Elige 3 de estas preguntas (u otras cuya respuesta ESTÉ en los datos): {$ejemplos}. Respuestas de una o dos frases, en texto plano, con el dato concreto. A "¿A qué se dedica…?" se responde con "Según sus estatutos, puede dedicarse a…" o "Su actividad registrada es…".
+2. "faqs": exactamente 3 objetos {"q": "...", "a": "..."}. Elige 3 de estas preguntas (u otras cuya respuesta ESTÉ en los datos): {$ejemplos}. Respuestas de una o dos frases, en texto plano, con el dato concreto. {$faqDedica}
 3. "seo_tags": de 3 a 6 etiquetas de actividad sacadas {$origenTags}, de 1 a 3 palabras, con mayúscula inicial, genéricas y reutilizables entre empresas (por ejemplo "Construcción", "Reformas de viviendas", "Promoción inmobiliaria"). Sin nombre de la empresa, sin lugares, sin marcas, sin adjetivos.
 4. "seo_pitch": una frase informativa de 80 a 150 caracteres con forma jurídica, municipio o provincia y actividad principal. Ejemplo: "{$pitchEj}" Sin adjetivos promocionales.
 5. "borme_summary": una o dos frases (máximo 40 palabras) que resuman los anuncios del BORME: cuántos hay, entre qué años y qué tipos de acto predominan según el recuento. Sin interpretarlos ni deducir causas o consecuencias (un cese no es "una crisis", un nombramiento no es "una reestructuración"). Si hay un solo anuncio, dilo así ("Consta un único anuncio, del…"). No uses "Otros" como tipo de acto. Si no hay anuncios, "".
@@ -344,6 +366,7 @@ TXT;
             'response_format' => ['type' => 'json_object'],
             'max_tokens'      => 1500,
             'temperature'     => 0.3,
+            'throw'           => true, // 14-10-2026: un fallo de la API no es "JSON no válido"
         ]));
 
         $j = json_decode($respuesta, true);
@@ -354,17 +377,31 @@ TXT;
         // seo_text: solo <strong>, párrafos con \n\n, longitud razonable
         $texto = trim(strip_tags((string) ($j['seo_text'] ?? ''), '<strong>'));
         $texto = preg_replace("/\n{3,}/", "\n\n", str_replace("\r", '', $texto));
+        // 14-10-2026: el mínimo era 250 caracteres, pero a una empresa con pocos datos (sin objeto
+        // social, sin año, sin anuncios) no se le pueden sacar 80 palabras sin inventar, y la IA
+        // escribía bien en ~240 caracteres: 123 errores "longitud fuera de rango (241-249)" en 4
+        // días. Por debajo de 150 (unas 25 palabras) el texto sí está roto.
         $largo = mb_strlen(strip_tags($texto), 'UTF-8');
-        if ($largo < 250 || $largo > 1600) {
+        if ($largo < 150 || $largo > 1600) {
             throw new \RuntimeException("seo_text con longitud fuera de rango ({$largo})");
         }
-        $prohibidas = '/\b(l[ií]der(es)?|referentes?|excelencia|innovador[ae]?s?|soluciones integrales|amplia experiencia|trayectoria|de confianza|profesionales cualificados|servicio personalizado)\b/iu';
+        // 14-10-2026: "referente(s) a/al" es "relativo a" ("anuncios referentes a nombramientos"),
+        // no publicidad; se excluye con el lookahead.
+        $prohibidas = '/\b(l[ií]der(es)?|referentes?(?!\s+al?\b)|excelencia|innovador[ae]?s?|soluciones integrales|amplia experiencia|trayectoria|de confianza|profesionales cualificados|servicio personalizado)\b/iu';
         $pitch = trim(strip_tags((string) ($j['seo_pitch'] ?? '')));
         // Una palabra "prohibida" que ya está en los datos (p. ej. "LIDER" en el nombre o
         // "de confianza" en el objeto social) no es lenguaje promocional de la IA.
+        // 14-10-2026: se compara sin tildes y sin la terminación de género/número: si el objeto
+        // social dice "productos innovadores" y la IA escribe "innovadoras", o el dato es "LIDER"
+        // y la IA pone "líderes", también está en los datos.
+        $enDatos = static function (string $w) use ($datos): bool {
+            $w = mb_strtolower(seo_ai_sin_tildes($w), 'UTF-8');
+            $raiz = str_contains($w, ' ') ? $w : preg_replace('/(?:es|as|os|a|e|s)$/u', '', $w);
+            return mb_stripos(seo_ai_sin_tildes($datos), $raiz) !== false;
+        };
         if (preg_match_all($prohibidas, strip_tags($texto) . ' ' . $pitch, $mm)) {
             foreach ($mm[0] as $w) {
-                if (mb_stripos(seo_ai_sin_tildes($datos), seo_ai_sin_tildes($w)) === false) {
+                if (!$enDatos($w)) {
                     throw new \RuntimeException("Texto con lenguaje promocional: '{$w}'");
                 }
             }
@@ -406,16 +443,43 @@ TXT;
         // 10-10-2026: antes la ventana era "40 caracteres que no sean dígitos" y cruzaba frases y
         // FAQ distintas; ahora se queda dentro de la frase y del campo.
         $sinBorme = strip_tags($texto) . ' ' . $pitch . ' ' . json_encode($j['faqs'] ?? [], JSON_UNESCAPED_UNICODE);
+        // 14-10-2026: el nombre de la empresa puede llevar "Fundación" y un año ("FUNDACION 1934"):
+        // no es una fecha de constitución.
+        $sinNombre = str_ireplace($d['nombre'], 'LA EMPRESA', $sinBorme);
         $anioAnuncio = (string) ($d['anio_anuncio_constitucion'] ?? '');
-        if (preg_match_all('/(?:constitu|fundad|fundaci)\w*([^.\d"]{0,60}?)\b(1[89]\d{2}|20\d{2})\b/iu', $sinBorme, $mm, PREG_SET_ORDER)) {
+        // 14-10-2026: años de anuncios del BORME (el de constitución, el primero, el último y los
+        // de las últimas fechas). "Desde su constitución, constan anuncios en el BORME entre 2000
+        // y 2026" es correcto aunque 2000 no sea el año de constitución (47 errores "2000 (es 1997)").
+        $aniosBorme = [];
+        foreach (array_merge([$d['anuncio_constitucion'] ?? '', $d['primer_acto'] ?? '', $d['ultimo_acto'] ?? ''], (array) ($d['actos'] ?? [])) as $fb) {
+            if (preg_match('/\b(1[89]\d{2}|20\d{2})\b/', (string) $fb, $ab)) {
+                $aniosBorme[$ab[1]] = true;
+            }
+        }
+        if (preg_match_all('/(?:constitu|fundad|fundaci)\w*([^.\d"]{0,60}?)\b(1[89]\d{2}|20\d{2})\b(?!\s*(?:€|euros?\b))/iu', $sinNombre, $mm, PREG_SET_ORDER | PREG_OFFSET_CAPTURE)) {
             foreach ($mm as $m) {
-                $a = $m[2];
+                $a = $m[2][0];
                 if ($d['anio'] !== '' && $a === $d['anio']) {
                     continue;
                 }
-                if ($anioAnuncio !== '' && $a === $anioAnuncio && preg_match('/BORME|public|anuncio/iu', $m[0])) {
-                    continue;
+                // Año de un anuncio del BORME (antes solo el de constitución): se admite si la FRASE entera (no
+                // solo el trozo entre "constitu…" y el año) habla del BORME o de la publicación
+                // ("El BORME publicó su constitución en 2005"). "Constituida en 2005" sigue siendo
+                // un error aunque la frase cite el BORME.
+                if (isset($aniosBorme[$a])) {
+                    $ini = $m[0][1];
+                    $fin = $ini + strlen($m[0][0]);
+                    $antes = substr($sinNombre, 0, $ini);
+                    $corte = max(strrpos($antes, '.') ?: 0, strrpos($antes, '"') ?: 0);
+                    $despues = substr($sinNombre, $fin);
+                    $finFrase = strcspn($despues, '."');
+                    $frase = substr($sinNombre, $corte, $fin - $corte + $finFrase);
+                    $directo = preg_match('/^(?:constituid[ao]s?|constituy[óo]|fundad[ao]s?)\s+(?:en\s+)?(?:el\s+(?:año\s+)?)?\d{4}$/iu', $m[0][0]);
+                    if (!$directo && preg_match('/BORME|public|anuncio/iu', $frase)) {
+                        continue;
+                    }
                 }
+                $m[0] = $m[0][0];
                 throw new \RuntimeException($d['anio'] !== ''
                     ? "Año de constitución equivocado: {$a} (es {$d['anio']}) en '{$m[0]}'"
                     : "Habla de la constitución con un año y el año no consta: '{$m[0]}'");
@@ -423,7 +487,10 @@ TXT;
         }
         // Sin objeto social no puede citarlo (BBVA: "según sus estatutos, puede dedicarse a…
         // gestión de inversiones", sacado de la nada).
-        if ($d['objeto'] === '' && preg_match('/objeto social|estatutos|puede dedicarse/iu', $sinBorme, $mm)) {
+        // 14-10-2026: en el texto y la frase corta se sigue rechazando todo; una FAQ que lo cite se
+        // descarta sola más abajo (quedan las otras dos) en vez de tirar la generación entera.
+        $citaObjeto = '/objeto social|estatutos|puede dedicarse/iu';
+        if ($d['objeto'] === '' && preg_match($citaObjeto, strip_tags($texto) . ' ' . $pitch, $mm)) {
             throw new \RuntimeException("Cita el objeto social y no consta ('{$mm[0]}')");
         }
 
@@ -438,7 +505,10 @@ TXT;
         foreach ((array) ($j['faqs'] ?? []) as $f) {
             $q = trim(strip_tags((string) ($f['q'] ?? '')));
             $a = trim(strip_tags((string) ($f['a'] ?? '')));
-            if ($q !== '' && $a !== '' && !(preg_match($prohibidas, $a, $mw) && mb_stripos(seo_ai_sin_tildes($datos), seo_ai_sin_tildes($mw[0])) === false)) {
+            if ($d['objeto'] === '' && preg_match($citaObjeto, $q . ' ' . $a)) {
+                continue;
+            }
+            if ($q !== '' && $a !== '' && !(preg_match($prohibidas, $a, $mw) && !$enDatos($mw[0]))) {
                 $faqs[] = ['q' => $q, 'a' => $a];
             }
         }
@@ -567,8 +637,11 @@ if (!function_exists('getOrGenerateAiSeoData')) {
                 'pitch'  => $r['seo_pitch'],
             ];
         } catch (\Throwable $e) {
-            log_message('error', '[seo_dynamic_helper] Error generando texto para ID ' . ($company['id'] ?? '?') . ': ' . $e->getMessage());
-            return ['status' => 'error', 'error' => $e->getMessage()];
+            // 14-10-2026: fallo de la API de OpenAI (cuota, límite, caída). No es culpa de la
+            // empresa: la cola no gasta el intento y para hasta la siguiente ejecución.
+            $apiCaida = $e instanceof \RuntimeException && $e->getCode() === 503 && str_starts_with($e->getMessage(), 'OpenAI: ');
+            log_message($apiCaida ? 'warning' : 'error', '[seo_dynamic_helper] Error generando texto para ID ' . ($company['id'] ?? '?') . ': ' . $e->getMessage());
+            return ['status' => 'error', 'error' => $e->getMessage(), 'api_caida' => $apiCaida];
         }
     }
 }
