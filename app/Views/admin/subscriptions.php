@@ -276,10 +276,9 @@
         background-color: #2152ff;
     }
 </style>
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+<?= view('admin/partials/select2') ?>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    aeAlCargar(function() { aeSelect2(function($) {
         var options = {
             width: '100%'
         };
@@ -291,12 +290,16 @@
         $('select[name="status"]').select2(Object.assign({}, options, { placeholder: "Buscar estado..." }));
 
         // Parche definitivo: obligar a mostrar la caja de búsqueda cuando Select2 la oculta
-        $(document).on('select2:open', function() {
-            setTimeout(function() {
-                $('.select2-search--hide').removeClass('select2-search--hide');
-            }, 10);
-        });
-    });
+        // (una sola vez: con hx-boost esta vista se puede abrir varias veces sin recargar)
+        if (!window.__aeSelect2Abierto) {
+            window.__aeSelect2Abierto = true;
+            $(document).on('select2:open', function() {
+                setTimeout(function() {
+                    $('.select2-search--hide').removeClass('select2-search--hide');
+                }, 10);
+            });
+        }
+    }, 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js'); });
 </script>
 <?= $this->endSection() ?>
 
