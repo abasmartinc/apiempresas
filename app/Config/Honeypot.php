@@ -24,7 +24,9 @@ class Honeypot extends BaseConfig
     /**
      * Honeypot HTML Template
      */
-    public string $template = '<label>{label}</label><input type="text" name="{name}" value="">';
+    // 14-10-2026: autocomplete="off" y tabindex="-1" para que el autorrelleno del navegador ni el
+    // tabulador lleguen al campo oculto (solo debería rellenarlo un bot).
+    public string $template = '<label>{label}</label><input type="text" name="{name}" value="" autocomplete="off" tabindex="-1">';
 
     /**
      * Honeypot container

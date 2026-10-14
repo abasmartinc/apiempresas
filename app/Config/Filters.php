@@ -28,7 +28,8 @@ class Filters extends BaseFilters
     public array $aliases = [
         'csrf'          => CSRF::class,
         'toolbar'       => DebugToolbar::class,
-        'honeypot'      => Honeypot::class,
+        // 14-10-2026: sin excepción ni 500 cuando un bot rellena el campo (ver App\Filters\HoneypotFilter).
+        'honeypot'      => \App\Filters\HoneypotFilter::class,
         'invalidchars'  => InvalidChars::class,
         'secureheaders' => SecureHeaders::class,
         'cors'          => Cors::class,
