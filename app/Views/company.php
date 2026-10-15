@@ -234,6 +234,9 @@
     if (!empty($company['phone'])) {
         $organizationSchema['telephone'] = $company['phone'];
     }
+    if (!empty($company['email']) && filter_var($company['email'], FILTER_VALIDATE_EMAIL)) {
+        $organizationSchema['email'] = $company['email'];
+    }
     if (!empty($company['fecha_constitucion']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $company['fecha_constitucion'])) {
         $organizationSchema['foundingDate'] = $company['fecha_constitucion'];
     }
@@ -1223,6 +1226,23 @@
                                                 <?= esc($m) ?>
                                             </a>
                                         <?php endforeach; ?>
+                                    </dd>
+                                </div>
+                                <?php endif; ?>
+
+                                <?php $emailVal = trim((string) ($company['email'] ?? '')); ?>
+                                <?php if ($emailVal !== '' && $emailVal !== '-' && filter_var($emailVal, FILTER_VALIDATE_EMAIL)): ?>
+                                <div class="b2b-data-row">
+                                    <dt class="b2b-data-label">
+                                        <div>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                                stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m22 7-10 5L2 7"></path></svg>
+                                        </div>
+                                        Email
+                                    </dt>
+                                    <dd class="b2b-data-value">
+                                        <a href="mailto:<?= esc($emailVal, 'attr') ?>" rel="nofollow" style="color: #2563eb; text-decoration: none; font-weight: 600; word-break: break-all;"><?= esc($emailVal) ?></a>
                                     </dd>
                                 </div>
                                 <?php endif; ?>

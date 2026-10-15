@@ -71,6 +71,28 @@
                             <p>Atención al cliente y reportes.</p>
                         </div>
                     </a>
+                    <a href="<?= site_url('admin/aportaciones') ?>" class="group-link">
+                        <span class="link-icon icon-sub-emerald"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg></span>
+                        <div class="link-text">
+                            <strong style="display: flex; align-items: center; gap: 8px;">
+                                Datos aportados
+                                <?php
+                                    // Teléfonos, webs y emails enviados desde "Añadir…" en la ficha, sin revisar.
+                                    $aportPendientes = 0;
+                                    try {
+                                        $aportPendientes = \Config\Database::connect()->table('company_contributions')
+                                            ->whereIn('estado', ['pendiente', 'verificado'])->countAllResults();
+                                    } catch (\Throwable $e) {
+                                        // La tabla aún no existe (scripts/sql/company_contributions.sql).
+                                    }
+                                ?>
+                                <?php if ($aportPendientes > 0): ?>
+                                    <span style="background: #ef4444; color: white; font-size: 0.75rem; padding: 2px 8px; border-radius: 99px; font-weight: 800;"><?= $aportPendientes ?></span>
+                                <?php endif; ?>
+                            </strong>
+                            <p>Teléfonos, webs y emails que envían desde la ficha. Aprobar o rechazar.</p>
+                        </div>
+                    </a>
                     <a href="<?= site_url('admin/subscriptions') ?>" class="group-link">
                         <span class="link-icon icon-sub-emerald"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 3h.008v.008H12V18Zm-3-6h.008v.008H9v-.008ZM9 15h.008v.008H9V15Zm0 3h.008v.008H9V18Zm6-6h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008V15Zm0 3h.008v.008h-.008V18Z" /></svg></span>
                         <div class="link-text"><strong>Suscripciones</strong><p>Pagos activos y ciclos de facturación.</p></div>
