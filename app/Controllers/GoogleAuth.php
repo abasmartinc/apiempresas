@@ -210,7 +210,22 @@ class GoogleAuth extends BaseController
             $token = $this->googleClient->fetchAccessTokenWithAuthCode($code);
             
             if (isset($token['error'])) {
-                throw new \Exception('Error al obtener el token: ' . $token['error_description']);
+                // 15-10-2026: "invalid_grant" (Google lo describe como "Bad Request") = el código ya
+                // se usó o caducó: el callback se abrió dos veces (doble clic, recarga, botón atrás,
+                // el navegador precargando la URL) o el usuario tardó más de unos minutos. No es un
+                // fallo nuestro: si la primera vez ya inició sesión, se le lleva a donde iba; si no,
+                // se le pide que vuelva a pulsar el botón. Se registra como aviso, no como error.
+                if (($token['error'] ?? '') === 'invalid_grant') {
+                    if (session()->get('logged_in')) {
+                        log_message('info', '[GoogleAuth] Código ya usado o caducado con la sesión ya iniciada; se sigue al destino.');
+                        return redirect()->to($destinoPed !== '' && $this->destinoSeguro($destinoPed) ? site_url($destinoPed) : site_url('dashboard'));
+                    }
+                    log_message('warning', '[GoogleAuth] Código de Google ya usado o caducado (invalid_grant); se pide repetir el acceso.');
+                    return redirect()->to(site_url('enter'))
+                        ->with('error', 'El acceso con Google ha caducado. Vuelve a pulsar «Continuar con Google».');
+                }
+                throw new \Exception('Error al obtener el token: ' . $token['error']
+                    . (isset($token['error_description']) ? ' (' . $token['error_description'] . ')' : ''));
             }
 
             $this->googleClient->setAccessToken($token['access_token']);
