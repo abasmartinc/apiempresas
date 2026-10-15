@@ -89,6 +89,11 @@ if (!function_exists('seo_pl_lugar')) {
     function seo_pl_lugar(string $s): string
     {
         $mapa = seo_pl_mapa_tildes();
+        // 15-10-2026: basura en la base ("Barcelona Tel\u{FFFD}Fono", "Ventas de Astig (Astigarraga")
+        $s = trim(preg_replace('/\s+tel\W{0,2}\p{L}{0,2}fono\b.*$/iu', '', $s));
+        if (substr_count($s, '(') > substr_count($s, ')')) {
+            $s = trim(preg_replace('/\s*\((?!\s*(?:el|la|los|las|l\'|es|sa|s\'|o|a|os|as)\s*$)[^()]*$/iu', '', $s));
+        }
         // "Astillero, el" -> "El Astillero"; "Palmas de Gran Canaria, Las" -> "Las Palmas de…"
         // "Astillero, el" / "Hospitalet de Llobregat (L')" / "Castell de Guadalest el" -> artículo delante
         if (preg_match('/^(.+?)(?:\s*,\s*|\s*\(\s*)(el|la|los|las|l\'|es|sa|s\'|o|a|os|as)\s*\)?$/iu', trim($s), $m)
@@ -134,6 +139,14 @@ if (!function_exists('seo_pl_minusculas')) {
         if (mb_strlen($mayus, 'UTF-8') / mb_strlen($letras, 'UTF-8') < 0.7) {
             // Ya viene en caja mixta, pero a menudo sin tildes ("mercancias", "asi"): se ponen
             // solo en las palabras en minúscula (las capitalizadas pueden ser nombres propios).
+            $s = preg_replace('/\bY\/O\b/u', 'y/o', $s);
+            $s = preg_replace_callback('/\b\p{Lu}{2,}\b/u', static function ($m) use ($mapa) {
+                if (in_array($m[0], ['IVA', 'IRPF', 'CNAE', 'BORME', 'NIF', 'CIF', 'UTE', 'SICAV', 'VTC', 'ITV', 'PVC', 'LED', 'GPS', 'ETT', 'ONG', 'IAE', 'TIC', 'SAAS', 'PYME', 'PYMES', 'USA', 'BIM', 'HVAC', 'UE', 'IA', 'TV', 'SL', 'SA', 'SLU', 'SAU', 'CB', 'AIE', 'SLP', 'I+D', 'RRHH', 'DJ', 'PC', 'IT'], true)) {
+                    return $m[0];
+                }
+                $min = mb_strtolower($m[0], 'UTF-8');
+                return $mapa[$min] ?? $min;
+            }, $s);
             return preg_replace_callback('/\b\p{Ll}+\b/u', static fn ($m) => $mapa[$m[0]] ?? $m[0], $s);
         }
         $t = mb_strtolower($s, 'UTF-8');
@@ -201,23 +214,38 @@ if (!function_exists('seo_pl_objeto_actividades')) {
         // Códigos y rótulos de CNAE: "(CNAE F4331)", "CNAE: 4321", "EPIGRAFE IAE 501",
         // "de la Clasificación Nacional de Actividades Económicas 2025", "n.c.o.p."
         $t = preg_replace('/\(?\s*\b(?:C\.?N\.?A\.?E\.?|I\.?A\.?E\.?|EP[IÍ]GRAFE)\b(?:\s*(?:2009|2025))?[\s:.\-nºNº°]*[A-U]?\s*[\d\.\s,y]{2,}\)?/iu', ' ', $t);
-        $t = preg_replace('/\(?\s*\b(?:de\s+)?la\s+clasificaci[oó]n\s+nacional\s+de\s+actividades\s+econ[oó]micas\b(?:\s*\(?\s*C\.?N\.?A\.?E\.?\s*\)?)?(?:\s*(?:2009|2025))?\s*\)?/iu', ' ', $t);
+        $t = preg_replace('/\(?\s*\b(?:(?:de|seg[uú]n)\s+)?(?:la\s+)?clasificaci[oó]n\s+nacional\s+de\s+actividades\s+econ[oó]micas\b(?:\s*\(?\s*C\.?N\.?A\.?E\.?\s*\)?)?(?:\s*(?:2009|2025))?\s*\)?/iu', ' ', $t);
         $t = preg_replace('/\(\s*C\.?\s?N\.?\s?A\.?\s?E\.?[^)]{0,120}\)/iu', ' ', $t);
+        // 15-10-2026 (revisión de 5.000 textos): "código Nacional de Actividades Económicas … es el 52.26:",
+        // "con Código en número 47.55", "cuyo código de actividad nacional CNAE es el 4791",
+        // "El código de su actividad económica principal, según será, 77.51", "artículo segundo y código "68.32"
+        $t = preg_replace('/[,;]?\s*(?:\b(?:y|con|cuyo|el|su|siendo)\s+)*(?:art[ií]culo\s+\p{L}+\s+y\s+)?\bc[oó]digo\b[^;:]{0,150}?\d{2}\.?\d{1,2}\b["”]?\s*:?\s*/iu', ' ', $t);
+        $t = preg_replace('/\s*[-(]\s*\d{2}\.?\d{0,2}\s*[-)](?!\s*\p{L}{2})/u', ' ', $t);                 // "-68.11-", "(43.29)", "-4730-"
+        $t = preg_replace('/\s*\(\s*principal\s*\)/iu', '', $t);
+        $t = preg_replace('/\s*,?\s*(?:y\s+)?siendo\s+(?:esta|ésta|este|éste)\s+su\s+(?:actividad|objeto)\s+principal\b,?/iu', '', $t);
+        $t = preg_replace('/\s*,?\s*(?:y\s+)?que\s+constituye\s+(?:su|lo)\s+(?:actividad|objeto)\s+principal\b(?:\s+de\s+la\s+sociedad)?(?:\s+y\s+a\s+la\s+que\s+(?:le\s+)?corresponde)?/iu', '', $t);
+        $t = preg_replace('/\s*,?\s*a\s+la\s+que\s+(?:le\s+)?corresponde\b/iu', '', $t);
+        $t = preg_replace('/\b(?:su|la)\s+actividad\s+principal\s+(?:ser[aá]|es|consiste\s+en)\s+/iu', '', $t);
+        $t = preg_replace('/[,:]?\s*\(?(?:actividad|objeto)\s+principal\)?(?=\s*(?:[;.,:]|$|y\s|e\s))/iu', '', $t);
         $t = preg_replace('/\s*,?\s*siendo\s+su\s+c[oó]digo\s+(?:C\.?\s?N\.?\s?A\.?\s?E\.?\s*)?(?:el\s+)?[\d.]+\s*/iu', '; ', $t);
         $t = preg_replace('/\s+(?=(?:y\s+como\s+)?(?:otras\s+actividades|actividad\s+principal)\s*:)/iu', "\n", $t);
-        $t = preg_replace('/\s*\bn\.\s?c\.\s?o\.\s?p\.?\.?(?=\s+[\p{Lu}\d])/u', ';', $t);   // fin de un rótulo de CNAE
+        $t = preg_replace('/\s*\bn[\s.,]{0,2}c[\s.,]{0,2}o[\s.,]{0,2}p\b\.?\.?(?=\s*[\p{Lu}\d])/u', ';', $t);   // fin de un rótulo de CNAE
         $t = preg_replace('/[,;.]?\s+(?=\(?[A-U]?\d{2}\.?\d{1,2}\)?\s*[-–\/]\s*\p{L})/u', "\n", $t);   // "…, 46.62 - Comercio…"
-        $t = preg_replace('/\.\s+(?=\d{4}\s+\p{Lu}{3})/u', "\n", $t);                                  // ". 8121 LIMPIEZA…"
-        $t = preg_replace('/\.-\s+/u', "\n", $t);
+        $t = preg_replace('/\.\s+(?=\d{4}\s+\p{Lu}{3})/u', "\n", $t);
+        $t = preg_replace_callback('/\s\d{4}\s+(\p{Lu})(?=\p{Ll})/u', static fn ($m) => ' ' . mb_strtolower($m[1], 'UTF-8'), $t);   // "… y 8121 Limpieza general…"                                  // ". 8121 LIMPIEZA…"
+        $t = preg_replace('/\.-\s*/u', "\n", $t);
+        $t = preg_replace('/[,;]?\s+(?=\d{2}\.\d{1,2}\.\s+\p{L})/u', "\n", $t);                         // "…, 43.31. Revocamiento"
+        $t = preg_replace('/\s*\b\d{2}\.\d{1,2}\.(?=\p{L})/u', "\n", $t);                                  // "68.11.compraventa"
+        $t = preg_replace('/(?<=\p{L}{3})\.([a-h])\s+(?=\p{Lu})/u', "\n", $t);                               // "EMPRESARIAL.a La prestación"
         $t = preg_replace('/\.{2,}\s*/u', "\n", $t);                                                   // "restaurantes..La intermediación"
-        $t = preg_replace('/(?<=\p{L}{3})\.(?=\p{Lu}\p{Ll}{2})/u', "\n", $t);                                    // "PUBLICIDAD.Otras actividades"
+        $t = preg_replace('/(?<=\p{L}{3})\.(?=\p{Lu}\p{Ll})/u', "\n", $t);                                    // "PUBLICIDAD.Otras actividades"
         $t = preg_replace('/\s*(?:\by\s+)?\(\s*[ivxIVX]{1,4}\s*\)\s*/u', "\n", $t);                          // "(I) … (II) … Y (III)"
         $t = preg_replace('/(?:^|\s)\d{1,2}\.[a-z]\)?\s+/u', "\n", $t);                                     // "1.a) La venta…"
         $t = preg_replace('/\s+(?=\d{2}\.\d{1,2}\s+\p{L})/u', "\n", $t);                                   // "… COMUNICACION 74.14 OTRAS…"
         $t = preg_replace('/\s+,/u', ',', $t);
         $t = preg_replace_callback('/\b(de|del|a|al|en|para|con|por)\.\s+(\p{Lu})(?=\p{Ll})/u', static fn ($m) => $m[1] . ' ' . mb_strtolower($m[2], 'UTF-8'), $t);           // "distribución de. Todo aquel…"                                                       // "diseño , creación"
         $t = seo_pl_reparar($t);
-        $t = preg_replace('/\s*\bn\.\s?c\.\s?o\.\s?p\.?/iu', '', $t);
+        $t = preg_replace('/\s*\bn[\s.,]{0,2}c[\s.,]{0,2}o[\s.,]{0,2}p\b\.?/iu', '', $t);
 
         // Fórmula de entrada: "La sociedad tiene por objeto…", "Constituye el objeto social…",
         // "El objeto social estará constituido por…"
@@ -229,9 +257,13 @@ if (!function_exists('seo_pl_objeto_actividades')) {
         $t = preg_replace('/^\s*(?:el\s+)?(?:desarrollo\s+de\s+)?(?:las\s+actividades\s+correspondientes\s+a\s+)?(?:los\s+)?siguientes\s+c[oó]digos[^:]{0,120}:\s*/iu', '', $t, 1);
         $t = preg_replace('/^\s*(?:esta|la)\s+(?:empresa|sociedad|entidad)\s+(?:tiene|tendr[aá])\s+(?:como|por)\s+(?:prop[oó]sito|finalidad|actividad)\s*:?\s*/iu', '', $t, 1);
         $t = preg_replace('/^\s*(?:la\/?s?\s+)?siguientes?\/?s?\s+actividad\/?(?:es)?\s*[:.]?\s*/iu', '', $t, 1);
+        // "…, ésta sociedad tiene de su actividad principal el CNAE "70.10", y su objeto lo constituye: "La adquisición…"
+        $t = preg_replace('/^.{0,300}?\b(?:su|el)\s+objeto(?:\s+social)?\s+(?:lo\s+constituye|es|ser[aá]|consiste\s+en)\s*:?\s*["“]?/iu', '', $t, 1);
+        // "desarrollo de las actividades que a continuación se indican, incluidas las que se detallan según su código y descripción…:"
+        $t = preg_replace('/^.{0,120}?(?:a\s+continuaci[oó]n\s+se\s+(?:indican|detallan|relacionan)|c[oó]digos?\s+y\s+descripci[oó]n)[^:]{0,200}:\s*/iu', '', $t, 1);
 
         // Coletillas legales: desde aquí, todo fuera (no son más actividades)
-        $colas = '/(?:\b(?:las\s+actividades\s+(?:integrantes|enumeradas|anteriores|antes\s+(?:citadas|mencionadas|indicadas|enumeradas|descritas)|descritas|que\s+integran|del\s+objeto|comprendidas)|tales\s+actividades|dichas\s+actividades|todas?\s+(?:estas|ellas|las\s+actividades\s+(?:anteriores|descritas|enumeradas))|quedan?\s+excluid|se\s+excluyen?|excluy[eé]ndose|si\s+(?:las\s+)?(?:disposiciones|leyes|la\s+ley)|podr[aá]n?\s+(?:ser\s+)?(?:desarrollad|ejercid|realizad)|podr[aá]n\s+realizarse|pudiendo\s+(?:al\s+efecto\s+)?(?:desarrollar|realizar|ejercer|constituir|participar)|de\s+modo\s+(?:directo|indirecto)|de\s+forma\s+(?:directa|indirecta)|cuando\s+(?:el|la)\s+(?:ejercicio|legislaci)|para\s+el\s+ejercicio\s+de\s+(?:las\s+)?actividades\s+(?:profesionales|reguladas)|la\s+sociedad\s+(?:no\s+)?podr[aá]|en\s+general,?\s+(?:cualquier|toda)|y\s+en\s+general\b|(?:y\s+)?cualquier\s+(?:otra\s+)?actividad\s+que\s+pueda|si\s+alguna\s+de\s+las\s+actividades|a\s+efectos\s+de\s+lo\s+dispuesto|tod[oa]s?\s+ell[oa]s\s+correspondientes|la\s+sociedad\s+la\s+ejercer|se\s+ejercer[aá]n?\b|ejercer[aá]n?\s+(?:[uú]nicamente|exclusivamente)))/iu';
+        $colas = '/(?:\b(?:las\s+actividades\s+(?:integrantes|enumeradas|anteriores|antes\s+(?:citadas|mencionadas|indicadas|enumeradas|descritas)|descritas|que\s+integran|del\s+objeto|comprendidas)|tales\s+actividades|dichas\s+actividades|todas?\s+(?:estas|ellas|las\s+actividades\s+(?:anteriores|descritas|enumeradas))|quedan?\s+excluid|se\s+excluyen?|excluy[eé]ndose|si\s+(?:las\s+)?(?:disposiciones|leyes|la\s+ley)|podr[aá]n?\s+(?:ser\s+)?(?:desarrollad|ejercid|realizad)|podr[aá]n\s+realizarse|pudiendo\s+(?:al\s+efecto\s+)?(?:desarrollar|realizar|ejercer|constituir|participar)|de\s+modo\s+(?:directo|indirecto)|de\s+forma\s+(?:directa|indirecta)|cuando\s+(?:el|la)\s+(?:ejercicio|legislaci)|para\s+el\s+ejercicio\s+de\s+(?:las\s+)?actividades\s+(?:profesionales|reguladas)|la\s+sociedad\s+(?:no\s+)?podr[aá]|en\s+general,?\s+(?:cualquier|toda)|y\s+en\s+general\b|(?:y\s+)?cualquier\s+(?:otra\s+)?actividad\s+que\s+pueda|si\s+alguna\s+de\s+las\s+actividades|a\s+efectos\s+de\s+lo\s+dispuesto|tod[oa]s?\s+ell[oa]s\s+correspondientes|la\s+sociedad\s+la\s+ejercer|se\s+ejercer[aá]n?\b|podr[aá]n?\s+desarrollarse|ejercer[aá]n?\s+(?:[uú]nicamente|exclusivamente)))/iu';
         if (preg_match($colas, $t, $m, PREG_OFFSET_CAPTURE) && $m[0][1] >= 15) {
             $t = substr($t, 0, $m[0][1]);
             $truncado = false;   // lo cortado era la coletilla, no una actividad a medias
@@ -241,6 +273,7 @@ if (!function_exists('seo_pl_objeto_actividades')) {
         // "a.La", "- ", y punto y seguido (no el de "S.L." ni "n.c.o.p.": solo tras 3 letras).
         $t = preg_replace('/(?:^|\s)(?:\d{1,2}\s*(?:º|°)?\s*[.)]\s*-?\s*:?\s+|[a-zA-Z]\s*\)\s*:?\s*|[a-zA-Z]\.\s*-\s*:?\s*|[IVXivx]{1,4}\s*[.)]\s*-\s*:?\s+)(?=\p{L})/u', "\n", $t);
         $t = preg_replace('/(?:^|\s)[a-zA-Z]\.(?=\p{Lu}\p{Ll})/u', "\n", $t);
+        $t = preg_replace('/(?:^|[;.]\s*)\(?[a-h][.)]?\s+(?=\p{Lu}\p{Ll})/u', "\n", $t);
         $t = preg_replace('/[\s,]+\.(?=\s|$)/u', '.', $t);   // "inmobiliaria), . Y como…"
         $partes = preg_split('/\s*;\s*|\n+|(?:(?<=\p{L}{3})|(?<=\)))\.\s+|\s+-\s+/u', $t);
         $partes = array_values(array_filter(array_map('trim', $partes), static fn ($p) => $p !== ''));
@@ -256,6 +289,16 @@ if (!function_exists('seo_pl_objeto_actividades')) {
             }
             for ($i = 0; $i < 3; $i++) {   // "Actividad principal, la citada en primer lugar:"
                 $p = preg_replace($rotulo, '', trim($p, " \t\n.,:;-–·•*"));
+            }
+            // "la sociedad tendrá por objeto social principal el de la promoción…" a mitad del texto
+            $p = preg_replace($intro, '', $p, 1);
+            $p = preg_replace('/^(?:el|la)\s+de\s+/iu', '', $p);
+            $p = preg_replace('/^\(?(?:\d{1,2}|[a-h]|[ivx]{1,4})\s*[.)]\s*-?\s*(?=\p{L})/iu', '', $p);   // "1.- La adquisición", "(a) La…"
+            if (preg_match($colas, $p, $mc, PREG_OFFSET_CAPTURE) && $mc[0][1] < 5) {
+                continue;   // la actividad entera es una coletilla legal
+            }
+            if (preg_match('/^(?:las\s+siguien|que\s+podr[aá]|y\s+c[oó]digo\b)|\bc[oó]digo\b|encuadrad|n[uú]mero\s+\d{3,}/iu', $p)) {
+                continue;
             }
             for ($i = 0; $i < 2; $i++) {
                 $p = preg_replace('/^(?:(?:y|e|o|u|as[ií]\s+como|tambi[eé]n|asimismo|igualmente|adem[aá]s|se\s+dedicar[aá]\s+a(?:\s+(?:la|el|los|las))?)[\s,]+)+/iu', '', $p);
@@ -275,7 +318,7 @@ if (!function_exists('seo_pl_objeto_actividades')) {
             }
             $p = preg_replace('/^(?:la|el|los|las|lo)\s+/iu', '', $p);
             // Cola colgante tras cortar: ", pudiendo realizarse", " y", " así como", ",etc"
-            $p = preg_replace('/(?:[\s,;:]+(?:y|o|e|u|as[ií]\s+como|pudiendo\s+\p{L}+|que|las?|los?|el|de|del|en|por|para|con|bien|todo|toda|etc))+\s*$/iu', '', $p);
+            $p = preg_replace('/(?:[\s,;:]+(?:y|o|e|u|as[ií]\s+como|pudiendo\s+\p{L}+|que|las?|los?|el|de|del|en|por|para|con|bien|todo|toda|etc|c[oó]digo))+\s*$/iu', '', $p);
             $p = preg_replace('/,(?=\p{L})/u', ', ', $p);
             if (substr_count($p, ')') > substr_count($p, '(')) {
                 $p = str_replace(')', '', $p);
@@ -315,6 +358,16 @@ if (!function_exists('seo_pl_objeto_actividades')) {
             $unidos[] = $it;
         }
         $items = $unidos;
+        $normales = ['de', 'el', 'la', 'y', 'e', 'o', 'u', 'en', 'al', 'gas', 'pan', 'mar', 'sol', 'bar', 'red', 'luz', 'oro', 'web', 'led', 'té', 'vino', 'uso', 'ia', 'ti', 'tic', 'iot', 'pvc', 'vtc', 'ute', 'pie', 'fe', 'mes', 'año', 'día', 'vía', 'ley'];
+        if ($items && preg_match('/\s(\p{L}{1,3})$/u', end($items), $mu) && !in_array(mb_strtolower($mu[1], 'UTF-8'), $normales, true)) {
+            $ult = array_pop($items);
+            // "…, construcción de edificios no residenciales e instalaciones ele": se quita el último tramo
+            $sinTramo = preg_match('/^(.*)(?:,\s*|\s+(?:y|e)\s+)/us', $ult, $mt) ? $mt[1] : $ult;
+            if ($sinTramo !== $ult && mb_strlen($sinTramo, 'UTF-8') >= 15) {
+                $items[] = $sinTramo;
+            }
+            $cortado = true;
+        }
         if (!$items && $truncado && $partes) {   // una sola actividad y cortada: hasta la última coma
             $p = $partes[0];
             $pos = mb_strrpos($p, ',', 0, 'UTF-8');
@@ -407,7 +460,7 @@ if (!function_exists('seo_pl_etiquetas')) {
         // [patrón sobre texto plano, etiqueta, frase, débil]
         static $reglas = [
             ['/\bpromocion (?:inmobiliaria|de (?:viviendas|edificaciones|edificios|inmuebles|terrenos))/', 'Promoción inmobiliaria', 'promoción inmobiliaria'],
-            ['/\bconstruccion|\bedificacion|\bobras? (?:civil|publica|maritima|de construccion|de edificacion)|\bconstruir\b/', 'Construcción', 'construcción'],
+            ['/\bconstruccion|\bedificacion|\bobras? (?:civil|publica|maritima|de construccion|de edificacion)|\bconstruir\b|\balbanileria|\bmamposteria|\brevestimiento|\bacabados de edificios|\brevocamiento|\bacristalamiento|\bdemolicion|\bpreparacion de terrenos/', 'Construcción', 'construcción'],
             ['/\breformas?\b|\brehabilitacion/', 'Reformas', 'reformas'],
             ['/\binmobiliari|\binmuebles?\b|\bfincas? (?:rusticas|urbanas)|\bviviendas?\b|\bbienes raices/', 'Inmobiliaria', 'actividades inmobiliarias'],
             ['/\barrendamiento|\balquiler/', 'Alquiler', 'alquiler'],
@@ -415,14 +468,14 @@ if (!function_exists('seo_pl_etiquetas')) {
             ['/\bhotel|\balojamientos?\b|\bapartamentos? turistic|\bhostal|\bcasas? rural|\bpensiones\b/', 'Alojamiento', 'alojamiento'],
             ['/\bagencias? de viaje|\bviajes\b|\bturismo\b|\bturistic/', 'Turismo', 'turismo'],
             ['/\bautotaxi|\btaxis?\b|\bvtc\b|\bvehiculos? con conductor/', 'Taxi y VTC', 'taxi y VTC'],
-            ['/\btransportes?\b/', 'Transporte', 'transporte'],
+            ['/\btra?n?sportes?\b|\btranporte/', 'Transporte', 'transporte'],
             ['/\blogistic|\balmacenaje|\balmacenamiento|\bdeposito de mercancias/', 'Logística', 'logística'],
             ['/\bmensajeri|\bpaqueteri/', 'Mensajería', 'mensajería'],
             ['/\bmudanzas?\b/', 'Mudanzas', 'mudanzas'],
             ['/\bal por mayor|\bmayorista/', 'Comercio mayorista', 'comercio al por mayor'],
             ['/\bal por menor|\bminorista|\btiendas?\b|\bcomercio electronico|\bventa online|\bventa por internet/', 'Comercio minorista', 'comercio al por menor'],
             ['/\bimportacion|\bexportacion|\bcomercio exterior/', 'Importación y exportación', 'importación y exportación'],
-            ['/\btenencia,? (?:de )?(?:administracion|gestion|disfrute)?.{0,120}(?:participaciones|acciones|valores)|\bgestion de (?:participaciones|sociedades participadas)|\bholding|\b(?:empresas|entidades|sociedades) (?:en las que participe|participadas)|\bsedes centrales/', 'Gestión de participaciones', 'gestión de participaciones'],
+            ['/\btenencia,? (?:de )?(?:administracion|gestion|disfrute)?.{0,120}(?:participaciones|acciones|valores)|\bgestion de (?:participaciones|sociedades participadas)|\bholding|\b(?:empresas|entidades|sociedades) (?:en las que participe|participadas)|\bsedes centrales|\bparticipaci[o]n(?:es)? en el capital|\bparticipacion en el capital/', 'Gestión de participaciones', 'gestión de participaciones'],
             ['/\bgestion (?:y administracion )?(?:de|del) (?:su )?patrimonio|\bpatrimonial|\btenencia\b.{0,80}\benajenacion/', 'Gestión patrimonial', 'gestión patrimonial'],
             ['/\bconsultori|\bconsultora\b/', 'Consultoría', 'consultoría'],
             ['/\bauditori/', 'Auditoría', 'auditoría'],
@@ -432,16 +485,16 @@ if (!function_exists('seo_pl_etiquetas')) {
             ['/\bseguros\b|\bcorreduri|\bmediacion de seguros|\baseguradora/', 'Seguros', 'seguros'],
             ['/\bintermediacion monetaria|\bentidad de credito|\bfinanciacion|\bprestamos\b|\bcreditos?\b|\bservicios financieros|\bactividades financieras|\bactivos financieros|\brecursos financieros|\bvalores (?:mobiliarios|representativos)|\binversion(?:es)? (?:financiera|mobiliaria)/', 'Finanzas', 'actividades financieras'],
             ['/\bpublicidad|\bpublicitari|\bmarketing|\bmercadotecnia/', 'Publicidad y marketing', 'publicidad y marketing'],
-            ['/\binformatic|\bsoftware|\bprogramas de ordenador|\baplicaciones (?:informaticas|moviles|web)|\bdesarrollo web|\bpaginas web|\btecnologias de la informacion|\bprogramacion/', 'Informática', 'informática'],
+            ['/\binformatic|\bsoftware|\bprogramas de ordenador|\baplicaciones (?:informaticas|moviles|web)|\bdesarrollo web|\bpaginas web|\btecnologias de la informacion|\bprogramacion|\bequipos tecnologicos|\binteligencia artificial/', 'Informática', 'informática'],
             ['/\btelecomunicacion|\btelefoni|\bfibra optica/', 'Telecomunicaciones', 'telecomunicaciones'],
             ['/\belectricidad|\binstalaciones? electric|\belectricistas?\b/', 'Instalaciones eléctricas', 'instalaciones eléctricas'],
             ['/\bfontaneri|\bsaneamiento/', 'Fontanería', 'fontanería'],
             ['/\bclimatizacion|\baire acondicionado|\bcalefaccion|\brefrigeracion|\bfrio industrial/', 'Climatización', 'climatización'],
-            ['/\benergias? renovables|\bfotovoltaic|\benergia solar|\bplacas solares|\beolic/', 'Energías renovables', 'energías renovables'],
+            ['/\benergias? renovables|\bfuentes renovables|\bfotovoltaic|\benergia solar|\bplacas solares|\beolic|\bbiogas|\bbiometano|\bbiomasa|\bautoconsumo/', 'Energías renovables', 'energías renovables'],
             ['/\bcombustibles|\bcarburantes|\bhidrocarburos|\bgasolineras?|\bestaciones de servicio/', 'Combustibles', 'combustibles'],
             ['/\bingenieri/', 'Ingeniería', 'ingeniería'],
             ['/\barquitect/', 'Arquitectura', 'arquitectura'],
-            ['/\bagricol|\bagricultura|\bcultivos?\b|\bexplotaciones? agrari|\bagropecuari|\bhorticol|\bfruticol/', 'Agricultura', 'agricultura'],
+            ['/\bagricol|\bagricultura|\bcultivos?\b|\bexplotaciones? agrari|\bagropecuari|\bhorticol|\bfruticol|\bforestal|\bsilvicultura|\brepoblacion/', 'Agricultura', 'agricultura'],
             ['/\bganaderi|\bganado\b|\bavicol|\bporcino|\bbovino|\bovino|\bcaprino/', 'Ganadería', 'ganadería'],
             ['/\bpesca\b|\bpesquer|\bacuicultura|\bmariscos?\b/', 'Pesca', 'pesca'],
             ['/\bpanaderi|\bpasteleri|\bconfiteri|\bbolleria|\bobrador|\bpan(?:es)?\b/', 'Panadería y pastelería', 'panadería y pastelería'],
@@ -462,15 +515,19 @@ if (!function_exists('seo_pl_etiquetas')) {
             ['/\bpapel\b|\bcarton\b/', 'Papel y cartón', 'papel y cartón'],
             ['/\belectrodomestic|\belectronic/', 'Electrónica', 'electrónica'],
             ['/\bfarmacia|\bfarmaceutic|\bmedicamentos|\bparafarmacia/', 'Farmacia', 'productos farmacéuticos'],
-            ['/\bclinicas?\b|\bsanitari|\bmedicina\b|\bmedicos?\b|\bhospital|\bfisioterap|\bodontolog|\bdental|\benfermeri|\bpsicolog|\bpodolog|\bsalud\b/', 'Sanidad', 'actividades sanitarias'],
+            ['/\bclinicas?\b|\bsanitari|\bmedicina\b|\bmedicos?\b|\bhospital|\bfisioterap|\bodontolog|\bdental|\benfermeri|\bpsicolog|\bpodolog|\bsalud\b|\bacupuntura|\bnaturopat|\bhomeopat|\bquiromasaje|\bespecialidades medicas/', 'Sanidad', 'actividades sanitarias'],
             ['/\bveterinari/', 'Veterinaria', 'veterinaria'],
             ['/\bopticas?\b|\boptometri/', 'Óptica', 'óptica'],
-            ['/\besteticas?\b|\bpeluqueri|\bbelleza|\bcosmetic|\bperfumeri/', 'Estética y belleza', 'estética y belleza'],
+            ['/\besteticas?\b|\bpeluqueri|\bbelleza|\bcosmetic|\bperfumeri|\btatuaje|\bmicropigment|\bbarberi/', 'Estética y belleza', 'estética y belleza'],
             ['/\bgeriatric|\bresidencias? (?:de|para) (?:mayores|ancianos|la tercera)|\btercera edad|\bayuda a domicilio|\bservicios sociales|\bpersonas dependientes/', 'Servicios sociales', 'servicios sociales'],
             ['/\bensenanza|\bformacion\b|\beducacion|\beducativ|\bacademias?\b|\bescuelas?\b|\bguarderi|\bcursos\b/', 'Formación y educación', 'formación y educación'],
             ['/\bdeportiv|\bdeportes?\b|\bgimnasios?\b|\bfitness/', 'Deporte', 'deporte'],
-            ['/\bespectaculos|\bocio\b|\bentretenimiento|\borganizacion de eventos|\beventos\b/', 'Ocio y eventos', 'ocio y eventos'],
-            ['/\baudiovisual|\bcinematograf|\bpeliculas|\btelevision|\bproductora/', 'Audiovisual', 'producción audiovisual'],
+            ['/\bartes escenicas|\bteatro|\bdanza\b|\bcirco\b/', 'Artes escénicas', 'artes escénicas'],
+            ['/\bespectaculos|\bocio\b|\bentretenimiento|\borganizacion de eventos|\beventos\b|\bconvenciones|\bferias\b|\bcongresos/', 'Ocio y eventos', 'ocio y eventos'],
+            ['/\bservicios integrales a edificios|\bmantenimiento (?:integral )?de edificios|\bfacility/', 'Servicios a edificios', 'servicios a edificios'],
+            ['/\brelaciones publicas/', 'Publicidad y marketing', 'publicidad y marketing'],
+            ['/\bactividades profesionales, cientificas|\bservicios profesionales/', 'Servicios profesionales', 'servicios profesionales', true],
+            ['/\baudiovisual|\bcinematograf|\bpeliculas|\btelevision|\bproductora|\blargometrajes|\bcortometrajes/', 'Audiovisual', 'producción audiovisual'],
             ['/\bmusica\b|\bmusical/', 'Música', 'música'],
             ['/\beditorial|\bedicion de (?:libros|periodicos|revistas)|\bimprenta|\bartes graficas|\bimpresion\b/', 'Artes gráficas', 'artes gráficas y edición'],
             ['/\bfotografi/', 'Fotografía', 'fotografía'],
@@ -481,9 +538,9 @@ if (!function_exists('seo_pl_etiquetas')) {
             ['/\bprevencion de riesgos/', 'Prevención de riesgos', 'prevención de riesgos laborales'],
             ['/\brecursos humanos|\bseleccion de personal|\btrabajo temporal|\bempresa de trabajo/', 'Recursos humanos', 'recursos humanos'],
             ['/\bmineri|\bcanteras?\b|\baridos\b/', 'Minería y canteras', 'minería y canteras'],
-            ['/\bresiduos|\breciclaje|\bmedio ?ambient|\btratamiento de aguas|\bdepuracion/', 'Medio ambiente', 'medio ambiente y residuos'],
+            ['/\bresiduos|\breciclaje|\bmedio ?ambient|\btratamiento de aguas|\bdepuracion|\bvalorizacion/', 'Medio ambiente', 'medio ambiente y residuos'],
             ['/\binvestigacion|\bi\+d\b|\bdesarrollo experimental/', 'Investigación y desarrollo', 'investigación y desarrollo'],
-            ['/\bjoyeri|\brelojeri|\borfebreri/', 'Joyería', 'joyería'],
+            ['/\bjoyeri|\brelojeri|\borfebreri|\bdiamantes|\bcompro oro/', 'Joyería', 'joyería'],
             ['/\bjuguet/', 'Juguetes', 'juguetes'],
             ['/\bjuegos? de azar|\bapuestas|\bmaquinas recreativas|\bcasinos?\b|\bbingos?\b/', 'Juego y apuestas', 'juego y apuestas'],
             ['/\bfunerari|\btanatorio/', 'Servicios funerarios', 'servicios funerarios'],
@@ -583,6 +640,7 @@ if (!function_exists('seo_plantilla_generar')) {
         $n      = seo_pl_limpio($d['nombre']);
         $cif    = $d['cif'];
         $anio   = $d['anio'];
+        $d['cnae'] = seo_pl_reparar((string) $d['cnae']);
         $cnae   = $d['cnae'] !== '' ? seo_pl_cnae($d['cnae']) : '';
         $capital = ($d['capital'] ?? '') !== '' && function_exists('ficha_euros') ? ficha_euros((string) $d['capital']) : '';
 
@@ -795,6 +853,18 @@ if (!function_exists('seo_plantilla_generar')) {
         }
         if ($frases) {
             $candidatas[] = "{$Forma}{$donde} con actividad en {$frases[0]}.";
+        }
+        // Sin etiquetas y con la primera actividad larga: su primer tramo, hasta una coma (≤ 70)
+        if ($acts && !$frases) {
+            $tramo = rtrim(preg_replace('/\s*…$/u', '', $acts[0]));
+            if (mb_strlen($tramo, 'UTF-8') > 70) {
+                $c = mb_substr($tramo, 0, 70, 'UTF-8');
+                $pos = mb_strrpos($c, ',', 0, 'UTF-8');
+                $tramo = $pos !== false && $pos > 25 ? mb_substr($c, 0, $pos, 'UTF-8') : '';
+            }
+            if ($tramo !== '') {
+                $candidatas[] = "{$Forma}{$donde} cuyo objeto social incluye {$tramo}.";
+            }
         }
         $candidatas[] = "{$Forma}{$donde}" . ($cAnio ? " constituida en {$anio}" : '') . '.';
         $pitch = '';

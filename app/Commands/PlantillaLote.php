@@ -27,7 +27,7 @@ class PlantillaLote extends BaseCommand
     protected $group       = 'SEO';
     protected $name        = 'seo:plantilla-lote';
     protected $description = 'Genera con la plantilla en código (sin IA) el texto de las fichas de la cola SEO.';
-    protected $usage       = 'seo:plantilla-lote [--limite N] [--guardar] [--mitad]';
+    protected $usage       = 'seo:plantilla-lote [--limite N] [--guardar] [--mitad] [--rehacer]';
 
     public function run(array $params)
     {
@@ -45,6 +45,15 @@ class PlantillaLote extends BaseCommand
         $db = \Config\Database::connect();
         $model = new CompanyModel();
         $borme = new BormePostsModel();
+
+        // --rehacer (15-10-2026): vuelve a generar los textos que ya hizo la plantilla
+        // (ai_origen = 'plantilla') con la versión actual del helper. Solo esos: nunca toca textos de IA.
+        if (CLI::getOption('rehacer') !== null || in_array('--rehacer', $params, true)) {
+            $this->rehacer($db, $model, $borme, $limite, $guardar);
+            flock($lock, LOCK_UN);
+            fclose($lock);
+            return;
+        }
 
         CLI::write(($guardar ? 'GUARDANDO' : 'PRUEBA (no escribe; --guardar para guardar)') . " · límite {$limite}" . ($mitad ? ' · solo la mitad A/B' : ''), $guardar ? 'yellow' : 'cyan');
 
@@ -136,6 +145,73 @@ class PlantillaLote extends BaseCommand
 
         flock($lock, LOCK_UN);
         fclose($lock);
+    }
+
+    /** Regenera los textos de plantilla ya guardados; guarda solo si el texto cambia. */
+    private function rehacer($db, CompanyModel $model, BormePostsModel $borme, int $limite, bool $guardar): void
+    {
+        if (!$db->fieldExists('ai_origen', 'company_enrichment')) {
+            CLI::error('No existe company_enrichment.ai_origen.');
+            return;
+        }
+        CLI::write(($guardar ? 'REHACIENDO Y GUARDANDO' : 'PRUEBA DE REHACER (no escribe; --guardar para guardar)') . " · límite {$limite}", $guardar ? 'yellow' : 'cyan');
+        $c = ['revisadas' => 0, 'cambian' => 0, 'iguales' => 0, 'omitidas' => 0, 'errores' => 0];
+        $ejemplos = [];
+        $t0 = microtime(true);
+        $ultimo = 0;
+        while ($c['revisadas'] < $limite) {
+            $filas = $db->query(
+                "SELECT company_id, ai_seo_text FROM company_enrichment WHERE ai_origen = 'plantilla' AND company_id > ? ORDER BY company_id LIMIT 500",
+                [$ultimo]
+            )->getResultArray();
+            if (!$filas) {
+                break;
+            }
+            foreach ($filas as $f) {
+                if ($c['revisadas'] >= $limite) {
+                    break 2;
+                }
+                $id = (int) $f['company_id'];
+                $ultimo = $id;
+                $c['revisadas']++;
+                $company = $model->getById($id);
+                $d = $company ? seo_ai_datos($company, $borme->getByCompanyId($id)) : null;
+                if ($d === null) {
+                    $c['omitidas']++;   // se deja el texto que tiene
+                    continue;
+                }
+                try {
+                    $r = seo_plantilla_generar($d);
+                } catch (\Throwable $e) {
+                    $c['errores']++;
+                    continue;
+                }
+                if ($r['seo_text'] === (string) $f['ai_seo_text']) {
+                    $c['iguales']++;
+                    continue;
+                }
+                $c['cambian']++;
+                if (count($ejemplos) < 8) {
+                    $ejemplos[] = "  [{$id}] ANTES: " . str_replace("\n\n", ' ¶ ', strip_tags((string) $f['ai_seo_text'])) . "\n        AHORA: " . str_replace("\n\n", ' ¶ ', strip_tags($r['seo_text']));
+                }
+                if ($guardar) {
+                    seo_plantilla_guardar($id, $r);
+                }
+                if ($c['revisadas'] % 1000 === 0) {
+                    CLI::write("  {$c['revisadas']} revisadas · {$c['cambian']} cambian · " . round(microtime(true) - $t0) . ' s', 'light_gray');
+                }
+            }
+        }
+        CLI::newLine();
+        foreach ($c as $k => $n) {
+            CLI::write(str_pad($k, 12) . number_format($n, 0, ',', '.'));
+        }
+        if ($ejemplos) {
+            CLI::newLine();
+            CLI::write('Ejemplos de cambio:', 'cyan');
+            CLI::write(implode("\n", $ejemplos));
+        }
+        CLI::write('Tiempo: ' . round(microtime(true) - $t0, 1) . ' s', 'green');
     }
 
     /** Fuera de la cola (como hace seo:process-queue con las omitidas). En prueba no hace nada. */
