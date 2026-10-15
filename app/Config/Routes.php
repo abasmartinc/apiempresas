@@ -31,6 +31,10 @@ $routes->group('', ['hostname' => 'spaincompanyapi.com'], $englishRoutes);
 $routes->get('/', 'Home::index');
 
 $routes->post('submit-review', 'Home::submitReview');
+// Valoraciones de clientes (14-10-2026): tarjeta del panel y enlace del correo. Ver Libraries/Valoraciones.php
+$routes->post('dashboard/valoracion', 'Valoraciones::panel');
+$routes->get('valorar', 'Valoraciones::formulario');
+$routes->post('valorar', 'Valoraciones::enviar');
 $routes->get('billing/export-excel', 'RadarController::exportExcel');
 $routes->get('enter', 'Login::index');          // muestra login
 $routes->get('logout', 'Login::logout');        // cierre de sesión

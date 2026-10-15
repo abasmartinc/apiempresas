@@ -82,6 +82,10 @@
                         ]) ?>
                     <?php endforeach; ?>
                 <?php endif; ?>
+
+                <?php if (!empty($showReviewCard)): ?>
+                    <?= view('partials/dashboard/review_card') ?>
+                <?php endif; ?>
             </div>
             <?= view('components/dash_kpis', get_defined_vars()) ?>
 

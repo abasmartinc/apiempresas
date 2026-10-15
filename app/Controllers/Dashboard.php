@@ -337,6 +337,17 @@ class Dashboard extends BaseController
             // (La redirección a dashboard_paid ha sido eliminada)
         }
 
+        // Tarjeta "¿Qué tal te está funcionando la API?" (14-10-2026): a quien ya le ha
+        // funcionado y aún no ha valorado. Nunca a la vez que el asistente de bienvenida.
+        $data['showReviewCard'] = false;
+        if (empty($data['show_wizard'])) {
+            try {
+                $data['showReviewCard'] = \App\Libraries\Valoraciones::mostrarEnPanel((int) $userId, (bool) $isPaid, $data['plan'] ?? null);
+            } catch (\Throwable $e) {
+                log_message('error', '[Dashboard] Valoraciones: ' . $e->getMessage());
+            }
+        }
+
         // Todos los usuarios convergen en el dashboard unificado
         return $this->renderView('dashboard', $data);
     }

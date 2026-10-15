@@ -1295,11 +1295,14 @@
 
                                 <?php $tE = $tamanoEmpresa ?? []; ?>
                                 <?php if (!empty($tE['texto'])):
-                                    // Tamaño (12-10-2026): tramo del Kit Digital o "Gran empresa" de TED.
+                                    // Tamaño (12-10-2026): tramo del Kit Digital o "Gran empresa" de TED (y de PLACSP desde el 15-10).
                                     // Ver ficha_tamano_empresa(). Es un dato fechado: se dice de dónde y de cuándo.
-                                    $tEInfo = $tE['fuente'] === 'ted'
+                                    $tEContratos = in_array($tE['fuente'], ['ted', 'placsp'], true);
+                                    $tEInfo = $tE['fuente'] === 'placsp'
+                                        ? 'Clasificación que dan los órganos de contratación al publicar la adjudicación en la Plataforma de Contratación del Sector Público. Gran empresa = no pyme según la definición europea (250 empleados o más, o facturación y balance por encima de los límites de pyme).'
+                                        : ($tE['fuente'] === 'ted'
                                         ? 'Clasificación que dan los órganos de contratación al publicar la adjudicación en TED, el diario de contratos públicos de la UE. Gran empresa = no pyme según la definición europea (250 empleados o más, o facturación y balance por encima de los límites de pyme).'
-                                        : 'Red.es concede el Kit Digital y el Kit Consulting por segmentos según el número de empleados. Es el tramo que la empresa acreditó al pedir la ayuda, en esa fecha; la plantilla actual puede ser otra. Fuente: Base de Datos Nacional de Subvenciones (BDNS).';
+                                        : 'Red.es concede el Kit Digital y el Kit Consulting por segmentos según el número de empleados. Es el tramo que la empresa acreditó al pedir la ayuda, en esa fecha; la plantilla actual puede ser otra. Fuente: Base de Datos Nacional de Subvenciones (BDNS).');
                                 ?>
                                 <div class="b2b-data-row">
                                     <dt class="b2b-data-label">
@@ -1308,7 +1311,7 @@
                                                 stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
                                                 stroke-linejoin="round"><use href="#icon-6ba5abb4"></use></svg>
                                         </div>
-                                        <?= $tE['fuente'] === 'ted' ? 'Tamaño' : 'Empleados' ?>
+                                        <?= $tEContratos ? 'Tamaño' : 'Empleados' ?>
                                     </dt>
                                     <dd class="b2b-data-value" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
                                         <span><?= esc($tE['texto']) ?></span>

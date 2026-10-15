@@ -79,6 +79,8 @@ class EmailAutomationCommand extends BaseCommand
         $this->bloque('4', fn () => $this->processPaidApiQuota());
         // Resumen del mes (días 1-3) y aviso a quien paga y no usa la API
         $this->bloque('4b', fn () => $this->processPaidApiLifecycle());
+        // Petición de valoración a quien ya usa la API (14-10-2026)
+        $this->bloque('4c', fn () => $this->processReviewRequests());
 
         // =========================================================================
         // BLOQUE 5: RECUPERACIÓN DE QUIEN DEJÓ PRO O BUSINESS HACE UN MES
@@ -1705,6 +1707,75 @@ class EmailAutomationCommand extends BaseCommand
         }
 
         CLI::write('  - Resúmenes y avisos de poco uso enviados: ' . $enviados);
+    }
+
+    /**
+     * api_review_request (14-10-2026): pide una valoración, una sola vez en la vida, a
+     * quien ya usa la API y no ha valorado (ni en el panel ni antes).
+     *
+     *  - Al menos REVIEW_MIN_CONSULTAS consultas en total y cuenta con 14 días o más.
+     *  - Con Pro o Business activo: 14 días después de empezar el plan (antes no).
+     *  - No si ese día ya ha recibido otro correo automático (recibioHoyApi).
+     *  - Como mucho REVIEW_MAX_POR_PASADA por ejecución, para repartir las respuestas.
+     */
+    protected const REVIEW_MIN_CONSULTAS   = 30;
+    protected const REVIEW_MAX_POR_PASADA = 20;
+
+    protected function processReviewRequests(): void
+    {
+        $db = \Config\Database::connect();
+
+        $filas = $db->query("
+            SELECT u.id, u.email, u.name, u.lang, SUM(d.requests_count) AS total
+            FROM users u
+            JOIN api_usage_daily d ON d.user_id = u.id
+            LEFT JOIN user_reviews r ON r.user_id = u.id
+            LEFT JOIN user_email_automation a ON a.user_id = u.id AND a.email_type = 'api_review_request'
+            WHERE u.is_admin = 0
+              AND u.unsuscribe = 0
+              AND u.id <> ?
+              AND r.id IS NULL
+              AND a.id IS NULL
+              AND u.created_at <= ?
+            GROUP BY u.id, u.email, u.name, u.lang
+            HAVING total >= ?
+            ORDER BY total DESC
+            LIMIT 300
+        ", [\App\Filters\ApiKeyFilter::MONITOR_USER_ID, date('Y-m-d H:i:s', strtotime('-14 days')), self::REVIEW_MIN_CONSULTAS])->getResultArray();
+
+        $enviados = 0;
+        foreach ($filas as $f) {
+            if ($enviados >= self::REVIEW_MAX_POR_PASADA) {
+                break;
+            }
+            $uid = (int) $f['id'];
+            if (empty($f['email']) || $this->recibioHoyApi($uid)) {
+                continue;
+            }
+
+            // Plan de pago activo: esperar 14 días desde que empezó
+            $sub = $db->table('user_subscriptions us')
+                ->select('ap.name AS plan_name, us.created_at')
+                ->join('api_plans ap', 'ap.id = us.plan_id')
+                ->where('us.user_id', $uid)
+                ->where('us.status', 'active')
+                ->whereIn('us.plan_id', [2, 3])
+                ->orderBy('us.id', 'DESC')
+                ->get(1)->getRowArray();
+            if ($sub && strtotime((string) $sub['created_at']) > strtotime('-14 days')) {
+                continue;
+            }
+
+            $usuario = ['id' => $uid, 'user_id' => $uid, 'email' => $f['email'], 'name' => $f['name'], 'lang' => $f['lang'] ?? 'es'];
+            CLI::write("  -> Enviando 'api_review_request' a {$f['email']} ({$f['total']} consultas)...");
+            $res = $this->emailService->sendReviewRequest($usuario, (int) $f['total'], $sub ? (string) $sub['plan_name'] : '');
+            $this->registrarEnvio($uid, 'api_review_request', $res);
+            if (!empty($res['success'])) {
+                $enviados++;
+            }
+        }
+
+        CLI::write('  - Peticiones de valoración enviadas: ' . $enviados);
     }
 
     /**

@@ -1595,6 +1595,62 @@ class EmailService
     }
 
     /**
+     * TRIGGER: api_review_request (14-10-2026)
+     *
+     * Pide una valoración a quien ya usa la API (ver EmailAutomationCommand::
+     * processReviewRequests). Correo de persona a persona: una pregunta y los números del
+     * 1 al 5 como enlaces firmados a /valorar, que abren la página con la nota marcada
+     * (no guardan nada hasta que pulsa Enviar). Sin regalos a cambio.
+     *
+     * @param string $plan nombre del plan de pago ('' si es Free)
+     */
+    public function sendReviewRequest(array $userData, int $consultas, string $plan = ''): array
+    {
+        $uid   = (int) ($userData['user_id'] ?? $userData['id'] ?? 0);
+        $en    = ($userData['lang'] ?? 'es') === 'en';
+        $firma = esc((string) env('EMAIL_FIRMA', $en ? 'The APIEmpresas team' : 'El equipo de APIEmpresas'));
+        $p     = static fn (string $h) => '<p style="margin:0 0 14px;">' . $h . '</p>';
+
+        $nums = [];
+        for ($i = 1; $i <= 5; $i++) {
+            $nums[] = '<a href="' . \App\Libraries\Valoraciones::enlace($uid, $i) . '" style="display:inline-block;min-width:34px;padding:6px 0;margin:0 4px 0 0;border:1px solid #cbd5e1;border-radius:8px;text-align:center;font-size:17px;font-weight:bold;color:#1d4ed8;text-decoration:none;">' . $i . '</a>';
+        }
+        $fila = '<p style="margin:0 0 6px;">' . implode('', $nums) . '</p>'
+            . '<p style="margin:0 0 16px;font-size:13px;color:#64748b;">' . ($en ? '1 = poor · 5 = excellent' : '1 = mala · 5 = excelente') . '</p>';
+
+        if ($en) {
+            $uso = $plan !== ''
+                ? 'You have been on the ' . esc($plan) . ' plan for a while and have made ' . self::num($consultas, true) . ' requests to the API.'
+                : 'You have made ' . self::num($consultas, true) . ' requests to the API so far.';
+            $contenido = $p($uso . ' How would you rate it from 1 to 5? Just click a number:')
+                . $fila
+                . $p('It opens a page with your score already selected, where you can add a comment if you like. If something is not working for you, just reply to this email and we will look into it.')
+                . $p($firma);
+            $asunto = 'A quick question about the API (one click)';
+            $pre    = 'How would you rate it from 1 to 5?';
+        } else {
+            $uso = $plan !== ''
+                ? 'Llevas un tiempo con el plan ' . esc($plan) . ' y ' . self::num($consultas) . ' consultas a la API.'
+                : 'Llevas ' . self::num($consultas) . ' consultas a la API.';
+            $contenido = $p($uso . ' ¿Qué nota le darías del 1 al 5? Basta con pulsar un número:')
+                . $fila
+                . $p('Se abre una página con tu nota marcada, donde puedes añadir un comentario si quieres. Y si algo no te está funcionando, responde a este correo y lo miramos.')
+                . $p($firma);
+            $asunto = 'Una pregunta rápida sobre la API (un clic)';
+            $pre    = '¿Qué nota le darías del 1 al 5?';
+        }
+
+        return $this->sendTemplateEmail('api_plain', [
+            '_log_slug' => 'api_review_request',
+            '_idioma'   => $en ? 'en' : 'es',
+            'subject'   => $asunto,
+            'preheader' => $pre,
+            'name'      => self::saludo($userData),
+            'content'   => $contenido,
+        ], $userData['email'], [], [], $uid);
+    }
+
+    /**
      * TRIGGER: paid_mid_cycle
      *
      * Hacia la mitad del ciclo mensual (días 10-15) de Pro/Business, a quien lo usa poco

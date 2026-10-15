@@ -1081,13 +1081,15 @@ if (!function_exists('ficha_grupo_gleif')) {
  *     empresa acreditó al recibir el Kit Digital o el Kit Consulting de Red.es, que se conceden por
  *     segmentos de empleados (concesiones publicadas en la BDNS). Es un dato de esa fecha.
  *   - company_procurement_size (calidad_datos/cargar_ted_tamano.py): "gran empresa" según los
- *     anuncios de adjudicación de TED (UE), solo con regla estricta (≥ 5 anuncios, ≥ 90 % iguales).
+ *     anuncios de adjudicación de TED (UE), solo con regla estricta (≥ 5 anuncios, ≥ 90 % iguales),
+ *     o de la Plataforma de Contratación del Sector Público (source 'placsp', 15-10-2026: ≥ 20
+ *     adjudicaciones, ≥ 90 % iguales, solo sociedades).
  *     "Gran empresa" es "no pyme" en la definición europea: 250 empleados o más, o facturación y
  *     balance por encima de los límites de pyme. No es un número de empleados.
  * Si hay las dos, vale el Kit Digital (lo declara la propia empresa). Si no hay ninguna, [].
  *  texto:   "De 3 a 9 empleados" / "Gran empresa"
  *  detalle: de dónde sale y de cuándo
- *  fuente:  'kit_digital' | 'kit_consulting' | 'ted'
+ *  fuente:  'kit_digital' | 'kit_consulting' | 'ted' | 'placsp'
  *  min/max: tramo (solo Kit)
  */
 if (!function_exists('ficha_tamano_empresa')) {
@@ -1116,10 +1118,13 @@ if (!function_exists('ficha_tamano_empresa')) {
         if ($t && $t['size_code'] === 'large') {
             $n = (int) $t['notices_same_size'];
             $mes = ficha_mes_anio($t['last_publication_date'] ?? '');
+            // 15-10-2026: también desde la Plataforma de Contratación del Sector Público (source = 'placsp').
+            $esPlacsp = ($t['source'] ?? '') === 'placsp';
+            $donde = $esPlacsp ? 'en la Plataforma de Contratación del Sector Público' : 'en TED (UE)';
             return [
                 'texto'   => 'Gran empresa',
-                'detalle' => "No pyme, según {$n} adjudicaciones publicadas en TED (UE)" . ($mes !== '' ? ", la última en {$mes}" : ''),
-                'fuente'  => 'ted',
+                'detalle' => "No pyme, según {$n} adjudicaciones publicadas {$donde}" . ($mes !== '' ? ", la última en {$mes}" : ''),
+                'fuente'  => $esPlacsp ? 'placsp' : 'ted',
                 'min'     => null,
                 'max'     => null,
             ];

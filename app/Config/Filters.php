@@ -86,7 +86,7 @@ class Filters extends BaseFilters
              'botprotection', // Check blocked IPs first
              'honeypot' => ['except' => ['admin/*', 'api/*']],
              'user_activity',
-             'csrf' => ['except' => ['api/*', 'tracking/*', 'webhook/*', 'events/*', 'company/rate', 'company/rate_feedback', 'company/data-feedback', 'admin/risk-profile/email-*', 'unsubscribe/one-click/*', 'unsubscribe/alertas/*']],
+             'csrf' => ['except' => ['api/*', 'tracking/*', 'webhook/*', 'events/*', 'company/rate', 'company/rate_feedback', 'company/data-feedback', 'admin/risk-profile/email-*', 'unsubscribe/one-click/*', 'unsubscribe/alertas/*', 'valorar']],
             // 'invalidchars',
         ],
         'after' => [
