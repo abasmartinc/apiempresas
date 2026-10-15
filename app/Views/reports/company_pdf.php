@@ -236,10 +236,12 @@
                     <td class="label">Provincia</td>
                     <td class="value"><?= esc($company['province'] ?? $company['provincia'] ?? '-') ?></td>
                 </tr>
-                <?php if (!empty($company['phone']) || !empty($company['phone_enriched'])): ?>
+                <?php /* 15-10-2026: los teléfonos solo están en companies (phone; phone_mobile = otra línea fija) */ ?>
+                <?php $pdfTel = trim(implode(' / ', array_filter([trim((string) ($company['phone'] ?? '')), trim((string) ($company['phone_mobile'] ?? ''))], fn ($t) => $t !== '' && $t !== '-'))); ?>
+                <?php if ($pdfTel !== ''): ?>
                 <tr>
                     <td class="label">Teléfono</td>
-                    <td class="value"><?= esc($company['phone_enriched'] ?? $company['phone'] ?? '-') ?></td>
+                    <td class="value"><?= esc($pdfTel) ?></td>
                 </tr>
                 <?php endif; ?>
                 <?php if (!empty($company['email'])): ?>

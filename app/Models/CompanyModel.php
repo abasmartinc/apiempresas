@@ -35,8 +35,7 @@ class CompanyModel extends Model
         'companies.updated_at         AS updated_at',
         'company_enrichment.website_official',
         'company_enrichment.email',
-        'company_enrichment.phone_enriched',
-        'company_enrichment.phone_mobile_enriched',
+        // 15-10-2026: phone_enriched y phone_mobile_enriched ya no se usan (teléfonos solo en companies)
         'company_enrichment.ai_seo_text',
         'company_enrichment.ai_faqs',
         'company_enrichment.ai_tags',

@@ -128,7 +128,8 @@ class AiCopilotController extends Controller
         if (!empty($admins)) {
             $adminData = implode(", ", array_slice(array_column($admins, 'name'), 0, 3));
         }
-        $bestPhone = $company['phone_enriched'] ?? $company['phone_mobile_enriched'] ?? $company['phone'] ?? $company['phone_mobile'] ?? '';
+        // 15-10-2026: los teléfonos solo están en companies (phone; phone_mobile = otra línea fija)
+        $bestPhone = trim((string) ($company['phone'] ?? '')) ?: trim((string) ($company['phone_mobile'] ?? ''));
         if (!empty($bestPhone)) {
             $cleanPhone = str_replace([' ', '-', '.'], '', $bestPhone);
             if (preg_match('/(?:(?:\+|00)34)?[6789]\d{8}/', $cleanPhone, $matches)) {

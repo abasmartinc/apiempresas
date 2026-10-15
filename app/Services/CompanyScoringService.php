@@ -255,7 +255,7 @@ class CompanyScoringService
     {
         $score = 0;
 
-        if (!empty($company['phone']) || !empty($company['phone_mobile']) || !empty($company['phone_enriched']) || !empty($company['phone_mobile_enriched'])) {
+        if (!empty($company['phone']) || !empty($company['phone_mobile'])) {   // 15-10-2026: solo companies
             $score += 50;
         }
 

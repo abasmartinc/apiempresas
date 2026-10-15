@@ -279,8 +279,6 @@ PROMPT;
                     'company_id'       => $companyId,
                     'website_official' => $data['website_official'] ?? null,
                     'email'            => $data['email'] ?? null,
-                    'phone_enriched'   => null,
-                    'phone_mobile_enriched' => null
                 ];
                 $this->db->table('company_enrichment')->insert($enrichmentData);
             }
