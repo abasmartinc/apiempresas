@@ -437,6 +437,10 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
 
     // Avisos de datos de la ficha ("¿Son correctos estos datos?")
     $routes->get('avisos-datos', 'Admin\DataFeedback::index');
+    // Datos de contacto aportados desde la ficha ("Añadir teléfono / web / email")
+    $routes->get('aportaciones', 'Admin\Contributions::index');
+    $routes->post('aportaciones/(:num)/aprobar', 'Admin\Contributions::aprobar/$1');
+    $routes->post('aportaciones/(:num)/rechazar', 'Admin\Contributions::rechazar/$1');
 
     // Registro de errores (error_issues / error_events): listado, detalle y gestion (acciones: POST + CSRF).
     $routes->get('errores', 'Admin\ErrorTracking::index');
@@ -615,6 +619,10 @@ $routes->addRedirect('directorio/ultimas-empresas-registradas/(:num)', 'empresas
 $routes->post('company/rate', 'Company::submitRating');
 $routes->post('company/rate_feedback', 'Company::submitRatingFeedback');
 $routes->post('company/data-feedback', 'Company::submitDataFeedback'); // "¿Son correctos estos datos?"
+// "Añadir teléfono / web / email" de la ficha (15-10-2026): ContributionService.
+$routes->post('company/aportar-dato', 'Company::submitContribution');
+$routes->get('aportacion/confirmar/(:segment)', 'Company::confirmContribution/$1');
+$routes->post('aportacion/confirmar/(:segment)', 'Company::confirmContribution/$1');
 
 $routes->get('empresa/export/(:num)', 'Company::exportPdf/$1');
 $routes->get('empresa/export-risk/(:segment)', 'Company::exportRiskPdf/$1');

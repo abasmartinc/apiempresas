@@ -20,8 +20,10 @@ namespace App\Services;
  *
  *   Campo            Dónde se escribe
  *   ---------------  ---------------------------------------------------------------
- *   telefono         companies.phone (en avisos antiguos, un móvil va a phone_mobile)
- *   movil            companies.phone_mobile
+ *   telefono         companies.phone
+ *   movil            companies.phone_mobile ("Otro teléfono": segunda línea fija)
+ *   Desde el 15-10-2026 los móviles (6/7) no se guardan en ningún campo: el aviso queda
+ *   como "No aplicado" con el motivo, para revisarlo a mano si hiciera falta.
  *   direccion        companies.address (y lat/lng a NULL para que se vuelva a geocodificar)
  *   actividad        companies.cnae_code + companies.cnae_label (si trae un código CNAE)
  *   web              company_enrichment.website_official
@@ -289,7 +291,7 @@ class DataCorrectionService
      * separados por " / ", que es como los parte la ficha.
      *
      * @param string|null $columna phone | phone_mobile; null = aviso antiguo de un solo
-     *                             número: los móviles (6/7) van a phone_mobile.
+     *                             número: va a phone. Los móviles (6/7) se rechazan.
      */
     private function prepararTelefono(string $v, ?string $columna): array
     {
@@ -297,8 +299,14 @@ class DataCorrectionService
         if ($nums === null) {
             return ['error' => 'No parece un teléfono español válido (9 cifras que empiezan por 6, 7, 8 o 9).'];
         }
+        // 15-10-2026: los móviles no se guardan (suelen ser del dueño o de un empleado: dato personal).
+        foreach ($nums as $n) {
+            if (in_array($n[0], ['6', '7'], true)) {
+                return ['error' => 'No guardamos teléfonos móviles; solo fijos de la empresa (8xx/9xx).'];
+            }
+        }
         if ($columna === null) {
-            $columna = (count($nums) === 1 && in_array($nums[0][0], ['6', '7'], true)) ? 'phone_mobile' : 'phone';
+            $columna = 'phone';
         }
         return [
             'tabla'   => 'companies',

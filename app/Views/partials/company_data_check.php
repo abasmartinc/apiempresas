@@ -39,7 +39,8 @@ $dcCnae = $dcV('cnae') !== ''
 // El email de la empresa no se enseña en la ficha: se deja vacío para que lo añadan.
 $dcCampos = [
     'telefono'  => [$dcT('Teléfono', 'Phone'),               $dcV('phone'),            'tel'],
-    'movil'     => [$dcT('Móvil', 'Mobile'),                 $dcV('phone_mobile'),     'tel'],
+    // 15-10-2026: en phone_mobile solo quedan segundas líneas fijas (los móviles no se guardan)
+    'movil'     => [$dcT('Otro teléfono', 'Other phone'),    $dcV('phone_mobile'),     'tel'],
     'web'       => [$dcT('Página web', 'Website'),           $dcV('website_official'), 'text'],
     'correo'    => [$dcT('Email de la empresa', 'Company email'), '',                  'email'],
     'direccion' => [$dcT('Dirección', 'Address'),            $dcV('address'),          'text'],

@@ -1,0 +1,42 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//APIEmpresas//Recordatorio//ES
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:apiempresas-plantilla-ia-20261112@apiempresas.es
+DTSTAMP:20261015T150000Z
+DTSTART:20261112T080000Z
+DTEND:20261112T083000Z
+SUMMARY:APIEmpresas: medir textos plantilla vs IA
+DESCRIPTION:QUÉ VERIFICAR\n1. Que el cron sigue funcionando: seo:queue-t
+ op --objetivo 20000 --cupo-nuevas 3000 (04:00) y seo:plantilla-lote --mi
+ tad --guardar --limite 15000 (04:30). Mirar la salida de los últimos d
+ ías (generadas / omitidas / errores).\n2. Cuántos textos hay de cada t
+ ipo desde el 16-10: ai_origen = 'plantilla' frente a ai_origen NULL (IA)
+ . Consultas en scripts/sql/textos_plantilla.sql.\n3. Search Console: ind
+ exación y visitas de las fichas de plantilla frente a las de IA creadas
+  desde el arranque.\n4. Revisar a ojo 5-10 fichas de plantilla en la web
+ .\n5. Decidir: si la plantilla aguanta\, quitar --mitad\, dejar de llama
+ r a la IA para fichas nuevas y subir --objetivo.\n6. Otros pendientes: m
+ edir la prueba de regeneración de textos IA (6-10 nov) y averiguar por 
+ qué muchos objetos sociales están guardados cortados a 300 caracteres.
+ \n\nPROMPT PARA PEGAR A CLAUDE (proyecto APIEmpresas):\nToca medir la pr
+ ueba A/B de los textos de ficha hechos con plantilla en código frente a
+  los de IA. Arrancó el 15-10-2026 con cron diario: seo:queue-top --obje
+ tivo 20000 --cupo-nuevas 3000 (04:00) y seo:plantilla-lote --mitad --gua
+ rdar --limite 15000 (04:30). Lee el documento del proyecto claude/seo-te
+ xtos-plantilla-sin-ia-oct-2026.md y prepárame las consultas para compar
+ ar\, en las fichas con texto creado desde el 16-10\, las de company_enri
+ chment.ai_origen = 'plantilla' con las de IA: cuántas hay\, visitas y c
+ ómo cruzarlas con la exportación de Search Console. Con el resultado\,
+  ayúdame a decidir si quito --mitad y dejo de usar la IA para las ficha
+ s nuevas. Recuérdame también la medición de la regeneración de texto
+ s IA (6-10 nov) y lo de los objetos sociales cortados a 300 caracteres.
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:APIEmpresas: medir textos plantilla vs IA
+TRIGGER:-PT15M
+END:VALARM
+END:VEVENT
+END:VCALENDAR

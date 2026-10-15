@@ -1300,6 +1300,98 @@ class Company extends BaseController
     }
 
     /**
+     * "Añadir teléfono / web / email" de la ficha (15-10-2026): POST company/aportar-dato.
+     * Lo guarda en company_contributions sin publicarlo (ver ContributionService).
+     * Sin CSRF (la ficha está en la caché de Cloudflare): AJAX, campo trampa, captcha si
+     * está activado y tope por IP.
+     */
+    public function submitContribution()
+    {
+        $request = service('request');
+        if (!$request->isAJAX() || strtolower($request->getMethod()) !== 'post') {
+            return $this->response->setStatusCode(403)->setJSON(['status' => 'error', 'message' => 'Acceso denegado']);
+        }
+
+        $en = $request->getPost('lang') === 'en';
+        $t  = static fn (string $es, string $enTxt) => $en ? $enTxt : $es;
+
+        // Campo trampa: si viene relleno, se responde como si todo hubiera ido bien.
+        if (trim((string) $request->getPost('url_extra')) !== '') {
+            return $this->response->setJSON(['status' => 'success', 'message' => $t('¡Gracias!', 'Thank you!')]);
+        }
+
+        helper('turnstile');
+        if (!verify_turnstile($request->getPost('cf-turnstile-response'), $request->getIPAddress())) {
+            return $this->response->setStatusCode(400)->setJSON(['status' => 'error', 'message' => $t('No hemos podido comprobar que no eres un robot. Inténtalo de nuevo.', 'We could not verify you are not a robot. Please try again.')]);
+        }
+
+        if ((string) $request->getPost('acepto') !== '1') {
+            return $this->response->setStatusCode(400)->setJSON(['status' => 'error', 'message' => $t('Marca la casilla para poder publicarlo.', 'Tick the box so we can publish it.')]);
+        }
+
+        $companyId = (int) $request->getPost('company_id');
+        $datos = [];
+        foreach ((array) ($request->getPost('datos') ?? []) as $campo => $valor) {
+            if (in_array($campo, \App\Services\ContributionService::CAMPOS, true) && is_string($valor)) {
+                $datos[$campo] = mb_substr(trim(strip_tags($valor)), 0, 255);
+            }
+        }
+        if ($companyId <= 0) {
+            return $this->response->setStatusCode(400)->setJSON(['status' => 'error', 'message' => $t('Datos inválidos', 'Invalid data')]);
+        }
+
+        try {
+            $r = (new \App\Services\ContributionService())->registrar(
+                $companyId,
+                $datos,
+                (string) $request->getPost('relacion'),
+                mb_substr(trim((string) $request->getPost('email_contacto')), 0, 190),
+                $request->getIPAddress(),
+                (string) $request->getUserAgent(),
+                $en
+            );
+        } catch (\Throwable $e) {
+            log_message('error', '[Aportaciones] Empresa ' . $companyId . ': ' . $e->getMessage());
+            return $this->response->setStatusCode(500)->setJSON(['status' => 'error', 'message' => $t('No se ha podido enviar. Inténtalo de nuevo.', 'Could not send it. Please try again.')]);
+        }
+
+        return $this->response->setStatusCode($r['ok'] ? 200 : 400)->setJSON([
+            'status'  => $r['ok'] ? 'success' : 'error',
+            'message' => $r['mensaje'],
+            'errores' => (object) $r['errores'],
+        ]);
+    }
+
+    /**
+     * GET aportacion/confirmar/{envio}: el enlace del correo a quien dice ser de la empresa.
+     * Solo anota la confirmación; el comando datos:verificar-aportaciones decide.
+     */
+    public function confirmContribution($envio = '')
+    {
+        $envio = (string) $envio;
+        $svc = new \App\Services\ContributionService();
+        helper(['company', 'form']);
+
+        // GET: solo enseña el botón. Los antivirus del correo abren los enlaces solos;
+        // la confirmación de verdad es el POST del botón.
+        $esPost = strtolower($this->request->getMethod()) === 'post';
+        $empresa = null;
+        try {
+            $empresa = $esPost ? $svc->confirmar($envio) : $svc->envioValido($envio);
+        } catch (\Throwable $e) {
+            log_message('error', '[Aportaciones] Confirmar ' . $envio . ': ' . $e->getMessage());
+        }
+
+        return view('aportacion_confirmada', [
+            'ok'        => $empresa !== null,
+            'hecho'     => $esPost && $empresa !== null,
+            'envio'     => $envio,
+            'empresa'   => $empresa,
+            'ficha'     => $empresa ? company_url(['cif' => $empresa['cif'] ?? '', 'name' => $empresa['company_name'] ?? '']) : site_url('/'),
+        ]);
+    }
+
+    /**
      * Endpoint AJAX para guardar el feedback de una valoración < 5
      */
     public function submitRatingFeedback()

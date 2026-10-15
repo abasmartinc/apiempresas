@@ -763,11 +763,10 @@
                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                                                 stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
                                                 stroke-linejoin="round">
-                                                <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
-                                                <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
                                             </svg>
                                         </div>
-                                        Phone Móvil
+                                        Other phone
                                     </dt>
                                     <dd class="b2b-data-value" style="display: flex; flex-wrap: wrap; gap: 12px;">
                                         <?php 
@@ -781,6 +780,38 @@
                                     </dd>
                                 </div>
                                 <?php endif; ?>
+
+                                <?php
+                                // "Añadir teléfono / web / email" (15-10-2026): filas para los datos de contacto
+                                // que faltan; abren partials/company_contribute. No en sociedades cerradas.
+                                $aportFaltan = [];
+                                if (empty($estadoReg['cerrada'])) {
+                                    $aportVacio = static fn ($v) => trim((string) $v) === '' || trim((string) $v) === '-';
+                                    if ($aportVacio($company['website_official'] ?? '')) { $aportFaltan[] = 'web'; }
+                                    if ($aportVacio($company['phone'] ?? '')) { $aportFaltan[] = 'telefono'; }
+                                    if ($aportVacio($company['email'] ?? '')) { $aportFaltan[] = 'correo'; }
+                                }
+                                $aportFilas = [
+                                    'web'      => ['Website', 'Add website', '<circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>'],
+                                    'telefono' => ['Phone', 'Add phone', '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>'],
+                                    'correo'   => ['Email', 'Add email', '<rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m22 7-10 5L2 7"></path>'],
+                                ];
+                                foreach ($aportFaltan as $aportK): [$aportLabel, $aportTxt, $aportIco] = $aportFilas[$aportK]; ?>
+                                <div class="b2b-data-row">
+                                    <dt class="b2b-data-label">
+                                        <div>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                                stroke-linejoin="round"><?= $aportIco ?></svg>
+                                        </div>
+                                        <?= $aportLabel ?>
+                                    </dt>
+                                    <dd class="b2b-data-value">
+                                        <button type="button" class="aport-add" data-aportar="<?= $aportK ?>"
+                                                data-track-click="company_contribute" data-track-element="<?= $aportK ?>"><?= $aportTxt ?></button>
+                                    </dd>
+                                </div>
+                                <?php endforeach; ?>
 
                                 <?php $cnaeVal = trim($cnaeFull ?? ''); ?>
                                 <?php if (!empty($cnaeVal) && $cnaeVal !== '-'): ?>
@@ -901,6 +932,7 @@
                                 <?php endif; ?>
                             </dl>
                             <?= view('partials/company_data_check', ['companyId' => (int) ($company['id'] ?? 0), 'company' => $company, 'lang' => 'en']) ?>
+                            <?= view('partials/company_contribute', ['companyId' => (int) ($company['id'] ?? 0), 'faltan' => $aportFaltan ?? [], 'lang' => 'en']) ?>
                         </section>
 
                         <?php if ((!empty($company['lat']) && !empty($company['lng'])) || !empty($company['address'])): ?>
