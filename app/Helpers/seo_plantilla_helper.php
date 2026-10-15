@@ -209,6 +209,10 @@ if (!function_exists('seo_pl_objeto_actividades')) {
         }
         $cortado = $truncado;
         $t = str_replace(["\r", "\t"], ["\n", ' '], $t);
+        // 15-10-2026: "El CNAE de la sociedad es el número 4941.", "actividad principal de la mercantil es el
+        // número 56.1 - Restaurantes…", "C.N.A.E. de la actividad principal 8551." (antes de quitar rótulos sueltos)
+        $t = preg_replace('/(?:^|(?<=[.;:\n]))\s*(?:el\s+)?(?:c[oó]digo\s+)?(?:c\.?\s?n\.?\s?a\.?\s?e\.?|(?:la\s+|su\s+)?actividad\s+principal)(?=[\s.])[^.;:\n]{0,80}?\b(?:es|ser[aá])\s+(?:el\s+)?(?:n[uú]mero\s+)?[A-U]?\s*\d[\d.]*?(?:\.(?=\s|$)|\s*[-–:]\s*|\s+|$)/iu', "\n", $t);
+        $t = preg_replace('/\s*\bc\.?\s?n\.?\s?a\.?\s?e\.?\s+de\s+(?:la|su)\s+actividad\s+principal\s*:?\s*[\d.]*\d\.?/iu', '. ', $t);
 
         $t = preg_replace('/\s*\(\s*actividad(?:es)?\s+(?:principal(?:es)?|secundari[oa]s?)[^)]{0,80}\)/iu', ' ', $t);   // "(ACTIVIDAD PRINCIPAL CNAE 9.313)"
         // Códigos y rótulos de CNAE: "(CNAE F4331)", "CNAE: 4321", "EPIGRAFE IAE 501",
@@ -229,7 +233,8 @@ if (!function_exists('seo_pl_objeto_actividades')) {
         $t = preg_replace('/[,:]?\s*\(?(?:actividad|objeto)\s+principal\)?(?=\s*(?:[;.,:]|$|y\s|e\s))/iu', '', $t);
         $t = preg_replace('/\s*,?\s*siendo\s+su\s+c[oó]digo\s+(?:C\.?\s?N\.?\s?A\.?\s?E\.?\s*)?(?:el\s+)?[\d.]+\s*/iu', '; ', $t);
         $t = preg_replace('/\s+(?=(?:y\s+como\s+)?(?:otras\s+actividades|actividad\s+principal)\s*:)/iu', "\n", $t);
-        $t = preg_replace('/\s*\bn[\s.,]{0,2}c[\s.,]{0,2}o[\s.,]{0,2}p\b\.?\.?(?=\s*[\p{Lu}\d])/u', ';', $t);   // fin de un rótulo de CNAE
+        $t = preg_replace('/\bc\.?\s?n\.?\s?a\.?\s?e\.?\s+de\s+(?:la|su)\s+actividad\s+principal\s*:?\s*[\d.]+/iu', ' ', $t);
+        $t = preg_replace('/\s*\bn[\s.,]{0,2}c[\s.,]{0,2}o[\s.,]{0,2}p\b\.?\.?(?=\s*[\p{Lu}\d])/iu', ';', $t);   // fin de un rótulo de CNAE
         $t = preg_replace('/[,;.]?\s+(?=\(?[A-U]?\d{2}\.?\d{1,2}\)?\s*[-–\/]\s*\p{L})/u', "\n", $t);   // "…, 46.62 - Comercio…"
         $t = preg_replace('/\.\s+(?=\d{4}\s+\p{Lu}{3})/u', "\n", $t);
         $t = preg_replace_callback('/\s\d{4}\s+(\p{Lu})(?=\p{Ll})/u', static fn ($m) => ' ' . mb_strtolower($m[1], 'UTF-8'), $t);   // "… y 8121 Limpieza general…"                                  // ". 8121 LIMPIEZA…"
@@ -238,7 +243,8 @@ if (!function_exists('seo_pl_objeto_actividades')) {
         $t = preg_replace('/\s*\b\d{2}\.\d{1,2}\.(?=\p{L})/u', "\n", $t);                                  // "68.11.compraventa"
         $t = preg_replace('/(?<=\p{L}{3})\.([a-h])\s+(?=\p{Lu})/u', "\n", $t);                               // "EMPRESARIAL.a La prestación"
         $t = preg_replace('/\.{2,}\s*/u', "\n", $t);                                                   // "restaurantes..La intermediación"
-        $t = preg_replace('/(?<=\p{L}{3})\.(?=\p{Lu}\p{Ll})/u', "\n", $t);                                    // "PUBLICIDAD.Otras actividades"
+        $t = preg_replace('/\s+-\s*(?=[.;,]|$)/u', '', $t);                                                   // "edificaciones -.Actividades"
+        $t = preg_replace('/(?<=\p{L}{3}|[)\-])\.(?=\p{Lu}\p{Ll})/u', "\n", $t);                                    // "PUBLICIDAD.Otras actividades"
         $t = preg_replace('/\s*(?:\by\s+)?\(\s*[ivxIVX]{1,4}\s*\)\s*/u', "\n", $t);                          // "(I) … (II) … Y (III)"
         $t = preg_replace('/(?:^|\s)\d{1,2}\.[a-z]\)?\s+/u', "\n", $t);                                     // "1.a) La venta…"
         $t = preg_replace('/\s+(?=\d{2}\.\d{1,2}\s+\p{L})/u', "\n", $t);                                   // "… COMUNICACION 74.14 OTRAS…"
@@ -297,8 +303,12 @@ if (!function_exists('seo_pl_objeto_actividades')) {
             if (preg_match($colas, $p, $mc, PREG_OFFSET_CAPTURE) && $mc[0][1] < 5) {
                 continue;   // la actividad entera es una coletilla legal
             }
-            if (preg_match('/^(?:las\s+siguien|que\s+podr[aá]|y\s+c[oó]digo\b)|\bc[oó]digo\b|encuadrad|n[uú]mero\s+\d{3,}/iu', $p)) {
+            if (preg_match('/^(?:las\s+siguien|que\s+podr[aá]|y\s+c[oó]digo\b|c[oó]digo\b|(?:de\s+la\s+)?actividad\s+principal\b)/iu', $p)) {
                 continue;
+            }
+            // "… gestión integral, código CNAE 4941", "… está encuadrado con el número 4751…": se corta ahí
+            if (preg_match('/[\s,;(]+(?:y\s+|con\s+|cuyo\s+|el\s+|su\s+)*(?:c[oó]digo\b|encuadrad|n[uú]mero\s+\d{3,})/iu', $p, $mc2, PREG_OFFSET_CAPTURE)) {
+                $p = rtrim(substr($p, 0, $mc2[0][1]), " ,;:-");
             }
             for ($i = 0; $i < 2; $i++) {
                 $p = preg_replace('/^(?:(?:y|e|o|u|as[ií]\s+como|tambi[eé]n|asimismo|igualmente|adem[aá]s|se\s+dedicar[aá]\s+a(?:\s+(?:la|el|los|las))?)[\s,]+)+/iu', '', $p);
@@ -320,6 +330,7 @@ if (!function_exists('seo_pl_objeto_actividades')) {
             // Cola colgante tras cortar: ", pudiendo realizarse", " y", " así como", ",etc"
             $p = preg_replace('/(?:[\s,;:]+(?:y|o|e|u|as[ií]\s+como|pudiendo\s+\p{L}+|que|las?|los?|el|de|del|en|por|para|con|bien|todo|toda|etc|c[oó]digo))+\s*$/iu', '', $p);
             $p = preg_replace('/,(?=\p{L})/u', ', ', $p);
+            $p = preg_replace('/(?<!\bde|\bdel|\baño|\bdesde)\s+\d{4}$/u', '', $p);
             if (substr_count($p, ')') > substr_count($p, '(')) {
                 $p = str_replace(')', '', $p);
             }
@@ -361,9 +372,11 @@ if (!function_exists('seo_pl_objeto_actividades')) {
         $normales = ['de', 'el', 'la', 'y', 'e', 'o', 'u', 'en', 'al', 'gas', 'pan', 'mar', 'sol', 'bar', 'red', 'luz', 'oro', 'web', 'led', 'té', 'vino', 'uso', 'ia', 'ti', 'tic', 'iot', 'pvc', 'vtc', 'ute', 'pie', 'fe', 'mes', 'año', 'día', 'vía', 'ley'];
         if ($items && preg_match('/\s(\p{L}{1,3})$/u', end($items), $mu) && !in_array(mb_strtolower($mu[1], 'UTF-8'), $normales, true)) {
             $ult = array_pop($items);
-            // "…, construcción de edificios no residenciales e instalaciones ele": se quita el último tramo
-            $sinTramo = preg_match('/^(.*)(?:,\s*|\s+(?:y|e)\s+)/us', $ult, $mt) ? $mt[1] : $ult;
-            if ($sinTramo !== $ult && mb_strlen($sinTramo, 'UTF-8') >= 15) {
+            // "…aplicaciones informáticas par" -> "…aplicaciones informáticas"
+            $sinTramo = preg_replace('/\s+\p{L}{1,3}$/u', '', $ult);
+            $sinTramo = preg_replace('/(?:[\s,;:]+(?:y|o|e|u|de|del|la|las|el|los|en|para|con|por|a|al|ya|sea|tanto|como))+\s*$/iu', '', $sinTramo);
+            $sinTramo = rtrim($sinTramo, ' ,;:');
+            if (mb_strlen($sinTramo, 'UTF-8') >= 15) {
                 $items[] = $sinTramo;
             }
             $cortado = true;
