@@ -279,7 +279,12 @@
                     <label class="form-label">
                         <?= (isset($redirect) && strpos($redirect, 'radar') !== false) ? '' : lang('Auth.quick_reg_email_label') ?>
                     </label>
-                    <input type="email" name="email" id="email_input" class="form-control" placeholder="<?= lang('Auth.quick_reg_email_ph') ?>" required autofocus>
+                    <?php
+                        // ?email=... (15-10-2026): llega relleno desde "Añadir datos" de la ficha.
+                        $emailPrefill = (string) (service('request')->getGet('email') ?? '');
+                        $emailPrefill = filter_var($emailPrefill, FILTER_VALIDATE_EMAIL) ? $emailPrefill : '';
+                    ?>
+                    <input type="email" name="email" id="email_input" class="form-control" placeholder="<?= lang('Auth.quick_reg_email_ph') ?>" value="<?= esc($emailPrefill, 'attr') ?>" required autofocus>
                 </div>
 
                 <div style="text-align: left; margin-bottom: 12px; font-size: 0.80rem; color: #475569;">

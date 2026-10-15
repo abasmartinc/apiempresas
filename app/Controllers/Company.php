@@ -1355,10 +1355,21 @@ class Company extends BaseController
             return $this->response->setStatusCode(500)->setJSON(['status' => 'error', 'message' => $t('No se ha podido enviar. Inténtalo de nuevo.', 'Could not send it. Please try again.')]);
         }
 
+        // Registro opcional: solo a quien dice ser de la empresa, sin sesión y en la web en español.
+        $registro = '';
+        if ($r['ok'] && $r['guardados'] > 0 && !$en && !session('logged_in')
+            && (string) $request->getPost('relacion') === 'empresa') {
+            $empresa = (new \App\Services\ContributionService())->empresa($companyId);
+            if ($empresa) {
+                $registro = \App\Services\ContributionService::urlRegistro($empresa, mb_strtolower(trim((string) $request->getPost('email_contacto'))));
+            }
+        }
+
         return $this->response->setStatusCode($r['ok'] ? 200 : 400)->setJSON([
-            'status'  => $r['ok'] ? 'success' : 'error',
-            'message' => $r['mensaje'],
-            'errores' => (object) $r['errores'],
+            'status'   => $r['ok'] ? 'success' : 'error',
+            'message'  => $r['mensaje'],
+            'errores'  => (object) $r['errores'],
+            'registro' => $registro,
         ]);
     }
 
@@ -1388,6 +1399,10 @@ class Company extends BaseController
             'envio'     => $envio,
             'empresa'   => $empresa,
             'ficha'     => $empresa ? company_url(['cif' => $empresa['cif'] ?? '', 'name' => $empresa['company_name'] ?? '']) : site_url('/'),
+            // Ya ha demostrado que es de la empresa: se le ofrece la cuenta (si no la tiene abierta).
+            'registro'  => ($esPost && $empresa && !session('logged_in'))
+                ? \App\Services\ContributionService::urlRegistro($empresa, (string) ($empresa['email_contacto'] ?? ''))
+                : '',
         ]);
     }
 

@@ -327,12 +327,38 @@ class ContributionService
         if (!preg_match('/^[a-f0-9]{32}$/', $envio)) {
             return null;
         }
-        $fila = $this->db->table('company_contributions')->select('company_id, created_at')
+        $fila = $this->db->table('company_contributions')->select('company_id, created_at, email_contacto')
             ->where('envio', $envio)->orderBy('id', 'ASC')->limit(1)->get()->getRowArray();
         if (!$fila || strtotime($fila['created_at']) < strtotime('-14 days')) {
             return null;
         }
-        return $this->empresa((int) $fila['company_id']);
+        $empresa = $this->empresa((int) $fila['company_id']);
+        if ($empresa) {
+            $empresa['email_contacto'] = (string) ($fila['email_contacto'] ?? '');
+        }
+        return $empresa;
+    }
+
+    // ================================================================ registro opcional
+
+    /**
+     * Enlace al alta rápida para quien dice ser de la empresa (15-10-2026): no se exige
+     * registro para aportar, pero se ofrece justo después. Mismo flujo que "Avísame si
+     * cambia" de la ficha (intent=view_risk_profile + redirect con ?vigilar=1): al volver,
+     * la ficha pone su empresa en vigilancia. source=aportacion_ficha para medirlo.
+     */
+    public static function urlRegistro(array $empresa, string $email = ''): string
+    {
+        helper('url');
+        $slug = url_title((string) ($empresa['company_name'] ?? ''), '-', true);
+        $redirect = 'empresa/' . (int) ($empresa['id'] ?? 0) . ($slug !== '' ? '-' . $slug : '') . '?vigilar=1';
+        return site_url('register/quick') . '?' . http_build_query(array_filter([
+            'intent'   => 'view_risk_profile',
+            'cif'      => (string) ($empresa['cif'] ?? ''),
+            'redirect' => $redirect,
+            'source'   => 'aportacion_ficha',
+            'email'    => filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : '',
+        ]));
     }
 
     // ================================================================ verificar (comando)

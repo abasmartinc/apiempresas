@@ -7,7 +7,8 @@
  * GET enseña el botón "Confirmar" (los antivirus del correo abren los enlaces solos);
  * el POST del botón es la confirmación.
  *
- * Variables: $ok (enlace válido), $hecho (ya confirmado), $envio, $empresa (array|null), $ficha (url)
+ * Variables: $ok (enlace válido), $hecho (ya confirmado), $envio, $empresa (array|null), $ficha (url),
+ *            $registro (url del alta rápida o '' si ya tiene sesión)
  */
 $nombre = (string) ($empresa['company_name'] ?? '');
 ?>
@@ -24,6 +25,8 @@ $nombre = (string) ($empresa['company_name'] ?? '');
         .ac-card h1 { font-size: 1.5rem; font-weight: 900; color: #0f172a; margin: 0 0 10px; line-height: 1.25; }
         .ac-card p { color: #475569; line-height: 1.6; font-size: 0.95rem; margin: 0 0 14px; }
         .ac-btn { display: inline-block; margin-top: 8px; padding: 12px 20px; border-radius: 12px; background: #0f172a; color: #fff; font-weight: 800; text-decoration: none; }
+        .ac-reg { margin-top: 22px; padding: 18px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 16px; }
+        .ac-reg p { margin-bottom: 4px; color: #166534; }
         @media (max-width: 560px) { .ac-card { margin: 24px 16px; padding: 28px 20px; } }
     </style>
 </head>
@@ -41,7 +44,16 @@ $nombre = (string) ($empresa['company_name'] ?? '');
             <h1>¡Gracias! Datos confirmados</h1>
             <p>Hemos anotado que los datos de <b><?= esc($nombre) ?></b> los envía alguien de la empresa.
                En cuanto comprobemos que la web es vuestra, los publicaremos en la ficha.</p>
-            <a class="ac-btn" href="<?= esc($ficha, 'attr') ?>">Ver la ficha</a>
+            <?php if (!empty($registro)): ?>
+                <div class="ac-reg">
+                    <p><b>¿Quieres que te avisemos si cambia algo de <?= esc($nombre) ?>?</b><br>
+                       Crea tu cuenta gratis y te escribimos el día que el BORME publique algo de tu empresa. Sin tarjeta.</p>
+                    <a class="ac-btn" href="<?= esc($registro, 'attr') ?>" data-track-click="aportacion_registro" data-track-element="confirmada">Crear mi cuenta gratis</a>
+                </div>
+                <p style="margin-top:14px"><a href="<?= esc($ficha, 'attr') ?>" style="color:#2563eb;font-weight:700">Ver la ficha</a></p>
+            <?php else: ?>
+                <a class="ac-btn" href="<?= esc($ficha, 'attr') ?>">Ver la ficha</a>
+            <?php endif; ?>
         <?php else: ?>
             <h1>Este enlace no es válido</h1>
             <p>Puede que haya caducado (dura 14 días) o que se haya copiado mal. Si quieres, vuelve a enviar los datos desde la ficha de la empresa.</p>

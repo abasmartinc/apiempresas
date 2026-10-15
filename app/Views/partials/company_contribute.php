@@ -52,6 +52,8 @@ $acCampos = [
     .aport-dlg .aport-msg{font-weight:700;line-height:1.45}
     .aport-dlg [hidden]{display:none!important}
     .aport-dlg .aport-hp{position:absolute!important;left:-9999px!important;width:1px;height:1px;overflow:hidden}
+    .aport-dlg .aport-reg{display:grid;gap:6px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:12px 14px;color:#166534;font-size:.82rem;line-height:1.45}
+    .aport-dlg .aport-reg a{justify-self:start;background:#15803d;color:#fff;border-radius:8px;padding:8px 14px;font-weight:800;text-decoration:none;margin-top:2px}
     .aport-add{color:#2563eb;font-weight:600;text-decoration:underline;background:none;border:0;padding:0;cursor:pointer;font:inherit}
     .aport-add:hover{color:#1d4ed8}
 </style>
@@ -105,6 +107,12 @@ $acCampos = [
 
         <div class="aport-msg" data-aport-msg hidden role="status"></div>
 
+        <div class="aport-reg" data-aport-reg hidden>
+            <b><?= $acT('¿Quieres que te avisemos si cambia algo de tu empresa?', 'Want us to let you know if anything changes?') ?></b>
+            <span><?= $acT('Crea tu cuenta gratis y te escribimos el día que el BORME publique algo de ella. Sin tarjeta.', 'Create a free account and we will email you whenever the BORME publishes something about it.') ?></span>
+            <a href="#" data-aport-reg-link data-track-click="aportacion_registro" data-track-element="formulario"><?= $acT('Crear mi cuenta gratis', 'Create my free account') ?></a>
+        </div>
+
         <div class="aport-foot">
             <button type="button" class="aport-cancel" data-aport-close><?= $acT('Cancelar', 'Cancel') ?></button>
             <button type="submit" class="aport-send" data-track-click="company_contribute" data-track-element="send"><?= $acT('Enviar', 'Send') ?></button>
@@ -123,6 +131,7 @@ $acCampos = [
     var msg    = dlg.querySelector('[data-aport-msg]');
     var send   = dlg.querySelector('.aport-send');
     var tsBox  = dlg.querySelector('[data-aport-ts]');
+    var reg    = dlg.querySelector('[data-aport-reg]');
     var emailLabel = dlg.querySelector('[data-aport-email-label]');
     var tsId   = null;
     var T = {
@@ -168,6 +177,7 @@ $acCampos = [
         e.preventDefault();
         errores(null);
         aviso('');
+        reg.hidden = true;
         form.hidden = false;
         send.hidden = false;
         if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
@@ -220,6 +230,10 @@ $acCampos = [
                     dlg.querySelectorAll('[data-aport-campo]').forEach(function (i) { i.value = ''; });
                     send.hidden = true;
                     dlg.querySelector('[data-aport-close]').textContent = T.cerrar;
+                    if (d.registro) {
+                        reg.querySelector('[data-aport-reg-link]').href = d.registro;
+                        reg.hidden = false;
+                    }
                 }
                 if (window.turnstile && tsId !== null) window.turnstile.reset(tsId);
             })
