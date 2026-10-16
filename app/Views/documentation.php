@@ -594,7 +594,8 @@ Accept: application/json</code></pre>
       {
         "name": "JUAN PÉREZ GARCÍA",
         "position": "Adm. Unico",
-        "since": "2019-03-01"
+        "since": "2019-03-01",
+        "url_pdf": "https://www.boe.es/borme/dias/2019/03/01/pdfs/BORME-A-2019-42-28.pdf"
       }
     ]
   }
@@ -682,7 +683,7 @@ Accept: application/json</code></pre>
                             <tr>
                                 <td><code style="background: transparent; color: #2563eb; font-weight: 600;">administrators[]</code></td>
                                 <td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">array[object]</span></td>
-                                <td style="color: #475569;">Administradores y cargos vigentes: nombramientos del BORME menos los ceses, dimisiones y revocaciones posteriores. Cada objeto contiene <code style="font-size: 0.8rem;">name</code>, su cargo (<code style="font-size: 0.8rem;">position</code>; si tiene varios, separados por comas) y <code style="font-size: 0.8rem;">since</code>, la fecha del nombramiento vigente (null si es anterior a nuestro histórico del BORME).</td>
+                                <td style="color: #475569;">Administradores y cargos vigentes: nombramientos del BORME menos los ceses, dimisiones y revocaciones posteriores. Cada objeto contiene <code style="font-size: 0.8rem;">name</code>, su cargo (<code style="font-size: 0.8rem;">position</code>; si tiene varios, separados por comas), <code style="font-size: 0.8rem;">since</code>, la fecha del nombramiento vigente (null si es anterior a nuestro histórico del BORME), y <code style="font-size: 0.8rem;">url_pdf</code>, el PDF oficial del BORME de ese nombramiento (null si no consta). Si la persona tiene varios cargos, <code style="font-size: 0.8rem;">since</code> y <code style="font-size: 0.8rem;">url_pdf</code> son los de su nombramiento vigente más antiguo.</td>
                             </tr>
                         </tbody>
                     </table>

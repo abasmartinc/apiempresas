@@ -31,7 +31,8 @@ class ApiCompanyEnricher
     private const CACHE_V = 'v1';
     // Solo para la caché de administradores vigentes: positionKey se amplió el 08-10-2026 y la
     // lista cacheada con la regla anterior no vale. Las demás cachés (CACHE_V) no cambian.
-    private const CACHE_ADMINS = 'v1b';
+    // v2 (16-10-2026): cada administrador lleva url_pdf (PDF del BORME de su nombramiento vigente).
+    private const CACHE_ADMINS = 'v2';
 
     // ------------------------------------------------------------------
     // Bajas por privacidad
@@ -903,7 +904,7 @@ class ApiCompanyEnricher
     // ------------------------------------------------------------------
 
     /**
-     * Administradores y cargos vigentes por empresa: [company_id => [[name, position, since], ...]].
+     * Administradores y cargos vigentes por empresa: [company_id => [[name, position, since, url_pdf], ...]].
      * Caché de 12 h por empresa.
      */
     public static function currentAdministrators(array $companyIds): array
@@ -928,7 +929,7 @@ class ApiCompanyEnricher
         try {
             $db = \Config\Database::connect();
             $nombramientos = $db->table('company_administrators ca')
-                ->select('ca.company_id, ca.name, ca.position, ca.action, bp.borme_date, ca.post_id')
+                ->select('ca.company_id, ca.name, ca.position, ca.action, bp.borme_date, ca.post_id, bp.url_pdf')
                 ->join('borme_posts bp', 'bp.id = ca.post_id', 'left')
                 ->whereIn('ca.company_id', $faltan)
                 ->get()->getResultArray();
@@ -968,7 +969,7 @@ class ApiCompanyEnricher
      * Cruza nombramientos y bajas y devuelve los vigentes agrupados por persona.
      * Pura (sin BD): se prueba aparte.
      *
-     * @param array $nombramientos filas [name, position, action, borme_date, post_id]
+     * @param array $nombramientos filas [name, position, action, borme_date, post_id, url_pdf]
      * @param array $actos filas de borme_posts [id, borme_date, description]
      */
     public static function resolveCurrent(array $nombramientos, array $actos): array
@@ -988,7 +989,7 @@ class ApiCompanyEnricher
             $accion = self::classifyHeading((string) ($n['action'] ?? 'Nombramientos'));
             $tipo = in_array($accion, ['cese', 'revocacion'], true) ? 'baja' : 'alta';
             $k = self::personKey($name) . '|' . self::positionKey($pos);
-            $eventos[$k][] = [(string) ($n['borme_date'] ?? ''), (int) ($n['post_id'] ?? 0), $tipo === 'baja' ? 0 : 1, $tipo];
+            $eventos[$k][] = [(string) ($n['borme_date'] ?? ''), (int) ($n['post_id'] ?? 0), $tipo === 'baja' ? 0 : 1, $tipo, self::bormePdf($n['url_pdf'] ?? null)];
             if (!isset($etiquetas[$k])) {
                 $etiquetas[$k] = ['name' => $name, 'position' => $pos];
             }
@@ -1004,7 +1005,7 @@ class ApiCompanyEnricher
                 foreach ($acto['names'] as $nm) {
                     $k = self::personKey($nm) . '|' . $pk;
                     if (isset($etiquetas[$k])) {
-                        $eventos[$k][] = [$fecha, (int) ($a['id'] ?? 0), 0, 'baja'];
+                        $eventos[$k][] = [$fecha, (int) ($a['id'] ?? 0), 0, 'baja', null];
                     }
                 }
             }
@@ -1019,19 +1020,23 @@ class ApiCompanyEnricher
             if ($ultimo[3] !== 'alta') {
                 continue;
             }
-            // Fecha del nombramiento vigente: el alta que sigue a la última baja.
+            // Fecha del nombramiento vigente: el alta que sigue a la última baja, con el
+            // PDF del BORME de ese anuncio (16-10-2026).
             $since = null;
+            $sinceUrl = null;
             foreach ($evs as $ev) {
                 if ($ev[3] === 'baja') {
                     $since = null;
+                    $sinceUrl = null;
                 } elseif ($since === null && $ev[0] !== '') {
                     $since = substr($ev[0], 0, 10);
+                    $sinceUrl = $ev[4] ?? null;
                 }
             }
             $name = $etiquetas[$k]['name'];
             $pk = self::personKey($name);
             if (!isset($porPersona[$pk])) {
-                $porPersona[$pk] = ['name' => $name, 'positions' => [], 'since' => null];
+                $porPersona[$pk] = ['name' => $name, 'positions' => [], 'since' => null, 'url_pdf' => null];
             }
             $pos = $etiquetas[$k]['position'];
             if ($pos !== '' && !in_array($pos, $porPersona[$pk]['positions'], true)) {
@@ -1039,6 +1044,7 @@ class ApiCompanyEnricher
             }
             if ($since !== null && ($porPersona[$pk]['since'] === null || $since < $porPersona[$pk]['since'])) {
                 $porPersona[$pk]['since'] = $since;
+                $porPersona[$pk]['url_pdf'] = $sinceUrl;
             }
         }
 
@@ -1048,9 +1054,18 @@ class ApiCompanyEnricher
                 'name'     => $p['name'],
                 'position' => implode(', ', $p['positions']),
                 'since'    => $p['since'],
+                // Campo nuevo (16-10-2026): PDF oficial del BORME del nombramiento de `since`.
+                'url_pdf'  => $p['url_pdf'],
             ];
         }
         return $result;
+    }
+
+    /** URL del PDF del BORME solo si es del BOE (mismo criterio que el socio único); si no, null. */
+    private static function bormePdf($url): ?string
+    {
+        $url = trim((string) $url);
+        return strpos($url, 'https://www.boe.es/') === 0 ? $url : null;
     }
 
     /**

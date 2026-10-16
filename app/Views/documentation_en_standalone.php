@@ -590,7 +590,8 @@ Accept: application/json</code></pre>
       {
         "name": "JUAN PÉREZ GARCÍA",
         "position": "Adm. Unico",
-        "since": "2019-03-01"
+        "since": "2019-03-01",
+        "url_pdf": "https://www.boe.es/borme/dias/2019/03/01/pdfs/BORME-A-2019-42-28.pdf"
       }
     ]
   }
@@ -678,7 +679,7 @@ Accept: application/json</code></pre>
                             <tr>
                                 <td><code style="background: transparent; color: #2563eb; font-weight: 600;">administrators[]</code></td>
                                 <td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">array[object]</span></td>
-                                <td style="color: #475569;">Current directors and officers: BORME appointments minus later removals, resignations and revocations. Each object contains <code style="font-size: 0.8rem;">name</code>, the title (<code style="font-size: 0.8rem;">position</code>; comma-separated if several) and <code style="font-size: 0.8rem;">since</code>, the date of the current appointment (null if it predates our BORME history).</td>
+                                <td style="color: #475569;">Current directors and officers: BORME appointments minus later removals, resignations and revocations. Each object contains <code style="font-size: 0.8rem;">name</code>, the title (<code style="font-size: 0.8rem;">position</code>; comma-separated if several), <code style="font-size: 0.8rem;">since</code>, the date of the current appointment (null if it predates our BORME history), and <code style="font-size: 0.8rem;">url_pdf</code>, the official BORME PDF of that appointment (null if not available). If the person holds several positions, <code style="font-size: 0.8rem;">since</code> and <code style="font-size: 0.8rem;">url_pdf</code> refer to their earliest current appointment.</td>
                             </tr>
                         </tbody>
                     </table>
