@@ -33,7 +33,8 @@ class ApiCompanyEnricher
     // lista cacheada con la regla anterior no vale. Las demás cachés (CACHE_V) no cambian.
     // v2 (16-10-2026): cada administrador lleva url_pdf (PDF del BORME de su nombramiento vigente).
     // v3 (16-10-2026): altas también desde el texto del BORME, nombres limpios y extinción.
-    private const CACHE_ADMINS = 'v3';
+    // v4 (16-10-2026): solo el último auditor; fuera los nombres cortados repetidos.
+    private const CACHE_ADMINS = 'v4';
 
     // ------------------------------------------------------------------
     // Bajas por privacidad
@@ -991,6 +992,7 @@ class ApiCompanyEnricher
         // mismo día es un cambio de cargo o una renovación: el nombramiento gana.
         $eventos = [];
         $etiquetas = [];
+        $deBorme = []; // claves persona|cargo con algún alta leída del texto del BORME
 
         foreach ($nombramientos as $n) {
             // Algunas filas guardan el nombre con el encabezado siguiente pegado
@@ -1042,6 +1044,7 @@ class ApiCompanyEnricher
                         continue;
                     }
                     $eventos[$k][] = [$fecha, $postId, 1, 'alta', self::bormePdf($a['url_pdf'] ?? null)];
+                    $deBorme[$k] = true;
                     if (!isset($etiquetas[$k])) {
                         $etiquetas[$k] = ['name' => $nm, 'position' => trim($acto['position'])];
                     }
@@ -1054,7 +1057,7 @@ class ApiCompanyEnricher
             }
         }
 
-        $porPersona = [];
+        $vigentes = [];
         foreach ($eventos as $k => $evs) {
             usort($evs, function ($x, $y) {
                 return [$x[0], $x[1], $x[2]] <=> [$y[0], $y[1], $y[2]];
@@ -1080,6 +1083,57 @@ class ApiCompanyEnricher
                     $sinceUrl = $ev[4] ?? null;
                 }
             }
+            $vigentes[$k] = ['since' => $since, 'url' => $sinceUrl, 'last' => substr((string) $ultimo[0], 0, 10)];
+        }
+
+        // Auditores: el BORME publica el nombramiento del nuevo sin el cese del anterior.
+        // Solo sigue vigente el del nombramiento o reelección más reciente.
+        $ultimoAuditor = '';
+        foreach ($vigentes as $k => $v) {
+            if (strpos(explode('|', $k, 2)[1], 'auditor') === 0 && $v['last'] > $ultimoAuditor) {
+                $ultimoAuditor = $v['last'];
+            }
+        }
+        if ($ultimoAuditor !== '') {
+            foreach ($vigentes as $k => $v) {
+                if (strpos(explode('|', $k, 2)[1], 'auditor') === 0 && $v['last'] < $ultimoAuditor) {
+                    unset($vigentes[$k]);
+                }
+            }
+        }
+
+        // Nombres cortados de company_administrators ("ERNST & YOUNG S") que duplican a una
+        // persona leída del mismo anuncio del BORME con el nombre completo y el mismo cargo:
+        // se queda solo el completo.
+        $palabras = fn(string $n) => preg_split('/[^A-Z0-9]+/', strtr(mb_strtoupper($n, 'UTF-8'),
+            ['Á' => 'A', 'É' => 'E', 'Í' => 'I', 'Ó' => 'O', 'Ú' => 'U', 'Ü' => 'U', 'Ñ' => 'N', 'Ç' => 'C']), -1, PREG_SPLIT_NO_EMPTY);
+        foreach (array_keys($vigentes) as $k) {
+            if (isset($deBorme[$k])) {
+                continue;
+            }
+            [, $cargo] = explode('|', $k, 2);
+            $corto = $palabras($etiquetas[$k]['name']);
+            foreach (array_keys($vigentes) as $k2) {
+                if ($k2 === $k || !isset($deBorme[$k2]) || explode('|', $k2, 2)[1] !== $cargo) {
+                    continue;
+                }
+                $largo = $palabras($etiquetas[$k2]['name']);
+                // Solo si salen del mismo anuncio: así es el mismo nombre cortado y no, por
+                // ejemplo, "GARCIA PEREZ JUAN" y su hijo "GARCIA PEREZ JUAN JOSE".
+                $postsCorto = array_filter(array_map(fn($e) => $e[3] === 'alta' ? $e[1] : 0, $eventos[$k]));
+                $postsLargo = array_filter(array_map(fn($e) => $e[3] === 'alta' ? $e[1] : 0, $eventos[$k2]));
+                if (count($largo) > count($corto) && array_slice($largo, 0, count($corto)) === $corto
+                    && array_intersect($postsCorto, $postsLargo)) {
+                    unset($vigentes[$k]);
+                    break;
+                }
+            }
+        }
+
+        $porPersona = [];
+        foreach ($vigentes as $k => $v) {
+            $since = $v['since'];
+            $sinceUrl = $v['url'];
             $name = $etiquetas[$k]['name'];
             $pk = self::personKey($name);
             if (!isset($porPersona[$pk])) {

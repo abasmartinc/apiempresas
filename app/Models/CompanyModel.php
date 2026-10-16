@@ -1076,6 +1076,35 @@ class CompanyModel extends Model
     }
 
     /**
+     * Empresas cuya razón social es exactamente una de $names (índice de company_name),
+     * con los campos de la API. Para /companies/reconcile (16-10-2026): la búsqueda por
+     * prefijo devolvía 10 "REPSOL …" sin orden y a veces sin REPSOL SA.
+     */
+    public function searchExactNames(array $names, int $limit = 10): array
+    {
+        $names = array_values(array_unique(array_filter(array_map('trim', $names), fn($n) => $n !== '')));
+        if (!$names) {
+            return [];
+        }
+        $ids = array_column(
+            $this->builder()->select('companies.id')->whereIn('companies.company_name', $names)->limit($limit)->get()->getResultArray(),
+            'id'
+        );
+        if (!$ids) {
+            return [];
+        }
+        $b = $this->builder();
+        $b->select(implode(', ', $this->apiSelectFields));
+        $b->join('cnae_2009_2025', 'cnae_2009_2025.cnae_2009 = companies.cnae_code', 'left');
+        $b->whereIn('companies.id', $ids);
+        $out = [];
+        foreach ($b->get()->getResultArray() as $row) {
+            $out[(int) $row['id']] = $out[(int) $row['id']] ?? $row; // una fila por empresa (el JOIN del CNAE puede repetir)
+        }
+        return array_values($out);
+    }
+
+    /**
      * Obtiene las últimas empresas constituidas.
      * Optimizado para tablas grandes: 2 pasos para evitar filesort masivo.
      */

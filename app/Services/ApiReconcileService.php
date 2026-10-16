@@ -22,7 +22,7 @@ class ApiReconcileService
     public const SHOW          = 3;
     public const CACHE_TTL     = 86400;
     /** Versión de la caché de candidatos (v2, 16-10-2026: una lista antigua sin A15075062 daba como match la ficha repetida sin CIF de Inditex). */
-    private const CACHE_V      = 'v2';
+    private const CACHE_V      = 'v3';
 
     /**
      * Normaliza la entrada: {"items":[{"name":..,"province":..}]} o {"names":[..]}.
@@ -77,6 +77,13 @@ class ApiReconcileService
         $plaus = array_values(array_filter($cands, fn($c) => $c['score'] >= self::AMBIGUOUS_MIN));
         if (!$plaus) {
             return ['status' => 'no_match', 'best' => null, 'candidates' => []];
+        }
+
+        // Fichas repetidas: entre candidatos con la misma razón social exacta (100), la que no
+        // tiene CIF no compite con la que sí (BBVA, Inditex: copia sin CIF creada desde el BORME).
+        $exactosConCif = array_filter($plaus, fn($c) => $c['score'] >= 100 && trim((string) ($c['cif'] ?? '')) !== '');
+        if ($exactosConCif) {
+            $plaus = array_values(array_filter($plaus, fn($c) => !($c['score'] >= 100 && trim((string) ($c['cif'] ?? '')) === '')));
         }
 
         // Con provincia: si alguno de los plausibles es de esa provincia, solo cuentan esos.
@@ -136,7 +143,13 @@ class ApiReconcileService
         if ($term === '') {
             return [];
         }
-        $rows = (new \App\Models\CompanyModel())->searchMany($term, self::CANDIDATES, 1, false, true);
+        $model = new \App\Models\CompanyModel();
+        // Primero la razón social exacta con sus variantes de forma jurídica; si no hay, la
+        // búsqueda por palabras (16-10-2026).
+        $rows = $model->searchExactNames(self::exactVariants($name), self::CANDIDATES);
+        if (!$rows) {
+            $rows = $model->searchMany($term, self::CANDIDATES, 1, false, true);
+        }
         $rows = ApiCompanyEnricher::withoutOptedOut($rows);
         $out = [];
         foreach ($rows as $r) {
@@ -149,6 +162,30 @@ class ApiReconcileService
             ];
         }
         cache()->save($key, $out, self::CACHE_TTL);
+        return $out;
+    }
+
+    /**
+     * Formas en que puede estar guardada la razón social: el nombre sin su forma jurídica,
+     * solo o con cada forma habitual ("MERCADONA SA", "INDUSTRIA DE DISEÑO TEXTIL, S.A.").
+     */
+    public static function exactVariants(string $name): array
+    {
+        $base = mb_strtoupper(trim(preg_replace('/\s+/u', ' ', $name)), 'UTF-8');
+        $base = rtrim($base, ' .,;');
+        $forma = '/[\s,]+(SOCIEDAD\s+(AN[OÓ]NIMA|LIMITADA)(\s+(UNIPERSONAL|LABORAL|PROFESIONAL|NUEVA\s+EMPRESA))?'
+            . '|S\.?\s?(A|L)\.?\s?(U|L|P|NE)?\.?|S\.?\s?COOP\.?(\s.*)?)$/u';
+        $base = trim((string) preg_replace($forma, '', $base), ' .,');
+        if (mb_strlen($base, 'UTF-8') < 3) {
+            return [];
+        }
+        $formas = ['SA', 'S.A.', 'SAU', 'S.A.U.', 'SOCIEDAD ANONIMA', 'SL', 'S.L.', 'SLU', 'S.L.U.', 'SOCIEDAD LIMITADA',
+                   'SOCIEDAD LIMITADA UNIPERSONAL', 'SOCIEDAD ANONIMA UNIPERSONAL', 'SLL', 'S.L.L.', 'SLP', 'S.L.P.', 'SLNE'];
+        $out = [$base];
+        foreach ($formas as $f) {
+            $out[] = $base . ' ' . $f;
+            $out[] = $base . ', ' . $f;
+        }
         return $out;
     }
 
