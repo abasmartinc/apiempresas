@@ -119,6 +119,7 @@ class McpController extends Controller
             'apache_7081'       => ['url' => 'https://' . $ipB . ':7081' . $ruta, 'host' => $host],
             'apache_7080_local' => ['url' => 'http://127.0.0.1:7080' . $ruta, 'host' => $host],
             'publica'           => ['url' => $publica . '/catalog'],
+            'apache_7081_sni'   => ['url' => 'https://' . $host . ':7081' . $ruta, 'resolve' => $host . ':7081:' . $ipB, 'host' => $host],
         ];
         $out = ['server_addr' => $ipS !== '' ? 'sí' : 'no', 'host' => $host];
         foreach ($casos as $nombre => $c) {
@@ -150,6 +151,15 @@ class McpController extends Controller
                 'inicio_respuesta' => $cuerpo,
             ];
         }
+        // ¿Llega Authorization a PHP si se salta nginx? (prueba con un valor falso de 10 caracteres)
+        $ch = curl_init('https://' . $host . ':7081/api/mcp?diag=cabeceras');
+        curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_CONNECTTIMEOUT => 2, CURLOPT_TIMEOUT => 4,
+            CURLOPT_RESOLVE => [$host . ':7081:' . $ipB], CURLOPT_SSL_VERIFYPEER => false, CURLOPT_SSL_VERIFYHOST => 0,
+            CURLOPT_HTTPHEADER => ['Host: ' . $host, 'Authorization: Bearer abcdefghij', 'Accept: application/json']]);
+        $raw = curl_exec($ch);
+        curl_close($ch);
+        $j = $raw !== false ? json_decode((string) $raw, true) : null;
+        $out['authorization_sin_nginx'] = is_array($j) ? ($j['longitudes'] ?? $j) : ('sin respuesta: ' . substr((string) $raw, 0, 80));
         return $out;
     }
 
@@ -169,8 +179,12 @@ class McpController extends Controller
         $lista = [];
         $recordado = cache('mcp_api_destino');
         if (!$local) {
-            // https: el servidor redirige http a https (301) también en las llamadas internas
-            $lista[] = ['nombre' => 'origen', 'base' => 'https://' . $host . $path, 'resolve' => $host . ':443:' . (str_contains($ipServidor, ':') ? '[' . $ipServidor . ']' : $ipServidor)];
+            // Apache de Plesk directamente (puerto https interno, 7081), con el nombre del dominio en la
+            // conexión (SNI). Diagnóstico del 16-10-2026: por el 443 de su IP se cuelga, el 7080 (http)
+            // redirige a https y la dirección pública no conecta desde el propio servidor.
+            $puerto = (int) (env('MCP_API_APACHE_PORT') ?: 7081);
+            $ipB = str_contains($ipServidor, ':') ? '[' . $ipServidor . ']' : $ipServidor;
+            $lista[] = ['nombre' => 'origen', 'base' => 'https://' . $host . ':' . $puerto . $path, 'resolve' => $host . ':' . $puerto . ':' . $ipB, 'host' => $host];
         }
         $lista[] = ['nombre' => 'publica', 'base' => $publica, 'resolve' => null];
         if ($recordado === 'publica' && count($lista) > 1) {
@@ -212,6 +226,9 @@ class McpController extends Controller
         $esOrigen = $d['nombre'] === 'origen';
         if ($esOrigen) {
             $headers[] = 'X-Forwarded-Proto: https'; // para que la API genere sus enlaces con https
+        }
+        if (!empty($d['host'])) {
+            $headers[] = 'Host: ' . $d['host']; // sin el puerto: la API genera sus enlaces con el Host
         }
         // Conexión al propio servidor por su IP: el certificado puede ser el de origen de Cloudflare,
         // que no valida fuera de Cloudflare. La IP está fijada (CURLOPT_RESOLVE), no hay intermediarios.
