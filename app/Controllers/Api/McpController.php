@@ -2,6 +2,7 @@
 
 namespace App\Controllers\Api;
 
+use App\Filters\ApiKeyFilter;
 use App\Libraries\McpServer;
 use CodeIgniter\Controller;
 
@@ -12,16 +13,23 @@ use CodeIgniter\Controller;
  *  - en la cabecera Authorization: Bearer <clave> o X-API-KEY (Claude Code, Cursor, VS Code...);
  *  - en la dirección: /api/mcp/<clave> o ?api_key=<clave> (Claude.ai y ChatGPT no dejan poner cabeceras).
  *
- * Cada herramienta llama a la API pública (/api/v1) con esa clave, así que el cobro, los límites y
- * los planes son los de siempre (ApiKeyFilter). Se reenvía la IP del usuario en X-Forwarded-For para
- * que el límite por IP del plan Free siga contando por usuario y no por servidor.
+ * Cada herramienta llama a la API (/api/v1) con esa clave, así que el cobro, los límites y los
+ * planes son los de siempre (ApiKeyFilter). La IP del usuario viaja firmada (X-MCP-Client-IP y
+ * X-MCP-Signature, ver ApiKeyFilter::ipCliente) para que el límite por IP del Free siga contando
+ * por usuario y no por servidor.
+ *
+ * A quién se llama, por orden:
+ *  1. MCP_API_BASE_URL del .env, si existe.
+ *  2. En producción, el propio servidor directamente (http, sin pasar por Cloudflare): la llamada
+ *     a https://apiempresas.es desde el servidor se quedaba sin respuesta (16-10-2026).
+ *  3. La dirección pública (site_url('api/v1')).
+ * La que funciona se recuerda 1 hora.
  *
  * Sin estado: no hay SSE ni sesiones. GET y DELETE responden 405, como permite la especificación.
- * Base de las llamadas: MCP_API_BASE_URL en el .env (por defecto site_url('api/v1')).
  */
 class McpController extends Controller
 {
-    private const TIMEOUT = 30;
+    private const TIMEOUT = 25;
 
     public function handle(?string $keyEnRuta = null)
     {
@@ -32,7 +40,6 @@ class McpController extends Controller
             return $this->response->setStatusCode(204);
         }
         if ($metodo !== 'POST') {
-            // Sin flujo SSE: los clientes usan solo POST. Un GET desde el navegador recibe una explicación.
             return $this->response->setStatusCode(405)->setHeader('Allow', 'POST, OPTIONS')
                 ->setJSON([
                     'error'   => 'METHOD_NOT_ALLOWED',
@@ -41,11 +48,10 @@ class McpController extends Controller
         }
 
         $key = $this->apiKey($keyEnRuta);
-        $ip  = (string) $this->request->getIPAddress();
-        $base = rtrim((string) (env('MCP_API_BASE_URL') ?: site_url('api/v1')), '/');
+        $ip  = ApiKeyFilter::ipCliente($this->request);
 
-        $server = new McpServer($key, function (string $method, string $path, ?array $body) use ($key, $ip, $base) {
-            return self::llamarApi($base . $path, $method, $body, $key, $ip);
+        $server = new McpServer($key, static function (string $method, string $path, ?array $body) use ($key, $ip) {
+            return self::llamarApi($path, $method, $body, $key, $ip);
         });
 
         [$status, $resp] = $server->handle((string) $this->request->getBody());
@@ -60,7 +66,7 @@ class McpController extends Controller
 
     private function apiKey(?string $keyEnRuta): string
     {
-        $auth = trim((string) $this->request->getHeaderLine('Authorization'));
+        $auth = ApiKeyFilter::cabeceraAuthorization($this->request);
         if (stripos($auth, 'Bearer ') === 0) {
             return trim(substr($auth, 7));
         }
@@ -74,25 +80,76 @@ class McpController extends Controller
         return trim((string) ($this->request->getGet('api_key') ?? ''));
     }
 
+    /** Destinos posibles para llamar a la API, por orden de preferencia. */
+    private static function destinos(): array
+    {
+        $env = trim((string) env('MCP_API_BASE_URL'));
+        if ($env !== '') {
+            return [['nombre' => 'env', 'base' => rtrim($env, '/'), 'resolve' => null]];
+        }
+        $publica = rtrim(site_url('api/v1'), '/');
+        $host = (string) parse_url($publica, PHP_URL_HOST);
+        $path = (string) parse_url($publica, PHP_URL_PATH);
+        $ipServidor = (string) ($_SERVER['SERVER_ADDR'] ?? '');
+        $local = $host === 'localhost' || str_ends_with($host, '.test') || $ipServidor === '';
+
+        $lista = [];
+        $recordado = cache('mcp_api_destino');
+        if (!$local) {
+            $lista[] = ['nombre' => 'origen', 'base' => 'http://' . $host . $path, 'resolve' => $host . ':80:' . (str_contains($ipServidor, ':') ? '[' . $ipServidor . ']' : $ipServidor)];
+        }
+        $lista[] = ['nombre' => 'publica', 'base' => $publica, 'resolve' => null];
+        if ($recordado === 'publica' && count($lista) > 1) {
+            $lista = array_reverse($lista);
+        }
+        return $lista;
+    }
+
     /** @return array{status:int, body:mixed} */
-    private static function llamarApi(string $url, string $method, ?array $body, string $key, string $ip): array
+    private static function llamarApi(string $path, string $method, ?array $body, string $key, string $ip): array
+    {
+        $fallos = [];
+        foreach (self::destinos() as $d) {
+            $r = self::peticion($d, $path, $method, $body, $key, $ip);
+            if ($r['ok']) {
+                if ($d['nombre'] !== 'env') {
+                    cache()->save('mcp_api_destino', $d['nombre'], 3600);
+                }
+                return ['status' => $r['status'], 'body' => $r['body']];
+            }
+            $fallos[] = $d['nombre'] . ': ' . $r['error'];
+        }
+        log_message('error', '[McpController] sin respuesta de la API (' . implode(' | ', $fallos) . ')');
+        return ['status' => 0, 'body' => ['detalle' => implode(' | ', $fallos)]];
+    }
+
+    /** @return array{ok:bool, status:int, body:mixed, error:string} */
+    private static function peticion(array $d, string $path, string $method, ?array $body, string $key, string $ip): array
     {
         $headers = [
             'X-API-KEY: ' . $key,
             'Accept: application/json',
             'User-Agent: apiempresas-mcp-remote/' . McpServer::VERSION,
         ];
-        if ($ip !== '') {
-            $headers[] = 'X-Forwarded-For: ' . $ip;
+        if ($ip !== '' && filter_var($ip, FILTER_VALIDATE_IP)) {
+            $headers[] = 'X-MCP-Client-IP: ' . $ip;
+            $headers[] = 'X-MCP-Signature: ' . hash_hmac('sha256', $ip, ApiKeyFilter::secretoInterno());
         }
-        $ch = curl_init($url);
+        $esOrigen = $d['nombre'] === 'origen';
+        if ($esOrigen) {
+            $headers[] = 'X-Forwarded-Proto: https'; // para que la API genere sus enlaces con https
+        }
+        $ch = curl_init($d['base'] . $path);
         $opts = [
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT        => self::TIMEOUT,
-            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_TIMEOUT        => $esOrigen ? 15 : self::TIMEOUT,
+            CURLOPT_CONNECTTIMEOUT => $esOrigen ? 3 : 10,
             CURLOPT_FOLLOWLOCATION => false,
             CURLOPT_HTTPHEADER     => $headers,
         ];
+        if ($d['resolve'] !== null) {
+            $opts[CURLOPT_RESOLVE] = [$d['resolve']];
+        }
         if ($method === 'POST') {
             $opts[CURLOPT_POST] = true;
             $opts[CURLOPT_POSTFIELDS] = json_encode($body ?? new \stdClass(), JSON_UNESCAPED_UNICODE);
@@ -101,13 +158,17 @@ class McpController extends Controller
         curl_setopt_array($ch, $opts);
         $raw = curl_exec($ch);
         $status = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        if ($raw === false) {
-            log_message('error', '[McpController] ' . curl_error($ch) . ' ' . preg_replace('/\?.*/', '', $url));
-            curl_close($ch);
-            return ['status' => 0, 'body' => null];
-        }
+        $err = $raw === false ? curl_error($ch) : '';
         curl_close($ch);
+
+        if ($raw === false) {
+            return ['ok' => false, 'status' => 0, 'body' => null, 'error' => $err];
+        }
         $json = json_decode((string) $raw, true);
-        return ['status' => $status, 'body' => $json ?? (string) $raw];
+        // Una redirección o una página que no es JSON no es la API (p. ej. la página por defecto del servidor)
+        if (!is_array($json) || ($status >= 300 && $status < 400)) {
+            return ['ok' => false, 'status' => $status, 'body' => null, 'error' => 'HTTP ' . $status . ' sin JSON'];
+        }
+        return ['ok' => true, 'status' => $status, 'body' => $json, 'error' => ''];
     }
 }

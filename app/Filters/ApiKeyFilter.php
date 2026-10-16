@@ -100,6 +100,65 @@ class ApiKeyFilter implements FilterInterface
     }
 
     /**
+     * Cabecera Authorization (16-10-2026). En producción no llega por getHeaderLine(): el servidor
+     * la deja en REDIRECT_HTTP_AUTHORIZATION tras la reescritura del .htaccess, y "Authorization:
+     * Bearer <clave>", que la documentación da como válida, respondía 401 API_KEY_MISSING.
+     */
+    public static function cabeceraAuthorization(RequestInterface $request): string
+    {
+        $a = trim((string) $request->getHeaderLine('Authorization'));
+        if ($a === '') {
+            foreach (['HTTP_AUTHORIZATION', 'REDIRECT_HTTP_AUTHORIZATION', 'REDIRECT_REDIRECT_HTTP_AUTHORIZATION'] as $k) {
+                if (!empty($_SERVER[$k])) {
+                    $a = trim((string) $_SERVER[$k]);
+                    break;
+                }
+            }
+        }
+        if ($a === '' && function_exists('getallheaders')) {
+            foreach ((array) getallheaders() as $nombre => $valor) {
+                if (strcasecmp((string) $nombre, 'Authorization') === 0) {
+                    $a = trim((string) $valor);
+                    break;
+                }
+            }
+        }
+        return $a;
+    }
+
+    /**
+     * Secreto para las llamadas internas del servidor MCP remoto (App\Controllers\Api\McpController).
+     * MCP_INTERNAL_SECRET en el .env; si no está, se deriva de la configuración de la base de datos,
+     * que solo conoce el propio servidor.
+     */
+    public static function secretoInterno(): string
+    {
+        $s = (string) env('MCP_INTERNAL_SECRET');
+        if ($s !== '') {
+            return $s;
+        }
+        $db = config('Database')->default ?? [];
+        return hash('sha256', 'apiempresas-mcp|' . ($db['password'] ?? '') . '|' . ($db['database'] ?? '') . '|' . ($db['username'] ?? ''));
+    }
+
+    /**
+     * IP del cliente. Las llamadas del servidor MCP remoto salen del propio servidor: traen la IP
+     * del usuario en X-MCP-Client-IP, firmada (X-MCP-Signature), para que el límite por IP del plan
+     * Free siga contando por usuario y no por servidor. Sin firma válida, la IP de siempre.
+     */
+    public static function ipCliente(RequestInterface $request): string
+    {
+        $ip = (string) $request->getIPAddress();
+        $fw = trim((string) $request->getHeaderLine('X-MCP-Client-IP'));
+        $firma = trim((string) $request->getHeaderLine('X-MCP-Signature'));
+        if ($fw !== '' && $firma !== '' && filter_var($fw, FILTER_VALIDATE_IP)
+            && hash_equals(hash_hmac('sha256', $fw, self::secretoInterno()), $firma)) {
+            return $fw;
+        }
+        return $ip;
+    }
+
+    /**
      * Red a la que pertenece una IP, para los límites del plan gratuito.
      * IPv4: la dirección tal cual. IPv6: los cuatro primeros grupos (la red /64) como
      * prefijo de texto; si la dirección viene abreviada dentro de esos grupos, se
@@ -244,7 +303,7 @@ class ApiKeyFilter implements FilterInterface
                 'http_method'     => (string) $request->getMethod(),
                 'status_code'     => $status,
                 'request_id'      => (string) self::$apiRequestId,
-                'ip_address'      => $request->getIPAddress(),
+                'ip_address'      => self::ipCliente($request),
                 'user_agent'      => substr($ua, 0, 255),
                 'duration_ms'     => self::$apiT0 > 0.0 ? (int) round((microtime(true) - self::$apiT0) * 1000) : null,
                 'search_term'     => null,
@@ -312,7 +371,7 @@ class ApiKeyFilter implements FilterInterface
         $apiKey = trim((string) $request->getHeaderLine('X-API-KEY'));
 
         if ($apiKey === '') {
-            $auth = trim((string) $request->getHeaderLine('Authorization'));
+            $auth = self::cabeceraAuthorization($request);
             if (stripos($auth, 'Bearer ') === 0) {
                 $apiKey = trim(substr($auth, 7));
             }
@@ -327,7 +386,7 @@ class ApiKeyFilter implements FilterInterface
         // 3) Validar contra DB
         $db = \Config\Database::connect('default');
 
-        $clientIp = $request->getIPAddress();
+        $clientIp = self::ipCliente($request);
         $escapedIp = $db->escape($clientIp);
 
         $builder = $db->table('api_keys ak')
@@ -617,7 +676,7 @@ class ApiKeyFilter implements FilterInterface
             // 100 consultas quedaba bloqueada también en el Sandbox y en /usage, que son
             // gratis y que la documentación da como disponibles siempre.
             if ((int)$planId === 1 && $walletBalance <= 0 && !self::$apiSkipBilling) {
-                $ipAddress = $request->getIPAddress();
+                $ipAddress = self::ipCliente($request);
                 $subscriptionTable = 'user_subscriptions';
                 // En IPv6 se compara la red (/64), no la dirección exacta: los equipos
                 // cambian de dirección dentro de su red y el límite no les afectaba.
@@ -743,7 +802,7 @@ class ApiKeyFilter implements FilterInterface
 
             $endpoint = (string)$request->getUri()->getPath();
             $method   = (string)$request->getMethod();
-            $ip = $request->getIPAddress();
+            $ip = self::ipCliente($request);
             $ua = (string)$request->getUserAgent();
             if (strlen($ua) > 255) $ua = substr($ua, 0, 255);
 

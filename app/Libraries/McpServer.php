@@ -257,7 +257,8 @@ class McpServer
         $status = (int) ($r['status'] ?? 0);
         $body = $r['body'] ?? null;
         if ($status === 0) {
-            return self::texto('No se pudo conectar con la API de APIEmpresas. Prueba de nuevo en un momento.', true);
+            $detalle = is_array($body) && !empty($body['detalle']) ? ' (detalle: ' . $body['detalle'] . ')' : '';
+            return self::texto('No se pudo conectar con la API de APIEmpresas. Prueba de nuevo en un momento.' . $detalle, true);
         }
         if ($status < 200 || $status >= 300) {
             return self::texto(self::mensajeError($status, $body), true);
