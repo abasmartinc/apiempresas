@@ -2043,7 +2043,27 @@ const evento = constructWebhookEvent(rawBody, req.headers['x-apiempresas-signatu
                 <section class="docs-section" id="mcp">
                     <h2>15.1 AI assistants (MCP)</h2>
                     <p>Connect the API to Claude, Cursor, VS Code or any <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener">MCP</a>-compatible assistant and ask in plain language: "Is Mercadona active and who are its directors?", "get the CIF of these 40 companies", "who is the sole shareholder of B12345678?". The assistant calls the API with your key and answers with the data.</p>
-                    <p>This is the official server: <a href="https://www.npmjs.com/package/apiempresas-mcp" target="_blank" rel="noopener"><code>apiempresas-mcp</code></a> on npm, source on <a href="https://github.com/abasmartinc/apiempresas-mcp" target="_blank" rel="noopener">GitHub</a>, listed in the official MCP Registry as <code>io.github.abasmartinc/apiempresas</code>. Requires Node.js 18 or later.</p>
+                    <p>There are two ways to connect it: the remote server, with nothing to install, or the npm package. This is the official server: <a href="https://www.npmjs.com/package/apiempresas-mcp" target="_blank" rel="noopener"><code>apiempresas-mcp</code></a> on npm, source on <a href="https://github.com/abasmartinc/apiempresas-mcp" target="_blank" rel="noopener">GitHub</a>, listed in the official MCP Registry as <code>io.github.abasmartinc/apiempresas</code>. The package requires Node.js 18 or later.</p>
+                    <h3 style="margin-top: 24px;">Nothing to install: remote server</h3>
+                    <p>The server URL is <code>https://apiempresas.es/api/mcp</code> (HTTP transport). Send your key in the <code>X-API-KEY</code> header or, if the assistant does not let you set headers, at the end of the URL: <code>https://apiempresas.es/api/mcp/your_api_key</code>.</p>
+                    <ul>
+                        <li><strong>Claude (web and app):</strong> in Settings → Connectors, add a custom connector with the URL <code>https://apiempresas.es/api/mcp</code>, no sign-in (no OAuth), and the <code>X-API-KEY</code> header with your key. If you don't see the headers option, use the URL with the key at the end.</li>
+                        <li><strong>ChatGPT:</strong> turn on developer mode and create a new connector with the URL that has your key at the end and "No Auth" authentication.</li>
+                    </ul>
+                    <p><strong>Claude Code:</strong></p>
+                    <pre style="background: #0f172a; padding: 10px 15px; border-radius: 8px; margin: 0 0 16px;"><code class="language-bash" style="color: #e2e8f0;">claude mcp add --transport http apiempresas https://apiempresas.es/api/mcp --header "X-API-KEY: your_api_key"</code></pre>
+                    <p><strong>Cursor</strong> (<code>~/.cursor/mcp.json</code>) and <strong>VS Code</strong> (<code>.vscode/mcp.json</code>, with <code>"servers"</code> instead of <code>"mcpServers"</code>):</p>
+                    <pre style="background: #0f172a; padding: 15px; border-radius: 8px; margin: 0 0 16px;"><code class="language-json" style="color: #e2e8f0;">{
+  "mcpServers": {
+    "apiempresas": {
+      "type": "http",
+      "url": "https://apiempresas.es/api/mcp",
+      "headers": { "X-API-KEY": "your_api_key" }
+    }
+  }
+}</code></pre>
+                    <p style="font-size: 14px; color: #64748b;">The URL with your key works like a password: anyone who has it spends queries from your account. Don't share it; if it leaks, rotate the key in your dashboard.</p>
+                    <h3 style="margin-top: 24px;">With the npm package (on your computer)</h3>
                     <h3 style="margin-top: 24px;">Claude Desktop and Cursor</h3>
                     <p>In <code>claude_desktop_config.json</code> (Claude Desktop) or <code>~/.cursor/mcp.json</code> (Cursor):</p>
                     <pre style="background: #0f172a; padding: 15px; border-radius: 8px; margin: 0 0 16px;"><code class="language-json" style="color: #e2e8f0;">{

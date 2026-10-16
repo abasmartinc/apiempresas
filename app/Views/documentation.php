@@ -2078,7 +2078,27 @@ const evento = constructWebhookEvent(rawBody, req.headers['x-apiempresas-signatu
                 <section class="docs-section" id="mcp">
                     <h2>15.1 Asistentes de IA (MCP)</h2>
                     <p>Conecta la API a Claude, Cursor, VS Code o cualquier asistente compatible con <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener">MCP</a> y pregunta en lenguaje natural: "¿Mercadona está activa y quiénes son sus administradores?", "saca el CIF de estas 40 empresas", "¿quién es el socio único de B12345678?". El asistente llama a la API con tu clave y te responde con los datos.</p>
-                    <p>Es el servidor oficial: paquete <a href="https://www.npmjs.com/package/apiempresas-mcp" target="_blank" rel="noopener"><code>apiempresas-mcp</code></a> en npm, código en <a href="https://github.com/abasmartinc/apiempresas-mcp" target="_blank" rel="noopener">GitHub</a> y publicado en el registro oficial de MCP como <code>io.github.abasmartinc/apiempresas</code>. Necesita Node.js 18 o superior.</p>
+                    <p>Hay dos formas de conectarlo: el servidor remoto, sin instalar nada, o el paquete de npm. Es el servidor oficial: paquete <a href="https://www.npmjs.com/package/apiempresas-mcp" target="_blank" rel="noopener"><code>apiempresas-mcp</code></a> en npm, código en <a href="https://github.com/abasmartinc/apiempresas-mcp" target="_blank" rel="noopener">GitHub</a> y publicado en el registro oficial de MCP como <code>io.github.abasmartinc/apiempresas</code>. El paquete necesita Node.js 18 o superior.</p>
+                    <h3 style="margin-top: 24px;">Sin instalar nada: servidor remoto</h3>
+                    <p>La dirección del servidor es <code>https://apiempresas.es/api/mcp</code> (transporte HTTP). Tu clave va en la cabecera <code>X-API-KEY</code> o, si el asistente no deja poner cabeceras, al final de la dirección: <code>https://apiempresas.es/api/mcp/tu_api_key</code>.</p>
+                    <ul>
+                        <li><strong>Claude (web y app):</strong> en Ajustes → Conectores, añade un conector personalizado con la dirección <code>https://apiempresas.es/api/mcp</code>, sin inicio de sesión (sin OAuth), y la cabecera <code>X-API-KEY</code> con tu clave. Si no ves la opción de cabeceras, usa la dirección con la clave al final.</li>
+                        <li><strong>ChatGPT:</strong> activa el modo desarrollador, crea un conector nuevo con la dirección que lleva tu clave al final y autenticación «No Auth».</li>
+                    </ul>
+                    <p><strong>Claude Code:</strong></p>
+                    <pre style="background: #0f172a; padding: 10px 15px; border-radius: 8px; margin: 0 0 16px;"><code class="language-bash" style="color: #e2e8f0;">claude mcp add --transport http apiempresas https://apiempresas.es/api/mcp --header "X-API-KEY: tu_api_key"</code></pre>
+                    <p><strong>Cursor</strong> (<code>~/.cursor/mcp.json</code>) y <strong>VS Code</strong> (<code>.vscode/mcp.json</code>, con <code>"servers"</code> en lugar de <code>"mcpServers"</code>):</p>
+                    <pre style="background: #0f172a; padding: 15px; border-radius: 8px; margin: 0 0 16px;"><code class="language-json" style="color: #e2e8f0;">{
+  "mcpServers": {
+    "apiempresas": {
+      "type": "http",
+      "url": "https://apiempresas.es/api/mcp",
+      "headers": { "X-API-KEY": "tu_api_key" }
+    }
+  }
+}</code></pre>
+                    <p style="font-size: 14px; color: #64748b;">La dirección con la clave funciona como una contraseña: quien la tenga gasta consultas de tu cuenta. No la compartas; si se filtra, cámbiala en tu panel.</p>
+                    <h3 style="margin-top: 24px;">Con el paquete de npm (en tu ordenador)</h3>
                     <h3 style="margin-top: 24px;">Claude Desktop y Cursor</h3>
                     <p>En <code>claude_desktop_config.json</code> (Claude Desktop) o en <code>~/.cursor/mcp.json</code> (Cursor):</p>
                     <pre style="background: #0f172a; padding: 15px; border-radius: 8px; margin: 0 0 16px;"><code class="language-json" style="color: #e2e8f0;">{
