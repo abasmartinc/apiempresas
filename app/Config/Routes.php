@@ -299,6 +299,11 @@ $routes->get('api/docs/openapi.json', 'Api\Docs::json');
 // Referencia de la API con Scalar (13-10-2026). /documentation es la guía; esta, la referencia.
 $routes->get('api/referencia', 'ApiReference::index');
 $routes->get('api/referencia/openapi.json', 'ApiReference::json');
+
+// Servidor MCP remoto (16-10-2026): Claude.ai, ChatGPT, Cursor... La clave va en la cabecera
+// (Authorization: Bearer / X-API-KEY) o en la dirección (/api/mcp/<clave>). Ver Api\McpController.
+$routes->match(['GET', 'POST', 'DELETE', 'OPTIONS'], 'api/mcp', 'Api\McpController::handle');
+$routes->match(['GET', 'POST', 'DELETE', 'OPTIONS'], 'api/mcp/(:segment)', 'Api\McpController::handle/$1');
 // Versión en inglés (13-10-2026): la enlazan /docs y spaincompanyapi.com
 $routes->get('api/reference', 'ApiReference::english');
 $routes->get('api/reference/openapi.json', 'ApiReference::jsonEnglish');

@@ -451,6 +451,16 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
     // Crecimiento: altas API / Solvencia por mes, paso a pago, MRR y prevision (App\Libraries\Crecimiento)
     $routes->get('crecimiento', 'Admin\Growth::index');
 
+    // Prospección de clientes para el trabajo de freelance (App\Libraries\Prospeccion), 16-10-2026
+    $routes->get('prospeccion', 'Admin\Prospeccion::index');
+    $routes->get('prospeccion/web', 'Admin\Prospeccion::web');
+    $routes->get('prospeccion/competencia', 'Admin\Prospeccion::competencia');
+    $routes->post('prospeccion/seguimiento', 'Admin\Prospeccion::seguimiento');
+    $routes->post('prospeccion/licitacion', 'Admin\Prospeccion::licitacion');
+    $routes->post('prospeccion/correo', 'Admin\Prospeccion::correo');
+    $routes->post('prospeccion/evaluar', 'Admin\Prospeccion::evaluar');
+    $routes->post('prospeccion/oferta', 'Admin\Prospeccion::oferta');
+
     // Email Templates
     $routes->get('email-templates', 'Admin\EmailTemplates::index');
     $routes->get('email-templates/edit/(:num)', 'Admin\EmailTemplates::edit/$1');

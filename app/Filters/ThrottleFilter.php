@@ -44,6 +44,16 @@ class ThrottleFilter implements FilterInterface
             return;
         }
 
+        // Servidor MCP remoto (16-10-2026): Claude.ai y ChatGPT conectan desde servidores compartidos
+        // por muchos usuarios, así que el límite por IP es más alto. Cada herramienta pasa además por
+        // /api/v1, con los límites por clave de siempre.
+        if ($path === 'api/mcp' || strpos($path, 'api/mcp/') === 0) {
+            if ($throttler->check(md5($ip . '_mcp'), 600, 60) === false) {
+                return Services::response()->setStatusCode(429)->setHeader('Retry-After', '60')->setBody('Too Many Requests (MCP)');
+            }
+            return;
+        }
+
         if (strpos($path, 'api/') === 0) {
             // Límite para el resto de la API (sandbox, anónima): 120 peticiones por minuto
             if ($throttler->check(md5($ip . '_api'), 120, 60) === false) {
