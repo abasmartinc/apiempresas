@@ -913,6 +913,10 @@ class Billing extends BaseController
                 'success_url' => $successUrl,
                 'cancel_url' => $cancelUrl,
                 'customer_creation' => 'if_required',
+                // 16-10-2026: como en el resto de pagos, Stripe pide la dirección y deja
+                // poner el NIF de la empresa; el webhook los lleva a la factura.
+                'billing_address_collection' => 'required',
+                'tax_id_collection' => ['enabled' => true],
                 'invoice_creation' => [
                     'enabled' => true,
                     'invoice_data' => [
@@ -931,6 +935,9 @@ class Billing extends BaseController
             if (!empty($user_row->stripe_customer_id)) {
                 $sessionParams['customer'] = $user_row->stripe_customer_id;
                 unset($sessionParams['customer_creation']); // Evita error 400 de Stripe si se envían ambos
+                // Con un cliente existente, Stripe exige customer_update para recoger el NIF
+                // y guardar en el cliente el nombre y la dirección que escriba.
+                $sessionParams['customer_update'] = ['name' => 'auto', 'address' => 'auto'];
             } else {
                 $sessionParams['customer_email'] = $user_row->email ?? null;
             }
