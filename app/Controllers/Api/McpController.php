@@ -39,6 +39,12 @@ class McpController extends Controller
         if ($metodo === 'OPTIONS') {
             return $this->response->setStatusCode(204);
         }
+        if ($metodo === 'GET' && $this->request->getGet('diag') === 'cabeceras') {
+            // Diagnóstico (16-10-2026): qué cabeceras de autorización llegan a PHP. Solo nombres, nunca valores.
+            $srv = array_values(array_filter(array_keys($_SERVER), static fn($k) => stripos((string) $k, 'AUTHORIZATION') !== false || stripos((string) $k, 'HTTP_X_API_KEY') !== false));
+            $todas = function_exists('getallheaders') ? array_keys((array) getallheaders()) : ['(getallheaders no disponible)'];
+            return $this->response->setJSON(['server_auth_keys' => $srv, 'headers' => $todas, 'sapi' => PHP_SAPI, 'software' => $_SERVER['SERVER_SOFTWARE'] ?? '']);
+        }
         if ($metodo !== 'POST') {
             return $this->response->setStatusCode(405)->setHeader('Allow', 'POST, OPTIONS')
                 ->setJSON([
@@ -96,7 +102,8 @@ class McpController extends Controller
         $lista = [];
         $recordado = cache('mcp_api_destino');
         if (!$local) {
-            $lista[] = ['nombre' => 'origen', 'base' => 'http://' . $host . $path, 'resolve' => $host . ':80:' . (str_contains($ipServidor, ':') ? '[' . $ipServidor . ']' : $ipServidor)];
+            // https: el servidor redirige http a https (301) también en las llamadas internas
+            $lista[] = ['nombre' => 'origen', 'base' => 'https://' . $host . $path, 'resolve' => $host . ':443:' . (str_contains($ipServidor, ':') ? '[' . $ipServidor . ']' : $ipServidor)];
         }
         $lista[] = ['nombre' => 'publica', 'base' => $publica, 'resolve' => null];
         if ($recordado === 'publica' && count($lista) > 1) {
@@ -139,6 +146,8 @@ class McpController extends Controller
         if ($esOrigen) {
             $headers[] = 'X-Forwarded-Proto: https'; // para que la API genere sus enlaces con https
         }
+        // Conexión al propio servidor por su IP: el certificado puede ser el de origen de Cloudflare,
+        // que no valida fuera de Cloudflare. La IP está fijada (CURLOPT_RESOLVE), no hay intermediarios.
         $ch = curl_init($d['base'] . $path);
         $opts = [
             CURLOPT_RETURNTRANSFER => true,
@@ -149,6 +158,8 @@ class McpController extends Controller
         ];
         if ($d['resolve'] !== null) {
             $opts[CURLOPT_RESOLVE] = [$d['resolve']];
+            $opts[CURLOPT_SSL_VERIFYPEER] = false;
+            $opts[CURLOPT_SSL_VERIFYHOST] = 0;
         }
         if ($method === 'POST') {
             $opts[CURLOPT_POST] = true;
@@ -167,7 +178,7 @@ class McpController extends Controller
         $json = json_decode((string) $raw, true);
         // Una redirección o una página que no es JSON no es la API (p. ej. la página por defecto del servidor)
         if (!is_array($json) || ($status >= 300 && $status < 400)) {
-            return ['ok' => false, 'status' => $status, 'body' => null, 'error' => 'HTTP ' . $status . ' sin JSON'];
+            return ['ok' => false, 'status' => $status, 'body' => null, 'error' => 'HTTP ' . $status . ' sin JSON' . ($status >= 300 && $status < 400 ? ' (redirige)' : '')];
         }
         return ['ok' => true, 'status' => $status, 'body' => $json, 'error' => ''];
     }
