@@ -41,5 +41,6 @@ Good to know:
 - [Create a free account and API key](https://spaincompanyapi.com/register)
 - [Service status](https://status.apiempresas.es)
 - SDKs: `npm install apiempresas`, `pip install apiempresas`, `composer require apiempresas/apiempresas-php`.
+- Official MCP server for Claude, Cursor, VS Code and other AI assistants: `npx -y apiempresas-mcp` with the `APIEMPRESAS_API_KEY` variable (official MCP Registry: `io.github.abasmartinc/apiempresas`). [Setup guide](https://spaincompanyapi.com/docs#mcp) · [GitHub](https://github.com/abasmartinc/apiempresas-mcp)
 - Contact: soporte@apiempresas.es
 - Spanish site: https://apiempresas.es

@@ -169,6 +169,12 @@
                             </a>
                         </li>
                         <li>
+                            <a href="#mcp">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path><line x1="8" y1="16" x2="8" y2="16"></line><line x1="16" y1="16" x2="16" y2="16"></line></svg>
+                                <span class="nav-num">15.1</span> Asistentes de IA (MCP)
+                            </a>
+                        </li>
+                        <li>
                             <a href="#examples">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
                                 <span class="nav-num">16.</span> Ejemplos
@@ -2066,6 +2072,57 @@ const { data: cambios } = await api.watchlist.events({ since: '2026-09-01' });
 // En tu servidor (cuerpo en bruto):
 const evento = constructWebhookEvent(rawBody, req.headers['x-apiempresas-signature'], secret);</code></pre>
                     <p>En PHP: <code>ApiEmpresas\Resources\Webhooks::constructEvent($raw, $firma, $secret)</code>. En Python: <code>from apiempresas import construct_webhook_event</code>.</p>
+                </section>
+
+                <!-- MCP -->
+                <section class="docs-section" id="mcp">
+                    <h2>15.1 Asistentes de IA (MCP)</h2>
+                    <p>Conecta la API a Claude, Cursor, VS Code o cualquier asistente compatible con <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener">MCP</a> y pregunta en lenguaje natural: "¿Mercadona está activa y quiénes son sus administradores?", "saca el CIF de estas 40 empresas", "¿quién es el socio único de B12345678?". El asistente llama a la API con tu clave y te responde con los datos.</p>
+                    <p>Es el servidor oficial: paquete <a href="https://www.npmjs.com/package/apiempresas-mcp" target="_blank" rel="noopener"><code>apiempresas-mcp</code></a> en npm, código en <a href="https://github.com/abasmartinc/apiempresas-mcp" target="_blank" rel="noopener">GitHub</a> y publicado en el registro oficial de MCP como <code>io.github.abasmartinc/apiempresas</code>. Necesita Node.js 18 o superior.</p>
+                    <h3 style="margin-top: 24px;">Claude Desktop y Cursor</h3>
+                    <p>En <code>claude_desktop_config.json</code> (Claude Desktop) o en <code>~/.cursor/mcp.json</code> (Cursor):</p>
+                    <pre style="background: #0f172a; padding: 15px; border-radius: 8px; margin: 0 0 16px;"><code class="language-json" style="color: #e2e8f0;">{
+  "mcpServers": {
+    "apiempresas": {
+      "command": "npx",
+      "args": ["-y", "apiempresas-mcp"],
+      "env": { "APIEMPRESAS_API_KEY": "tu_api_key" }
+    }
+  }
+}</code></pre>
+                    <h3>Claude Code</h3>
+                    <pre style="background: #0f172a; padding: 10px 15px; border-radius: 8px; margin: 0 0 16px;"><code class="language-bash" style="color: #e2e8f0;">claude mcp add apiempresas --env APIEMPRESAS_API_KEY=tu_api_key -- npx -y apiempresas-mcp</code></pre>
+                    <h3>VS Code</h3>
+                    <p>En <code>.vscode/mcp.json</code>:</p>
+                    <pre style="background: #0f172a; padding: 15px; border-radius: 8px; margin: 0 0 16px;"><code class="language-json" style="color: #e2e8f0;">{
+  "servers": {
+    "apiempresas": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "apiempresas-mcp"],
+      "env": { "APIEMPRESAS_API_KEY": "tu_api_key" }
+    }
+  }
+}</code></pre>
+                    <h3>Herramientas</h3>
+                    <table class="docs-table">
+                        <thead><tr><th>Herramienta</th><th>Qué hace</th><th>Plan</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>get_company</code></td><td>Empresa por CIF: estado, forma jurídica, LEI, CNAE; domicilio, socio único, matriz y administradores según plan</td><td>Free (recortado), Pro</td></tr>
+                            <tr><td><code>search_companies</code></td><td>Buscar empresas por nombre</td><td>Free</td></tr>
+                            <tr><td><code>verify_company</code></td><td>Verificación KYB en una llamada (2 consultas)</td><td>Pro</td></tr>
+                            <tr><td><code>find_cif_by_name</code></td><td>De nombre a CIF, hasta 100 a la vez (solo cobra las coincidencias)</td><td>Pro</td></tr>
+                            <tr><td><code>get_borme_history</code></td><td>Actos publicados en el BORME</td><td>Pro</td></tr>
+                            <tr><td><code>get_risk_profile</code></td><td>Perfil de riesgo</td><td>Business</td></tr>
+                            <tr><td><code>get_public_contracts</code></td><td>Contratos públicos adjudicados</td><td>Business</td></tr>
+                            <tr><td><code>get_usage</code></td><td>Plan, consultas disponibles y saldo (no gasta)</td><td>Todos</td></tr>
+                        </tbody>
+                    </table>
+                    <ul style="margin-top: 16px;">
+                        <li>Cada llamada del asistente gasta consultas de tu plan, igual que la API. Todas las herramientas son de solo lectura.</li>
+                        <li>Para probar sin gastar, añade <code>"APIEMPRESAS_BASE_URL": "https://apiempresas.es/api/sandbox/v1"</code> a <code>env</code> (solo admite los CIF de prueba A15075062 y B00000000).</li>
+                        <li>¿No tienes clave? <a href="<?= site_url('register?intent=api&plan=free&source=docs_mcp') ?>">Crea una cuenta gratis</a>: 100 consultas, sin tarjeta.</li>
+                    </ul>
                 </section>
 
                 <!-- EXAMPLES -->

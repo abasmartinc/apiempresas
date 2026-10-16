@@ -705,13 +705,14 @@ $empresa = $api-&gt;companies-&gt;get(<span class="hc-str">'A46103834'</span>);
                     <li class="hiw-step reveal delay-3">
                         <span class="hiw-num">3</span>
                         <h3>Haz tu primera llamada</h3>
-                        <p>Con <code>curl</code> o con los SDK para PHP, Node.js y Python. Para desarrollar sin gastar consultas tienes el Sandbox, con la misma clave.</p>
+                        <p>Con <code>curl</code>, con los SDK para PHP, Node.js y Python o desde tu asistente de IA con el servidor MCP. Para desarrollar sin gastar consultas tienes el Sandbox, con la misma clave.</p>
                         <a href="<?= site_url('api/referencia') ?>" data-track-event="how_cta_click" data-track-metadata='{"step": 3, "target": "sandbox", "page_type": "home"}'>Probar en el Sandbox →</a>
                     </li>
                 </ol>
                 <p class="hiw-tools reveal">Sin programar, úsala desde tus herramientas:
                     <a href="<?= site_url('integraciones/google-sheets') ?>">Google Sheets</a> ·
-                    <a href="<?= site_url('plugin-wordpress-buscador-empresas') ?>">WordPress</a>
+                    <a href="<?= site_url('plugin-wordpress-buscador-empresas') ?>">WordPress</a> ·
+                    <a href="<?= site_url('documentation#mcp') ?>">Claude, Cursor y otros asistentes de IA (MCP)</a>
                 </p>
 
             </div>

@@ -134,4 +134,8 @@ pip install apiempresas
 composer require apiempresas/apiempresas-php
 ```
 
+## Asistentes de IA (MCP)
+
+Servidor MCP oficial para Claude, Cursor, VS Code y otros asistentes: `npx -y apiempresas-mcp` con la variable `APIEMPRESAS_API_KEY`. Configuración paso a paso en la [guía](https://apiempresas.es/documentation#mcp); código en [GitHub](https://github.com/abasmartinc/apiempresas-mcp).
+
 Estado del servicio: [status.apiempresas.es](https://status.apiempresas.es). Soporte: [soporte@apiempresas.es](mailto:soporte@apiempresas.es).

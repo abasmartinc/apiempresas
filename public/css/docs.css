@@ -482,3 +482,16 @@ body.dark-mode table.docs-table thead th {
 body.dark-mode table.docs-table td {
     border-color: #334155 !important;
 }
+
+/* 16-10-2026: en modo oscuro los enlaces del texto salían en azul marino (#133A82) sobre
+   fondo pizarra y casi no se leían. Las etiquetas de plan y los botones conservan su estilo. */
+body.dark-mode .docs-section p a:not(.plan-badge),
+body.dark-mode .docs-section li a:not(.plan-badge),
+body.dark-mode .docs-table td a:not(.plan-badge) {
+    color: #93c5fd;
+}
+body.dark-mode .docs-section p a:not(.plan-badge):hover,
+body.dark-mode .docs-section li a:not(.plan-badge):hover,
+body.dark-mode .docs-table td a:not(.plan-badge):hover {
+    color: #bfdbfe;
+}

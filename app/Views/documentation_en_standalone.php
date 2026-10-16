@@ -169,6 +169,12 @@
                             </a>
                         </li>
                         <li>
+                            <a href="#mcp">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path><line x1="8" y1="16" x2="8" y2="16"></line><line x1="16" y1="16" x2="16" y2="16"></line></svg>
+                                <span class="nav-num">15.1</span> AI assistants (MCP)
+                            </a>
+                        </li>
+                        <li>
                             <a href="#examples">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
                                 <span class="nav-num">16.</span> Examples
@@ -2031,6 +2037,57 @@ const { data: cambios } = await api.watchlist.events({ since: '2026-09-01' });
 // On your server (raw body):
 const evento = constructWebhookEvent(rawBody, req.headers['x-apiempresas-signature'], secret);</code></pre>
                     <p>In PHP: <code>ApiEmpresas\Resources\Webhooks::constructEvent($raw, $firma, $secret)</code>. In Python: <code>from apiempresas import construct_webhook_event</code>.</p>
+                </section>
+
+                <!-- MCP -->
+                <section class="docs-section" id="mcp">
+                    <h2>15.1 AI assistants (MCP)</h2>
+                    <p>Connect the API to Claude, Cursor, VS Code or any <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener">MCP</a>-compatible assistant and ask in plain language: "Is Mercadona active and who are its directors?", "get the CIF of these 40 companies", "who is the sole shareholder of B12345678?". The assistant calls the API with your key and answers with the data.</p>
+                    <p>This is the official server: <a href="https://www.npmjs.com/package/apiempresas-mcp" target="_blank" rel="noopener"><code>apiempresas-mcp</code></a> on npm, source on <a href="https://github.com/abasmartinc/apiempresas-mcp" target="_blank" rel="noopener">GitHub</a>, listed in the official MCP Registry as <code>io.github.abasmartinc/apiempresas</code>. Requires Node.js 18 or later.</p>
+                    <h3 style="margin-top: 24px;">Claude Desktop and Cursor</h3>
+                    <p>In <code>claude_desktop_config.json</code> (Claude Desktop) or <code>~/.cursor/mcp.json</code> (Cursor):</p>
+                    <pre style="background: #0f172a; padding: 15px; border-radius: 8px; margin: 0 0 16px;"><code class="language-json" style="color: #e2e8f0;">{
+  "mcpServers": {
+    "apiempresas": {
+      "command": "npx",
+      "args": ["-y", "apiempresas-mcp"],
+      "env": { "APIEMPRESAS_API_KEY": "your_api_key" }
+    }
+  }
+}</code></pre>
+                    <h3>Claude Code</h3>
+                    <pre style="background: #0f172a; padding: 10px 15px; border-radius: 8px; margin: 0 0 16px;"><code class="language-bash" style="color: #e2e8f0;">claude mcp add apiempresas --env APIEMPRESAS_API_KEY=your_api_key -- npx -y apiempresas-mcp</code></pre>
+                    <h3>VS Code</h3>
+                    <p>In <code>.vscode/mcp.json</code>:</p>
+                    <pre style="background: #0f172a; padding: 15px; border-radius: 8px; margin: 0 0 16px;"><code class="language-json" style="color: #e2e8f0;">{
+  "servers": {
+    "apiempresas": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "apiempresas-mcp"],
+      "env": { "APIEMPRESAS_API_KEY": "your_api_key" }
+    }
+  }
+}</code></pre>
+                    <h3>Tools</h3>
+                    <table class="docs-table">
+                        <thead><tr><th>Tool</th><th>What it does</th><th>Plan</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>get_company</code></td><td>Company by CIF: status, legal form, LEI, CNAE; address, sole shareholder, parent company and directors depending on plan</td><td>Free (trimmed), Pro</td></tr>
+                            <tr><td><code>search_companies</code></td><td>Search companies by name</td><td>Free</td></tr>
+                            <tr><td><code>verify_company</code></td><td>One-call KYB verification (2 requests)</td><td>Pro</td></tr>
+                            <tr><td><code>find_cif_by_name</code></td><td>Name to CIF, up to 100 at a time (only matches are charged)</td><td>Pro</td></tr>
+                            <tr><td><code>get_borme_history</code></td><td>BORME filings</td><td>Pro</td></tr>
+                            <tr><td><code>get_risk_profile</code></td><td>Risk profile</td><td>Business</td></tr>
+                            <tr><td><code>get_public_contracts</code></td><td>Awarded public contracts</td><td>Business</td></tr>
+                            <tr><td><code>get_usage</code></td><td>Plan, remaining requests and credit balance (free)</td><td>All</td></tr>
+                        </tbody>
+                    </table>
+                    <ul style="margin-top: 16px;">
+                        <li>Each call by the assistant uses requests from your plan, just like the API. All tools are read-only.</li>
+                        <li>To test without spending, add <code>"APIEMPRESAS_BASE_URL": "https://apiempresas.es/api/sandbox/v1"</code> to <code>env</code> (test CIFs A15075062 and B00000000 only).</li>
+                        <li>No key yet? <a href="<?= site_url('register?intent=api&plan=free&source=docs_mcp') ?>">Create a free account</a>: 100 requests, no card.</li>
+                    </ul>
                 </section>
 
                 <!-- CODE EXAMPLES -->

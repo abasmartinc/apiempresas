@@ -42,6 +42,7 @@ Datos importantes para no confundir:
 - [Crear cuenta y API key gratis](https://apiempresas.es/register?intent=api&plan=free)
 - [Estado del servicio](https://status.apiempresas.es)
 - SDK: `npm install apiempresas`, `pip install apiempresas`, `composer require apiempresas/apiempresas-php`.
+- Servidor MCP oficial para Claude, Cursor, VS Code y otros asistentes de IA: `npx -y apiempresas-mcp` con la variable `APIEMPRESAS_API_KEY` (registro oficial de MCP: `io.github.abasmartinc/apiempresas`). [Guía de instalación](https://apiempresas.es/documentation#mcp) · [GitHub](https://github.com/abasmartinc/apiempresas-mcp)
 - Contacto: soporte@apiempresas.es
 
 ## Herramientas y guías gratuitas (sin registro)

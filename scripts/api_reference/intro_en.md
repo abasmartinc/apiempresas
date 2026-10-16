@@ -134,4 +134,8 @@ pip install apiempresas
 composer require apiempresas/apiempresas-php
 ```
 
+## AI assistants (MCP)
+
+Official MCP server for Claude, Cursor, VS Code and other assistants: `npx -y apiempresas-mcp` with the `APIEMPRESAS_API_KEY` variable. Step-by-step setup in the [guide](https://spaincompanyapi.com/docs#mcp); source on [GitHub](https://github.com/abasmartinc/apiempresas-mcp).
+
 Service status: [status.apiempresas.es](https://status.apiempresas.es). Support: [soporte@apiempresas.es](mailto:soporte@apiempresas.es).

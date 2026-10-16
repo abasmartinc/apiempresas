@@ -721,11 +721,11 @@ $company = $api-&gt;companies-&gt;get(<span class="hc-str">'A46103834'</span>);
                     <li class="hiw-step reveal delay-3">
                         <span class="hiw-num">3</span>
                         <h3>Make your first call</h3>
-                        <p>With <code>curl</code> or the SDKs for PHP, Node.js and Python. To build without using requests, there is a Sandbox that takes the same key.</p>
+                        <p>With <code>curl</code>, the SDKs for PHP, Node.js and Python, or from your AI assistant with the MCP server. To build without using requests, there is a Sandbox that takes the same key.</p>
                         <a href="<?= site_url('api/reference') ?>" data-track-event="how_cta_click" data-track-metadata='{"step": 3, "target": "sandbox", "page_type": "home_en"}'>Try it in the Sandbox →</a>
                     </li>
                 </ol>
-                <p class="hiw-tools reveal">No code? It also works from Google Sheets and WordPress.</p>
+                <p class="hiw-tools reveal">No code? It also works from Google Sheets, WordPress and AI assistants like Claude or Cursor (<a href="<?= site_url('docs#mcp') ?>">MCP server</a>).</p>
 
 
                 <div class="hiw-sources reveal">
