@@ -233,7 +233,11 @@
                 </div>
                 <div class="endpoint-card">
                     <div class="endpoint-route">GET /companies/verify</div>
-                    <p class="endpoint-desc">Verificación KYB en una llamada: estado, coincidencia del nombre, si quien firma es administrador vigente y NIF en VIES, con recomendación pass, review o fail. Gasta 2 consultas.</p>
+                    <p class="endpoint-desc">Verificación KYB en una llamada: estado, coincidencia del nombre, si quien firma es administrador vigente o socio único y NIF en VIES, con recomendación pass, review o fail. Gasta 2 consultas.</p>
+                </div>
+                <div class="endpoint-card">
+                    <div class="endpoint-route">GET /companies?cif= · ownership y group</div>
+                    <p class="endpoint-desc">Socio único de las sociedades unipersonales, con su fecha y el enlace al BORME, y la matriz del grupo que la empresa declara a GLEIF (con su CIF si es española). Sin coste extra: van en la misma consulta.</p>
                 </div>
                 <div class="endpoint-card">
                     <div class="endpoint-route">POST /companies/reconcile</div>

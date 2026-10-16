@@ -89,7 +89,7 @@ console.log(v.decision_hint);  // 'pass' | 'review' | 'fail'
 console.log(v.flags);          // alertas con code, severity y message
 ```
 
-Cada empresa trae además `status_code` (ACTIVE, INSOLVENCY, EXTINCT...), `status_source`, `status_date` y, en Pro/Business, `financials` (tramo de tamaño y último año de cuentas). Los administradores traen `since`.
+Cada empresa trae además `status_code` (ACTIVE, INSOLVENCY, EXTINCT...), `status_source`, `status_date` y, en Pro/Business, `financials` (tramo de tamaño y último año de cuentas). Los administradores traen `since`. Desde la 1.3.0 la respuesta lleva también `identifiers` (código LEI) y `legal_form` (forma jurídica con su código ISO 20275) en todos los planes, y en Pro/Business `group` (matriz directa y última según GLEIF) y `ownership` (socio único según el BORME). En `verify`, con `person`, `checks.person.is_sole_shareholder` dice si quien firma es el socio único.
 
 ### Nombre a CIF (Pro)
 

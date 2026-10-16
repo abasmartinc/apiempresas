@@ -16,7 +16,7 @@ return [
     'pro_f1' => '3.000 consultas al mes',
     'pro_f2' => 'Dirección completa y administradores vigentes, con fecha',
     'pro_f3' => 'Tramo de facturación y último año de cuentas',
-    'pro_f4' => 'Verificación KYB en una llamada y nombre a CIF en lote',
+    'pro_f4' => 'Verificación KYB en una llamada, socio único y matriz del grupo, y nombre a CIF en lote',
     'pro_f5' => 'Vigilancia de 100 empresas, lotes de 100 CIF e historial BORME',
     'pro_f6' => 'Soporte prioritario por email: respuesta en menos de 2 h',
     'free_limited' => 'Sin dirección ni administradores; objeto social recortado',

@@ -198,9 +198,17 @@ class CompanyModel extends Model
         }
 
         $rows = $builder->whereIn('companies.cif', $cifs)
-            ->limit(100)
+            ->limit(400) // margen para las filas repetidas por el CNAE; se recorta a 100 abajo
             ->get()
             ->getResultArray();
+
+        // 16-10-2026: un código CNAE 2009 con varias equivalencias en cnae_2009_2025 repetía la
+        // ficha (Inditex salía 2 veces) y /companies/batch cobraba cada copia. Una fila por empresa.
+        $unicas = [];
+        foreach ($rows as $r) {
+            $unicas[(int) $r['id']] ??= $r;
+        }
+        $rows = array_slice(array_values($unicas), 0, 100);
 
         // CIF anteriores (12-10-2026): los CIF pedidos que no son de ninguna ficha pero son el CIF
         // anterior de una sociedad. Si esa sociedad ya sale (se pidieron los dos CIF), no se repite.
@@ -228,7 +236,8 @@ class CompanyModel extends Model
                 }
                 foreach ($builder->whereIn('companies.id', array_keys($porId))->get()->getResultArray() as $r) {
                     $c = $porId[(int) $r['id']] ?? null;
-                    if ($c !== null && count($rows) < 100) {
+                    if ($c !== null && count($rows) < 100 && !isset($ids[(int) $r['id']])) {
+                        $ids[(int) $r['id']] = true;
                         $r['previous_cif_match'] = self::previousCifMatch($c, $r, $prev[$c]);
                         $rows[] = $r;
                     }

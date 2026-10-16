@@ -325,7 +325,7 @@ $company = $api-&gt;companies-&gt;get(<span class="hc-str">'A46103834'</span>);
                     <li class="api-map-card">
                         <code>GET /companies/verify</code>
                         <h3>KYB verification</h3>
-                        <p>Whether it exists, whether it is active and who runs it, in one call.</p>
+                        <p>Whether it exists, whether it is active, who runs it and who its sole shareholder is, in one call.</p>
                         <span class="api-map-plan">Pro</span>
                     </li>
                     <li class="api-map-card">
@@ -799,7 +799,7 @@ $company = $api-&gt;companies-&gt;get(<span class="hc-str">'A46103834'</span>);
                         <ul class="tier-features">
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> <?= $freeLimit ?> free requests (one-time, not renewed)</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Lookup by CIF and search by name</li>
-                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Basic data: company name, normalised status, CNAE, province and incorporation date</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Basic data: company name, normalised status, legal form (with ISO 20275 code), CNAE, province, incorporation date and LEI</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Commercial score (0-100): the number only</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Newly incorporated companies (today, 7 or 30 days): 10 per request, with name and CIF hidden</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Free segment counts: how many companies by sector, area and size</li>
@@ -820,7 +820,8 @@ $company = $api-&gt;companies-&gt;get(<span class="hc-str">'A46103834'</span>);
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> 3,000 requests per month</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Full data, with address and current directors (with appointment date)</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Revenue band and latest filed accounts year</li>
-                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> One-call KYB verification: status, name, signer and VAT number in VIES</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Sole shareholder of single-member companies and parent company, with the official source (BORME and GLEIF)</li>
+                            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> One-call KYB verification: status, name, signer, sole shareholder and VAT number in VIES</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Name to CIF in batch: complete your customer database (you only pay for matches)</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Batch lookups: up to 100 CIFs per request</li>
                             <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> BORME history, signals and corporate graphs</li>
@@ -917,7 +918,7 @@ $company = $api-&gt;companies-&gt;get(<span class="hc-str">'A46103834'</span>);
                                     <div class="cap-col-feature">
                                         <div class="cap-feature-name">Validation and Enrichment</div>
                                         <div class="cap-feature-endpoint">GET /api/v1/companies</div>
-                                        <div class="cap-feature-desc">Check that a company exists and get its registry data (CNAE, address, capital).</div>
+                                        <div class="cap-feature-desc">Check that a company exists and get its registry data (legal form with ISO 20275 code, LEI, CNAE, address, capital).</div>
                                         <button type="button" onclick="event.preventDefault(); showJsonPreview('get_companies')" class="btn-json-preview">View JSON Response</button>
                                     </div>
                                 </td>
@@ -945,6 +946,18 @@ $company = $api-&gt;companies-&gt;get(<span class="hc-str">'A46103834'</span>);
                                         <div class="cap-feature-endpoint">GET /api/v1/companies/verify</div>
                                         <div class="cap-feature-desc">In one call: whether the company operates, whether the name matches, whether the signer is a current director and whether the VAT number is in VIES. Returns pass, review or fail.</div>
                                         <button type="button" onclick="event.preventDefault(); showJsonPreview('get_verify')" class="btn-json-preview">View JSON Response</button>
+                                    </div>
+                                </td>
+                                <td style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
+                                <td class="cap-featured-col" style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                                <td style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="cap-col-feature">
+                                        <div class="cap-feature-name">Sole shareholder and corporate group</div>
+                                        <div class="cap-feature-endpoint">GET /api/v1/companies · /companies/verify</div>
+                                        <div class="cap-feature-desc">If the company is single-member, who its sole shareholder is and since when, with the BORME link. Plus the direct and ultimate parent the company reports to GLEIF. On Free you see whether they exist, without the detail.</div>
                                     </div>
                                 </td>
                                 <td style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
@@ -1186,7 +1199,7 @@ $company = $api-&gt;companies-&gt;get(<span class="hc-str">'A46103834'</span>);
                         <?php
                         // Single source for the FAQ: rendered here and in the FAQPage JSON-LD at the bottom.
                         $homeFaqs = [
-                            ['What data does the Spanish company API return?', 'Legal name, status (active, dissolved, in insolvency…), incorporation date, province and main activity (CNAE code). On the Pro plan you also get current directors, the full registered address, revenue band, the BORME filing history, the commercial score with its reasons and change monitoring. On Business, also the risk profile, public contracts and webhooks.'],
+                            ['What data does the Spanish company API return?', 'Legal name, status (active, dissolved, in insolvency…), incorporation date, province, main activity (CNAE code), legal form with its ISO 20275 code and LEI. On the Pro plan you also get current directors, sole shareholder and parent company, the full registered address, revenue band, the BORME filing history, the commercial score with its reasons and change monitoring. On Business, also the risk profile, public contracts and webhooks.'],
                             ['What is a CIF and how do I validate it?', 'The CIF (now officially the NIF of a legal entity) is the tax ID of a Spanish company: a letter for the legal form, seven digits and a check character, for example A46103834. The API checks the check digit and tells you whether a company with that CIF exists and whether it is active.'],
                             ['Can I try it for free?', 'Yes. The Free plan gives you ' . (int) $freeLimit . ' requests against the live API (one-time, not renewed), with no card and no commitment. There is also a sandbox that does not use requests, for testing the response format.'],
                             ['Is the data official?', 'Most of the data comes from official public sources such as the BORME (the gazette of the Spanish Commercial Registry), the Spanish Public Procurement Platform, the BDNS grants database and GLEIF; the BORME is processed every working day. Some address, contact and size data is completed from other public sources; the full list is on the data sources page. Registry status, the commercial score and the risk profile are calculated by us from those publications, so they are not an official Commercial Registry certificate.'],
@@ -1281,6 +1294,9 @@ $company = $api-&gt;companies-&gt;get(<span class="hc-str">'A46103834'</span>);
                     status_source: "registry",
                     status_date: "2024-03-12",
                     financials: { size_band: "LT_500K", size_band_label: "Menos de 0,5 M€", last_accounts_year: 2024 },
+                    legal_form: { code: "SL", label: "Sociedad limitada", iso20275: "DP3Q", source: "name" },
+                    identifiers: { lei: null, lei_status: null },
+                    ownership: { unipersonal: true, sole_shareholder: { name: "GRUPO EJEMPLO SA", type: "company", since: "2021-06-14" }, source: "borme" },
                     score: 94
                 }
             },
@@ -1292,7 +1308,7 @@ $company = $api-&gt;companies-&gt;get(<span class="hc-str">'A46103834'</span>);
                     status: "ACTIVA", status_code: "ACTIVE", status_source: "registry", status_date: null,
                     checks: {
                         name: { provided: "Empresa de Ejemplo, S.L.", score: 100, match: true },
-                        person: { provided: "Juan Pérez García", is_current_admin: true, matched_name: "PEREZ GARCIA JUAN", position: "Adm. Unico", since: "2019-03-01" },
+                        person: { provided: "Juan Pérez García", is_current_admin: true, matched_name: "PEREZ GARCIA JUAN", position: "Adm. Unico", since: "2019-03-01", is_sole_shareholder: true },
                         vat: { vat_number: "ESB12345678", checked: true, valid: true, source: "VIES", error: null },
                         accounts: { last_accounts_year: 2023 }
                     },

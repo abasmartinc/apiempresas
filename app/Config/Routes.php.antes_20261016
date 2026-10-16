@@ -1,0 +1,717 @@
+<?php
+
+use CodeIgniter\Router\RouteCollection;
+
+
+
+/** @var RouteCollection $routes */
+// --- MÁXIMA PRIORIDAD PARA DEPURACIÓN ---
+$routes->get('informes/(:any)', 'SeoReportController::handleReport/$1');
+
+$englishRoutes = static function ($routes) {
+    // English Landing Page
+    $routes->get('/', 'Home::englishStandalone');
+    // English Documentation
+    $routes->get('docs', 'Documentation::englishStandalone');
+    
+    // English API Prices/Marketing Page
+    $routes->get('spanish-company-data-api', 'ApiPrices::englishStandalone');
+    
+    // Data sources (13-10-2026)
+    $routes->get('data-sources', 'FuentesDatos::english');
+
+    // Auth English
+    $routes->get('enter', 'Login::english');
+    $routes->get('register', 'Register::english');
+};
+
+$routes->group('', ['hostname' => 'spaincompanyapi.test'], $englishRoutes);
+$routes->group('', ['hostname' => 'spaincompanyapi.com'], $englishRoutes);
+
+$routes->get('/', 'Home::index');
+
+$routes->post('submit-review', 'Home::submitReview');
+// Valoraciones de clientes (14-10-2026): tarjeta del panel y enlace del correo. Ver Libraries/Valoraciones.php
+$routes->post('dashboard/valoracion', 'Valoraciones::panel');
+$routes->get('valorar', 'Valoraciones::formulario');
+$routes->post('valorar', 'Valoraciones::enviar');
+$routes->get('billing/export-excel', 'RadarController::exportExcel');
+$routes->get('enter', 'Login::index');          // muestra login
+$routes->get('logout', 'Login::logout');        // cierre de sesión
+$routes->post('login', 'Login::authenticate');        // cierre de sesión
+
+// Forgot Password Flow
+$routes->get('forgot-password', 'Login::forgotPassword');
+$routes->post('forgot-password', 'Login::sendResetLink');
+$routes->get('reset-password/(:any)', 'Login::resetPassword/$1');
+$routes->post('reset-password', 'Login::updatePassword');
+
+// Enlace de acceso de un solo uso (App\Services\LoginLinkService).
+// El GET solo enseña el botón; el POST consume el token (los antivirus de correo
+// abren los enlaces y lo gastarían).
+$routes->get('acceso/(:segment)', 'Login::enlace/$1');
+$routes->post('acceso', 'Login::entrarConEnlace');
+
+// Copilot Pro Landing
+$routes->get('copilot-pro', 'CopilotLandingController::index');
+
+// Plan Details Pages
+$routes->group('planes', function($routes) {
+    $routes->get('free', 'PlansController::free');
+    $routes->get('pro', 'PlansController::pro');
+    $routes->get('business', 'PlansController::business');
+});
+
+$routes->get('register', 'Register::index');
+$routes->get('register/quick', 'Register::quick');
+$routes->get('register_sucess', 'Register::register_sucess');
+$routes->post('signup', 'Register::store');
+$routes->post('register/quick_store', 'Register::quick_store');
+
+// Google Auth
+$routes->get('auth/google', 'GoogleAuth::login');
+$routes->get('auth/google/callback', 'GoogleAuth::callback');
+
+// GitHub Auth
+$routes->get('auth/github', 'GithubAuth::login');
+$routes->get('auth/github/callback', 'GithubAuth::callback');
+
+// LinkedIn Auth
+$routes->get('auth/linkedin', 'LinkedinAuth::login');
+$routes->get('auth/linkedin/callback', 'LinkedinAuth::callback');
+
+$routes->get('dashboard', 'Dashboard::index');
+$routes->get('profile', 'Profile::index');
+// Activar las alertas del BORME de un clic desde donde esté el usuario (va bajo
+// api/* a propósito: ahí están las exenciones de CSRF, y la ficha va cacheada).
+$routes->post('api/usuario/activar-avisos', 'Profile::activarAvisos');
+$routes->post('profile/update', 'Profile::update');
+$routes->post('profile/password', 'Profile::password');
+
+// Whitelist IPs
+$routes->get('whitelist-ips', 'WhitelistIpsController::index');
+$routes->post('whitelist-ips/add', 'WhitelistIpsController::add');
+$routes->post('whitelist-ips/delete/(:num)', 'WhitelistIpsController::delete/$1');
+
+// Integraciones
+$routes->get('integraciones/google-sheets', 'IntegrationsController::googleSheets');
+
+// $routes->get('empresas-nuevas', 'NewCompanies::index'); // Deprecated route interfering with SeoController::newRadarHub (line 194)
+$routes->get('dashboard/kpis', 'Dashboard::kpis_ajax');
+$routes->post('dashboard/complete-wizard', 'Dashboard::completeWizard');
+$routes->get('dashboard/test-sample', 'Api\V1\DashboardTestApi::getSample');
+$routes->get('search_company', 'Search::search_company');
+$routes->post('search_company', 'Search::search_company_post');
+$routes->match(['get', 'post'], 'search', 'Search::index');
+$routes->get('administrador/(:any)', 'AdministratorController::show/$1');
+
+// User Tickets
+$routes->get('tickets', 'Tickets::index');
+$routes->get('tickets/create', 'Tickets::create');
+$routes->post('tickets/store', 'Tickets::store');
+$routes->get('tickets/(:num)', 'Tickets::show/$1');
+$routes->post('tickets/(:num)/reply', 'Tickets::reply/$1');
+$routes->post('tickets/(:num)/close', 'Tickets::close/$1');
+$routes->post('tickets/(:num)/rate', 'Tickets::rate/$1');
+$routes->post('tickets/(:num)/priority', 'Tickets::updatePriority/$1');
+
+// Billing
+$routes->get('billing', 'Billing::index');
+$routes->get('billing/purchase_success', 'Billing::purchase_success');
+$routes->get('billing/manage', 'Billing::billing_manage');
+$routes->get('billing', 'Billing::index');
+$routes->match(['GET', 'POST'], 'billing/checkout', 'Billing::checkout');
+$routes->get('billing/single_checkout', 'Billing::single_checkout');
+$routes->get('checkout/radar-export', 'Billing::order_summary');
+$routes->get('billing/directory_checkout', 'Billing::directory_checkout');
+$routes->get('checkout/directory-export', 'Billing::directory_order_summary');
+
+$routes->get('billing/subsidies_checkout', 'Billing::subsidies_checkout');
+$routes->get('checkout/subsidies-export', 'Billing::subsidies_order_summary');
+$routes->get('billing/export-subsidies', 'RadarController::exportSubsidiesExcel');
+
+$routes->get('billing/contracts_checkout', 'Billing::contracts_checkout');
+$routes->get('checkout/contracts-export', 'Billing::contracts_order_summary');
+$routes->get('billing/export-contracts', 'RadarController::exportContractsExcel');
+$routes->get('billing/export-lookalike', 'LookalikeController::exportExcel');
+$routes->get('billing/success', 'Billing::success'); // callback Stripe
+$routes->get('billing/cancel', 'Billing::cancel');   // cancel Stripe/PayPal
+$routes->get('billing/purchase-success', 'Billing::purchase_success');
+$routes->get('billing/manage', 'Billing::billing_manage');
+$routes->get('billing/invoices', 'Billing::invoices');
+// Listados comprados (volver a descargar) y presupuesto por correo desde el resumen de compra.
+// Bajo /billing: la Cache Rule de Cloudflare "Protección Privacidad" no los guarda.
+$routes->get('billing/mis-listados', 'Billing::mis_listados');
+$routes->post('billing/presupuesto-listado', 'Billing::presupuesto_listado');
+$routes->get('billing/recuento-telefono', 'Billing::recuento_telefono');
+$routes->get('billing/invoices/download/(:num)', 'Billing::invoice_download/$1');
+$routes->get('download/secure/(:any)', 'DownloadController::secure/$1');
+$routes->get('billing/portal', 'Billing::portal');
+$routes->post('billing/rotate-key', 'Billing::rotate_key');
+$routes->post('billing/cancel-subscription', 'Billing::cancel_subscription');
+
+// Pedidos a medida pactados por soporte (Config\PedidosMedida): enlace de pago,
+// vuelta de Stripe y descarga. El POST pasa por el CSRF (la vista lleva csrf_field()).
+$routes->get('pedido/([a-f0-9]{16,64})', 'PedidoMedida::index/$1');
+$routes->post('pedido/([a-f0-9]{16,64})/pagar', 'PedidoMedida::pagar/$1');
+$routes->get('pedido/([a-f0-9]{16,64})/gracias', 'PedidoMedida::gracias/$1');
+$routes->get('pedido/([a-f0-9]{16,64})/descargar', 'PedidoMedida::descargar/$1');
+$routes->post('pedido/([a-f0-9]{16,64})/generar', 'PedidoMedida::generar/$1');
+
+$routes->get('consumption', 'Usage::index');
+$routes->get('consumption/request/(:any)', 'Usage::getRequestDetails/$1');
+$routes->get('consumption/logs_ajax', 'Usage::getLogsAjax');
+$routes->get('api-empresas', 'ApiPrices::index');
+// Páginas en inglés antiguas de apiempresas.es: su sitio es spaincompanyapi.com (12-10-2026).
+// Redirección permanente para no tener la misma página en los dos dominios.
+$alIngles = static function (string $ruta) {
+    $host = strtolower((string) ($_SERVER['HTTP_HOST'] ?? ''));
+    $base = (strpos($host, '.test') !== false || strpos($host, '.local') !== false) ? 'http://spaincompanyapi.test' : 'https://spaincompanyapi.com';
+    return static fn () => redirect()->to($base . '/' . ltrim($ruta, '/'), 301);
+};
+$routes->get('spanish-company-api', $alIngles('spanish-company-data-api'));
+$routes->get('crear-bono-api', 'ApiPrices::customBonusWizard');
+$routes->get('buy-api-credits', 'ApiPrices::customBonusWizardEn');
+$routes->match(['get', 'post'], 'billing/checkout_bonus', 'Billing::checkout_bonus');
+$routes->get('plugin-wordpress-buscador-empresas', 'Plugin::index');
+$routes->get('obtener-plugin-wordpress', 'Plugin::get_plugin');
+$routes->get('descargar/plugin-wp', 'Plugin::download');
+$routes->get('leads-empresas-nuevas', 'RadarPrices::index');
+$routes->get('radar', 'Radar::index'); 
+$routes->get('radar/quickview/(:num)', 'Radar::quickView/$1');
+$routes->get('radar/favoritos', 'Radar::favorites');
+$routes->get('radar/exportar', 'Radar::export');
+$routes->get('radar/invoices', 'Radar::invoices');
+$routes->post('radar/toggle-favorite', 'Radar::toggleFavorite');
+$routes->post('radar/save-note', 'Radar::saveNote');
+$routes->get('radar/map-data', 'Radar::mapData');
+$routes->post('radar/ai-search', 'Radar::aiSearch');
+$routes->get('radar/kanban', 'Radar::kanban', ['filter' => 'subscription:radar']);
+$routes->post('radar/update-favorite-status', 'Radar::updateFavoriteStatus', ['filter' => 'subscription:radar']);
+$routes->get('radar/trends', 'Radar::trends', ['filter' => 'subscription:radar']);
+$routes->get('radar/trend-data', 'Radar::getTrendData', ['filter' => 'subscription:radar']);
+$routes->get('radar/ai-analyze/(:num)', 'Radar::aiAnalyze/$1');
+$routes->post('radar/prepare-contact/(:num)', 'Radar::prepareContact/$1');
+$routes->post('radar/log-event', 'Radar::logEvent');
+$routes->get('contact', 'Contact::index');
+$routes->post('contact/send', 'Contact::send');
+$routes->get('blog', 'Blog::index');
+$routes->get('blog/post', 'Blog::post');
+$routes->get('blog/get_posts', 'Blog::get_posts');
+$routes->get('blog/(:segment)', 'Blog::post/$1');
+$routes->get('get-posts-grid', 'Blog::get_posts_grid');
+
+
+// Email Tracking
+$routes->get('e/o/(:any)', 'EmailTracking::open/$1');
+$routes->get('e/c/(:any)', 'EmailTracking::click/$1');
+
+// ----------- API ----------- //
+$routes->group('', ['filter' => ['apikey', 'subscription:api']], static function ($routes) {
+
+
+
+    // Auth Webw Commercial Endpoints (Expansion)
+    $routes->get('api/v1/companies', 'Api\V1\CompaniesByCif::index');
+    $routes->post('api/v1/companies/batch', 'Api\V1\CompaniesBatch::index');
+    $routes->get('api/v1/companies/search', 'Api\V1\CompaniesSearch::index');
+    $routes->get('api/v1/custom/(:segment)/companies', 'Api\V1\CustomClientController::companies/$1');
+
+    $routes->get('api/v1/companies/score', 'Api\V1\CompanyEnrichmentController::score');
+    $routes->get('api/v1/companies/signals', 'Api\V1\CompanyEnrichmentController::signals');
+    $routes->get('api/v1/companies/insights', 'Api\V1\CompanyEnrichmentController::insights');
+    $routes->get('api/v1/companies/contact-prep', 'Api\V1\CompanyEnrichmentController::contactPrep');
+    $routes->get('api/v1/companies/radar', 'Api\V1\RadarApiController::index');
+    $routes->get('api/v1/companies/match', 'Api\V1\CompanyMatchController::index');
+    $routes->get('api/v1/companies/network', 'Api\V1\CompanyNetworkController::index');
+    $routes->get('api/v1/companies/borme', 'Api\V1\CompanyBormeController::index');
+    $routes->get('api/v1/companies/contracts', 'Api\V1\CompanyContractsController::index');
+    $routes->get('api/v1/companies/risk-profile', 'Api\V1\CompanyRiskProfileController::index');
+    $routes->get('api/v1/companies/verify', 'Api\V1\CompanyVerifyController::index');
+    $routes->get('api/v1/companies/filter', 'Api\V1\CompanyFilterController::index'); // Segmentos (29-09-2026)
+    $routes->post('api/v1/companies/reconcile', 'Api\V1\CompanyReconcileController::index'); // Nombre → CIF (29-09-2026)
+
+    // Webhooks CRUD
+    $routes->get('api/v1/webhooks', 'Api\V1\WebhookController::index');
+    $routes->post('api/v1/webhooks', 'Api\V1\WebhookController::create');
+    $routes->delete('api/v1/webhooks/(:num)', 'Api\V1\WebhookController::delete/$1');
+    $routes->post('api/v1/webhooks/(:num)/test', 'Api\V1\WebhookController::test/$1');
+    $routes->get('api/v1/webhooks/(:num)/deliveries', 'Api\V1\WebhookController::deliveries/$1'); // Historial de entregas (13-10-2026)
+
+    // Catálogo de valores de los filtros (13-10-2026, gratis)
+    $routes->get('api/v1/catalog', 'Api\V1\CatalogController::index');
+
+    // Vigilancia de empresas (27-09-2026, piloto). /events antes que la ruta con CIF.
+    $routes->get('api/v1/watchlist/events', 'Api\V1\WatchlistController::events');
+    $routes->get('api/v1/watchlist', 'Api\V1\WatchlistController::index');
+    $routes->post('api/v1/watchlist', 'Api\V1\WatchlistController::create');
+    $routes->delete('api/v1/watchlist/(:segment)', 'Api\V1\WatchlistController::delete/$1');
+
+    // Dedicated Professional Plan routes
+    $routes->get('api/v1/professional/search', 'Api\V1\Professional::search');
+    $routes->get('api/v1/professional/details', 'Api\V1\Professional::details');
+    $routes->get('api/v1/usage', 'Api\V1\UsageController::index');
+});
+// ----------- API ----------- //
+
+// ----------- API SANDBOX ----------- //
+$routes->group('api/sandbox/v1', ['filter' => ['apikey']], static function ($routes) {
+    $routes->get('companies', 'Api\V1\Sandbox\SandboxController::companies');
+    $routes->get('companies/search', 'Api\V1\Sandbox\SandboxController::search');
+    $routes->get('companies/score', 'Api\V1\Sandbox\SandboxController::score');
+    $routes->get('companies/signals', 'Api\V1\Sandbox\SandboxController::signals');
+    $routes->get('companies/insights', 'Api\V1\Sandbox\SandboxController::insights');
+    $routes->get('companies/contact-prep', 'Api\V1\Sandbox\SandboxController::contactPrep');
+    $routes->get('companies/radar', 'Api\V1\Sandbox\SandboxController::radar');
+    $routes->get('companies/match', 'Api\V1\Sandbox\SandboxController::match');
+    $routes->get('companies/network', 'Api\V1\Sandbox\SandboxController::network');
+    $routes->get('companies/borme', 'Api\V1\Sandbox\SandboxController::borme');
+    $routes->get('companies/risk-profile', 'Api\V1\Sandbox\SandboxController::riskProfile');
+    $routes->post('companies/batch', 'Api\V1\Sandbox\SandboxController::batch');
+    // Endpoints nuevos también en el sandbox (30-09-2026)
+    $routes->get('companies/contracts', 'Api\V1\Sandbox\SandboxController::contracts');
+    $routes->get('companies/verify', 'Api\V1\Sandbox\SandboxController::verify');
+    $routes->get('companies/filter', 'Api\V1\Sandbox\SandboxController::filter');
+    $routes->post('companies/reconcile', 'Api\V1\Sandbox\SandboxController::reconcile');
+    $routes->get('watchlist', 'Api\V1\Sandbox\SandboxController::watchlistList');
+    $routes->post('watchlist', 'Api\V1\Sandbox\SandboxController::watchlistAdd');
+    $routes->get('watchlist/events', 'Api\V1\Sandbox\SandboxController::watchlistEvents');
+    $routes->delete('watchlist/(:segment)', 'Api\V1\Sandbox\SandboxController::watchlistRemove/$1');
+    $routes->get('catalog', 'Api\V1\CatalogController::index'); // mismo catálogo que producción (13-10-2026)
+});
+// ----------- API SANDBOX ----------- //
+
+// Triggers & Usage API (Session Auth)
+$routes->get('api/user/usage-status', 'Api\UsageStatus::index');
+$routes->post('api/user/log-event', 'Api\EventTracker::log');
+
+// AI Internal Routes
+$routes->post('api/ai/copilot/generate', 'AiCopilotController::generate');
+$routes->post('api/ai/copilot/email', 'AiCopilotController::emailDossier');
+$routes->post('api/ai/copilot/feedback', 'AiCopilotController::submitFeedback');
+
+// Swagger
+$routes->cli('swagger:generate', 'App\Commands\GenerateSwaggerCommand::run');
+// Swagger UI sustituido por la referencia nueva (13-10-2026). La vista y el controlador
+// siguen ahí: para volver, cambiar esta línea por la ruta a Api\Docs::index.
+$routes->addRedirect('api/docs', 'api/referencia', 301);
+$routes->get('api/docs/openapi.json', 'Api\Docs::json');
+// Referencia de la API con Scalar (13-10-2026). /documentation es la guía; esta, la referencia.
+$routes->get('api/referencia', 'ApiReference::index');
+$routes->get('api/referencia/openapi.json', 'ApiReference::json');
+// Versión en inglés (13-10-2026): la enlazan /docs y spaincompanyapi.com
+$routes->get('api/reference', 'ApiReference::english');
+$routes->get('api/reference/openapi.json', 'ApiReference::jsonEnglish');
+$routes->get('documentation', 'Documentation::index');
+$routes->get('documentation/en', $alIngles('docs'));
+$routes->get('api-docs', $alIngles('docs'));
+$routes->get('docs/errors/(:any)', 'Documentation::error/$1');
+// Guía en PDF: el correo de bienvenida la enlazó un tiempo sin /public (29-09-2026)
+$routes->addRedirect('docs/guia-api-apiempresas.pdf', 'public/docs/guia-api-apiempresas.pdf', 301);
+
+
+// SEO Map Route
+$routes->get('base-de-datos-de-empresas', 'CompanyMapV2Controller::index');
+$routes->addRedirect('map/companies', 'base-de-datos-de-empresas');
+$routes->addRedirect('comprar-base-de-datos-empresas', 'base-de-datos-de-empresas');
+$routes->get('api/geo/provinces', 'CompanyMapV2Controller::provinces');
+$routes->get('api/geo/municipalities', 'CompanyMapV2Controller::municipalities');
+$routes->get('api/cnae/sections', 'CompanyMapV2Controller::cnaeSections');
+$routes->get('api/cnae/groups', 'CompanyMapV2Controller::cnaeGroups');
+$routes->get('api/cnae/classes', 'CompanyMapV2Controller::cnaeClasses');
+$routes->get('api/cnae/subclasses', 'CompanyMapV2Controller::cnaeSubclasses');
+$routes->get('api/map/search', 'CompanyMapV2Controller::search');
+$routes->get('api/map/export', 'CompanyMapV2Controller::export');
+$routes->post('api/map/request-sample', 'CompanyMapV2Controller::requestFreeSample');
+
+
+// Alerts
+$routes->get('alerts/confirm/(:any)', 'Alerts::confirm/$1');
+$routes->post('alerts/add', 'Alerts::add');
+
+// Leads
+$routes->post('leads/subscribe', 'Leads::subscribe');
+
+// Errores de JavaScript del navegador al registro propio (solo con sesion; ver App\Controllers\ErrorReports)
+$routes->post('errors/js', 'ErrorReports::js');
+
+// Admin Routes
+$routes->group('admin', ['filter' => 'admin'], function ($routes) {
+    $routes->get('dashboard', 'Admin\Dashboard::index');
+
+    // RGPD (Derecho al olvido)
+    $routes->get('rgpd', 'Admin\RgpdController::index');
+    $routes->post('rgpd/preview', 'Admin\RgpdController::preview');
+    $routes->post('rgpd/execute', 'Admin\RgpdController::execute');
+
+
+    // Tickets
+    $routes->get('tickets', 'Admin\TicketsController::index');
+    $routes->get('tickets/(:num)', 'Admin\TicketsController::show/$1');
+    $routes->post('tickets/(:num)/reply', 'Admin\TicketsController::reply/$1');
+    $routes->post('tickets/(:num)/status', 'Admin\TicketsController::updateStatus/$1');
+
+    $routes->get('users', 'Admin\Dashboard::index');
+    $routes->get('users/create', 'Admin\Dashboard::create');
+    $routes->post('users/store', 'Admin\Dashboard::store');
+    $routes->get('users/edit/(:num)', 'Admin\Dashboard::edit/$1');
+    $routes->post('users/update', 'Admin\Dashboard::update');
+    $routes->get('users/delete/(:num)', 'Admin\Dashboard::delete/$1');
+    $routes->get('users/email/(:num)', 'Admin\Dashboard::compose/$1');
+    $routes->post('users/send', 'Admin\Dashboard::send');
+    $routes->get('users/impersonate/(:num)', 'Admin\Dashboard::impersonate/$1');
+
+    // Bulk Email
+    $routes->match(['GET', 'POST'], 'users/email/bulk', 'Admin\Dashboard::compose_bulk');
+    $routes->post('users/email/send-bulk', 'Admin\Dashboard::send_bulk');
+
+    $routes->get('api-requests', 'Admin\Dashboard::api_requests');
+    $routes->get('usage-daily', 'Admin\Dashboard::usage_daily');
+    $routes->get('blocked-ips', 'Admin\Dashboard::blocked_ips');
+
+    // $routes->get('usage', 'Admin\Dashboard::usage_daily'); // Removed incorrect alias
+
+    // Companies CRUD
+    $routes->get('companies', 'Admin\Dashboard::companies');
+    $routes->get('companies/kpi/(:any)', 'Admin\Dashboard::company_kpi_ajax/$1');
+    $routes->get('kpis-all', 'Admin\Dashboard::all_kpis_ajax');
+    $routes->get('kpis-refresh', 'Admin\Dashboard::refresh_kpis_ajax');
+    $routes->get('companies/create', 'Admin\Dashboard::company_create');
+    $routes->post('companies/store', 'Admin\Dashboard::company_store');
+    $routes->get('companies/edit/(:num)', 'Admin\Dashboard::company_edit/$1');
+    $routes->post('companies/update', 'Admin\Dashboard::company_update');
+    $routes->get('companies/delete/(:num)', 'Admin\Dashboard::company_delete/$1');
+
+    // Plans CRUD
+    $routes->get('plans', 'Admin\Dashboard::plans');
+    $routes->get('plans/create', 'Admin\Dashboard::plan_create');
+    $routes->post('plans/store', 'Admin\Dashboard::plan_store');
+    $routes->get('plans/edit/(:num)', 'Admin\Dashboard::plan_edit/$1');
+    $routes->post('plans/update', 'Admin\Dashboard::plan_update');
+    $routes->get('plans/delete/(:num)', 'Admin\Dashboard::plan_delete/$1');
+
+    // API Keys CRUD
+    $routes->get('api-keys', 'Admin\Dashboard::api_keys');
+    $routes->get('api-keys/create', 'Admin\Dashboard::api_key_create');
+    $routes->post('api-keys/store', 'Admin\Dashboard::api_key_store');
+    $routes->get('api-keys/edit/(:num)', 'Admin\Dashboard::api_key_edit/$1');
+    $routes->post('api-keys/update', 'Admin\Dashboard::api_key_update');
+    $routes->get('api-keys/delete/(:num)', 'Admin\Dashboard::api_key_delete/$1');
+
+    // Subscriptions CRUD
+    $routes->get('subscriptions', 'Admin\Dashboard::subscriptions');
+    $routes->get('subscriptions/create', 'Admin\Dashboard::subscription_create');
+    $routes->post('subscriptions/store', 'Admin\Dashboard::subscription_store');
+    $routes->get('subscriptions/edit/(:num)', 'Admin\Dashboard::subscription_edit/$1');
+    $routes->post('subscriptions/update', 'Admin\Dashboard::subscription_update');
+    $routes->get('subscriptions/delete/(:num)', 'Admin\Dashboard::subscription_delete/$1');
+
+    // Stripe Test Page
+    $routes->get('stripe-test', 'Admin\StripeTest::index');
+    $routes->post('stripe-test/checkout', 'Admin\StripeTest::checkout');
+
+    // Email Logs
+    // Correos: comprobaciones de envio, KPIs, resultado por correo e historial (App\Libraries\CorreosSalud).
+    // Antes: Admin\Dashboard::email_logs (se deja el metodo, sin ruta).
+    $routes->get('email-logs', 'Admin\EmailHealth::index');
+    $routes->get('email-logs/(:num)/ver', 'Admin\EmailHealth::ver/$1');
+
+    // Invoices
+    $routes->get('invoices', 'Admin\Dashboard::invoices');
+    $routes->get('invoices/download/(:num)', 'Admin\Dashboard::invoice_download/$1');
+
+    // Risk Profile & Solvencia Business Analytics
+    $routes->get('risk-profile', 'Admin\RiskProfileAnalytics::index');
+    $routes->post('risk-profile/email-single', 'Admin\RiskProfileAnalytics::sendSingleEmail');
+    $routes->post('risk-profile/email-bulk', 'Admin\RiskProfileAnalytics::sendBulkEmail');
+
+    // API & Developer Business Analytics
+    $routes->get('api-analytics', 'Admin\ApiAnalytics::index');
+    $routes->post('api-analytics/email-single', 'Admin\ApiAnalytics::sendSingleEmail');
+    $routes->post('api-analytics/email-bulk', 'Admin\ApiAnalytics::sendBulkEmail');
+
+    // Activity Logs
+    $routes->get('activity-logs', 'Admin\ActivityLogs::index');
+    $routes->get('activity-logs/user/(:num)', 'Admin\ActivityLogs::user/$1');
+    $routes->get('activity-logs/export', 'Admin\ActivityLogs::export');
+
+    // Avisos de datos de la ficha ("¿Son correctos estos datos?")
+    $routes->get('avisos-datos', 'Admin\DataFeedback::index');
+    // Datos de contacto aportados desde la ficha ("Añadir teléfono / web / email")
+    $routes->get('aportaciones', 'Admin\Contributions::index');
+    $routes->post('aportaciones/(:num)/aprobar', 'Admin\Contributions::aprobar/$1');
+    $routes->post('aportaciones/(:num)/rechazar', 'Admin\Contributions::rechazar/$1');
+
+    // Registro de errores (error_issues / error_events): listado, detalle y gestion (acciones: POST + CSRF).
+    $routes->get('errores', 'Admin\ErrorTracking::index');
+    $routes->get('errores/(:num)', 'Admin\ErrorTracking::show/$1');
+    $routes->post('errores/bulk', 'Admin\ErrorTracking::bulk');
+    $routes->post('errores/(:num)/(resolve|ignore|reopen|note)', 'Admin\ErrorTracking::act/$1/$2');
+
+    // Crecimiento: altas API / Solvencia por mes, paso a pago, MRR y prevision (App\Libraries\Crecimiento)
+    $routes->get('crecimiento', 'Admin\Growth::index');
+
+    // Email Templates
+    $routes->get('email-templates', 'Admin\EmailTemplates::index');
+    $routes->get('email-templates/edit/(:num)', 'Admin\EmailTemplates::edit/$1');
+    $routes->post('email-templates/update/(:num)', 'Admin\EmailTemplates::update/$1');
+    $routes->get('email-templates/preview/(:num)', 'Admin\EmailTemplates::preview/$1');
+
+
+    // SEO Auto Posts
+    $routes->get('seo-auto-posts', 'Admin\SeoAutoPostsController::index');
+    $routes->post('seo-auto-posts/store', 'Admin\SeoAutoPostsController::storeKeyword');
+    $routes->post('seo-auto-posts/generate-one/(:num)', 'Admin\SeoAutoPostsController::generateOne/$1');
+    $routes->post('seo-auto-posts/generate-pending', 'Admin\SeoAutoPostsController::generatePending');
+    $routes->post('seo-auto-posts/generate-batch', 'Admin\SeoAutoPostsController::generateBatch');
+    $routes->post('seo-auto-posts/retry/(:num)', 'Admin\SeoAutoPostsController::retry/$1');
+});
+
+// Webhooks & AI API
+$routes->post('webhook/stripe', 'Webhook::stripe');
+$routes->post('api/chat', 'AiChat::sendMessage');
+$routes->post('api/chat/reset', 'AiChat::resetChat');
+$routes->post('api/chat/assistant', 'Api\ChatAssistantController::handle');
+
+// Robots.txt dinámico por dominio
+$routes->match(['get', 'head'], 'robots.txt', 'Sitemap::robots');
+// llms.txt para asistentes de IA (12-10-2026). La raíz web es la del proyecto y public/ se
+// sirve en /public/, así que el fichero no saldría en /llms.txt sin esta ruta.
+$routes->match(['get', 'head'], 'llms.txt', 'Sitemap::llms');
+
+// Sitemap (Soporte GET y HEAD)
+$routes->match(['get', 'head'], 'sitemap.xml', 'Sitemap::index');
+$routes->match(['get', 'head'], 'sitemap-static.xml', 'Sitemap::static');
+$routes->match(['get', 'head'], 'sitemap-blog.xml', 'Sitemap::blog');
+$routes->match(['get', 'head'], 'sitemap-directories.xml', 'Sitemap::directories');
+$routes->match(['get', 'head'], 'sitemap-informes-provincias.xml', 'Sitemap::informesProvincias');
+$routes->match(['get', 'head'], 'sitemap-informes-sectores.xml', 'Sitemap::informesSectores');
+$routes->match(['get', 'head'], 'sitemap-informes-wp.xml', 'Sitemap::informesWp');
+$routes->match(['get', 'head'], 'sitemap-subvenciones.xml', 'Sitemap::subvenciones');
+$routes->match(['get', 'head'], 'sitemap-contratos.xml', 'Sitemap::contratos');
+$routes->match(['get', 'head'], 'sitemap-companies-(:num).xml', 'Sitemap::companies/$1');
+$routes->match(['get', 'head'], 'sitemap-en-companies-(:num).xml', 'Sitemap::companies/$1');
+$routes->match(['get', 'head'], 'sitemap-holdings-(:num).xml', 'Sitemap::holdings/$1');
+$routes->match(['get', 'head'], 'sitemap-ai-ready-(:num).xml', 'Sitemap::aiReady/$1');
+$routes->match(['get', 'head'], 'sitemap-control-(:num).xml', 'Sitemap::control/$1');
+$routes->match(['get', 'head'], 'sitemap-indice-fichas.xml', 'Sitemap::indiceGrupo/fichas');
+$routes->match(['get', 'head'], 'sitemap-indice-control.xml', 'Sitemap::indiceGrupo/control');
+$routes->match(['get', 'head'], 'sitemap-empresas-nuevas.xml', 'Sitemap::empresasNuevas');
+
+// --- Export Routes ---
+$routes->get('excel/preview', 'RadarController::excel_preview');
+$routes->post('excel/unlock', 'RadarController::excel_unlock');
+$routes->post('api/quick-unlock', 'Api\QuickUnlock::index');
+$routes->post('checkout/radar-email', 'RadarController::sendExportEmail');
+
+// --- Programmatic SEO Routes ---
+$routes->get('empresas/(:any)', 'RadarController::provinceCatalog/$1');
+
+// Public Finances SEO Clusters
+$routes->get('licitaciones-del-estado', 'PublicFinancesSEO::contractsHub');
+$routes->get('licitaciones-del-estado/organo-(:segment)', 'PublicFinancesSEO::contractsByOrgan/$1');
+$routes->get('licitaciones-del-estado/organo-(:segment)/(:num)', 'PublicFinancesSEO::contractsByOrgan/$1/$2');
+
+$routes->get('subvenciones-empresas', 'PublicFinancesSEO::subsidiesHub');
+$routes->get('subvenciones-empresas/convocatoria-(:segment)', 'PublicFinancesSEO::subsidiesByConvocatoria/$1');
+$routes->get('subvenciones-empresas/convocatoria-(:segment)/(:num)', 'PublicFinancesSEO::subsidiesByConvocatoria/$1/$2');
+
+// Rankings
+$routes->get('mayores-empresas-contratistas-del-estado', 'PublicFinancesSEO::topContractors');
+$routes->get('empresas-mas-subvencionadas-espana',        'PublicFinancesSEO::topSubsidyRecipients');
+
+// Por año
+$routes->get('licitaciones-del-estado/ano-(:num)',  'PublicFinancesSEO::contractsByYear/$1');
+$routes->get('subvenciones-empresas/ano-(:num)',     'PublicFinancesSEO::subsidiesByYear/$1');
+
+
+// Radar Demo (Conversion Page)
+$routes->get('radar-demo', 'Radar::demo');
+$routes->get('radar/preview', 'Radar::preview');
+$routes->post('radar/preview', 'Radar::preview_store');
+$routes->get('excel/preview', 'RadarController::excel_preview');
+$routes->post('tracking/radar-demo-event', 'TrackingController::processRadarEvent');
+
+// Radar Hub (New Companies Strategy)
+$routes->get('empresas-nuevas', 'RadarController::index'); // Central Hub
+$routes->get('empresas-nuevas-hoy', 'RadarController::today');
+$routes->get('empresas-nuevas-semana', 'RadarController::week');
+$routes->get('empresas-nuevas-mes', 'RadarController::month');
+$routes->get('empresas-nuevas-sector/(:any)', 'RadarController::sector/$1');
+
+// Combinations (e.g. /empresas-nuevas/hosteleria-en-madrid) -> NEW
+$routes->get('empresas-nuevas/(:any)-en-(:any)', 'RadarController::newRadarLongTail/$1/$2');
+
+$routes->get('empresas-nuevas-hoy/(:any)', 'RadarController::todayProvince/$1');
+$routes->get('empresas-nuevas-semana/(:any)', 'RadarController::weekProvince/$1');
+$routes->get('empresas-nuevas-mes/(:any)', 'RadarController::monthProvince/$1');
+
+// --- Lookalike Feature ---
+$routes->get('encontrar-empresas-similares', 'LookalikeController::index');
+$routes->post('encontrar-empresas-similares/process', 'LookalikeController::process');
+$routes->get('encontrar-empresas-similares/resultados', 'LookalikeController::results');
+
+// Legacy Sitemap Redirects
+$routes->addRedirect('informes/nuevas-empresas-en-(:any)', 'empresas-nuevas/$1', 301);
+$routes->addRedirect('informes/nuevas-empresas-sector-(:any)', 'empresas-nuevas-sector/$1', 301);
+
+$routes->get('empresas-nuevas/(:any)', 'RadarController::province/$1'); // Province Radar
+
+// Combination Sector + Province (e.g. /empresas-programacion-en-madrid)
+// This regex matches "empresas-[anything]-en-[anything]" // MUST BE AFTER RADAR LONG-TAIL
+$routes->get('empresas-(:any)-en-(:any)', 'RadarController::sectorProvince/$1/$2');
+// --- Programmatic SEO Routes ---
+
+// Directorios SEO (Listado de empresas)
+// Token CSRF del visitante para páginas que Cloudflare sirve desde su caché (ver CsrfToken).
+// SIN guion: la Page Rule de Cloudflare *apiempresas.es/*-* guarda un mes todo lo que lleva
+// guion, y con 'csrf-token' servía el mismo token a todos los visitantes.
+$routes->get('csrftoken', 'CsrfToken::index');
+$routes->get('listado-de-empresas', 'Directory::index');
+$routes->get('listado-de-grupos-empresariales', 'HoldingDirectory::index');
+
+// Perfil público SEO (URL base amigable + ID + Nombre)
+$routes->get('directorios-de-empresas/(:segment)', 'SeoController::hubProvincia/$1');
+$routes->get('directorio-de-empresas/(:segment)/(:segment)', 'SeoController::hubMunicipio/$1/$2');
+$routes->get('informacion-empresa/(:segment)', 'Company::show/$1'); // Ficha de empresa
+$routes->get('grupos-empresariales/(:segment)', 'Holding::show/$1'); // Ficha de holding
+
+// CNAE / Sectores
+$routes->get('listado-de-empresas/sector-(:segment)', 'Directory::cnae/$1');
+$routes->get('listado-de-empresas/sector-(:segment)/(:segment)', 'Directory::cnae/$1/$2');
+$routes->get('listado-de-empresas/sector-(:segment)/(:segment)/(:num)', 'Directory::cnae/$1/$2/$3');
+
+// ORDEN: las rutas se comprueban de arriba abajo y (:any) es `.*`, así que la
+// de provincia tiene que ir la ÚLTIMA. Antes iba antes que etiquetas y que
+// provincia + sector y se las tragaba: /listado-de-empresas/etiqueta/x (enlazada
+// desde cada ficha de empresa) acababa redirigida al índice.
+
+// Etiquetas
+$routes->get('listado-de-empresas/etiqueta/(:segment)/(:num)', 'Directory::tag/$1/$2');
+$routes->get('listado-de-empresas/etiqueta/(:segment)', 'Directory::tag/$1');
+
+// Provincia + Sector (la provincia puede llevar barra: Araba/Álava)
+$routes->get('listado-de-empresas/(:any)/sector-(:segment)/(:num)', 'Directory::provinceCnae/$1/$2/$3');
+$routes->get('listado-de-empresas/(:any)/sector-(:segment)', 'Directory::provinceCnae/$1/$2');
+
+// Provincias (siempre al final)
+$routes->get('listado-de-empresas/(:any)/(:num)', 'Directory::province/$1/$2');
+$routes->get('listado-de-empresas/(:any)', 'Directory::province/$1');
+
+// --- 301 Redirects desde el antiguo /directorio/ ---
+$routes->addRedirect('directorio', 'listado-de-empresas', 301);
+$routes->addRedirect('directorio/provincia/(:any)', 'listado-de-empresas/$1', 301);
+$routes->addRedirect('directorio/provincia/(:any)/(:num)', 'listado-de-empresas/$1/$2', 301);
+$routes->addRedirect('directorio/cnae/(:segment)', 'listado-de-empresas/sector-$1', 301);
+$routes->addRedirect('directorio/cnae/(:segment)/(:segment)', 'listado-de-empresas/sector-$1/$2', 301);
+$routes->addRedirect('directorio/cnae/(:segment)/(:segment)/(:num)', 'listado-de-empresas/sector-$1/$2/$3', 301);
+$routes->addRedirect('directorio/provincia/(:any)/cnae/(:segment)', 'listado-de-empresas/$1/sector-$2', 301);
+$routes->addRedirect('directorio/provincia/(:any)/cnae/(:segment)/(:num)', 'listado-de-empresas/$1/sector-$2/$3', 301);
+$routes->addRedirect('directorio/etiqueta/(:any)', 'listado-de-empresas/etiqueta/$1', 301);
+$routes->addRedirect('directorio/etiqueta/(:any)/(:num)', 'listado-de-empresas/etiqueta/$1/$2', 301);
+
+$routes->addRedirect('directorio/ultimas-empresas-registradas', 'empresas-nuevas', 301);
+$routes->addRedirect('directorio/ultimas-empresas-registradas/(:num)', 'empresas-nuevas', 301);
+
+// Company SEO Pages (Regex: Letter + 7 Digits + Char + optional slug)
+// Must be last to avoid conflicts
+// Company Rating
+$routes->post('company/rate', 'Company::submitRating');
+$routes->post('company/rate_feedback', 'Company::submitRatingFeedback');
+$routes->post('company/data-feedback', 'Company::submitDataFeedback'); // "¿Son correctos estos datos?"
+// "Añadir teléfono / web / email" de la ficha (15-10-2026): ContributionService.
+$routes->post('company/aportar-dato', 'Company::submitContribution');
+$routes->get('aportacion/confirmar/(:segment)', 'Company::confirmContribution/$1');
+$routes->post('aportacion/confirmar/(:segment)', 'Company::confirmContribution/$1');
+
+$routes->get('empresa/export/(:num)', 'Company::exportPdf/$1');
+$routes->get('empresa/export-risk/(:segment)', 'Company::exportRiskPdf/$1');
+$routes->get('empresa/preview-risk/(:num)', 'Company::previewRiskPdf/$1');
+$routes->get('ejemplo/dictamen-riesgo', 'Company::sampleRiskPdf');
+$routes->get('ejemplo/informe-riesgo', 'Company::sampleRiskPdf');
+$routes->get('ejemplo/dossier-360', 'Company::sampleDossierPdf');
+$routes->get('ejemplo/dossier-completo', 'Company::sampleDossierPdf');
+$routes->post('empresa/checkout-premium-pdf', 'Company::checkoutPremiumPdf');
+$routes->post('empresa/update-premium-pdf', 'Company::updatePremiumPdf');
+$routes->get('empresa/success-premium-pdf', 'Company::successPremiumPdf');
+$routes->get('empresa/download-premium-pdf', 'Company::generateAndDownloadPremiumPdf');
+$routes->get('empresa/download-premium-pdf/(:any)', 'Company::downloadPremiumPdf/$1');
+$routes->get('empresa/(:num)-(:any)', 'Company::showById/$1/$2');
+$routes->get('empresa/(:num)', 'Company::showById/$1');
+$routes->get('api/empresa/private-data/(:any)', 'Company::ajaxPrivateData/$1');
+// Único punto donde se consume cuota de perfil de riesgo desde la ficha.
+// Bajo api/* para quedar exento de CSRF (la ficha se sirve cacheada por Cloudflare).
+$routes->post('api/empresa/desbloquear-riesgo', 'Company::ajaxUnlockRisk');
+$routes->post('api/empresa/vigilar', 'Company::ajaxToggleWatch');
+
+// Fallback for broken "no disponible" links
+$routes->get('no%20disponible(:any)', 'Company::handleBrokenCif/$1');
+$routes->get('no disponible(:any)', 'Company::handleBrokenCif/$1');
+
+// Company Suggestions (Professional Landing)
+// Página de autocompletado retirada (24-09-2026): no se usaba y su endpoint /get
+// devolvía empresas con dirección completa sin API Key. El validador de CIF está en
+// la home. Las URL antiguas redirigen allí; /get ya no existe (404).
+$routes->addRedirect('autocompletado-cif-empresas', '/', 301);
+$routes->addRedirect('company-suggestions', '/', 301);
+
+// Herramienta de Perfil de Riesgo y Solvencia Corporativa
+$routes->get('perfil-de-riesgo', 'RiskProfileController::index');
+// Validador gratuito de CIF (12-10-2026)
+$routes->get('validar-cif', 'Herramientas::validarCif');
+$routes->get('como-saber-si-una-empresa-esta-activa', 'Herramientas::empresaActiva');
+$routes->get('validar-cif-excel', 'Herramientas::validarCifExcel');
+$routes->get('validar-nif-clientes-facturacion', 'Herramientas::nifFacturacion');
+$routes->get('validar-cif-php-python', 'Herramientas::validarCifCodigo');
+$routes->post('perfil-de-riesgo', 'RiskProfileController::index');
+$routes->get('api/perfil-de-riesgo/lookup', 'RiskProfileController::ajaxLookup');
+
+// Carga de cartera: subir un CSV de CIFs y ponerlos en vigilancia de golpe.
+// Los POST pasan por el filtro CSRF (no están bajo api/*), así que las vistas
+// llevan csrf_field().
+$routes->get('cartera', 'Cartera::index');
+$routes->post('cartera/analizar', 'Cartera::analizar');
+$routes->post('cartera/vigilar', 'Cartera::vigilar');
+$routes->post('cartera/exportar', 'Cartera::exportar');
+
+
+// Traffic Advice (Chrome prefetching)
+$routes->get('.well-known/traffic-advice', static function () {
+    return service('response')->setJSON([
+        'advice' => [
+            'prefetch' => true,
+            'prerender' => true
+        ]
+    ]);
+});
+
+$routes->group('api', function($routes) {
+    $routes->post('tracking/event', 'TrackingController::logEvent');
+});
+
+
+// Garantía de devolución de Solvencia Pro.
+// Tiene página propia a propósito: una garantía que el usuario no sabe ejecutar
+// convierte igual pero genera contracargos, que son peores que un reembolso.
+$routes->get('garantia', 'Garantia::index');
+
+// Fuentes de datos (13-10-2026): lista de fuentes, licencias y atribución. /data-sources solo en spaincompanyapi.com
+$routes->get('fuentes-de-datos', 'FuentesDatos::index');
+$routes->post('garantia/solicitar', 'Garantia::solicitar');
+
+// Unsubscribe
+// Baja de un clic solo de las alertas del BORME (antes de la ruta genérica, que es (:any))
+$routes->get('unsubscribe/alertas/(:any)', 'Unsubscribe::alerts/$1');
+// Baja de un clic de la cabecera List-Unsubscribe: el cliente de correo hace POST (baja
+// inmediata). Abierta en el navegador (GET), la confirmación de siempre.
+$routes->post('unsubscribe/alertas/(:any)', 'Unsubscribe::alerts/$1');
+$routes->get('unsubscribe/one-click/(:any)', 'Unsubscribe::index/$1');
+$routes->post('unsubscribe/one-click/(:any)', 'Unsubscribe::oneClick/$1');
+$routes->get('unsubscribe/(:any)', 'Unsubscribe::index/$1');
+$routes->post('unsubscribe/confirm', 'Unsubscribe::confirm');
+
+// Company pages: CIF-based and Slug-based URLs (must be last)
+$routes->get('([a-zA-Z][0-9]{7}[a-zA-Z0-9].*)', 'Company::show/$1');
+$routes->get('(:segment)', 'Company::show/$1');
+
+

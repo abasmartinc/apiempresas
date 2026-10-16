@@ -24,7 +24,7 @@ class CompanyVerifyController extends BaseApiController
     #[OA\Get(
         path: "/api/v1/companies/verify",
         summary: "Verificación KYB",
-        description: "En una llamada: si la empresa existe y está operativa (status_code), si el nombre coincide con la razón social, si la persona que firma es administrador vigente, si el NIF-IVA está en VIES y las alertas. Devuelve decision_hint: pass, review o fail. En Business añade el nivel de riesgo. **Coste:** 2 consultas de tu cuota (o 2 créditos). Los errores no consumen.",
+        description: "En una llamada: si la empresa existe y está operativa (status_code), si el nombre coincide con la razón social, si la persona que firma es administrador vigente, si el NIF-IVA está en VIES y las alertas. Devuelve decision_hint: pass, review o fail. Incluye también `identifiers` (LEI), `legal_form` (con código ISO 20275), `group` (matrices en GLEIF) y `ownership` (socio único según el BORME); con `person`, `checks.person.is_sole_shareholder` dice si quien firma es el socio único. En Business añade el nivel de riesgo. **Coste:** 2 consultas de tu cuota (o 2 créditos). Los errores no consumen.",
         tags: ["2. Plan Pro"]
     )]
     #[OA\Parameter(name: "cif", in: "query", required: true, description: "CIF de la empresa", schema: new OA\Schema(type: "string"))]
@@ -108,6 +108,11 @@ class CompanyVerifyController extends BaseApiController
                 'position'         => $m['position'] ?? null,
                 'since'            => $m['since'] ?? null,
             ];
+            // 16-10-2026 (campo nuevo, no cambia la decisión): ¿es quien firma el socio único?
+            $socio = $c['ownership']['sole_shareholder'] ?? null;
+            $checks['person']['is_sole_shareholder'] = ($socio && ($socio['type'] ?? '') === 'person')
+                ? V::matchPerson($person, [['name' => $socio['name'], 'position' => 'Socio único', 'since' => $socio['since']]]) !== null
+                : false;
         }
 
         $vatValid = null;
@@ -160,6 +165,11 @@ class CompanyVerifyController extends BaseApiController
             'status_code'   => $c['status_code'] ?? null,
             'status_source' => $c['status_source'] ?? null,
             'status_date'   => $c['status_date'] ?? null,
+            // 16-10-2026: identificadores, forma jurídica, grupo (GLEIF) y socio único (BORME)
+            'identifiers'   => $c['identifiers'] ?? null,
+            'legal_form'    => $c['legal_form'] ?? null,
+            'group'         => $c['group'] ?? null,
+            'ownership'     => $c['ownership'] ?? null,
             'checks'        => $checks,
         ];
         if ($esBusiness) {

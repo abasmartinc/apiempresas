@@ -1158,7 +1158,7 @@
                                 </td>
                                 <td style="padding: 18px 20px;">
                                     <strong style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">KYB verification in one call</strong>
-                                    <p style="margin: 0; font-size: 0.82rem; color: #64748b; line-height: 1.4;">Exists and operates, name match, signer is a current director and VAT number in VIES, with alerts and a recommendation (pass, review or fail). 2 requests.</p>
+                                    <p style="margin: 0; font-size: 0.82rem; color: #64748b; line-height: 1.4;">Exists and operates, name match, signer is a current director or sole shareholder, VAT number in VIES, ISO legal form and LEI, with alerts and a recommendation (pass, review or fail). 2 requests.</p>
                                 </td>
                                 <td style="padding: 18px 20px; text-align: center;"><span style="background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">PRO / BUS</span></td>
                                 <td style="padding: 18px 20px; text-align: center;"><button type="button" onclick="event.preventDefault(); showJsonPreview('get_verify')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VIEW JSON</button></td>
@@ -1363,6 +1363,10 @@
                                     <path
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
                                 </svg> Revenue band and latest filed accounts year</li>
+                            <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+                                    <path
+                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
+                                </svg> Sole shareholder and parent company (BORME and GLEIF)</li>
                             <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
                                     <path
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
@@ -1837,6 +1841,9 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                         address: "CALLE DE EJEMPLO 42, MADRID",
                         cnae: "6201",
                         cnae_label: "Actividades de programación informática",
+                        legal_form: { code: "SL", label: "Sociedad limitada", iso20275: "DP3Q", source: "name" },
+                        identifiers: { lei: null, lei_status: null },
+                        ownership: { unipersonal: true, sole_shareholder: { name: "JUAN PÉREZ GARCÍA", type: "person", since: "2019-03-12" }, source: "borme" },
                         administrators: [
                             { name: "JUAN PÉREZ GARCÍA", position: "Administrador Único" }
                         ]
@@ -1927,7 +1934,7 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                         calculated_at: "2026-08-24T00:00:00Z"
                     }
                 },
-                get_verify: {"success": true, "data": {"cif": "B12345678", "exists": true, "name": "EMPRESA DE EJEMPLO SL", "status": "ACTIVA", "status_code": "ACTIVE", "status_source": "registry", "status_date": null, "checks": {"name": {"provided": "Empresa de Ejemplo, S.L.", "score": 100, "match": true}, "person": {"provided": "Juan Pérez García", "is_current_admin": true, "matched_name": "PEREZ GARCIA JUAN", "position": "Adm. Unico", "since": "2019-03-01"}, "vat": {"vat_number": "ESB12345678", "checked": true, "valid": true, "source": "VIES", "error": null}, "accounts": {"last_accounts_year": 2023}}, "flags": [], "decision_hint": "pass", "checked_at": "2026-09-28T10:30:00+02:00"}},
+                get_verify: {"success": true, "data": {"cif": "B12345678", "exists": true, "name": "EMPRESA DE EJEMPLO SL", "status": "ACTIVA", "status_code": "ACTIVE", "status_source": "registry", "status_date": null, "legal_form": {"code": "SL", "label": "Sociedad limitada", "iso20275": "DP3Q", "source": "name"}, "ownership": {"unipersonal": true, "sole_shareholder": {"name": "PEREZ GARCIA JUAN", "type": "person", "since": "2019-03-01"}, "source": "borme"}, "checks": {"name": {"provided": "Empresa de Ejemplo, S.L.", "score": 100, "match": true}, "person": {"provided": "Juan Pérez García", "is_current_admin": true, "matched_name": "PEREZ GARCIA JUAN", "position": "Adm. Unico", "since": "2019-03-01", "is_sole_shareholder": true}, "vat": {"vat_number": "ESB12345678", "checked": true, "valid": true, "source": "VIES", "error": null}, "accounts": {"last_accounts_year": 2023}}, "flags": [], "decision_hint": "pass", "checked_at": "2026-09-28T10:30:00+02:00"}},
                 post_reconcile: {"success": true, "data": [{"input": {"name": "Mercadona, S.A.", "province": "Valencia"}, "status": "match", "score": 100, "company": {"cif": "A46103834", "name": "MERCADONA SA", "province": "VALENCIA", "status": "ACTIVA", "status_code": "ACTIVE", "score": 100}}, {"input": {"name": "Talleres Pérez", "province": null}, "status": "ambiguous", "candidates": [{"cif": "B12345678", "name": "TALLERES PEREZ SL", "province": "MADRID", "status": "ACTIVA", "status_code": "ACTIVE", "score": 100}, {"cif": "A12345674", "name": "TALLERES PEREZ SA", "province": "SEVILLA", "status": "ACTIVA", "status_code": "ACTIVE", "score": 100}]}, {"input": {"name": "Panadería Inventada del Norte", "province": null}, "status": "no_match"}], "meta": {"requested": 3, "matched": 1, "ambiguous": 1, "no_match": 1, "invalid": 0, "skipped_quota": 0, "cost": 1, "thresholds": {"match": 85, "ambiguous": 70}}},
                 get_watchlist_events: {"success": true, "data": [{"id": "borme_act:8812345", "type": "borme_act", "date": "2026-09-22", "cif": "B12345678", "company_name": "EMPRESA DE EJEMPLO SL", "data": {"act_types": "Nombramientos, Ceses/Dimisiones", "description": "Ceses/Dimisiones. Adm. Unico: ...", "url_pdf": "https://www.boe.es/borme/dias/2026/09/22/pdfs/BORME-A-2026-181-28.pdf"}}, {"id": "risk_level_change:B12345678:2026-09-25", "type": "risk_level_change", "date": "2026-09-25", "cif": "B12345678", "company_name": "EMPRESA DE EJEMPLO SL", "data": {"from": "BAJO", "to": "MEDIO", "model_change": null}}], "meta": {"since": "2026-09-20", "types": ["borme_act", "status_change", "risk_level_change"], "total": 2, "page": 1, "limit": 100, "has_more": false}},
                 post_webhook: {"success": true, "message": "Webhook creado correctamente", "id": 12, "event": "watchlist.*", "secret": "3f9c1b2a7d..."},

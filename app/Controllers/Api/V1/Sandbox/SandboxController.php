@@ -78,8 +78,31 @@ class SandboxController extends \App\Controllers\Api\V1\BaseApiController
                 'size_band'          => 'GT_1M',
                 'size_band_label'    => 'Más de 1 M€',
                 'last_accounts_year' => 2024,
-            ]
+            ],
+            // Campos añadidos el 16-10-2026. LEI, estado, renovación y matriz comprobados en GLEIF
+            // (api.gleif.org) el 16-10-2026.
+            'identifiers'   => self::mockIdentifiers(),
+            'legal_form'    => ['code' => 'SA', 'label' => 'Sociedad anónima', 'iso20275' => '5RDO', 'source' => 'name'],
+            'group'         => self::mockGroup(),
+            'ownership'     => ['unipersonal' => null, 'sole_shareholder' => null, 'source' => null, 'as_of' => null],
         ];
+    }
+
+    private static function mockIdentifiers(): array
+    {
+        return [
+            'lei'                   => '549300TTCXZOGZM2EY83',
+            'lei_status'            => 'ISSUED',
+            'lei_next_renewal_date' => '2027-10-25',
+            'lei_source'            => 'gleif',
+            'lei_as_of'             => '2026-10-16',
+        ];
+    }
+
+    private static function mockGroup(): array
+    {
+        $pontegadea = ['lei' => '959800U254WM470TRW79', 'name' => 'PONTEGADEA INVERSIONES SL', 'country' => 'ES', 'cif' => null];
+        return ['direct_parent' => $pontegadea, 'ultimate_parent' => $pontegadea, 'source' => 'gleif', 'as_of' => '2026-10-16'];
     }
 
     // =========================================================================
@@ -518,6 +541,10 @@ class SandboxController extends \App\Controllers\Api\V1\BaseApiController
                 'lng'               => 'pro',
                 'financials'        => 'pro',
                 'administrators'    => 'pro',
+                'identifiers'       => 'free',
+                'legal_form'        => 'free',
+                'group'             => 'pro',
+                'ownership'         => 'pro',
             ];
         }
         $notas = [
@@ -642,6 +669,7 @@ class SandboxController extends \App\Controllers\Api\V1\BaseApiController
                 'matched_name'     => $encontrado['name'] ?? null,
                 'position'         => $encontrado['position'] ?? null,
                 'since'            => $encontrado['since'] ?? null,
+                'is_sole_shareholder' => false,
             ];
             if ($encontrado === null) {
                 $flags[] = ['code' => 'SIGNER_NOT_ADMIN', 'severity' => 'medium', 'message' => 'Quien firma no consta como administrador vigente.'];
@@ -664,6 +692,10 @@ class SandboxController extends \App\Controllers\Api\V1\BaseApiController
                 'status_code'   => 'ACTIVE',
                 'status_source' => 'registry',
                 'status_date'   => null,
+                'identifiers'   => self::mockIdentifiers(),
+                'legal_form'    => ['code' => 'SA', 'label' => 'Sociedad anónima', 'iso20275' => '5RDO', 'source' => 'name'],
+                'group'         => self::mockGroup(),
+                'ownership'     => ['unipersonal' => null, 'sole_shareholder' => null, 'source' => null, 'as_of' => null],
                 'checks'        => $checks,
                 'flags'         => $flags,
                 'decision_hint' => $hint,

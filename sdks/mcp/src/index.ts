@@ -162,7 +162,8 @@ export function crearServidor(): McpServer {
       title: 'Empresa por CIF',
       description:
         'Datos de una empresa española a partir de su CIF/NIF: razón social, estado (activa, extinguida, en concurso…), ' +
-        'fecha de constitución, provincia, municipio, CNAE y, según el plan, domicilio completo, tramo de facturación y ' +
+        'fecha de constitución, provincia, municipio, CNAE, forma jurídica (con código ISO 20275) y código LEI y, según el ' +
+        'plan, domicilio completo, tramo de facturación, socio único (ownership), matriz del grupo según GLEIF (group) y ' +
         'administradores (include_directors). Gasta 1 consulta. El estado lo calcula APIEmpresas a partir del BORME; ' +
         'no es un certificado del Registro Mercantil. Spanish company lookup by tax ID.',
       inputSchema: {
@@ -200,12 +201,13 @@ export function crearServidor(): McpServer {
       title: 'Verificación KYB',
       description:
         'Verificación KYB de una empresa en una sola llamada: si existe y está activa, si el nombre declarado coincide ' +
-        'y si una persona es administradora, con alertas y una recomendación (pass / review / fail). ' +
+        'y si una persona es administradora o el socio único, con alertas y una recomendación (pass / review / fail). ' +
+        'Devuelve también la forma jurídica, el LEI, la matriz del grupo y el socio único. ' +
         'Plan Pro o superior; gasta 2 consultas. KYB check for a Spanish company.',
       inputSchema: {
         cif: cifSchema,
         name: z.string().optional().describe('Razón social que ha declarado el cliente, para comprobar que coincide'),
-        person: z.string().optional().describe('Nombre de la persona que firma, para comprobar si es administradora'),
+        person: z.string().optional().describe('Nombre de la persona que firma, para comprobar si es administradora o socia única'),
         vat: z.boolean().optional().describe('true para comprobar además el NIF-IVA en VIES (operador intracomunitario)'),
       },
       annotations: soloLectura,

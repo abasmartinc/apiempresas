@@ -32,6 +32,10 @@
                         <span class="link-icon icon-sub-emerald"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941" /></svg></span>
                         <div class="link-text"><strong>Crecimiento</strong><p>Altas API y Solvencia por mes, paso a pago, MRR y previsión.</p></div>
                     </a>
+                    <a href="<?= site_url('admin/prospeccion') ?>" class="group-link">
+                        <span class="link-icon icon-sub-purple"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg></span>
+                        <div class="link-text"><strong>Prospección</strong><p>Clientes para mis servicios: empresas nuevas, sin web, con subvención o contratos, y licitaciones TI.</p></div>
+                    </a>
                     <a href="<?= site_url('admin/users') ?>" class="group-link">
                         <span class="link-icon icon-sub-blue"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" /></svg></span>
                         <div class="link-text"><strong>Usuarios</strong><p>Gestión de cuentas y perfiles.</p></div>

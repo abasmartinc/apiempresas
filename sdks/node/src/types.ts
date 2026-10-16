@@ -50,6 +50,14 @@ export interface Company {
   status_date?: string | null;
   /** Pro/Business: tramo de tamaño y año de las últimas cuentas vistas. */
   financials?: CompanyFinancials | null;
+  /** Todos los planes (desde 1.3.0): código LEI de GLEIF. */
+  identifiers?: CompanyIdentifiers;
+  /** Todos los planes (desde 1.3.0): forma jurídica con su código ISO 20275 (ELF). */
+  legal_form?: CompanyLegalForm;
+  /** Pro/Business (desde 1.3.0): matriz directa y última declaradas a GLEIF. null si no tiene LEI. */
+  group?: CompanyGroup | null;
+  /** Pro/Business (desde 1.3.0): socio único según el BORME. */
+  ownership?: CompanyOwnership;
   /** Solo con get(cif, { admin: true }) en Pro/Business. since: fecha del nombramiento. */
   administrators?: Array<{ name: string; position: string; since?: string | null; [key: string]: any }>;
   /** Solo en el plan Free: indica que la respuesta viene recortada. */
@@ -59,6 +67,54 @@ export interface Company {
 export type StatusCode =
   | 'ACTIVE' | 'PRESUMED_ACTIVE' | 'INSOLVENCY' | 'IN_LIQUIDATION' | 'DISSOLVED'
   | 'REGISTRY_CLOSED' | 'MERGED' | 'INACTIVE' | 'EXTINCT' | 'UNKNOWN';
+
+export interface CompanyIdentifiers {
+  lei: string | null;
+  /** Estado del LEI en GLEIF: ISSUED, LAPSED, RETIRED... */
+  lei_status: string | null;
+  lei_next_renewal_date: string | null;
+  lei_source: 'gleif' | null;
+  lei_as_of: string | null;
+}
+
+export interface CompanyLegalForm {
+  /** SL, SA, SLP, SLL, SLNE, SAL, SAD, SCOOP, AIE, UTE, FUNDACION... */
+  code: string | null;
+  label: string | null;
+  /** Código ELF de la ISO 20275 (DP3Q = SL, 5RDO = SA). null si la forma no tiene código propio. */
+  iso20275: string | null;
+  /** name: leída de la razón social; cif: deducida de la letra del CIF. */
+  source: 'name' | 'cif' | null;
+}
+
+export interface CompanyParent {
+  lei: string;
+  name: string | null;
+  country: string | null;
+  /** CIF de la matriz si es una sociedad española con ficha. */
+  cif: string | null;
+}
+
+export interface CompanyGroup {
+  direct_parent: CompanyParent | null;
+  ultimate_parent: CompanyParent | null;
+  source: 'gleif';
+  as_of: string | null;
+}
+
+export interface CompanyOwnership {
+  /** true, false o null (no consta: el accionariado con varios socios no es público). */
+  unipersonal: boolean | null;
+  sole_shareholder: {
+    name: string;
+    type: 'person' | 'company';
+    since: string | null;
+    url_pdf: string | null;
+  } | null;
+  /** borme: último acto de unipersonalidad; name: solo el nombre dice SLU o SAU. */
+  source: 'borme' | 'name' | null;
+  as_of: string | null;
+}
 
 export interface CompanyFinancials {
   size_band?: string | null;
@@ -93,9 +149,13 @@ export interface VerifyResult {
   status_code: StatusCode | null;
   status_source: string | null;
   status_date: string | null;
+  identifiers?: CompanyIdentifiers;
+  legal_form?: CompanyLegalForm;
+  group?: CompanyGroup | null;
+  ownership?: CompanyOwnership;
   checks: {
     name?: { provided: string; score: number; match: boolean };
-    person?: { provided: string; is_current_admin: boolean; matched_name: string | null; position: string | null; since: string | null };
+    person?: { provided: string; is_current_admin: boolean; matched_name: string | null; position: string | null; since: string | null; is_sole_shareholder?: boolean };
     vat?: { vat_number: string; checked: boolean; valid: boolean | null; source: string; error: string | null };
     accounts?: { last_accounts_year: number | null };
   };

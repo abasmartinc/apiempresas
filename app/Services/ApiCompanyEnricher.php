@@ -22,6 +22,8 @@ namespace App\Services;
  *  - administrators vigentes: nombramientos de company_administrators (fechados por su
  *    acto del BORME) menos los ceses, dimisiones y revocaciones que el BORME publica en
  *    el texto de los actos.
+ *  - (16-10-2026) identifiers (LEI de GLEIF) y legal_form (con ISO 20275) en todos los planes;
+ *    group (matrices en GLEIF) y ownership (socio único del BORME) en planes de pago o con saldo.
  */
 class ApiCompanyEnricher
 {
@@ -138,6 +140,16 @@ class ApiCompanyEnricher
         }
         $adminCounts = $fullAccess ? [] : self::countAdministrators($idsActuales ?: $ids);
 
+        // 16-10-2026: LEI y grupo (GLEIF) y socio único (BORME). Una consulta por bloque.
+        $idsUsar = $idsActuales ?: $ids;
+        $leis = self::loadLei($idsUsar);
+        $parentCifs = $fullAccess ? self::loadParentCifs($leis) : [];
+        $founded = [];
+        foreach ($extras as $ex) {
+            $founded[(int) $ex['id']] = (string) ($ex['fecha_constitucion'] ?? '');
+        }
+        $owners = self::loadOwnership($idsUsar, $founded);
+
         foreach ($companies as &$c) {
             $cif = self::normalizeCif((string) ($c['cif'] ?? ''));
             $ex  = $extras[$cif] ?? [];
@@ -159,24 +171,446 @@ class ApiCompanyEnricher
             $band = self::sizeBand($ex['ventas_raw'] ?? null);
             $year = isset($ex['ult_cuentas_anio']) && (int) $ex['ult_cuentas_anio'] > 1900 ? (int) $ex['ult_cuentas_anio'] : null;
 
+            // Identificadores y forma jurídica (16-10-2026): todos los planes.
+            $lei = $leis[$id] ?? null;
+            $c['identifiers'] = self::identifiersFor($lei);
+            $c['legal_form']  = self::legalForm((string) ($c['name'] ?? ''), $cif);
+
             if ($fullAccess) {
                 $c['financials'] = [
                     'size_band'          => $band['code'],
                     'size_band_label'    => $band['label'],
                     'last_accounts_year' => $year,
                 ];
+                // Grupo (GLEIF) y socio único (BORME), 16-10-2026: Pro, Business o saldo.
+                $c['group']     = self::groupFor($lei, $parentCifs);
+                $c['ownership'] = self::ownershipFor($owners[$id] ?? null, (string) ($c['name'] ?? ''));
             } elseif (isset($c['upsell_opportunities']) && is_array($c['upsell_opportunities'])) {
                 // Free: enseñar QUÉ hay sin darlo (campo nuevo dentro de upsell_opportunities).
+                $own = self::ownershipFor($owners[$id] ?? null, (string) ($c['name'] ?? ''));
                 $c['upsell_opportunities']['datos_pro'] = [
                     'tramo_facturacion'        => $band['code'] !== null,
                     'ultimo_ejercicio_cuentas' => $year !== null,
                     'administradores'          => (int) ($adminCounts[$id] ?? 0),
+                    // 16-10-2026 (campos nuevos)
+                    'socio_unico'              => $own['sole_shareholder'] !== null,
+                    'grupo_empresarial'        => $lei !== null && (!empty($lei['direct_parent_lei']) || !empty($lei['ultimate_parent_lei'])),
                 ];
             }
         }
         unset($c);
 
         return $companies;
+    }
+
+    // ------------------------------------------------------------------
+    // Identificadores, forma jurídica, grupo y socio único (16-10-2026)
+    // ------------------------------------------------------------------
+    //
+    // Lo que piden los procesos KYB además de "existe y está activa":
+    //  - identifiers.lei: código LEI de GLEIF (company_lei, Golden Copy CC0 cargada con
+    //    calidad_datos/cargar_gleif.py). Todos los planes.
+    //  - legal_form: forma jurídica con su código ISO 20275 (ELF), que es como la entienden los
+    //    sistemas de otros países. Todos los planes.
+    //  - group: matriz directa y última que la empresa declara a GLEIF. Pro, Business o saldo.
+    //  - ownership: si es sociedad unipersonal y quién es el socio único, según el último acto del
+    //    BORME sobre unipersonalidad. Es el único dato de titularidad público en España: el
+    //    accionariado de una sociedad con varios socios no se publica, y el titular real no es
+    //    accesible al público. Pro, Business o saldo.
+    // Sin EUID a propósito: el español usa un número interno del Registro
+    // (ES28.RM-M28038019301), no el CIF, y no lo tenemos.
+
+    /** Versión de la caché de socio único: subirla si cambia parseOwnership(). */
+    private const CACHE_OWN = 'v2'; // v2 (16-10-2026): nombres sin saltos de línea
+
+    /**
+     * Formas jurídicas por el final de la razón social, de la más concreta a la más general.
+     * [código propio, patrón sobre el nombre normalizado, etiqueta, ISO 20275, unipersonal]
+     * Códigos ELF de la lista de GLEIF (Topograph usa los mismos; 5RDO, DP3Q y 1QU8 comprobados
+     * en GLEIF el 16-10-2026). null: la forma no tiene código ELF propio.
+     */
+    private const FORMAS = [
+        ['SLNE',  '/\b(SLNE|SOCIEDAD LIMITADA NUEVA EMPRESA)$/', 'Sociedad limitada nueva empresa', null, null],
+        ['SLLP',  '/\b(SLLP|SOCIEDAD LIMITADA LABORAL PROFESIONAL)$/', 'Sociedad limitada laboral profesional', null, null],
+        ['SLP',   '/\b(SLP|SRLP|SOCIEDAD (DE RESPONSABILIDAD )?LIMITADA PROFESIONAL)$/', 'Sociedad limitada profesional', 'JB2M', null],
+        ['SLL',   '/\b(SLL|SRLL|SOCIEDAD (DE RESPONSABILIDAD )?LIMITADA LABORAL)$/', 'Sociedad limitada laboral', '1G29', null],
+        ['SAD',   '/\b(SAD|SOCIEDAD ANONIMA DEPORTIVA)$/', 'Sociedad anónima deportiva', null, null],
+        ['SAL',   '/\b(SAL|SOCIEDAD ANONIMA LABORAL)$/', 'Sociedad anónima laboral', 'R2L8', null],
+        ['SE',    '/\b(SE|SOCIEDAD ANONIMA EUROPEA)$/', 'Sociedad anónima europea', '9FPZ', null],
+        ['SICAV', '/\bSICAV$/', 'Sociedad de inversión de capital variable', '8EHB', null],
+        ['SGR',   '/\b(SGR|SOCIEDAD DE GARANTIA RECIPROCA)$/', 'Sociedad de garantía recíproca', 'IAS6', null],
+        ['SL',    '/\b(SLU|SRLU|SOCIEDAD (DE RESPONSABILIDAD )?LIMITADA UNIPERSONAL)$/', 'Sociedad limitada', 'DP3Q', true],
+        ['SA',    '/\b(SAU|SOCIEDAD ANONIMA UNIPERSONAL)$/', 'Sociedad anónima', '5RDO', true],
+        ['SL',    '/\b(SL|SRL|SOCIEDAD LIMITADA|SOCIEDAD DE RESPONSABILIDAD LIMITADA)$/', 'Sociedad limitada', 'DP3Q', null],
+        ['SA',    '/\b(SA|SOCIEDAD ANONIMA)$/', 'Sociedad anónima', '5RDO', null],
+        ['SCOM',  '/\b(SOCIEDAD COMANDITARIA POR ACCIONES|SCOMPA|S COM P A)$/', 'Sociedad comanditaria por acciones', 'GJL1', null],
+        ['SCOM',  '/\b(SOCIEDAD COMANDITARIA( SIMPLE)?|SCOM|S EN C|S COM)$/', 'Sociedad comanditaria', 'TDD5', null],
+        ['SRC',   '/\b(SOCIEDAD REGULAR COLECTIVA|SOCIEDAD COLECTIVA|SRC)$/', 'Sociedad colectiva', 'S6X7', null],
+        ['AEIE',  '/\b(AEIE|AGRUPACION EUROPEA DE INTERES ECONOMICO)$/', 'Agrupación europea de interés económico', 'BI3B', null],
+        ['AIE',   '/\b(AIE|AGRUPACION DE INTERES ECONOMICO)$/', 'Agrupación de interés económico', 'I2WU', null],
+        ['UTE',   '/\b(UTE|UNION TEMPORAL DE EMPRESAS)\b/', 'Unión temporal de empresas', null, null],
+        ['SCOOP', '/\b(COOPERATIVA DE CREDITO|CAJA RURAL)\b/', 'Cooperativa de crédito', 'SS0L', null],
+        ['SCOOP', '/\b(S ?COOP|SDAD COOP|SOCIEDAD COOPERATIVA|COOPERATIVA|SCCL|COOP)\b/', 'Sociedad cooperativa', '1QU8', null],
+        ['FI',    '/\bFONDO DE INVERSION\b/', 'Fondo de inversión', 'S0Z5', null],
+        ['FP',    '/\bFONDO DE PENSIONES\b/', 'Fondo de pensiones', 'FH4R', null],
+        ['FUNDACION', '/^FUNDACION\b|\bFUNDACION$/', 'Fundación', 'MDOL', null],
+        ['SC',    '/\b(SOCIEDAD CIVIL( PARTICULAR| PROFESIONAL)?|SCP|SC)$/', 'Sociedad civil', '2W1A', null],
+        ['SUCURSAL', '/\bSUCURSAL EN ESPANA$/', 'Sucursal en España de sociedad extranjera', null, null],
+    ];
+
+    /**
+     * Si el nombre no dice la forma, la letra del CIF da la familia (Orden EHA/451/2008).
+     * [código, etiqueta, ISO 20275]. Las letras de varias formas (D, G, N...) no llevan ISO.
+     */
+    private const LETRAS_CIF = [
+        'A' => ['SA', 'Sociedad anónima', '5RDO'],
+        'B' => ['SL', 'Sociedad limitada', 'DP3Q'],
+        'C' => ['SRC', 'Sociedad colectiva', 'S6X7'],
+        'D' => ['SCOM', 'Sociedad comanditaria', null],
+        'E' => ['CB', 'Comunidad de bienes', null],
+        'F' => ['SCOOP', 'Sociedad cooperativa', '1QU8'],
+        'G' => ['ASOC_FUND', 'Asociación o fundación', null],
+        'H' => ['CP', 'Comunidad de propietarios', null],
+        'J' => ['SC', 'Sociedad civil', '2W1A'],
+        'N' => ['EXT', 'Entidad extranjera', null],
+        'P' => ['PUB', 'Corporación local', null],
+        'Q' => ['PUB', 'Organismo público', null],
+        'R' => ['REL', 'Congregación o institución religiosa', null],
+        'S' => ['PUB', 'Órgano de la Administración', null],
+        'U' => ['UTE', 'Unión temporal de empresas', null],
+        'V' => ['OTRA', 'Otro tipo de entidad', null],
+        'W' => ['EP', 'Establecimiento permanente de entidad no residente', null],
+    ];
+
+    /** Nombre en mayúsculas, sin tildes, puntos ni coletillas de estado ("EN LIQUIDACION"). */
+    public static function normalizeName(string $name): string
+    {
+        $s = mb_strtoupper(trim($name), 'UTF-8');
+        $s = strtr($s, ['Á' => 'A', 'É' => 'E', 'Í' => 'I', 'Ó' => 'O', 'Ú' => 'U', 'Ü' => 'U', 'Ñ' => 'N', 'Ç' => 'C', 'À' => 'A', 'È' => 'E', 'Ò' => 'O']);
+        $s = preg_replace('/\([^)]*\)/', ' ', $s);            // "(EXTINGUIDA)", "(R.M. MADRID)"
+        // "S.L.", "S. L. U." -> "SL", "SLU": se juntan las siglas con punto (solo las que llevan
+        // punto, para no pegar una inicial suelta del nombre: "TALLERES X S.L.L.")
+        $s = (string) preg_replace_callback('/(?<![A-Z])(?:[A-Z]\s?\.\s?){2,}/', static fn($m) => str_replace(['.', ' '], '', $m[0]) . ' ', (string) $s);
+        $s = str_replace(['.', ',', ';', '"', "'"], ' ', $s);
+        $s = trim((string) preg_replace('/\s+/', ' ', $s));
+        $s = (string) preg_replace('/\s+EN (LIQUIDACION|CONSTITUCION)$/', '', $s);
+        return trim($s);
+    }
+
+    /**
+     * Forma jurídica: por el final de la razón social y, si no, por la letra del CIF.
+     * @return array{code:?string,label:?string,iso20275:?string,source:?string}
+     */
+    public static function legalForm(string $name, string $cif): array
+    {
+        $n = self::normalizeName($name);
+        if ($n !== '') {
+            foreach (self::FORMAS as [$code, $re, $label, $iso]) {
+                if (preg_match($re, $n)) {
+                    return ['code' => $code, 'label' => $label, 'iso20275' => $iso, 'source' => 'name'];
+                }
+            }
+        }
+        $letra = substr(self::normalizeCif($cif), 0, 1);
+        if (isset(self::LETRAS_CIF[$letra])) {
+            [$code, $label, $iso] = self::LETRAS_CIF[$letra];
+            return ['code' => $code, 'label' => $label, 'iso20275' => $iso, 'source' => 'cif'];
+        }
+        return ['code' => null, 'label' => null, 'iso20275' => null, 'source' => null];
+    }
+
+    /** ¿El nombre dice que es unipersonal (SLU, SAU)? null si no lo dice. */
+    public static function unipersonalByName(string $name): ?bool
+    {
+        $n = self::normalizeName($name);
+        foreach (self::FORMAS as [, $re, , , $uni]) {
+            if (preg_match($re, $n)) {
+                return $uni;
+            }
+        }
+        return null;
+    }
+
+    /** Filas de company_lei por company_id. [] si la tabla no existe. Caché de 24 h por empresa. */
+    private static function loadLei(array $ids): array
+    {
+        $out = [];
+        $faltan = [];
+        foreach (array_unique(array_map('intval', $ids)) as $id) {
+            if ($id <= 0) {
+                continue;
+            }
+            $hit = cache()->get('api_lei_' . self::CACHE_V . '_' . $id);
+            if (is_array($hit)) {
+                if ($hit) {
+                    $out[$id] = $hit;
+                }
+            } else {
+                $faltan[] = $id;
+            }
+        }
+        if (empty($faltan)) {
+            return $out;
+        }
+        try {
+            $rows = \Config\Database::connect()->table('company_lei')
+                ->select('company_id, lei, registration_status, next_renewal_date, source_date, '
+                       . 'direct_parent_lei, direct_parent_name, direct_parent_country, direct_parent_company_id, '
+                       . 'ultimate_parent_lei, ultimate_parent_name, ultimate_parent_country, ultimate_parent_company_id')
+                ->whereIn('company_id', $faltan)
+                ->get()->getResultArray();
+        } catch (\Throwable $e) {
+            log_message('error', '[ApiCompanyEnricher::loadLei] ' . $e->getMessage());
+            return $out;
+        }
+        $vistos = [];
+        foreach ($rows as $r) {
+            $id = (int) $r['company_id'];
+            $out[$id] = $r;
+            $vistos[$id] = true;
+            cache()->save('api_lei_' . self::CACHE_V . '_' . $id, $r, 86400);
+        }
+        foreach ($faltan as $id) {
+            if (!isset($vistos[$id])) {
+                cache()->save('api_lei_' . self::CACHE_V . '_' . $id, [], 86400);
+            }
+        }
+        return $out;
+    }
+
+    /** CIF de las matrices que tienen ficha nuestra: [company_id => cif]. */
+    private static function loadParentCifs(array $leis): array
+    {
+        $ids = [];
+        foreach ($leis as $l) {
+            foreach (['direct', 'ultimate'] as $t) {
+                if (!empty($l[$t . '_parent_company_id'])) {
+                    $ids[] = (int) $l[$t . '_parent_company_id'];
+                }
+            }
+        }
+        $ids = array_values(array_unique($ids));
+        if (empty($ids)) {
+            return [];
+        }
+        try {
+            $rows = \Config\Database::connect()->table('companies')->select('id, cif')->whereIn('id', $ids)->get()->getResultArray();
+        } catch (\Throwable $e) {
+            log_message('error', '[ApiCompanyEnricher::loadParentCifs] ' . $e->getMessage());
+            return [];
+        }
+        $out = [];
+        foreach ($rows as $r) {
+            if (!empty($r['cif'])) {
+                $out[(int) $r['id']] = strtoupper((string) $r['cif']);
+            }
+        }
+        return $out;
+    }
+
+    private static function identifiersFor(?array $lei): array
+    {
+        $fecha = static fn($d) => !empty($d) ? substr((string) $d, 0, 10) : null;
+        return [
+            'lei'                   => $lei['lei'] ?? null,
+            'lei_status'            => isset($lei['registration_status']) ? (string) $lei['registration_status'] : null,
+            'lei_next_renewal_date' => $fecha($lei['next_renewal_date'] ?? null),
+            'lei_source'            => $lei ? 'gleif' : null,
+            'lei_as_of'             => $fecha($lei['source_date'] ?? null),
+        ];
+    }
+
+    /** Matriz directa y última declaradas a GLEIF. null si la empresa no tiene LEI. */
+    private static function groupFor(?array $lei, array $parentCifs): ?array
+    {
+        if (!$lei) {
+            return null;
+        }
+        $parent = static function (string $t) use ($lei, $parentCifs): ?array {
+            if (empty($lei[$t . '_parent_lei'])) {
+                return null;
+            }
+            $cid = (int) ($lei[$t . '_parent_company_id'] ?? 0);
+            return [
+                'lei'     => (string) $lei[$t . '_parent_lei'],
+                'name'    => $lei[$t . '_parent_name'] ?? null,
+                'country' => $lei[$t . '_parent_country'] ?? null,
+                'cif'     => $parentCifs[$cid] ?? null,
+            ];
+        };
+        return [
+            'direct_parent'   => $parent('direct'),
+            'ultimate_parent' => $parent('ultimate'),
+            'source'          => 'gleif',
+            'as_of'           => !empty($lei['source_date']) ? substr((string) $lei['source_date'], 0, 10) : null,
+        ];
+    }
+
+    /**
+     * Último hecho de unipersonalidad del BORME por empresa: [company_id => parseOwnership()].
+     * Caché de 12 h por empresa.
+     * @param array<int,string> $founded [company_id => fecha de constitución] para descartar
+     *        anuncios de otra sociedad con el mismo nombre (ficha_posts_coherentes)
+     */
+    private static function loadOwnership(array $ids, array $founded): array
+    {
+        $out = [];
+        $faltan = [];
+        foreach (array_unique(array_map('intval', $ids)) as $id) {
+            if ($id <= 0) {
+                continue;
+            }
+            $hit = cache()->get('api_own_' . self::CACHE_OWN . '_' . $id);
+            if (is_array($hit)) {
+                $out[$id] = $hit ?: null;
+            } else {
+                $faltan[] = $id;
+            }
+        }
+        if (empty($faltan)) {
+            return $out;
+        }
+        try {
+            $rows = \Config\Database::connect()->table('borme_posts')
+                ->select('id, company_id, borme_date, description, url_pdf')
+                ->whereIn('company_id', $faltan)
+                ->groupStart()
+                    ->like('description', 'unipersonal', 'both', null, true)
+                    ->orLike('description', 'socio', 'both', null, true)
+                ->groupEnd()
+                ->get()->getResultArray();
+        } catch (\Throwable $e) {
+            log_message('error', '[ApiCompanyEnricher::loadOwnership] ' . $e->getMessage());
+            return $out;
+        }
+        helper('ficha_hechos');
+        $porEmpresa = [];
+        foreach ($rows as $r) {
+            $porEmpresa[(int) $r['company_id']][] = $r;
+        }
+        foreach ($faltan as $id) {
+            $posts = $porEmpresa[$id] ?? [];
+            if ($posts && function_exists('ficha_posts_coherentes')) {
+                $posts = ficha_posts_coherentes($posts, (string) ($founded[$id] ?? ''));
+            }
+            $r = self::parseOwnership($posts);
+            if ($r && !empty($r['name']) && function_exists('ficha_nombre_completo')) {
+                // "INNGEN" -> "INNGEN.IO SEED SL" (la extracción corta en el primer punto)
+                $r['name'] = ficha_nombre_completo($r['name'], $posts);
+            }
+            $out[$id] = $r;
+            cache()->save('api_own_' . self::CACHE_OWN . '_' . $id, $r ?? [], 43200);
+        }
+        return $out;
+    }
+
+    /**
+     * Último hecho sobre unipersonalidad de una lista de anuncios. Pura (sin BD): se prueba aparte.
+     * Devuelve null si ningún anuncio habla de ello, o
+     * ['unipersonal' => bool, 'name' => ?string, 'date' => ?string, 'url_pdf' => ?string].
+     *
+     * Textos del BORME que se leen:
+     *   "Declaración de unipersonalidad. Socio único: X."      -> unipersonal, socio X
+     *   "Cambio de identidad del socio único: X."              -> unipersonal, socio X
+     *   "Socio único: X." (p. ej. en la constitución)          -> unipersonal, socio X
+     *   "Pérdida del caracter de unipersonalidad."             -> deja de serlo
+     * Si un mismo anuncio trae varios, manda el último en el texto.
+     */
+    public static function parseOwnership(array $posts): ?array
+    {
+        usort($posts, static function ($a, $b) {
+            return [(string) ($b['borme_date'] ?? ''), (int) ($b['id'] ?? 0)] <=> [(string) ($a['borme_date'] ?? ''), (int) ($a['id'] ?? 0)];
+        });
+        $nombre = '((?:[^.]|\.(?=[^\s]))+)';
+        foreach ($posts as $p) {
+            $t = (string) ($p['description'] ?? '');
+            $hechos = [];
+            if (preg_match_all('/P[eé]rdida del car[aá]cter de unipersonalidad/iu', $t, $m, PREG_OFFSET_CAPTURE)) {
+                foreach ($m[0] as $x) {
+                    $hechos[] = [$x[1], false, null];
+                }
+            }
+            if (preg_match_all('/(?:Cambio de identidad del socio [úu]nico|Socio [úu]nico)\s*:\s*' . $nombre . '/iu', $t, $m, PREG_OFFSET_CAPTURE)) {
+                foreach ($m[1] as $x) {
+                    // El texto del BORME trae saltos de línea dentro de los nombres ("MACIAS SANCHEZ\nMANUEL")
+                    $hechos[] = [$x[1], true, trim((string) preg_replace('/\s+/u', ' ', $x[0]), " .;,")];
+                }
+            }
+            if (preg_match_all('/Declaraci[oó]n de unipersonalidad/iu', $t, $m, PREG_OFFSET_CAPTURE)) {
+                foreach ($m[0] as $x) {
+                    $hechos[] = [$x[1], true, null];
+                }
+            }
+            if (!$hechos) {
+                continue;
+            }
+            // El último en el texto; si una declaración y su "Socio único: X" van juntas, gana la que tiene nombre.
+            usort($hechos, static fn($a, $b) => $a[0] <=> $b[0]);
+            $h = end($hechos);
+            if ($h[1] === true && $h[2] === null) {
+                foreach (array_reverse($hechos) as $o) {
+                    if ($o[1] === true && $o[2] !== null) {
+                        $h = $o;
+                        break;
+                    }
+                    if ($o[1] === false) {
+                        break;
+                    }
+                }
+            }
+            $url = (string) ($p['url_pdf'] ?? '');
+            return [
+                'unipersonal' => $h[1],
+                'name'        => ($h[2] !== null && $h[2] !== '') ? $h[2] : null,
+                'date'        => !empty($p['borme_date']) ? substr((string) $p['borme_date'], 0, 10) : null,
+                'url_pdf'     => strpos($url, 'https://www.boe.es/') === 0 ? $url : null,
+            ];
+        }
+        return null;
+    }
+
+    /** ¿Persona o sociedad? Por la forma jurídica o palabras de empresa en el nombre. */
+    public static function partyType(string $name): string
+    {
+        $n = self::normalizeName($name);
+        $re = '/\b(SL|SA|SLU|SAU|SLP|SLL|SRL|SOCIEDAD|SDAD|COOP|SCOOP|COOPERATIVA|FUNDACION|ASOCIACION|AIE|UTE|'
+            . 'GMBH|BV|NV|AG|SE|SAS|SARL|SPA|SRL|LTD|LIMITED|LLC|INC|PLC|CORP|CORPORATION|HOLDING|HOLDINGS|GROUP|'
+            . 'GRUPO|INVERSIONES|INVESTMENTS|CAPITAL|PARTNERS|FONDO|FUND|BANCO|BANK|CAJA|AYUNTAMIENTO|DIPUTACION|'
+            . 'CONSORCIO|ENTIDAD|COMPANY|CIA|COMPANIA|GESTION|SERVICIOS|TRUST)\b/';
+        return preg_match($re, $n) ? 'company' : 'person';
+    }
+
+    /**
+     * Bloque ownership. Fuente principal: el último acto del BORME sobre unipersonalidad. Sin
+     * actos, el nombre (SLU, SAU) dice si es unipersonal pero no quién es el socio. Sin nada,
+     * unipersonal = null: el accionariado de una sociedad con varios socios no se publica.
+     */
+    private static function ownershipFor(?array $own, string $name): array
+    {
+        if ($own) {
+            $socio = null;
+            if ($own['unipersonal'] && $own['name'] !== null) {
+                $socio = [
+                    'name'    => $own['name'],
+                    'type'    => self::partyType($own['name']),
+                    'since'   => $own['date'],
+                    'url_pdf' => $own['url_pdf'],
+                ];
+            }
+            return [
+                'unipersonal'      => (bool) $own['unipersonal'],
+                'sole_shareholder' => $socio,
+                'source'           => 'borme',
+                'as_of'            => $own['date'],
+            ];
+        }
+        $uni = self::unipersonalByName($name);
+        return [
+            'unipersonal'      => $uni,
+            'sole_shareholder' => null,
+            'source'           => $uni !== null ? 'name' : null,
+            'as_of'            => null,
+        ];
     }
 
     /** id, ventas_raw, ult_cuentas_anio y estado_fecha por CIF (índice único). */

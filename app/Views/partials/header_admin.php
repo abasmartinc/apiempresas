@@ -56,6 +56,9 @@
             <a href="<?= site_url('admin/crecimiento') ?>" class="admin-top-nav-link <?= strpos(current_url(), 'admin/crecimiento') !== false ? 'active' : '' ?>">
                 Crecimiento
             </a>
+            <a href="<?= site_url('admin/prospeccion') ?>" class="admin-top-nav-link <?= strpos(current_url(), 'admin/prospeccion') !== false ? 'active' : '' ?>">
+                Prospección
+            </a>
             <a href="<?= site_url('admin/tickets') ?>" class="admin-top-nav-link <?= strpos(current_url(), 'admin/tickets') !== false ? 'active' : '' ?>">
                 Tickets
             </a>
@@ -104,6 +107,10 @@
                     <a href="<?= site_url('admin/crecimiento') ?>" class="dropdown-item">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
                         Crecimiento
+                    </a>
+                    <a href="<?= site_url('admin/prospeccion') ?>" class="dropdown-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>
+                        Prospección
                     </a>
                     <a href="<?= site_url('admin/tickets') ?>" class="dropdown-item">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/></svg>

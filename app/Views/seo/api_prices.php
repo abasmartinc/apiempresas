@@ -931,7 +931,7 @@
                     <div class="kc2-row kc2-head" role="row"><div role="columnheader">Comprobación</div><div role="columnheader">Qué devuelve la API</div><div class="kc2-plan" role="columnheader">Plan</div></div>
                     <div class="kc2-row" role="row">
                         <div class="kc2-check" role="cell"><span class="kc2-ico" style="--c:#2563eb"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></span><div><strong>La empresa existe y el NIF es suyo</strong><code>GET /companies</code></div></div>
-                        <div class="kc2-desc" role="cell">Razón social de la sociedad a partir del NIF (CIF) que te da el cliente.</div>
+                        <div class="kc2-desc" role="cell">Razón social de la sociedad a partir del NIF (CIF) que te da el cliente, con su forma jurídica (y su código ISO 20275) y su código LEI si lo tiene.</div>
                         <div class="kc2-plan" role="cell"><span class="kc2-pill kc2-pill--free">Desde Free</span></div>
                     </div>
                     <div class="kc2-row" role="row">
@@ -941,7 +941,12 @@
                     </div>
                     <div class="kc2-row" role="row">
                         <div class="kc2-check" role="cell"><span class="kc2-ico" style="--c:#7c3aed"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span><div><strong>Quién puede firmar por ella</strong><code>GET /companies/verify</code></div></div>
-                        <div class="kc2-desc" role="cell">Administradores y cargos vigentes con su fecha de nombramiento. Le pasas el nombre de quien firma y te dice si es administrador vigente.</div>
+                        <div class="kc2-desc" role="cell">Administradores y cargos vigentes con su fecha de nombramiento. Le pasas el nombre de quien firma y te dice si es administrador vigente o socio único.</div>
+                        <div class="kc2-plan" role="cell"><span class="kc2-pill kc2-pill--pro">Pro</span></div>
+                    </div>
+                    <div class="kc2-row" role="row">
+                        <div class="kc2-check" role="cell"><span class="kc2-ico" style="--c:#4f46e5"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><div><strong>Quién la controla</strong><code>GET /companies</code></div></div>
+                        <div class="kc2-desc" role="cell">Socio único de las sociedades unipersonales, con la fecha y el enlace al BORME, y la matriz del grupo que la empresa declara a GLEIF. Si tiene varios socios, el accionariado no es público.</div>
                         <div class="kc2-plan" role="cell"><span class="kc2-pill kc2-pill--pro">Pro</span></div>
                     </div>
                     <div class="kc2-row" role="row">
@@ -965,7 +970,7 @@
                     <h3>Fuera del alcance de la API</h3>
                     <p>Un KYB completo suele pedir también estas dos comprobaciones. No las hacemos, pero así se resuelven:</p>
                     <div class="kc2-out-grid">
-                        <div class="kc2-out-item"><span class="kc2-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><div><strong>Titular real</strong><span>Pídele la declaración al cliente o consulta el Registro de Titularidades Reales si tienes acceso como sujeto obligado.</span></div></div>
+                        <div class="kc2-out-item"><span class="kc2-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><div><strong>Titular real</strong><span>Pídele la declaración al cliente o consulta el Registro de Titularidades Reales si tienes acceso como sujeto obligado. La API te da el punto de partida: el socio único de las sociedades unipersonales y la matriz del grupo.</span></div></div>
                         <div class="kc2-out-item"><span class="kc2-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span><div><strong>Listas de sanciones y PEP</strong><span>Necesitarás un proveedor específico de listas de sanciones. Puedes cruzarlo con los administradores que devuelve la API.</span></div></div>
                     </div>
                 </div>
@@ -987,7 +992,7 @@
                         </div></li>
                         <li><span class="n">2</span><div>
                             <h3>Verifica la empresa en una llamada</h3>
-                            <p><code>/companies/verify</code> con el NIF, la razón social que te dieron y el nombre de quien firma comprueba que la sociedad existe y opera, que el nombre coincide, que el firmante es administrador vigente y, si lo pides, el NIF-IVA en VIES. Cuesta 2 consultas (Pro).</p>
+                            <p><code>/companies/verify</code> con el NIF, la razón social que te dieron y el nombre de quien firma comprueba que la sociedad existe y opera, que el nombre coincide, que el firmante es administrador vigente (o el socio único) y, si lo pides, el NIF-IVA en VIES. También devuelve la forma jurídica, el LEI, la matriz y el socio único. Cuesta 2 consultas (Pro).</p>
                         </div></li>
                         <li><span class="n">3</span><div>
                             <h3>Decide con la recomendación</h3>
@@ -1018,12 +1023,18 @@
     <span class="k">"exists"</span>: true,
     <span class="k">"name"</span>: <span class="s">"EMPRESA DE EJEMPLO SL"</span>,
     <span class="k">"status_code"</span>: <span class="s">"ACTIVE"</span>,
+    <span class="k">"legal_form"</span>: { <span class="k">"code"</span>: <span class="s">"SL"</span>, <span class="k">"iso20275"</span>: <span class="s">"DP3Q"</span> },
+    <span class="k">"ownership"</span>: {
+      <span class="k">"unipersonal"</span>: true,
+      <span class="k">"sole_shareholder"</span>: { <span class="k">"name"</span>: <span class="s">"PEREZ GARCIA JUAN"</span>, <span class="k">"type"</span>: <span class="s">"person"</span> }
+    },
     <span class="k">"checks"</span>: {
       <span class="k">"name"</span>: { <span class="k">"score"</span>: 100, <span class="k">"match"</span>: true },
       <span class="k">"person"</span>: {
         <span class="k">"is_current_admin"</span>: true,
         <span class="k">"position"</span>: <span class="s">"Adm. Unico"</span>,
-        <span class="k">"since"</span>: <span class="s">"2019-03-01"</span>
+        <span class="k">"since"</span>: <span class="s">"2019-03-01"</span>,
+        <span class="k">"is_sole_shareholder"</span>: true
       },
       <span class="k">"vat"</span>: { <span class="k">"checked"</span>: true, <span class="k">"valid"</span>: true }
     },
@@ -1153,7 +1164,7 @@
                                 </td>
                                 <td style="padding: 18px 20px;">
                                     <strong style="display: block; color: #0f172a; font-size: 0.9rem; margin-bottom: 4px;">Verificación KYB en una llamada</strong>
-                                    <p style="margin: 0; font-size: 0.82rem; color: #64748b; line-height: 1.4;">Existe y opera, coincide el nombre, quien firma es administrador vigente y NIF-IVA en VIES, con alertas y una recomendación (pass, review o fail). 2 consultas.</p>
+                                    <p style="margin: 0; font-size: 0.82rem; color: #64748b; line-height: 1.4;">Existe y opera, coincide el nombre, quien firma es administrador vigente o socio único, NIF-IVA en VIES, forma jurídica ISO y LEI, con alertas y una recomendación (pass, review o fail). 2 consultas.</p>
                                 </td>
                                 <td style="padding: 18px 20px; text-align: center;"><span style="background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 10px; white-space: nowrap;">PRO / BUS</span></td>
                                 <td style="padding: 18px 20px; text-align: center;"><button type="button" onclick="event.preventDefault(); showJsonPreview('get_verify')" style="background: none; border: 1px solid #e2e8f0; color: #3b82f6; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.borderColor='#3b82f6'; this.style.background='#eff6ff';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.background='none';">VER JSON</button></td>
@@ -1358,6 +1369,10 @@
                                     <path
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
                                 </svg> Tramo de facturación y último año de cuentas</li>
+                            <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+                                    <path
+                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
+                                </svg> Socio único y matriz del grupo (BORME y GLEIF)</li>
                             <li><svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
                                     <path
                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
@@ -1830,6 +1845,9 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                         address: "CALLE DE EJEMPLO 42, MADRID",
                         cnae: "6201",
                         cnae_label: "Actividades de programación informática",
+                        legal_form: { code: "SL", label: "Sociedad limitada", iso20275: "DP3Q", source: "name" },
+                        identifiers: { lei: null, lei_status: null },
+                        ownership: { unipersonal: true, sole_shareholder: { name: "JUAN PÉREZ GARCÍA", type: "person", since: "2019-03-12" }, source: "borme" },
                         administrators: [
                             { name: "JUAN PÉREZ GARCÍA", position: "Administrador Único" }
                         ]
@@ -1920,7 +1938,7 @@ curl_setopt_array(<span class="api-code-keyword">$ch</span>, [
                         calculated_at: "2026-08-24T00:00:00Z"
                     }
                 },
-                get_verify: {"success": true, "data": {"cif": "B12345678", "exists": true, "name": "EMPRESA DE EJEMPLO SL", "status": "ACTIVA", "status_code": "ACTIVE", "status_source": "registry", "status_date": null, "checks": {"name": {"provided": "Empresa de Ejemplo, S.L.", "score": 100, "match": true}, "person": {"provided": "Juan Pérez García", "is_current_admin": true, "matched_name": "PEREZ GARCIA JUAN", "position": "Adm. Unico", "since": "2019-03-01"}, "vat": {"vat_number": "ESB12345678", "checked": true, "valid": true, "source": "VIES", "error": null}, "accounts": {"last_accounts_year": 2023}}, "flags": [], "decision_hint": "pass", "checked_at": "2026-09-28T10:30:00+02:00"}},
+                get_verify: {"success": true, "data": {"cif": "B12345678", "exists": true, "name": "EMPRESA DE EJEMPLO SL", "status": "ACTIVA", "status_code": "ACTIVE", "status_source": "registry", "status_date": null, "legal_form": {"code": "SL", "label": "Sociedad limitada", "iso20275": "DP3Q", "source": "name"}, "ownership": {"unipersonal": true, "sole_shareholder": {"name": "PEREZ GARCIA JUAN", "type": "person", "since": "2019-03-01"}, "source": "borme"}, "checks": {"name": {"provided": "Empresa de Ejemplo, S.L.", "score": 100, "match": true}, "person": {"provided": "Juan Pérez García", "is_current_admin": true, "matched_name": "PEREZ GARCIA JUAN", "position": "Adm. Unico", "since": "2019-03-01", "is_sole_shareholder": true}, "vat": {"vat_number": "ESB12345678", "checked": true, "valid": true, "source": "VIES", "error": null}, "accounts": {"last_accounts_year": 2023}}, "flags": [], "decision_hint": "pass", "checked_at": "2026-09-28T10:30:00+02:00"}},
                 post_reconcile: {"success": true, "data": [{"input": {"name": "Mercadona, S.A.", "province": "Valencia"}, "status": "match", "score": 100, "company": {"cif": "A46103834", "name": "MERCADONA SA", "province": "VALENCIA", "status": "ACTIVA", "status_code": "ACTIVE", "score": 100}}, {"input": {"name": "Talleres Pérez", "province": null}, "status": "ambiguous", "candidates": [{"cif": "B12345678", "name": "TALLERES PEREZ SL", "province": "MADRID", "status": "ACTIVA", "status_code": "ACTIVE", "score": 100}, {"cif": "A12345674", "name": "TALLERES PEREZ SA", "province": "SEVILLA", "status": "ACTIVA", "status_code": "ACTIVE", "score": 100}]}, {"input": {"name": "Panadería Inventada del Norte", "province": null}, "status": "no_match"}], "meta": {"requested": 3, "matched": 1, "ambiguous": 1, "no_match": 1, "invalid": 0, "skipped_quota": 0, "cost": 1, "thresholds": {"match": 85, "ambiguous": 70}}},
                 get_watchlist_events: {"success": true, "data": [{"id": "borme_act:8812345", "type": "borme_act", "date": "2026-09-22", "cif": "B12345678", "company_name": "EMPRESA DE EJEMPLO SL", "data": {"act_types": "Nombramientos, Ceses/Dimisiones", "description": "Ceses/Dimisiones. Adm. Unico: ...", "url_pdf": "https://www.boe.es/borme/dias/2026/09/22/pdfs/BORME-A-2026-181-28.pdf"}}, {"id": "risk_level_change:B12345678:2026-09-25", "type": "risk_level_change", "date": "2026-09-25", "cif": "B12345678", "company_name": "EMPRESA DE EJEMPLO SL", "data": {"from": "BAJO", "to": "MEDIO", "model_change": null}}], "meta": {"since": "2026-09-20", "types": ["borme_act", "status_change", "risk_level_change"], "total": 2, "page": 1, "limit": 100, "has_more": false}},
                 post_webhook: {"success": true, "message": "Webhook creado correctamente", "id": 12, "event": "watchlist.*", "secret": "3f9c1b2a7d..."},

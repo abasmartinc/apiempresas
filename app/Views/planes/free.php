@@ -219,7 +219,7 @@
             <div class="endpoints-grid">
                 <div class="endpoint-card">
                     <div class="endpoint-route">GET /companies?cif=</div>
-                    <p class="endpoint-desc">Obtén los datos básicos (razón social, estado, CNAE, provincia) de una empresa con su CIF. La dirección y el objeto social completos van en Pro.</p>
+                    <p class="endpoint-desc">Obtén los datos básicos (razón social, estado, forma jurídica con su código ISO 20275, código LEI, CNAE y provincia) de una empresa con su CIF. La dirección, el objeto social completo, el socio único y la matriz del grupo van en Pro.</p>
                 </div>
                 <div class="endpoint-card">
                     <div class="endpoint-route">GET /companies/search</div>

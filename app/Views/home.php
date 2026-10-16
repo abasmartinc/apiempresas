@@ -309,7 +309,7 @@ $empresa = $api-&gt;companies-&gt;get(<span class="hc-str">'A46103834'</span>);
                     <li class="api-map-card">
                         <code>GET /companies/verify</code>
                         <h3>Verificación KYB</h3>
-                        <p>Si existe, si está activa y quién la administra, en una llamada.</p>
+                        <p>Si existe, si está activa, quién la administra y quién es su socio único, en una llamada.</p>
                         <span class="api-map-plan">Pro</span>
                     </li>
                     <li class="api-map-card">
@@ -763,7 +763,7 @@ $empresa = $api-&gt;companies-&gt;get(<span class="hc-str">'A46103834'</span>);
                     'free' => [
                         (int) $freeLimit . ' consultas gratis (no se renuevan)',
                         'Validación por CIF y buscador por nombre',
-                        'Datos básicos: razón social, estado normalizado, CNAE, provincia y fecha de constitución',
+                        'Datos básicos: razón social, estado normalizado, forma jurídica (con código ISO 20275), CNAE, provincia, fecha de constitución y código LEI',
                         'Puntuación comercial (0-100): solo la cifra',
                         'Empresas recién constituidas (hoy, 7 o 30 días): 10 por consulta, con nombre y CIF ocultos',
                         'Recuento de segmentos gratis: cuántas empresas hay por sector, zona y tamaño',
@@ -773,7 +773,8 @@ $empresa = $api-&gt;companies-&gt;get(<span class="hc-str">'A46103834'</span>);
                         '3.000 consultas al mes',
                         'Datos completos, con dirección y administradores vigentes (con fecha de nombramiento)',
                         'Tramo de facturación y último año de cuentas depositadas',
-                        'Verificación KYB en una llamada: estado, nombre, firmante y NIF en VIES',
+                        'Socio único de las sociedades unipersonales y matriz del grupo, con su fuente oficial (BORME y GLEIF)',
+                        'Verificación KYB en una llamada: estado, nombre, firmante, socio único y NIF en VIES',
                         'Nombre a CIF en lote: completa tu base de clientes (solo pagas las coincidencias)',
                         'Consultas por lotes: hasta 100 CIFs por petición',
                         'Historial BORME, señales y grafos societarios',
@@ -949,7 +950,7 @@ $empresa = $api-&gt;companies-&gt;get(<span class="hc-str">'A46103834'</span>);
                                     <div class="cap-col-feature">
                                         <div class="cap-feature-name">Datos de empresa por CIF</div>
                                         <div class="cap-feature-endpoint">GET /api/v1/companies</div>
-                                        <div class="cap-feature-desc">Comprueba que la sociedad existe y obtén su razón social, estado (también normalizado), CNAE, domicilio y capital. En Pro, además, tramo de facturación y último año de cuentas.</div>
+                                        <div class="cap-feature-desc">Comprueba que la sociedad existe y obtén su razón social, estado (también normalizado), forma jurídica con su código ISO 20275, código LEI, CNAE, domicilio y capital. En Pro, además, tramo de facturación y último año de cuentas.</div>
                                         <button type="button" onclick="event.preventDefault(); showJsonPreview('get_companies')" class="btn-json-preview">Ver Respuesta JSON</button>
                                     </div>
                                 </td>
@@ -963,6 +964,18 @@ $empresa = $api-&gt;companies-&gt;get(<span class="hc-str">'A46103834'</span>);
                                         <div class="cap-feature-name">Administradores y cargos</div>
                                         <div class="cap-feature-endpoint">GET /api/v1/companies?cif=…&amp;admin=true</div>
                                         <div class="cap-feature-desc">Añade a la respuesta los administradores y cargos vigentes, con su fecha de nombramiento: se descuentan los ceses publicados en el BORME.</div>
+                                    </div>
+                                </td>
+                                <td style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
+                                <td class="cap-featured-col" style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                                <td style="text-align: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="cap-col-feature">
+                                        <div class="cap-feature-name">Socio único y grupo empresarial</div>
+                                        <div class="cap-feature-endpoint">GET /api/v1/companies · /companies/verify</div>
+                                        <div class="cap-feature-desc">Si la sociedad es unipersonal, quién es su socio único y desde cuándo, con el enlace al BORME. Y la matriz directa y la cabecera del grupo que la empresa declara a GLEIF. En el Free ves si existen, sin el detalle.</div>
                                     </div>
                                 </td>
                                 <td style="text-align: center; color: var(--ae-slate); opacity: 0.5;">—</td>
@@ -1258,7 +1271,7 @@ $empresa = $api-&gt;companies-&gt;get(<span class="hc-str">'A46103834'</span>);
                         <?php
                         // Única fuente de las FAQ: se pintan aquí y en el JSON-LD de más abajo.
                         $homeFaqs = [
-                            ['¿Qué datos devuelve la API?', 'Devuelve la razón social, el estado (activa, extinguida, en concurso…), la fecha de constitución, la provincia y la actividad principal (CNAE). Con Pro, también administradores, domicilio completo, tramo de facturación, historial del BORME, puntuación comercial con sus motivos y vigilancia de cambios. Con Business, además, perfil de riesgo, contratos públicos y webhooks.'],
+                            ['¿Qué datos devuelve la API?', 'Devuelve la razón social, el estado (activa, extinguida, en concurso…), la fecha de constitución, la provincia, la actividad principal (CNAE), la forma jurídica con su código ISO 20275 y el código LEI. Con Pro, también administradores, socio único y matriz del grupo, domicilio completo, tramo de facturación, historial del BORME, puntuación comercial con sus motivos y vigilancia de cambios. Con Business, además, perfil de riesgo, contratos públicos y webhooks.'],
                             ['¿Puedo probarla gratis?', 'Sí. Al registrarte obtienes el plan Free con ' . (int) $freeLimit . ' consultas gratuitas (no se renuevan) contra la API real, sin tarjeta y sin compromiso.'],
                             ['¿La información es oficial?', 'La mayoría de los datos proceden de fuentes públicas oficiales, como el BORME (Registro Mercantil), la Plataforma de Contratación del Sector Público, la BDNS o GLEIF, y el BORME se procesa cada día hábil. Algunos datos de dirección, contacto y tamaño se completan con otras fuentes públicas; la lista completa está en la página de fuentes de datos. El estado registral, la puntuación comercial y el perfil de riesgo los calculamos nosotros a partir de esas publicaciones: no son un certificado del Registro Mercantil.'],
                             ['¿Qué tipo de autenticación utiliza la API?', 'Envías tu API Key en la cabecera X-API-KEY (también se acepta Authorization: Bearer). Al crear tu cuenta obtienes al instante tu API Key, lista para usar.'],
@@ -1345,7 +1358,14 @@ $empresa = $api-&gt;companies-&gt;get(<span class="hc-str">'A46103834'</span>);
                     municipality: "MADRID",
                     address: "CALLE DE EJEMPLO 42, MADRID",
                     cnae: "6201",
-                    cnae_label: "Actividades de programación informática"
+                    cnae_label: "Actividades de programación informática",
+                    legal_form: { code: "SL", label: "Sociedad limitada", iso20275: "DP3Q", source: "name" },
+                    identifiers: { lei: null, lei_status: null },
+                    ownership: {
+                        unipersonal: true,
+                        sole_shareholder: { name: "GRUPO EJEMPLO SA", type: "company", since: "2021-06-14" },
+                        source: "borme"
+                    }
                 }
             },
             get_search: {

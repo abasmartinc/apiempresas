@@ -1,0 +1,231 @@
+<?= $this->extend( ($isHtmx ?? false) ? 'layouts/htmx' : 'layouts/admin_app' ) ?>
+
+<?= $this->section('styles') ?>
+    
+<?= $this->endSection() ?>
+
+<?= $this->section('content') ?>
+        <div style="margin-bottom: 32px;">
+            <h1 class="title" style="font-size: 2.8rem; margin-bottom: 8px;">Dashboard <span class="grad">Admin</span>
+            </h1>
+            <p style="color: #64748b; font-size: 1.1rem;">Bienvenido de nuevo, <?= esc(session('user_name')) ?>. Aquí
+                tienes el resumen de hoy. <a href="<?= site_url('dashboard?view=client') ?>" style="color: #2152ff; font-weight: 700; text-decoration: none; margin-left: 10px;">Ver mi Dashboard como Cliente &rarr;</a></p>
+        </div>
+
+
+        <!-- Grid de Grupos de Gestión -->
+        <div class="dashboard-groups" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 32px;">
+            
+            <!-- Grupo: Operaciones de Negocio -->
+            <div class="group-card" style="background: #fff; border-radius: 28px; border: 1px solid #f1f5f9; overflow: hidden; box-shadow: 0 4px 20px -2px rgba(0,0,0,0.05);">
+                <div class="group-header">
+                    <div class="group-icon-premium icon-grad-blue">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+                    </div>
+                    <div class="group-title-wrapper">
+                        <p class="group-subtitle">Ecosistema</p>
+                        <h2 class="group-title">Operaciones de Negocio</h2>
+                    </div>
+                </div>
+                <div style="padding: 8px 0;">
+                    <a href="<?= site_url('admin/crecimiento') ?>" class="group-link">
+                        <span class="link-icon icon-sub-emerald"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941" /></svg></span>
+                        <div class="link-text"><strong>Crecimiento</strong><p>Altas API y Solvencia por mes, paso a pago, MRR y previsión.</p></div>
+                    </a>
+                    <a href="<?= site_url('admin/users') ?>" class="group-link">
+                        <span class="link-icon icon-sub-blue"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" /></svg></span>
+                        <div class="link-text"><strong>Usuarios</strong><p>Gestión de cuentas y perfiles.</p></div>
+                    </a>
+
+                    <a href="<?= site_url('admin/risk-profile') ?>" class="group-link">
+                        <span class="link-icon icon-sub-amber"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+                        <div class="link-text">
+                            <strong style="display: flex; align-items: center; gap: 6px;">
+                                Perfil de Riesgo & Solvencia
+                                <span style="background: #f59e0b; color: white; font-size: 0.65rem; padding: 1px 6px; border-radius: 99px; font-weight: 800;">PRO</span>
+                            </strong>
+                            <p>Analítica de negocio, embudo y monetización.</p>
+                        </div>
+                    </a>
+
+                    <a href="<?= site_url('admin/api-analytics') ?>" class="group-link">
+                        <span class="link-icon icon-sub-blue"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5" /></svg></span>
+                        <div class="link-text">
+                            <strong style="display: flex; align-items: center; gap: 6px;">
+                                API & Desarrolladores
+                                <span style="background: #2563eb; color: white; font-size: 0.65rem; padding: 1px 6px; border-radius: 99px; font-weight: 800;">CORE</span>
+                            </strong>
+                            <p>Consumo de peticiones, embudo de activación y planes de pago.</p>
+                        </div>
+                    </a>
+
+                    <a href="<?= site_url('admin/tickets') ?>" class="group-link">
+                        <span class="link-icon icon-sub-sky"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.974 0-5.699-1.08-7.843-2.882m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418"/></svg></span>
+                        <div class="link-text">
+                            <strong style="display: flex; align-items: center; gap: 8px;">
+                                Tickets de Soporte
+                                <?php if(isset($pending_tickets_count) && $pending_tickets_count > 0): ?>
+                                    <span style="background: #ef4444; color: white; font-size: 0.75rem; padding: 2px 8px; border-radius: 99px; font-weight: 800;"><?= $pending_tickets_count ?></span>
+                                <?php endif; ?>
+                            </strong>
+                            <p>Atención al cliente y reportes.</p>
+                        </div>
+                    </a>
+                    <a href="<?= site_url('admin/aportaciones') ?>" class="group-link">
+                        <span class="link-icon icon-sub-emerald"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg></span>
+                        <div class="link-text">
+                            <strong style="display: flex; align-items: center; gap: 8px;">
+                                Datos aportados
+                                <?php
+                                    // Teléfonos, webs y emails enviados desde "Añadir…" en la ficha, sin revisar.
+                                    $aportPendientes = 0;
+                                    try {
+                                        $aportPendientes = \Config\Database::connect()->table('company_contributions')
+                                            ->whereIn('estado', ['pendiente', 'verificado'])->countAllResults();
+                                    } catch (\Throwable $e) {
+                                        // La tabla aún no existe (scripts/sql/company_contributions.sql).
+                                    }
+                                ?>
+                                <?php if ($aportPendientes > 0): ?>
+                                    <span style="background: #ef4444; color: white; font-size: 0.75rem; padding: 2px 8px; border-radius: 99px; font-weight: 800;"><?= $aportPendientes ?></span>
+                                <?php endif; ?>
+                            </strong>
+                            <p>Teléfonos, webs y emails que envían desde la ficha. Aprobar o rechazar.</p>
+                        </div>
+                    </a>
+                    <a href="<?= site_url('admin/subscriptions') ?>" class="group-link">
+                        <span class="link-icon icon-sub-emerald"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 3h.008v.008H12V18Zm-3-6h.008v.008H9v-.008ZM9 15h.008v.008H9V15Zm0 3h.008v.008H9V18Zm6-6h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008V15Zm0 3h.008v.008h-.008V18Z" /></svg></span>
+                        <div class="link-text"><strong>Suscripciones</strong><p>Pagos activos y ciclos de facturación.</p></div>
+                    </a>
+                    <a href="<?= site_url('admin/invoices') ?>" class="group-link">
+                        <span class="link-icon icon-sub-violet"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" /></svg></span>
+                        <div class="link-text"><strong>Facturas</strong><p>Historial de facturación y cobros.</p></div>
+                    </a>
+                    <a href="<?= site_url('admin/plans') ?>" class="group-link">
+                        <span class="link-icon icon-sub-rose"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75-6.75a.75.75 0 0 1 .75-.75h16.5a.75.75 0 0 1 .75.75v9a.75.75 0 0 1-.75.75H3.75a.75.75 0 0 1-.75-.75v-9ZM12 3v3.375m0 0c0 .621.504 1.125 1.125 1.125h2.25c.621 0 1.125-.504 1.125-1.125V3m-4.5 0h4.5" /></svg></span>
+                        <div class="link-text"><strong>Planes y Tarifas</strong><p>Configuración de precios y límites.</p></div>
+                    </a>
+                    <a href="<?= site_url('admin/api-keys') ?>" class="group-link">
+                        <span class="link-icon icon-sub-sky"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z" /></svg></span>
+                        <div class="link-text"><strong>API Keys</strong><p>Gestión de credenciales de acceso.</p></div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Grupo: Monitorización de Datos -->
+            <div class="group-card" style="background: #fff; border-radius: 28px; border: 1px solid #f1f5f9; overflow: hidden; box-shadow: 0 4px 20px -2px rgba(0,0,0,0.05);">
+                <div class="group-header">
+                    <div class="group-icon-premium icon-grad-amber">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"/></svg>
+                    </div>
+                    <div class="group-title-wrapper">
+                        <p class="group-subtitle">Auditoría</p>
+                        <h2 class="group-title">Monitorización de Datos</h2>
+                    </div>
+                </div>
+                <div style="padding: 8px 0;">
+
+                    <a href="<?= site_url('admin/email-logs') ?>" class="group-link">
+                        <span class="link-icon icon-sub-pink"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" /></svg></span>
+                        <div class="link-text"><strong>Logs de Emails</strong><p>Trazabilidad de correos del sistema.</p></div>
+                    </a>
+                    <a href="<?= site_url('admin/api-requests') ?>" class="group-link">
+                        <span class="link-icon icon-sub-purple"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 0 0 2.25-2.25V6.75a2.25 2.25 0 0 0-2.25-2.25H6.75A2.25 2.25 0 0 0 4.5 6.75v10.5a2.25 2.25 0 0 0 2.25 2.25Zm.75-12h9v9h-9v-9Z" /></svg></span>
+                        <div class="link-text"><strong>Peticiones API</strong><p>Monitorización técnica en tiempo real.</p></div>
+                                <a href="<?= site_url('admin/usage-daily') ?>" class="group-link">
+                        <span class="link-icon icon-sub-emerald"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" /></svg></span>
+                        <div class="link-text"><strong>Consumo Diario</strong><p>Análisis agregado por fecha.</p></div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Grupo: Crecimiento y Marketing -->
+            <div class="group-card" style="background: #fff; border-radius: 28px; border: 1px solid #f1f5f9; overflow: hidden; box-shadow: 0 4px 20px -2px rgba(0,0,0,0.05);">
+                <div class="group-header">
+                    <div class="group-icon-premium icon-grad-rose">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15.362 5.214A8.252 8.252 0 0 1 12 21 8.25 8.25 0 0 1 6.038 7.048 8.287 8.287 0 0 0 9 9.6a8.983 8.983 0 0 1 3.361-6.867 8.21 8.21 0 0 0 3 2.48Z"/><path d="M12 18a3.75 3.75 0 0 0 .495-7.467 5.99 5.99 0 0 0-1.925 3.546 5.974 5.974 0 0 1-2.133-1.001A3.75 3.75 0 0 0 12 18Z"/></svg>
+                    </div>
+                    <div class="group-title-wrapper">
+                        <p class="group-subtitle">Expansión</p>
+                        <h2 class="group-title">Crecimiento y Marketing</h2>
+                    </div>
+                </div>
+                <div style="padding: 8px 0;">
+                    <a href="<?= site_url('admin/seo-auto-posts') ?>" class="group-link">
+                        <span class="link-icon icon-sub-purple"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg></span>
+                        <div class="link-text"><strong>SEO Auto Posts</strong><p>Generación automatizada de contenidos.</p></div>
+                    </a>
+                    <a href="<?= site_url('admin/email-templates') ?>" class="group-link">
+                        <span class="link-icon icon-sub-blue"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" /></svg></span>
+                        <div class="link-text"><strong>Gestor de Emails</strong><p>Configuración de plantillas transaccionales.</p></div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Grupo: Sistema y Mantenimiento -->
+            <div class="group-card" style="background: #fff; border-radius: 28px; border: 1px solid #f1f5f9; overflow: hidden; box-shadow: 0 4px 20px -2px rgba(0,0,0,0.05);">
+                <div class="group-header">
+                    <div class="group-icon-premium icon-grad-red">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 0 0 15 0m-15 0a7.5 7.5 0 1 1 15 0m-15 0H3m16.5 0H21m-1.5 0H12m-8.457 3.077 1.41-.513m14.095-5.128 1.41-.513M12 3.103V4.5m0 15v1.397M5.077 18.923l.513-1.411m12.82-12.82.513-1.411m-4.736 15.75L12 20.25M6.103 5.077l1.411.513m12.82 12.82 1.411.513"/></svg>
+                    </div>
+                    <div class="group-title-wrapper">
+                        <p class="group-subtitle">Infraestructura</p>
+                        <h2 class="group-title">Sistema y Mantenimiento</h2>
+                    </div>
+                </div>
+                <div style="padding: 8px 0;">
+                    <a href="<?= site_url('admin/errores') ?>" class="group-link">
+                        <span class="link-icon icon-sub-red"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 12.75c1.148 0 2.278.08 3.383.237 1.037.146 1.866.966 1.866 2.013 0 3.728-2.35 6.75-5.25 6.75S6.75 18.728 6.75 15c0-1.046.83-1.867 1.866-2.013A24.204 24.204 0 0 1 12 12.75Zm0 0c2.883 0 5.647.508 8.207 1.44a23.91 23.91 0 0 1-1.152 6.06M12 12.75c-2.883 0-5.647.508-8.208 1.44.125 2.104.52 4.136 1.153 6.06M12 12.75a2.25 2.25 0 0 0 2.248-2.354M12 12.75a2.25 2.25 0 0 1-2.248-2.354M12 8.25c.995 0 1.971-.08 2.922-.236.403-.066.74-.358.795-.762a3.778 3.778 0 0 0-.399-2.25M12 8.25c-.995 0-1.97-.08-2.922-.236-.402-.066-.74-.358-.795-.762a3.734 3.734 0 0 1 .4-2.253M12 8.25a2.25 2.25 0 0 0-2.248 2.146M12 8.25a2.25 2.25 0 0 1 2.248 2.146M8.683 5a6.032 6.032 0 0 1-1.155-1.002c.07-.63.27-1.222.574-1.747m.581 2.749A3.75 3.75 0 0 1 15.318 5m0 0c.427-.283.815-.62 1.155-.999a4.471 4.471 0 0 0-.575-1.752M4.921 6a24.048 24.048 0 0 0-.392 3.314c1.668.546 3.416.914 5.223 1.082M19.08 6c.205 1.08.337 2.187.392 3.314a23.882 23.882 0 0 1-5.223 1.082" /></svg></span>
+                        <div class="link-text">
+                            <strong style="display: flex; align-items: center; gap: 6px;">
+                                Errores de la aplicación
+                                <?php
+                                    // Siempre visible: rojo con los pendientes (abiertos + reabiertos), gris con 0 si esta todo limpio.
+                                    $erroresPendientes = \App\Libraries\ErrorTracking::pendingCount();
+                                    $erroresNuevos = \App\Libraries\ErrorTracking::newCount();
+                                ?>
+                                <span title="Errores sin gestionar (abiertos + reabiertos)" style="background: <?= $erroresPendientes > 0 ? '#ef4444' : '#e2e8f0' ?>; color: <?= $erroresPendientes > 0 ? 'white' : '#64748b' ?>; font-size: 0.75rem; padding: 2px 8px; border-radius: 99px; font-weight: 800;"><?= $erroresPendientes ?></span>
+                            </strong>
+                            <?php if ($erroresNuevos > 0): ?>
+                                <p style="color: #dc2626; font-weight: 700;"><?= $erroresNuevos ?> <?= $erroresNuevos === 1 ? 'error nuevo' : 'errores nuevos' ?> en las últimas 24 h.</p>
+                            <?php elseif ($erroresPendientes > 0): ?>
+                                <p><?= $erroresPendientes ?> sin gestionar. Ninguno nuevo en las últimas 24 h.</p>
+                            <?php else: ?>
+                                <p>Todo limpio: no hay errores sin gestionar.</p>
+                            <?php endif; ?>
+                        </div>
+                    </a>
+                    <a href="<?= site_url('admin/blocked-ips') ?>" class="group-link">
+                        <span class="link-icon icon-sub-red"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" /></svg></span>
+                        <div class="link-text"><strong>Centro de Seguridad</strong><p>Gestión de bloqueos e IPs maliciosas.</p></div>
+                    </a>
+                    <a href="<?= site_url('admin/rgpd') ?>" class="group-link">
+                        <span class="link-icon icon-sub-amber"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg></span>
+                        <div class="link-text"><strong>Privacidad & RGPD</strong><p>Gestión de supresiones y derecho al olvido.</p></div>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+<?= $this->endSection() ?>
+
+<?= $this->section('scripts') ?>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Lógica de cuenta atrás para el refresco
+                let timeLeft = 60;
+                const timerEl = document.getElementById('refresh-timer');
+
+                setInterval(function () {
+                    timeLeft--;
+                    if (timeLeft <= 0) {
+                        location.reload();
+                        timeLeft = 60;
+                    }
+                    if (timerEl) {
+                        timerEl.innerText = timeLeft + 's';
+                    }
+                }, 1000);
+            });
+        </script>
+<?= $this->endSection() ?>

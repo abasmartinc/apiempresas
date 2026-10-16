@@ -556,6 +556,36 @@ Accept: application/json</code></pre>
       "size_band_label": "Más de 1 M€",
       "last_accounts_year": 2023
     },
+    "identifiers": {
+      "lei": "5493000EJEMPLO000000",
+      "lei_status": "ISSUED",
+      "lei_next_renewal_date": "2027-03-15",
+      "lei_source": "gleif",
+      "lei_as_of": "2026-10-15"
+    },
+    "legal_form": {
+      "code": "SL",
+      "label": "Sociedad limitada",
+      "iso20275": "DP3Q",
+      "source": "name"
+    },
+    "group": {
+      "direct_parent": { "lei": "5493000MATRIZ0000000", "name": "GRUPO EJEMPLO SA", "country": "ES", "cif": "A12345674" },
+      "ultimate_parent": { "lei": "5493000MATRIZ0000000", "name": "GRUPO EJEMPLO SA", "country": "ES", "cif": "A12345674" },
+      "source": "gleif",
+      "as_of": "2026-10-15"
+    },
+    "ownership": {
+      "unipersonal": true,
+      "sole_shareholder": {
+        "name": "GRUPO EJEMPLO SA",
+        "type": "company",
+        "since": "2021-06-14",
+        "url_pdf": "https://www.boe.es/borme/dias/2021/06/14/pdfs/BORME-A-2021-111-28.pdf"
+      },
+      "source": "borme",
+      "as_of": "2021-06-14"
+    },
     "administrators": [
       {
         "name": "JUAN PÉREZ GARCÍA",
@@ -616,6 +646,26 @@ Accept: application/json</code></pre>
                                 <td style="color: #475569;"><span class="plan-badge pro">Pro</span> <code style="font-size: 0.8rem;">size_band</code>: indicative revenue band (<code style="font-size: 0.8rem;">LT_500K</code>, <code style="font-size: 0.8rem;">500K_1M</code>, <code style="font-size: 0.8rem;">GT_1M</code> or <code style="font-size: 0.8rem;">NO_REVENUE</code>; null if unknown), with its label in <code style="font-size: 0.8rem;">size_band_label</code>. <code style="font-size: 0.8rem;">last_accounts_year</code>: latest financial year with filed accounts in our database (a later one may exist that we have not loaded yet).</td>
                             </tr>
                             <tr>
+                                <td><code style="background: transparent; color: #2563eb; font-weight: 600;">identifiers</code></td>
+                                <td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">object</span></td>
+                                <td style="color: #475569;">The company's LEI from GLEIF (all plans). <code style="font-size: 0.8rem;">lei</code> (null if it has none), <code style="font-size: 0.8rem;">lei_status</code> as GLEIF gives it (<code style="font-size: 0.8rem;">ISSUED</code> current, <code style="font-size: 0.8rem;">LAPSED</code> not renewed, <code style="font-size: 0.8rem;">RETIRED</code>…), <code style="font-size: 0.8rem;">lei_next_renewal_date</code>, <code style="font-size: 0.8rem;">lei_source</code> and <code style="font-size: 0.8rem;">lei_as_of</code> (date of the GLEIF copy). Mostly held by mid-size and large companies and by those active in financial markets.</td>
+                            </tr>
+                            <tr>
+                                <td><code style="background: transparent; color: #2563eb; font-weight: 600;">legal_form</code></td>
+                                <td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">object</span></td>
+                                <td style="color: #475569;">Legal form (all plans). <code style="font-size: 0.8rem;">code</code> (<code style="font-size: 0.8rem;">SL</code>, <code style="font-size: 0.8rem;">SA</code>, <code style="font-size: 0.8rem;">SLP</code>, <code style="font-size: 0.8rem;">SLL</code>, <code style="font-size: 0.8rem;">SCOOP</code>, <code style="font-size: 0.8rem;">AIE</code>, <code style="font-size: 0.8rem;">UTE</code>, <code style="font-size: 0.8rem;">FUNDACION</code>…), <code style="font-size: 0.8rem;">label</code> (in Spanish), <code style="font-size: 0.8rem;">iso20275</code> (ISO 20275 ELF code, as used by GLEIF and KYB systems; null when the form has no code of its own, e.g. SLNE or UTE) and <code style="font-size: 0.8rem;">source</code>: <code style="font-size: 0.8rem;">name</code> (read from the company name) or <code style="font-size: 0.8rem;">cif</code> (inferred from the CIF letter when the name does not say).</td>
+                            </tr>
+                            <tr>
+                                <td><code style="background: transparent; color: #2563eb; font-weight: 600;">group</code></td>
+                                <td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">object | null</span></td>
+                                <td style="color: #475569;"><span class="plan-badge pro">Pro</span> Direct parent (<code style="font-size: 0.8rem;">direct_parent</code>) and ultimate parent (<code style="font-size: 0.8rem;">ultimate_parent</code>) reported by the company to GLEIF, each with <code style="font-size: 0.8rem;">lei</code>, <code style="font-size: 0.8rem;">name</code>, <code style="font-size: 0.8rem;">country</code> and <code style="font-size: 0.8rem;">cif</code> (when it is a Spanish company in our database). null if the company has no LEI; both parents null if it has an LEI but reports no parent.</td>
+                            </tr>
+                            <tr>
+                                <td><code style="background: transparent; color: #2563eb; font-weight: 600;">ownership</code></td>
+                                <td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">object</span></td>
+                                <td style="color: #475569;"><span class="plan-badge pro">Pro</span> Sole shareholder according to the BORME. <code style="font-size: 0.8rem;">unipersonal</code>: true, false or null (unknown). <code style="font-size: 0.8rem;">sole_shareholder</code>: <code style="font-size: 0.8rem;">name</code>, <code style="font-size: 0.8rem;">type</code> (<code style="font-size: 0.8rem;">company</code> or <code style="font-size: 0.8rem;">person</code>), <code style="font-size: 0.8rem;">since</code> and <code style="font-size: 0.8rem;">url_pdf</code> (official BORME PDF), or null. <code style="font-size: 0.8rem;">source</code>: <code style="font-size: 0.8rem;">borme</code> (latest published single-member act) or <code style="font-size: 0.8rem;">name</code> (only the name says SLU or SAU; the shareholder is not on record). In Spain only the shareholder of single-member companies is public: the shareholders of companies with several members and the beneficial owner are not published.</td>
+                            </tr>
+                            <tr>
                                 <td><code style="background: transparent; color: #2563eb; font-weight: 600;">province</code></td>
                                 <td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">string</span></td>
                                 <td style="color: #475569;">Spanish province where the registered office is located.</td>
@@ -641,7 +691,8 @@ Accept: application/json</code></pre>
                         <li><code>lat</code> and <code>lng</code> are not included.</li>
                         <li>An <code>upsell_opportunities</code> object is added. If your code needs to know whether the response is trimmed, check for that field.</li>
                         <li><code>financials</code> is not included. Inside <code>upsell_opportunities</code>, <code>datos_pro</code> says whether a revenue band and accounts year exist, and how many people currently hold a board position (excluding attorneys-in-fact; <code>admin=true</code> on Pro also returns the other posts).</li>
-                        <li><code>status_code</code>, <code>status_source</code> and <code>status_date</code> are returned as on paid plans.</li>
+                        <li><code>group</code> and <code>ownership</code> are not included. <code>datos_pro</code> says whether a sole shareholder is on record (<code>socio_unico</code>) and whether the company reports a parent to GLEIF (<code>grupo_empresarial</code>).</li>
+                        <li><code>status_code</code>, <code>status_source</code>, <code>status_date</code>, <code>identifiers</code> (LEI) and <code>legal_form</code> are returned as on paid plans.</li>
                     </ul>
                     <p>With a Pro or Business plan, or with prepaid credit, you get the full data without changing your code.</p>
                 </section>
@@ -674,9 +725,18 @@ Accept: application/json</code></pre>
     "status_code": "ACTIVE",
     "status_source": "registry",
     "status_date": null,
+    "identifiers": { "lei": null, "lei_status": null, "lei_next_renewal_date": null, "lei_source": null, "lei_as_of": null },
+    "legal_form": { "code": "SL", "label": "Sociedad limitada", "iso20275": "DP3Q", "source": "name" },
+    "group": null,
+    "ownership": {
+      "unipersonal": true,
+      "sole_shareholder": { "name": "PEREZ GARCIA JUAN", "type": "person", "since": "2019-03-01", "url_pdf": "https://www.boe.es/borme/dias/2019/03/01/pdfs/BORME-A-2019-42-28.pdf" },
+      "source": "borme",
+      "as_of": "2019-03-01"
+    },
     "checks": {
       "name": { "provided": "Empresa de Ejemplo, S.L.", "score": 100, "match": true },
-      "person": { "provided": "Juan Pérez García", "is_current_admin": true, "matched_name": "PEREZ GARCIA JUAN", "position": "Adm. Unico", "since": "2019-03-01" },
+      "person": { "provided": "Juan Pérez García", "is_current_admin": true, "matched_name": "PEREZ GARCIA JUAN", "position": "Adm. Unico", "since": "2019-03-01", "is_sole_shareholder": true },
       "vat": { "vat_number": "ESB12345678", "checked": true, "valid": true, "source": "VIES", "error": null },
       "accounts": { "last_accounts_year": 2023 }
     },
@@ -696,6 +756,7 @@ Accept: application/json</code></pre>
                     <ul>
                         <li>Each alert in <code>flags</code> has <code>code</code>, <code>severity</code> (critical, high, medium, low) and <code>message</code>.</li>
                         <li>If VIES does not respond, <code>checks.vat.checked</code> is <code>false</code> and the decision is not affected.</li>
+                        <li><code>identifiers</code>, <code>legal_form</code>, <code>group</code> and <code>ownership</code> are the same blocks as in <a href="#endpoint-by-cif">/companies</a>. With <code>person</code>, <code>checks.person.is_sole_shareholder</code> also says whether the signer is the sole shareholder (a natural person). It is informational and does not change <code>decision_hint</code>.</li>
                         <li>The latest accounts year is informative: later filings may exist that we have not loaded yet.</li>
                         <li><strong>Business:</strong> the response adds <code>risk</code> (<code>risk_level</code>, <code>risk_score</code>).</li>
                         <li>Company not found: 404 <code>COMPANY_NOT_FOUND</code> with <code>decision_hint: "fail"</code> (not charged). Free plan without credit: 403 <code>PLAN_RESTRICTION</code>.</li>

@@ -8,9 +8,9 @@ Pregunta en lenguaje natural ("¿Mercadona está activa y quiénes son sus admin
 
 | Herramienta | Qué hace | Plan |
 |---|---|---|
-| `get_company` | Empresa por CIF: razón social, estado, constitución, provincia, CNAE; domicilio y administradores según plan | Free (datos recortados), Pro |
+| `get_company` | Empresa por CIF: razón social, estado, constitución, provincia, CNAE, forma jurídica (ISO 20275) y LEI; domicilio, socio único, matriz del grupo y administradores según plan | Free (datos recortados), Pro |
 | `search_companies` | Buscar empresas por nombre | Free |
-| `verify_company` | Verificación KYB: existe, activa, nombre y administrador coinciden y, si se pide, NIF-IVA en VIES (2 consultas) | Pro |
+| `verify_company` | Verificación KYB: existe, activa, nombre y administrador (o socio único) coinciden y, si se pide, NIF-IVA en VIES; con forma jurídica, LEI, matriz y socio único (2 consultas) | Pro |
 | `find_cif_by_name` | De nombre a CIF, hasta 100 a la vez, con provincia opcional para desempatar (solo cobra las coincidencias) | Pro |
 | `get_borme_history` | Actos publicados en el BORME | Pro |
 | `get_risk_profile` | Perfil de riesgo a partir del BORME | Business |

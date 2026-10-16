@@ -7,7 +7,7 @@ APIEmpresas.es es un servicio español que convierte las publicaciones del Bolet
 Datos importantes para no confundir:
 
 - El estado registral (activa, extinguida, en concurso…), el scoring y el perfil de riesgo los calcula APIEmpresas a partir de las publicaciones oficiales. No son un certificado del Registro Mercantil.
-- No cubre titular real, listas de sanciones ni PEP, ni empresarios individuales (autónomos).
+- No cubre titular real, listas de sanciones ni PEP, ni empresarios individuales (autónomos). Sí da el socio único de las sociedades unipersonales (dato público del BORME); el accionariado de las sociedades con varios socios no es público.
 - Autenticación con la cabecera `X-API-KEY` (también `Authorization: Bearer`). Base: `https://apiempresas.es/api/v1`.
 
 ## Precios (IVA no incluido)
@@ -20,7 +20,7 @@ Datos importantes para no confundir:
 
 ## Endpoints principales
 
-- `GET /companies?cif=` — ficha de una empresa por CIF: razón social, estado, fecha de constitución, provincia, CNAE, domicilio; administradores con `admin=true` (Pro).
+- `GET /companies?cif=` — ficha de una empresa por CIF: razón social, estado, fecha de constitución, provincia, CNAE, domicilio, código LEI (GLEIF) y forma jurídica con código ISO 20275 (todos los planes); matriz del grupo según GLEIF y socio único según el BORME (Pro); administradores con `admin=true` (Pro).
 - `GET /companies/search?q=` — búsqueda por nombre.
 - `POST /companies/batch` — hasta 100 CIF por petición (Pro y Business).
 - `GET /companies/verify` — verificación KYB en una llamada (Pro).

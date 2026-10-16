@@ -7,7 +7,7 @@ SpainCompanyAPI is the English site of APIEmpresas.es, a Spanish service that tu
 Good to know:
 
 - Registry status (active, dissolved, insolvency…), scoring and risk profile are computed by APIEmpresas from official publications. They are not a certificate from the Spanish Commercial Registry.
-- Not covered: ultimate beneficial owners, sanctions/PEP lists, sole traders (autónomos).
+- Not covered: ultimate beneficial owners, sanctions/PEP lists, sole traders (autónomos). The sole shareholder of single-member companies is covered (public in the BORME); shareholders of companies with several members are not public in Spain.
 - Authentication with the `X-API-KEY` header (`Authorization: Bearer` also accepted). Base URL: `https://apiempresas.es/api/v1`.
 
 ## Pricing (VAT not included)
@@ -20,7 +20,7 @@ Good to know:
 
 ## Main endpoints
 
-- `GET /companies?cif=` — company by CIF: legal name, status, incorporation date, province, CNAE activity code, address; directors with `admin=true` (Pro).
+- `GET /companies?cif=` — company by CIF: legal name, status, incorporation date, province, CNAE activity code, address, LEI (GLEIF) and legal form with ISO 20275 code (all plans); parent company per GLEIF and sole shareholder per the BORME (Pro); directors with `admin=true` (Pro).
 - `GET /companies/search?q=` — search by name.
 - `POST /companies/batch` — up to 100 CIFs per request (Pro and Business).
 - `GET /companies/verify` — KYB verification in one call (Pro).

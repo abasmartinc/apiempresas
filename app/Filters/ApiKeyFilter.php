@@ -561,9 +561,15 @@ class ApiKeyFilter implements FilterInterface
                             }
                             if ($planPrevio && !empty($planPrevio->current_period_end)) {
                                 $finTs     = strtotime((string) $planPrevio->current_period_end);
-                                $errorMsg  = 'Tu plan ' . $planPrevio->name . ' terminó el ' . date('d/m/Y', $finTs) . ' y tu cuenta ya no tiene consultas incluidas. Reactiva el plan o recarga créditos para continuar.';
                                 $origen429 = 'api_429_winback';
-                                $extra429  = ['plan_ended_at' => date('c', $finTs)];
+                                if ($finTs !== false && $finTs <= time()) {
+                                    $errorMsg = 'Tu plan ' . $planPrevio->name . ' terminó el ' . date('d/m/Y', $finTs) . ' y tu cuenta ya no tiene consultas incluidas. Reactiva el plan o recarga créditos para continuar.';
+                                    $extra429 = ['plan_ended_at' => date('c', $finTs)];
+                                } else {
+                                    // 16-10-2026: suscripción dada de baja (o cambiada a mano) con fecha de fin
+                                    // futura. Decía "terminó el 01/01/2030": sin fecha, que no es verdad.
+                                    $errorMsg = 'Tu plan ' . $planPrevio->name . ' ya no está activo y tu cuenta no tiene consultas incluidas. Reactiva el plan o recarga créditos para continuar.';
+                                }
                             }
                         }
                     }
