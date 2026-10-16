@@ -43,7 +43,21 @@ class McpController extends Controller
             // Diagnóstico (16-10-2026): qué cabeceras de autorización llegan a PHP. Solo nombres, nunca valores.
             $srv = array_values(array_filter(array_keys($_SERVER), static fn($k) => stripos((string) $k, 'AUTHORIZATION') !== false || stripos((string) $k, 'HTTP_X_API_KEY') !== false));
             $todas = function_exists('getallheaders') ? array_keys((array) getallheaders()) : ['(getallheaders no disponible)'];
-            return $this->response->setJSON(['server_auth_keys' => $srv, 'headers' => $todas, 'sapi' => PHP_SAPI, 'software' => $_SERVER['SERVER_SOFTWARE'] ?? '']);
+            $longitudes = [];
+            foreach ($srv as $k) {
+                $longitudes[$k] = strlen((string) $_SERVER[$k]); // longitud del valor, nunca el valor
+            }
+            $hdr = function_exists('getallheaders') ? (array) getallheaders() : [];
+            foreach ($hdr as $n => $v) {
+                if (strcasecmp((string) $n, 'Authorization') === 0) {
+                    $longitudes['getallheaders:Authorization'] = strlen((string) $v);
+                }
+            }
+            $longitudes['getHeaderLine:Authorization'] = strlen((string) $this->request->getHeaderLine('Authorization'));
+            return $this->response->setJSON(['server_auth_keys' => $srv, 'longitudes' => $longitudes, 'headers' => $todas, 'sapi' => PHP_SAPI, 'software' => $_SERVER['SERVER_SOFTWARE'] ?? '']);
+        }
+        if ($metodo === 'GET' && $this->request->getGet('diag') === 'red') {
+            return $this->response->setJSON(self::diagnosticoRed());
         }
         if ($metodo !== 'POST') {
             return $this->response->setStatusCode(405)->setHeader('Allow', 'POST, OPTIONS')
@@ -84,6 +98,59 @@ class McpController extends Controller
             return trim(urldecode($keyEnRuta));
         }
         return trim((string) ($this->request->getGet('api_key') ?? ''));
+    }
+
+    /**
+     * Diagnóstico (16-10-2026): prueba las formas en que el servidor puede llamarse a sí mismo y dice
+     * cuál responde. Solo llama a /api/v1/catalog sin clave (responde 401 en JSON si llega a la API).
+     */
+    private static function diagnosticoRed(): array
+    {
+        $publica = rtrim(site_url('api/v1'), '/');
+        $host = (string) parse_url($publica, PHP_URL_HOST);
+        $ipS = (string) ($_SERVER['SERVER_ADDR'] ?? '');
+        $ipB = str_contains($ipS, ':') ? '[' . $ipS . ']' : $ipS;
+        $ruta = '/api/v1/catalog';
+        $casos = [
+            'ip_servidor_https' => ['url' => 'https://' . $host . $ruta, 'resolve' => $host . ':443:' . $ipB],
+            'localhost_https'   => ['url' => 'https://' . $host . $ruta, 'resolve' => $host . ':443:127.0.0.1'],
+            'localhost_http'    => ['url' => 'http://' . $host . $ruta, 'resolve' => $host . ':80:127.0.0.1'],
+            'apache_7080'       => ['url' => 'http://' . $ipB . ':7080' . $ruta, 'host' => $host],
+            'apache_7081'       => ['url' => 'https://' . $ipB . ':7081' . $ruta, 'host' => $host],
+            'apache_7080_local' => ['url' => 'http://127.0.0.1:7080' . $ruta, 'host' => $host],
+            'publica'           => ['url' => $publica . '/catalog'],
+        ];
+        $out = ['server_addr' => $ipS !== '' ? 'sí' : 'no', 'host' => $host];
+        foreach ($casos as $nombre => $c) {
+            $ch = curl_init($c['url']);
+            $h = ['Accept: application/json', 'X-Forwarded-Proto: https', 'User-Agent: apiempresas-mcp-diag'];
+            if (!empty($c['host'])) {
+                $h[] = 'Host: ' . $c['host'];
+            }
+            $o = [CURLOPT_RETURNTRANSFER => true, CURLOPT_HEADER => true, CURLOPT_CONNECTTIMEOUT => 2, CURLOPT_TIMEOUT => 4,
+                  CURLOPT_FOLLOWLOCATION => false, CURLOPT_HTTPHEADER => $h, CURLOPT_SSL_VERIFYPEER => false, CURLOPT_SSL_VERIFYHOST => 0];
+            if (!empty($c['resolve'])) {
+                $o[CURLOPT_RESOLVE] = [$c['resolve']];
+            }
+            curl_setopt_array($ch, $o);
+            $t = microtime(true);
+            $raw = curl_exec($ch);
+            $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $hs = (int) curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+            $err = $raw === false ? curl_error($ch) : '';
+            curl_close($ch);
+            $cuerpo = $raw === false ? '' : substr((string) $raw, $hs, 80);
+            $loc = ($raw !== false && preg_match('/^Location:\s*(\S+)/mi', substr((string) $raw, 0, $hs), $m)) ? $m[1] : null;
+            $out[$nombre] = [
+                'ms' => (int) round((microtime(true) - $t) * 1000),
+                'http' => $code,
+                'llega_a_la_api' => $raw !== false && is_array(json_decode(substr((string) $raw, $hs), true)),
+                'redirige_a' => $loc,
+                'error' => $err,
+                'inicio_respuesta' => $cuerpo,
+            ];
+        }
+        return $out;
     }
 
     /** Destinos posibles para llamar a la API, por orden de preferencia. */
@@ -151,8 +218,8 @@ class McpController extends Controller
         $ch = curl_init($d['base'] . $path);
         $opts = [
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT        => $esOrigen ? 15 : self::TIMEOUT,
-            CURLOPT_CONNECTTIMEOUT => $esOrigen ? 3 : 10,
+            CURLOPT_TIMEOUT        => $esOrigen ? 8 : 12,
+            CURLOPT_CONNECTTIMEOUT => 3,
             CURLOPT_FOLLOWLOCATION => false,
             CURLOPT_HTTPHEADER     => $headers,
         ];
