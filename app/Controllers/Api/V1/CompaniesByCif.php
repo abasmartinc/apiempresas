@@ -44,7 +44,7 @@ class CompaniesByCif extends BaseApiController
         name: "admin",
         in: "query",
         required: false,
-        description: "Si es 'true', incluye los administradores y cargos vigentes: nombramientos del BORME menos los ceses, dimisiones y revocaciones publicados después. Cada uno lleva `since` (fecha del nombramiento vigente; null si es anterior a nuestro histórico) y `url_pdf` (PDF oficial del BORME de ese nombramiento; null si no consta). Exclusivo para planes Pro y Business.",
+        description: "Si es 'true', incluye los administradores y cargos vigentes: nombramientos y reelecciones del BORME menos los ceses, dimisiones y revocaciones publicados después (en una sociedad extinguida, ninguno). Cada uno lleva `since` (fecha del nombramiento vigente; null si es anterior a nuestro histórico) y `url_pdf` (PDF oficial del BORME de ese nombramiento; null si no consta). Exclusivo para planes Pro y Business.",
         schema: new OA\Schema(type: "boolean")
     )]
     #[OA\Response(

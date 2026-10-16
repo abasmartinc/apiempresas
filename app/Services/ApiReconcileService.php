@@ -21,6 +21,8 @@ class ApiReconcileService
     public const CANDIDATES    = 10;
     public const SHOW          = 3;
     public const CACHE_TTL     = 86400;
+    /** Versión de la caché de candidatos (v2, 16-10-2026: una lista antigua sin A15075062 daba como match la ficha repetida sin CIF de Inditex). */
+    private const CACHE_V      = 'v2';
 
     /**
      * Normaliza la entrada: {"items":[{"name":..,"province":..}]} o {"names":[..]}.
@@ -123,7 +125,7 @@ class ApiReconcileService
     /** Candidatos de la base para un nombre (caché de 24 h por nombre normalizado). */
     public static function candidates(string $name): array
     {
-        $key = 'api_reconcile_cands_v1_' . md5(ApiVerifyService::normalizeName($name));
+        $key = 'api_reconcile_cands_' . self::CACHE_V . '_' . md5(ApiVerifyService::normalizeName($name));
         $hit = cache()->get($key);
         if (is_array($hit)) {
             return $hit;

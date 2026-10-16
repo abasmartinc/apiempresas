@@ -683,7 +683,7 @@ Accept: application/json</code></pre>
                             <tr>
                                 <td><code style="background: transparent; color: #2563eb; font-weight: 600;">administrators[]</code></td>
                                 <td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">array[object]</span></td>
-                                <td style="color: #475569;">Administradores y cargos vigentes: nombramientos del BORME menos los ceses, dimisiones y revocaciones posteriores. Cada objeto contiene <code style="font-size: 0.8rem;">name</code>, su cargo (<code style="font-size: 0.8rem;">position</code>; si tiene varios, separados por comas), <code style="font-size: 0.8rem;">since</code>, la fecha del nombramiento vigente (null si es anterior a nuestro histórico del BORME), y <code style="font-size: 0.8rem;">url_pdf</code>, el PDF oficial del BORME de ese nombramiento (null si no consta). Si la persona tiene varios cargos, <code style="font-size: 0.8rem;">since</code> y <code style="font-size: 0.8rem;">url_pdf</code> son los de su nombramiento vigente más antiguo.</td>
+                                <td style="color: #475569;">Administradores y cargos vigentes: nombramientos y reelecciones publicados en el BORME menos los ceses, dimisiones y revocaciones posteriores (en una sociedad extinguida, ninguno). Cada objeto contiene <code style="font-size: 0.8rem;">name</code>, su cargo (<code style="font-size: 0.8rem;">position</code>; si tiene varios, separados por comas), <code style="font-size: 0.8rem;">since</code>, la fecha del nombramiento vigente (null si es anterior a nuestro histórico del BORME), y <code style="font-size: 0.8rem;">url_pdf</code>, el PDF oficial del BORME de ese nombramiento (null si no consta). Si la persona tiene varios cargos, <code style="font-size: 0.8rem;">since</code> y <code style="font-size: 0.8rem;">url_pdf</code> son los de su nombramiento vigente más antiguo.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -772,7 +772,7 @@ Accept: application/json</code></pre>
 
                 <section class="docs-section" id="endpoint-reconcile">
                     <h2>3.2 Nombre a CIF (reconciliación)</h2>
-                    <p>Envía una lista de nombres de empresa y recibe el CIF de cada una con una puntuación de confianza. Sirve para completar o limpiar bases de clientes y proveedores que tienen el nombre pero no el CIF. <strong>Coste: 1 consulta por cada nombre con coincidencia (<code>match</code>)</strong>; los ambiguos y los que no se encuentran no se cobran.</p>
+                    <p>Envía una lista de nombres de empresa y recibe el CIF de cada una con una puntuación de confianza. Sirve para completar o limpiar bases de clientes y proveedores que tienen el nombre pero no el CIF. <strong>Coste: 1 consulta por cada nombre con coincidencia (<code>match</code>)</strong>; los ambiguos, los que no se encuentran y los que coinciden con una sociedad de la que aún no tenemos CIF (<code>cif: null</code>) no se cobran.</p>
 
                     <div class="endpoint-header">
                         <span class="http-badge post">POST</span>

@@ -10,7 +10,7 @@ use OpenApi\Attributes as OA;
 
 /**
  * POST /api/v1/companies/reconcile (29-09-2026). Nombre → CIF, en lote.
- * Pro y Business (y Free con saldo). 1 consulta por cada "match"; ambiguous y no_match no se cobran.
+ * Pro y Business (y Free con saldo). 1 consulta por cada "match" con CIF; ambiguous, no_match y un match sin CIF no se cobran.
  */
 class CompanyReconcileController extends BaseApiController
 {
@@ -19,7 +19,7 @@ class CompanyReconcileController extends BaseApiController
     #[OA\Post(
         path: "/api/v1/companies/reconcile",
         summary: "Nombre a CIF (reconciliación)",
-        description: "Envía hasta 100 nombres de empresa (con provincia opcional para desempatar) y recibe, para cada uno, el CIF con una puntuación de 0 a 100 y un veredicto: match, ambiguous (con hasta 3 candidatos) o no_match. **Coste:** 1 consulta por cada match; ambiguous y no_match no se cobran. Si no te llega el cupo, los nombres que quedan se devuelven como skipped_quota.",
+        description: "Envía hasta 100 nombres de empresa (con provincia opcional para desempatar) y recibe, para cada uno, el CIF con una puntuación de 0 a 100 y un veredicto: match, ambiguous (con hasta 3 candidatos) o no_match. **Coste:** 1 consulta por cada match con CIF; ambiguous, no_match y los match sin CIF (`cif: null`) no se cobran. Si no te llega el cupo, los nombres que quedan se devuelven como skipped_quota.",
         tags: ["2. Plan Pro"]
     )]
     #[OA\RequestBody(required: true, content: new OA\JsonContent(example: ["items" => [["name" => "Mercadona", "province" => "Valencia"], ["name" => "Telefonica de España"]]]))]
@@ -96,7 +96,11 @@ class CompanyReconcileController extends BaseApiController
             if ($d['status'] === 'match') {
                 $row['score'] = (int) $d['best']['score'];
                 $row['company'] = R::publicCandidate($mostrar[0]);
-                $charged++;
+                // 16-10-2026: un match sin CIF (sociedad identificada, CIF aún no disponible)
+                // no se cobra.
+                if (trim((string) ($row['company']['cif'] ?? '')) !== '') {
+                    $charged++;
+                }
             } elseif ($d['status'] === 'ambiguous') {
                 $row['candidates'] = array_map([R::class, 'publicCandidate'], $mostrar);
             }

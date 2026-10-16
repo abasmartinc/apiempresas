@@ -679,7 +679,7 @@ Accept: application/json</code></pre>
                             <tr>
                                 <td><code style="background: transparent; color: #2563eb; font-weight: 600;">administrators[]</code></td>
                                 <td><span style="color: #10b981; font-family: monospace; font-size: 0.85rem;">array[object]</span></td>
-                                <td style="color: #475569;">Current directors and officers: BORME appointments minus later removals, resignations and revocations. Each object contains <code style="font-size: 0.8rem;">name</code>, the title (<code style="font-size: 0.8rem;">position</code>; comma-separated if several), <code style="font-size: 0.8rem;">since</code>, the date of the current appointment (null if it predates our BORME history), and <code style="font-size: 0.8rem;">url_pdf</code>, the official BORME PDF of that appointment (null if not available). If the person holds several positions, <code style="font-size: 0.8rem;">since</code> and <code style="font-size: 0.8rem;">url_pdf</code> refer to their earliest current appointment.</td>
+                                <td style="color: #475569;">Current directors and officers: appointments and re-elections published in the BORME minus later removals, resignations and revocations (none for a dissolved-and-struck-off company). Each object contains <code style="font-size: 0.8rem;">name</code>, the title (<code style="font-size: 0.8rem;">position</code>; comma-separated if several), <code style="font-size: 0.8rem;">since</code>, the date of the current appointment (null if it predates our BORME history), and <code style="font-size: 0.8rem;">url_pdf</code>, the official BORME PDF of that appointment (null if not available). If the person holds several positions, <code style="font-size: 0.8rem;">since</code> and <code style="font-size: 0.8rem;">url_pdf</code> refer to their earliest current appointment.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -766,7 +766,7 @@ Accept: application/json</code></pre>
 
                 <section class="docs-section" id="endpoint-reconcile">
                     <h2>3.2 Name to CIF (reconciliation)</h2>
-                    <p>Send a list of company names and get each one's CIF with a confidence score. Useful to complete or clean customer and supplier databases that have the name but not the CIF. <strong>Cost: 1 request per name with a match (<code>match</code>)</strong>; ambiguous and not-found names are free.</p>
+                    <p>Send a list of company names and get each one's CIF with a confidence score. Useful to complete or clean customer and supplier databases that have the name but not the CIF. <strong>Cost: 1 request per name with a match (<code>match</code>)</strong>; ambiguous names, not-found names and matches to a company whose CIF we do not have yet (<code>cif: null</code>) are free.</p>
 
                     <div class="endpoint-header">
                         <span class="http-badge post">POST</span>

@@ -32,7 +32,8 @@ class ApiCompanyEnricher
     // Solo para la caché de administradores vigentes: positionKey se amplió el 08-10-2026 y la
     // lista cacheada con la regla anterior no vale. Las demás cachés (CACHE_V) no cambian.
     // v2 (16-10-2026): cada administrador lleva url_pdf (PDF del BORME de su nombramiento vigente).
-    private const CACHE_ADMINS = 'v2';
+    // v3 (16-10-2026): altas también desde el texto del BORME, nombres limpios y extinción.
+    private const CACHE_ADMINS = 'v3';
 
     // ------------------------------------------------------------------
     // Bajas por privacidad
@@ -934,13 +935,19 @@ class ApiCompanyEnricher
                 ->whereIn('ca.company_id', $faltan)
                 ->get()->getResultArray();
 
+            // 16-10-2026: también los nombramientos y reelecciones del texto del BORME (antes
+            // solo los ceses). company_administrators no tiene todos los cargos (faltaba el
+            // consejo de Mercadona o la presidenta de Inditex) y las extinciones vacían la lista.
             $actos = $db->table('borme_posts')
-                ->select('id, company_id, borme_date, description')
+                ->select('id, company_id, borme_date, act_types, description, url_pdf')
                 ->whereIn('company_id', $faltan)
                 ->groupStart()
                     ->like('description', 'Ceses', 'both', null, true)
                     ->orLike('description', 'Dimisiones', 'both', null, true)
                     ->orLike('description', 'Revocaciones', 'both', null, true)
+                    ->orLike('description', 'Nombramientos', 'both', null, true)
+                    ->orLike('description', 'Reelecciones', 'both', null, true)
+                    ->orLike('act_types', 'Extinci', 'both', null, true)
                 ->groupEnd()
                 ->get()->getResultArray();
         } catch (\Throwable $e) {
@@ -970,7 +977,12 @@ class ApiCompanyEnricher
      * Pura (sin BD): se prueba aparte.
      *
      * @param array $nombramientos filas [name, position, action, borme_date, post_id, url_pdf]
-     * @param array $actos filas de borme_posts [id, borme_date, description]
+     * @param array $actos filas de borme_posts [id, borme_date, act_types, description, url_pdf]
+     *
+     * Altas: las filas de company_administrators y, desde el 16-10-2026, también los
+     * "Nombramientos" y "Reelecciones" leídos del texto de cada acto (la tabla no los tiene
+     * todos). Bajas: "Ceses/Dimisiones" y "Revocaciones". Tras una "Extinción" (act_types)
+     * no queda nadie vigente con un alta anterior.
      */
     public static function resolveCurrent(array $nombramientos, array $actos): array
     {
@@ -981,7 +993,9 @@ class ApiCompanyEnricher
         $etiquetas = [];
 
         foreach ($nombramientos as $n) {
-            $name = trim((string) ($n['name'] ?? ''));
+            // Algunas filas guardan el nombre con el encabezado siguiente pegado
+            // ("ROMANA GARCIA BELEN. Reelecciones"): así no casaba con su cese.
+            $name = self::cleanOfficerName((string) ($n['name'] ?? ''));
             $pos  = trim((string) ($n['position'] ?? ''));
             if ($name === '') {
                 continue;
@@ -995,19 +1009,48 @@ class ApiCompanyEnricher
             }
         }
 
+        $extincion = '';
+        $bajas = [];
         foreach ($actos as $a) {
             $fecha = (string) ($a['borme_date'] ?? '');
+            $postId = (int) ($a['id'] ?? 0);
+            if ($fecha !== '' && stripos((string) ($a['act_types'] ?? ''), 'Extinci') !== false && $fecha > $extincion) {
+                $extincion = substr($fecha, 0, 10);
+            }
             foreach (self::parseOfficerActs((string) ($a['description'] ?? '')) as $acto) {
-                if (!in_array($acto['section'], ['cese', 'revocacion'], true)) {
+                $esBaja = in_array($acto['section'], ['cese', 'revocacion'], true);
+                $esAlta = in_array($acto['section'], ['nombramiento', 'reeleccion'], true);
+                if (!$esBaja && !$esAlta) {
+                    continue;
+                }
+                if ($esAlta && !self::isOfficerPosition($acto['position'])) {
                     continue;
                 }
                 $pk = self::positionKey($acto['position']);
                 foreach ($acto['names'] as $nm) {
+                    $nm = self::cleanOfficerName($nm);
+                    if ($nm === '') {
+                        continue;
+                    }
                     $k = self::personKey($nm) . '|' . $pk;
-                    if (isset($etiquetas[$k])) {
-                        $eventos[$k][] = [$fecha, (int) ($a['id'] ?? 0), 0, 'baja', null];
+                    if ($esBaja) {
+                        // Las bajas se aplican al final: solo cuentan si hay un alta de esa persona y cargo.
+                        $bajas[$k][] = [$fecha, $postId, 0, 'baja', null];
+                        continue;
+                    }
+                    if (!self::isOfficerName($nm)) {
+                        continue;
+                    }
+                    $eventos[$k][] = [$fecha, $postId, 1, 'alta', self::bormePdf($a['url_pdf'] ?? null)];
+                    if (!isset($etiquetas[$k])) {
+                        $etiquetas[$k] = ['name' => $nm, 'position' => trim($acto['position'])];
                     }
                 }
+            }
+        }
+        foreach ($bajas as $k => $lista) {
+            if (isset($eventos[$k])) {
+                array_push($eventos[$k], ...$lista);
             }
         }
 
@@ -1018,6 +1061,10 @@ class ApiCompanyEnricher
             });
             $ultimo = end($evs);
             if ($ultimo[3] !== 'alta') {
+                continue;
+            }
+            // Sociedad extinguida: nadie nombrado antes de la extinción sigue vigente.
+            if ($extincion !== '' && $ultimo[0] !== '' && substr($ultimo[0], 0, 10) <= $extincion) {
                 continue;
             }
             // Fecha del nombramiento vigente: el alta que sigue a la última baja, con el
@@ -1059,6 +1106,43 @@ class ApiCompanyEnricher
             ];
         }
         return $result;
+    }
+
+    /** Quita lo que el extractor dejó pegado al nombre: ". Reelecciones", "Datos registrales"… */
+    public static function cleanOfficerName(string $name): string
+    {
+        $name = trim(preg_replace('/\s+/u', ' ', $name));
+        $name = preg_replace('/\.\s*(Reelecciones|Nombramientos|Ceses\/Dimisiones|Ceses|Dimisiones|Revocaciones|Datos registrales|Otros conceptos)\b.*$/iu', '', $name);
+        return trim(rtrim(trim((string) $name), '.;,'));
+    }
+
+    /** Un nombre del BORME va en mayúsculas; descarta frases sueltas que el lector tome por nombre. */
+    private static function isOfficerName(string $name): bool
+    {
+        $len = mb_strlen($name, 'UTF-8');
+        if ($len < 3 || $len > 120) {
+            return false;
+        }
+        return mb_strtoupper($name, 'UTF-8') === $name;
+    }
+
+    /** Etiqueta de cargo del BORME (abreviada) y no un encabezado de otro acto. */
+    private static function isOfficerPosition(string $pos): bool
+    {
+        $pos = trim($pos);
+        if ($pos === '' || mb_strlen($pos, 'UTF-8') > 30) {
+            return false;
+        }
+        $k = mb_strtolower(strtr($pos, ['Á' => 'A', 'É' => 'E', 'Í' => 'I', 'Ó' => 'O', 'Ú' => 'U', 'á' => 'a', 'é' => 'e', 'í' => 'i', 'ó' => 'o', 'ú' => 'u']), 'UTF-8');
+        foreach (['otros', 'datos', 'concepto', 'socio', 'unipersonal', 'capital', 'domicilio', 'objeto', 'disoluci', 'extinci',
+                  'fusion', 'escision', 'transforma', 'modifica', 'cambio', 'constituci', 'ampliaci', 'reducci', 'declaraci',
+                  'perdida', 'sucursal', 'situaci', 'reapertura', 'cierre', 'emision', 'articulo', 'estatut', 'denominaci',
+                  'fe de erratas', 'revocaci', 'nombramiento', 'reelecci', 'cese', 'dimisi'] as $no) {
+            if (strpos($k, $no) !== false) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /** URL del PDF del BORME solo si es del BOE (mismo criterio que el socio único); si no, null. */
